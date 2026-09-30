@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronLeft, ChevronRight, Play } from "lucide-react";
-import { Suspense, forwardRef, useEffect, useState, type MutableRefObject } from "react";
+import { Fragment, Suspense, forwardRef, useEffect, useState, type MutableRefObject } from "react";
 import { MockupGradientRing } from "@/components/portfolio/MockupGradientRing";
 import {
   requestOpenMessaging,
@@ -44,6 +44,11 @@ export interface Project {
   title: string;
   role: string;
   year: string;
+  /**
+   * Right-hand meta while the row is open. Closed rows keep `role | year`.
+   * Segments are separated with " | ".
+   */
+  openMeta?: string;
   /** Override the default four case-study steps. */
   tabs?: readonly string[];
   /** Tab key to show when the accordion opens (defaults to the first tab). */
@@ -187,10 +192,23 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
               {project.title}
             </span>
           </div>
-          <div className="hidden shrink-0 items-center justify-end gap-4 text-[14px] text-[#76767a] sm:flex">
-            <span className="text-right">{project.role}</span>
-            <span className="font-light text-[#999]">|</span>
-            <span className="tabular-nums">{project.year}</span>
+          <div
+            className={
+              "hidden items-center justify-end text-[14px] text-[#76767a] sm:flex " +
+              (isOpen && project.openMeta
+                ? "min-w-0 max-w-[760px] text-right leading-5"
+                : "shrink-0 gap-4")
+            }
+          >
+            {isOpen && project.openMeta ? (
+              <OpenMetaLine text={project.openMeta} />
+            ) : (
+              <>
+                <span className="text-right">{project.role}</span>
+                <span className="font-light text-[#999]">|</span>
+                <span className="tabular-nums">{project.year}</span>
+              </>
+            )}
           </div>
         </div>
       </button>
@@ -407,6 +425,21 @@ function TextBlock({
       </div>
       <p className={`text-base text-zinc-500 ${compact ? "leading-7" : "leading-8"}`}>{children}</p>
     </div>
+  );
+}
+
+/** Closed row uses role | year. Open row swaps in `openMeta` segments. */
+function OpenMetaLine({ text }: { text: string }) {
+  const parts = text.split(" | ");
+  return (
+    <span className="inline-flex flex-wrap items-center justify-end gap-x-4 gap-y-1">
+      {parts.map((part, index) => (
+        <Fragment key={part}>
+          {index > 0 ? <span className="font-light text-[#999]">|</span> : null}
+          <span>{part}</span>
+        </Fragment>
+      ))}
+    </span>
   );
 }
 
