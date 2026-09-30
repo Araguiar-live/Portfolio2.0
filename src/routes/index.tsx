@@ -207,6 +207,7 @@ const PROJECTS: Project[] = [
     title: "Odicci",
     role: "Product Team / Core UX",
     year: "2025-26",
+    openMeta: "Live SaaS Platform | End-to-End Design System & CRO Optimisation",
     defaultTab: "Create Workspace\u00a0",
     content: {
       "Create Workspace\u00a0": {
