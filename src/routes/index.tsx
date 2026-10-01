@@ -221,6 +221,7 @@ const PROJECTS: Project[] = [
       alt: "Odicci on a laptop",
       width: 1600,
       height: 1066,
+      playColor: "#E9582C",
     },
     defaultTab: "Create Workspace\u00a0",
     content: {

@@ -3,6 +3,28 @@ import { useEffect, useState, type MouseEvent } from "react";
 import { createPortal } from "react-dom";
 import playSolid from "@/assets/portfolio/hover/play-solid.svg";
 
+/** Same basil play path as play-solid.svg, tinted per project. */
+function PlayGlyph({ color }: { color: string }) {
+  return (
+    <span
+      aria-hidden
+      className="pointer-events-none inline-block size-3.5 shrink-0"
+      style={{
+        backgroundColor: color,
+        maskImage: `url("${playSolid}")`,
+        WebkitMaskImage: `url("${playSolid}")`,
+        maskRepeat: "no-repeat",
+        WebkitMaskRepeat: "no-repeat",
+        maskPosition: "center",
+        WebkitMaskPosition: "center",
+        maskSize: "contain",
+        WebkitMaskSize: "contain",
+        maskMode: "alpha",
+      }}
+    />
+  );
+}
+
 /** Figma 1883:41884 / 1883:41889 — corner radius on the 4096px source frame. */
 const FRAME_RADIUS = 120;
 const FRAME_WIDTH = 4096;
@@ -16,7 +38,11 @@ export interface HoverPreviewMedia {
   alt: string;
   width: number;
   height: number;
+  /** Play glyph color. Defaults to the Figma ink. */
+  playColor?: string;
 }
+
+const DEFAULT_PLAY_COLOR = "#060A0C";
 
 function cardSize(media: HoverPreviewMedia) {
   const max = Math.min(CARD_MAX, window.innerWidth - 32);
@@ -120,13 +146,7 @@ export function ProjectHoverPreview({
                 className="pointer-events-none size-full max-w-none object-cover"
               />
               <div className="absolute top-3 left-3 inline-flex items-center gap-1.5 rounded-full bg-white/20 py-1 pr-3 pl-2 backdrop-blur-md">
-                <img
-                  src={playSolid}
-                  alt=""
-                  width={64}
-                  height={64}
-                  className="pointer-events-none size-3.5 shrink-0"
-                />
+                <PlayGlyph color={media.playColor ?? DEFAULT_PLAY_COLOR} />
                 <span className="text-[13px] leading-none tracking-[-0.5px] whitespace-nowrap text-[#292d32]">
                   Play me
                 </span>
