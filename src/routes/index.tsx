@@ -4,6 +4,8 @@ import { lazy, useCallback, useEffect, useRef, useState } from "react";
 import { useWorkScrollGate } from "@/hooks/use-work-scroll-gate";
 import girlPleaseLogo from "@/assets/girl-please.svg";
 import designToggleKnob from "@/assets/portfolio/design-toggle-knob.svg";
+import crcleHoverPreview from "@/assets/portfolio/hover/crcle-in-the-area.jpg";
+import odicciHoverPreview from "@/assets/portfolio/hover/odicci-laptop.jpg";
 import { InteractiveHero } from "@/components/portfolio/InteractiveHero";
 import { ProjectBentoStack, type Project } from "@/components/portfolio/ProjectAccordion";
 import { Dock } from "@/components/portfolio/Dock";
@@ -65,6 +67,12 @@ const PROJECTS: Project[] = [
     year: "2025-26",
     openMeta:
       "Live Mobile Application | 0-to-1 Spatial & Canvas Mobile Architecture | Shipped to Production",
+    hoverPreview: {
+      src: crcleHoverPreview,
+      alt: "CRCLE In The Area on iPhone",
+      width: 1400,
+      height: 1050,
+    },
     defaultTab: "Create Workspace\u00a0",
     content: {
       "Create Workspace\u00a0": {
@@ -208,6 +216,12 @@ const PROJECTS: Project[] = [
     role: "Product Team / Core UX",
     year: "2025-26",
     openMeta: "Live SaaS Platform | End-to-End Design System & CRO Optimisation",
+    hoverPreview: {
+      src: odicciHoverPreview,
+      alt: "Odicci on a laptop",
+      width: 1600,
+      height: 1066,
+    },
     defaultTab: "Create Workspace\u00a0",
     content: {
       "Create Workspace\u00a0": {

@@ -1,34 +1,17 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { ChevronLeft, ChevronRight, Play } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Fragment, Suspense, forwardRef, useEffect, useState, type MutableRefObject } from "react";
 import { MockupGradientRing } from "@/components/portfolio/MockupGradientRing";
+import {
+  ProjectHoverPreview,
+  useRowHoverPreview,
+  type HoverPreviewMedia,
+} from "@/components/portfolio/ProjectHoverPreview";
 import {
   requestOpenMessaging,
   useCrcleAreaInboxOpen,
   useCrcleVerifyOpen,
 } from "@/components/portfolio/crcleBroadcast";
-
-/**
- * Figma 530:151835 — row hover gradients + play accent per project.
- * Hue is 30% less saturated than the wireframe accents, and the tint is 30% lighter.
- */
-const ROW_HOVER: Record<string, { gradient: string; playColor: string }> = {
-  crcle: {
-    gradient:
-      "linear-gradient(90deg, rgba(3, 3, 22, 0.154) 0%, rgba(255, 255, 255, 0.28) 100%)",
-    playColor: "#030316",
-  },
-  "first-design": {
-    gradient:
-      "linear-gradient(90deg, rgba(131, 98, 207, 0.224) 0%, rgba(255, 255, 255, 0.28) 100%)",
-    playColor: "#8362CF",
-  },
-  odicci: {
-    gradient:
-      "linear-gradient(90deg, rgba(213, 91, 61, 0.252) 0%, rgba(255, 255, 255, 0.28) 100%)",
-    playColor: "#D55B3D",
-  },
-};
 
 // Default tabs for projects that don't set `project.tabs`.
 const DEFAULT_TABS = ["Create Workspace\u00a0", "Brand Personality", "Sign Up", "Template Library"] as const;
@@ -49,6 +32,8 @@ export interface Project {
    * Segments are separated with " | ".
    */
   openMeta?: string;
+  /** Floating media shown while the closed row is hovered. */
+  hoverPreview?: HoverPreviewMedia;
   /** Override the default four case-study steps. */
   tabs?: readonly string[];
   /** Tab key to show when the accordion opens (defaults to the first tab). */
@@ -143,47 +128,20 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
   }, [isOpen, project.defaultTab, project.tabs]);
   const tabContent = project.content?.[activeTab] ?? {};
   const tabIndex = Math.max(0, tabs.indexOf(activeTab));
-  const rowHover = ROW_HOVER[project.slug];
+  const hover = useRowHoverPreview(project.hoverPreview, !isOpen);
 
   return (
     <div ref={ref} className="border-b border-[#d1d5db] last:border-b-0">
-      {/* Row header — Figma 530:151817; hover 530:151835 */}
+      {/* Row header — Figma 530:151817. Hover media: 1883:41884 / 1883:41889 */}
       <button
         type="button"
         onClick={onToggle}
-        className="group relative flex w-full items-center justify-between gap-6 overflow-hidden px-8 py-7 text-left transition-[background] duration-300"
+        onMouseEnter={hover.onMouseEnter}
+        onMouseMove={hover.onMouseMove}
+        onMouseLeave={hover.onMouseLeave}
+        className="relative flex w-full items-center justify-between gap-6 overflow-hidden px-8 py-7 text-left transition-[background] duration-300"
       >
-        {rowHover && !isOpen ? (
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-80"
-            style={{ background: rowHover.gradient }}
-          />
-        ) : null}
-
-        {rowHover && !isOpen ? (
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-0 z-[3] flex items-center justify-center opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-          >
-            <span className="inline-flex items-center gap-2 whitespace-nowrap text-[14px] font-normal tracking-[-0.5px] text-[#111]">
-              <Play
-                className="size-4 shrink-0"
-                fill={rowHover.playColor}
-                stroke={rowHover.playColor}
-                strokeWidth={0}
-              />
-              Play me
-            </span>
-          </div>
-        ) : null}
-
-        <div
-          className={
-            "relative z-[2] flex w-full min-w-0 flex-1 items-center justify-between gap-6 transition-opacity duration-300 " +
-            (rowHover && !isOpen ? "group-hover:opacity-0" : "")
-          }
-        >
+        <div className="relative z-[2] flex w-full min-w-0 flex-1 items-center justify-between gap-6">
           <div className="flex min-w-0 flex-1 items-center gap-8">
             <span className="shrink-0 text-[14px] font-medium tracking-[1px] text-[#111]/70 tabular-nums">
               {project.id}
@@ -212,6 +170,16 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
           </div>
         </div>
       </button>
+
+      {project.hoverPreview ? (
+        <ProjectHoverPreview
+          open={hover.open}
+          media={project.hoverPreview}
+          x={hover.x}
+          y={hover.y}
+          reduceMotion={hover.reduceMotion}
+        />
+      ) : null}
 
       {/* Expanded body — fixed length for consistency across projects */}
       <AnimatePresence initial={false}>
