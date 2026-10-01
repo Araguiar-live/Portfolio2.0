@@ -1,4 +1,12 @@
-import { AnimatePresence, motion, useMotionValue, useReducedMotion, useSpring } from "framer-motion";
+import {
+  AnimatePresence,
+  motion,
+  useMotionValue,
+  useReducedMotion,
+  useSpring,
+  useTransform,
+  useVelocity,
+} from "framer-motion";
 import { useEffect, useState, type MouseEvent } from "react";
 import { createPortal } from "react-dom";
 import playSolid from "@/assets/portfolio/hover/play-solid.svg";
@@ -65,8 +73,7 @@ const FRAME_RADIUS = 120;
 const FRAME_WIDTH = 4096;
 const CARD_MAX = 440;
 
-const FOLLOW_SPRING = { stiffness: 220, damping: 26, mass: 0.45 };
-const ENTER_SPRING = { type: "spring" as const, stiffness: 420, damping: 32, mass: 0.5 };
+const springConfig = { damping: 15, stiffness: 150, mass: 0.2 };
 
 export interface HoverPreviewLogo {
   src: string;
@@ -96,48 +103,41 @@ function cardSize(media: HoverPreviewMedia) {
   return { width, height };
 }
 
-function placeCard(clientX: number, clientY: number, width: number, height: number) {
-  const pad = 16;
-  const x = Math.min(window.innerWidth - pad - width / 2, Math.max(pad + width / 2, clientX));
-  // Keep the cursor near the lower third so the card tracks the row without covering the pointer.
-  const y = Math.min(
-    window.innerHeight - pad - height / 2,
-    Math.max(pad + height / 2, clientY - height * 0.18),
-  );
-  return { x, y };
-}
-
-/** Cursor-following media card for a closed project row. */
+/**
+ * Cursor follow runs on motion values. React state changes only when the
+ * pointer enters or leaves the row, never while it is moving.
+ */
 export function useRowHoverPreview(media: HoverPreviewMedia | undefined, enabled: boolean) {
   const reduceMotion = useReducedMotion();
   const [open, setOpen] = useState(false);
-  const pointerX = useMotionValue(0);
-  const pointerY = useMotionValue(0);
-  const x = useSpring(pointerX, reduceMotion ? { duration: 0 } : FOLLOW_SPRING);
-  const y = useSpring(pointerY, reduceMotion ? { duration: 0 } : FOLLOW_SPRING);
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+  const physics = reduceMotion ? { duration: 0 } : springConfig;
+  const x = useSpring(mouseX, physics);
+  const y = useSpring(mouseY, physics);
+  const xVelocity = useVelocity(mouseX);
+  const tilt = useTransform(xVelocity, [-800, 800], [-3, 3]);
+  const rotate = useSpring(tilt, physics);
 
-  const track = (event: MouseEvent, jump: boolean) => {
-    if (!media || !enabled) return;
-    const { width, height } = cardSize(media);
-    const next = placeCard(event.clientX, event.clientY, width, height);
-    pointerX.set(next.x);
-    pointerY.set(next.y);
-    if (jump || reduceMotion) {
-      x.jump(next.x);
-      y.jump(next.y);
-    }
+  const onMouseMove = (event: MouseEvent) => {
+    mouseX.set(event.clientX);
+    mouseY.set(event.clientY);
   };
 
   return {
     open: open && enabled && Boolean(media),
     onMouseEnter: (event: MouseEvent) => {
-      track(event, true);
+      mouseX.set(event.clientX);
+      mouseY.set(event.clientY);
+      x.jump(event.clientX);
+      y.jump(event.clientY);
       if (media && enabled) setOpen(true);
     },
-    onMouseMove: (event: MouseEvent) => track(event, false),
+    onMouseMove,
     onMouseLeave: () => setOpen(false),
     x,
     y,
+    rotate,
     reduceMotion: Boolean(reduceMotion),
   };
 }
@@ -147,12 +147,14 @@ export function ProjectHoverPreview({
   media,
   x,
   y,
+  rotate,
   reduceMotion,
 }: {
   open: boolean;
   media: HoverPreviewMedia;
   x: ReturnType<typeof useSpring>;
   y: ReturnType<typeof useSpring>;
+  rotate: ReturnType<typeof useSpring>;
   reduceMotion: boolean;
 }) {
   const [mounted, setMounted] = useState(false);
@@ -167,16 +169,16 @@ export function ProjectHoverPreview({
       {open ? (
         <motion.div
           key={media.src}
-          className="pointer-events-none fixed top-0 left-0 z-[100]"
-          style={{ x, y }}
+          className="pointer-events-none fixed top-0 left-0 z-[100] will-change-transform"
+          style={{ x, y, rotate: reduceMotion ? 0 : rotate }}
           aria-hidden
         >
           <motion.div
-            className="pointer-events-none -translate-x-1/2 -translate-y-1/2 will-change-transform"
-            initial={reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.9 }}
+            className="pointer-events-none -translate-x-1/2 -translate-y-1/2"
+            initial={reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.92 }}
             animate={reduceMotion ? { opacity: 1 } : { opacity: 1, scale: 1 }}
             exit={reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.92 }}
-            transition={reduceMotion ? { duration: 0.15 } : ENTER_SPRING}
+            transition={reduceMotion ? { duration: 0.15 } : { type: "spring", ...springConfig }}
           >
             <div
               className="relative overflow-hidden shadow-[0_24px_60px_rgba(6,10,12,0.22)]"

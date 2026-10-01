@@ -177,6 +177,7 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
           media={project.hoverPreview}
           x={hover.x}
           y={hover.y}
+          rotate={hover.rotate}
           reduceMotion={hover.reduceMotion}
         />
       ) : null}
