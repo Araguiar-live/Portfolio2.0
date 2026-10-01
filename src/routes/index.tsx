@@ -5,7 +5,9 @@ import { useWorkScrollGate } from "@/hooks/use-work-scroll-gate";
 import girlPleaseLogo from "@/assets/girl-please.svg";
 import designToggleKnob from "@/assets/portfolio/design-toggle-knob.svg";
 import crcleHoverPreview from "@/assets/portfolio/hover/crcle-in-the-area.jpg";
+import crcleHoverLogo from "@/assets/portfolio/hover/crcle-logo.svg";
 import odicciHoverPreview from "@/assets/portfolio/hover/odicci-laptop.jpg";
+import odicciHoverLogo from "@/assets/portfolio/hover/odicci-logo.svg";
 import { InteractiveHero } from "@/components/portfolio/InteractiveHero";
 import { ProjectBentoStack, type Project } from "@/components/portfolio/ProjectAccordion";
 import { Dock } from "@/components/portfolio/Dock";
@@ -72,6 +74,8 @@ const PROJECTS: Project[] = [
       alt: "CRCLE In The Area on iPhone",
       width: 1400,
       height: 1050,
+      glassLogo: true,
+      logo: { src: crcleHoverLogo, width: 248, height: 255 },
     },
     defaultTab: "Create Workspace\u00a0",
     content: {
@@ -222,6 +226,7 @@ const PROJECTS: Project[] = [
       width: 1600,
       height: 1066,
       playColor: "#E9582C",
+      logo: { src: odicciHoverLogo, width: 248, height: 259 },
     },
     defaultTab: "Create Workspace\u00a0",
     content: {
