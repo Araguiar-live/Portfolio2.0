@@ -192,7 +192,7 @@ const PROJECTS: Project[] = [
   {
     id: "02",
     slug: "first-design",
-    title: "Bending spoons",
+    title: "Bending Spoons",
     role: "First Design Hackathon",
     year: "2026",
     tabs: ["Productive"],
