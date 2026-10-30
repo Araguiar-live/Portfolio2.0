@@ -32,7 +32,9 @@ export function ProductiveDesignFileFrame({
   children,
   overlay,
   overlayAboveDocument = false,
+  overlayUnclipped = false,
   immersive = false,
+  strip = false,
   initialCamera,
 }: {
   children: ReactNode;
@@ -42,8 +44,15 @@ export function ProductiveDesignFileFrame({
    * above page-wide backdrops that would otherwise cover this frame's stacking context.
    */
   overlayAboveDocument?: boolean;
+  /** Let overlay children (floating spec cards) paint outside the canvas rect. */
+  overlayUnclipped?: boolean;
   /** Fades the canvas shell out and unclips the document overlay so it floats over the page. */
   immersive?: boolean;
+  /**
+   * Browse mode: horizontal scroller, phones capped to the viewport height.
+   * Inspector keeps the pannable canvas.
+   */
+  strip?: boolean;
   initialCamera?: Camera;
 }) {
   const viewportRef = useRef<HTMLDivElement>(null);
@@ -87,7 +96,7 @@ export function ProductiveDesignFileFrame({
 
   useEffect(() => {
     const el = viewportRef.current;
-    if (!el) return;
+    if (!el || strip) return;
     const onWheel = (event: WheelEvent) => {
       event.preventDefault();
       const dx = event.deltaX * (event.deltaMode === 1 ? 16 : 1);
@@ -104,7 +113,7 @@ export function ProductiveDesignFileFrame({
     };
     el.addEventListener("wheel", onWheel, { passive: false });
     return () => el.removeEventListener("wheel", onWheel);
-  }, [commit, zoomAt]);
+  }, [commit, zoomAt, strip]);
 
   useEffect(() => {
     const isTypingTarget = (target: EventTarget | null) => {
@@ -226,7 +235,7 @@ export function ProductiveDesignFileFrame({
 
   return (
     <div
-      className={`relative w-full min-w-0 overflow-hidden border border-white/10 bg-[#1b1b1b] shadow-none transition-opacity duration-300 ${
+      className={`spatial-layer spatial-spring relative w-full min-w-0 overflow-hidden border border-white/10 bg-[#1b1b1b] shadow-none ${
         immersive ? "pointer-events-none opacity-0" : "opacity-100"
       }`}
       style={{ borderRadius: DESIGN_FILE_SHELL_RADIUS_PX, maxWidth: DESIGN_FILE_MAX_W }}
@@ -234,15 +243,19 @@ export function ProductiveDesignFileFrame({
       <div
         ref={viewportRef}
         data-productive-design-viewport
-        className={`relative z-0 h-[874px] w-full overflow-hidden touch-none ${
-          grabbing || spaceHeld ? "cursor-grabbing" : "cursor-grab"
-        }`}
-        onPointerDown={onPointerDown}
-        onPointerMove={onPointerMove}
-        onPointerUp={endPointer}
-        onPointerCancel={endPointer}
-        onClickCapture={onClickCapture}
-        onAuxClick={onAuxClick}
+        className={
+          strip
+            ? "relative z-0 h-[620px] w-full overflow-x-auto overflow-y-hidden p-6 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+            : `relative z-0 h-[874px] w-full touch-none ${
+                immersive ? "overflow-x-auto overflow-y-visible" : "overflow-hidden"
+              } ${grabbing || spaceHeld ? "cursor-grabbing" : "cursor-grab"}`
+        }
+        onPointerDown={strip ? undefined : onPointerDown}
+        onPointerMove={strip ? undefined : onPointerMove}
+        onPointerUp={strip ? undefined : endPointer}
+        onPointerCancel={strip ? undefined : endPointer}
+        onClickCapture={strip ? undefined : onClickCapture}
+        onAuxClick={strip ? undefined : onAuxClick}
         onPointerEnter={() => {
           hoveredRef.current = true;
         }}
@@ -251,19 +264,25 @@ export function ProductiveDesignFileFrame({
         }}
       >
         <DesignFileDotGrid className="pointer-events-none absolute inset-0" />
-        <div
-          className="absolute left-1/2 top-1/2 flex w-max origin-center items-center gap-12 will-change-transform"
-          style={{
-            transform: `translate(-50%, -50%) translate(${camera.x}px, ${camera.y}px) scale(${camera.z})`,
-          }}
-        >
-          {children}
-        </div>
+        {strip ? (
+          <div className="relative z-[1] flex h-full w-max items-center justify-start gap-6">
+            {children}
+          </div>
+        ) : (
+          <div
+            className="absolute left-1/2 top-1/2 flex w-max origin-center items-center gap-12 will-change-transform"
+            style={{
+              transform: `translate(-50%, -50%) translate(${camera.x}px, ${camera.y}px) scale(${camera.z})`,
+            }}
+          >
+            {children}
+          </div>
+        )}
         {overlay && !overlayAboveDocument ? (
           <div className="pointer-events-none absolute inset-0 z-30 overflow-hidden">{overlay}</div>
         ) : null}
         {overlay && overlayAboveDocument ? (
-          <DocumentOverlay anchorRef={viewportRef} unclipped={immersive}>
+          <DocumentOverlay anchorRef={viewportRef} unclipped={immersive || overlayUnclipped}>
             {overlay}
           </DocumentOverlay>
         ) : null}
@@ -307,7 +326,10 @@ function DocumentOverlay({
     <div
       data-productive-design-viewport
       className={`pointer-events-none fixed z-50 ${unclipped ? "overflow-visible" : "overflow-hidden"}`}
-      style={{ ...rect, borderRadius: unclipped ? undefined : DESIGN_FILE_SHELL_RADIUS_PX }}
+      style={{
+        ...rect,
+        borderRadius: unclipped ? undefined : DESIGN_FILE_SHELL_RADIUS_PX,
+      }}
     >
       {children}
     </div>,

@@ -56,7 +56,7 @@ export function Marquee() {
 
   return (
     <div
-      className="relative aspect-[1262/280] w-full overflow-hidden bg-black max-sm:aspect-auto max-sm:h-[156px] max-sm:bg-[#0c0f14]"
+      className="relative aspect-[1262/280] w-full overflow-hidden bg-black max-sm:aspect-auto max-sm:h-[156px] max-sm:bg-[var(--portfolio-bottom-surface,#0a0d11)]"
     >
       <div className="absolute inset-0 flex items-center overflow-hidden">
         <div className="relative flex w-max animate-marquee gap-6 px-6 max-sm:gap-4 max-sm:px-4">

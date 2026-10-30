@@ -48,6 +48,7 @@ import { useCrclePhoneLight } from "@/lib/crcle-phone-theme";
 import {
   CrcleBackButton,
   CrcleMoreButton,
+  CrclePhoneOverlay,
   CrclePrimaryDock,
 } from "@/components/portfolio/CrcleChrome";
 import {
@@ -862,13 +863,9 @@ function MessagingOnboarding({
   onContinue: () => void;
 }) {
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.28, ease: EASE }}
-      className="absolute inset-0 z-[55] flex flex-col overflow-hidden rounded-[53px] bg-[rgba(2,3,29,0.82)] backdrop-blur-[12px]"
-      role="dialog"
+    <CrclePhoneOverlay
+      zClass="z-[55]"
+      scrim="heavy"
       aria-modal="true"
       aria-labelledby="messaging-onboarding-title"
     >
@@ -950,7 +947,7 @@ function MessagingOnboarding({
           </button>
         </div>
       </div>
-    </motion.div>
+    </CrclePhoneOverlay>
   );
 }
 
@@ -1288,15 +1285,14 @@ function ContextMenu({ onClose, top }: { onClose: () => void; top: number }) {
 
   return (
     <>
-      <motion.button
+      <button
         type="button"
         aria-label="Close menu"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="absolute inset-0 z-40 bg-black/40 backdrop-blur-[2px]"
+        className="absolute inset-0 z-40 overflow-hidden rounded-[53px]"
         onClick={onClose}
-      />
+      >
+        <span className="crcle-phone-scrim crcle-phone-scrim--menu" aria-hidden />
+      </button>
       <motion.div
         initial={{ opacity: 0, y: -8, scale: 0.96 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}

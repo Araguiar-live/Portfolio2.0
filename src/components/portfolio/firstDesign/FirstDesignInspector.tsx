@@ -1,10 +1,13 @@
 import { useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { CrclePhoneFrame } from "@/components/portfolio/CrclePhoneFrame";
 import type { InspectorFrameId } from "./inspectorTypes";
 import { ProductiveWireframePhone } from "./ProductiveWireframePhone";
 import { cn } from "@/lib/utils";
-import { DesignSystemInspectorModal } from "./DesignSystemInspectorModal";
+import {
+  DesignSystemInspectorModal,
+  INSPECTOR_PREVIEW_INSET,
+  INSPECTOR_PREVIEW_W,
+} from "./DesignSystemInspectorModal";
 import { InspectorTetheredSpecs } from "./InspectorTetheredSpecs";
 import {
   DEFAULT_ZOOM,
@@ -15,12 +18,12 @@ import { INSPECTOR_FRAMES } from "./inspectorTypes";
 import { ProductiveFrameScreen } from "./ProductiveScreens";
 import { ProductiveUnframedArtboard, UNFRAMED_ARTBOARD_W } from "./ProductiveUnframedArtboard";
 
-const HORIZONTAL_ORDER = [0, 1, 2, 3] as const;
+const HORIZONTAL_ORDER = [0, 1, 2, 3, 4, 5] as const;
 const DRAWER_TO_ARTBOARD_GAP = 40;
 /** Matches the `gap-12` on the canvas strip in ProductiveDesignFileFrame. */
 const CANVAS_STRIP_GAP = 48;
-/** Left drawer: 24px inset + phone scaled to the 874px viewport (~360px). */
-const INSPECTOR_DRAWER_RIGHT_PX = 384;
+/** Left drawer: inset + fitted inspect phone, capped to the 874px file frame. */
+const INSPECTOR_DRAWER_RIGHT_PX = INSPECTOR_PREVIEW_INSET + INSPECTOR_PREVIEW_W;
 const INSPECTOR_ARTBOARD_ZOOM = 0.85;
 
 /**
@@ -40,6 +43,26 @@ export function FirstDesignInspector() {
 
   const frame = INSPECTOR_FRAMES[modalFrameIndex];
   const annotations = frame.annotations ?? [];
+
+  const inspectorModal = (
+    <DesignSystemInspectorModal
+      open={modalOpen}
+      initialFrameIndex={modalFrameIndex}
+      phoneRef={previewPhoneRef}
+      highlightHotspotId={activeAnnotationId}
+      onHotspotHover={setActiveAnnotationId}
+      isDevModeActive={isDevModeActive}
+      onToggleDevMode={() => setIsDevModeActive((v) => !v)}
+      onClose={() => {
+        setModalOpen(false);
+        setActiveAnnotationId(null);
+      }}
+      onFrameIndexChange={(index) => {
+        setActiveAnnotationId(null);
+        setModalFrameIndex(index);
+      }}
+    />
+  );
 
   const openModal = (frameIndex: number) => {
     const viewportW = Math.min(wrapperRef.current?.clientWidth ?? 1200, DESIGN_FILE_MAX_W);
@@ -66,8 +89,8 @@ export function FirstDesignInspector() {
             <div
               aria-hidden
               className={cn(
-                "pointer-events-none fixed inset-0 z-40 h-screen w-screen transition-all duration-300",
-                isDevModeActive ? "bg-zinc-900/20 backdrop-blur-md" : "bg-transparent backdrop-blur-none",
+                "spatial-layer spatial-spring pointer-events-none fixed inset-0 z-40 h-screen w-screen",
+                isDevModeActive ? "spatial-glass bg-zinc-900/20" : "bg-transparent",
               )}
             />,
             document.body,
@@ -81,26 +104,14 @@ export function FirstDesignInspector() {
             : { x: 0, y: 0, z: DEFAULT_ZOOM }
         }
         overlayAboveDocument={modalOpen}
-        immersive={modalOpen && isDevModeActive}
+        overlayUnclipped={modalOpen}
         overlay={
           <>
-            <DesignSystemInspectorModal
-              open={modalOpen}
-              initialFrameIndex={modalFrameIndex}
-              phoneRef={previewPhoneRef}
-              highlightHotspotId={activeAnnotationId}
-              onHotspotHover={setActiveAnnotationId}
-              isDevModeActive={isDevModeActive}
-              onToggleDevMode={() => setIsDevModeActive((v) => !v)}
-              onClose={() => {
-                setModalOpen(false);
-                setActiveAnnotationId(null);
-              }}
-              onFrameIndexChange={setModalFrameIndex}
-            />
+            {inspectorModal}
             {modalOpen && isDevModeActive ? (
               <InspectorTetheredSpecs
                 annotations={annotations}
+                frameRole={frame.role}
                 artboardRef={previewPhoneRef}
                 activeId={activeAnnotationId}
                 onActiveChange={setActiveAnnotationId}
@@ -126,19 +137,13 @@ export function FirstDesignInspector() {
         ) : (
           HORIZONTAL_ORDER.map((frameIndex) => {
             const f = INSPECTOR_FRAMES[frameIndex];
-            const isHero = f.kind === "hero";
             return (
               <WireframePhone
                 key={f.id}
                 frameId={f.id}
-                interactive={isHero}
-                onClick={isHero ? () => openModal(frameIndex) : undefined}
-                ariaLabel={
-                  isHero
-                    ? "Open onboarding frame in design system inspector"
-                    : `${f.label} — coming soon`
-                }
-                dimmed={!isHero && frameIndex > 1}
+                interactive
+                onClick={() => openModal(frameIndex)}
+                ariaLabel={`Open ${f.label} in design system inspector`}
               >
                 <ProductiveFrameScreen frameId={f.id} />
               </WireframePhone>
@@ -151,7 +156,6 @@ export function FirstDesignInspector() {
 }
 
 function WireframePhone({
-  frameId,
   children,
   interactive,
   onClick,
@@ -165,20 +169,9 @@ function WireframePhone({
   ariaLabel: string;
   dimmed?: boolean;
 }) {
-  const shellClassName = interactive ? "transition-transform group-hover:scale-[1.01]" : undefined;
   const phone = (
-    <div
-      className={cn(
-        "shrink-0 transition-opacity",
-        dimmed && "opacity-70",
-        interactive && "group",
-      )}
-    >
-      {frameId === "onboarding" ? (
-        <CrclePhoneFrame className={shellClassName}>{children}</CrclePhoneFrame>
-      ) : (
-        <ProductiveWireframePhone className={shellClassName}>{children}</ProductiveWireframePhone>
-      )}
+    <div className={cn("shrink-0", dimmed && "opacity-70")}>
+      <ProductiveWireframePhone>{children}</ProductiveWireframePhone>
     </div>
   );
 

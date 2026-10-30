@@ -3,6 +3,7 @@ import type { SpecAnnotation } from "./inspectorTypes";
 
 type SpecAnnotationToastProps = {
   annotation: SpecAnnotation;
+  frameRole?: string;
   active?: boolean;
   className?: string;
   onHover?: (id: string | null) => void;
@@ -10,21 +11,24 @@ type SpecAnnotationToastProps = {
 
 export function SpecAnnotationToast({
   annotation,
+  frameRole,
   active = false,
   className,
   onHover,
 }: SpecAnnotationToastProps) {
   const rows: { label: string; value: string }[] = [
-    { label: "Element", value: annotation.element },
-    { label: "Target", value: annotation.target },
-    { label: "Accessible Name", value: annotation.accessibleName },
-    { label: "Description", value: annotation.description },
+    { label: "Element", value: `${annotation.element} · ${annotation.elementType}` },
+    { label: "Target / Frame Purpose", value: annotation.target },
+    ...(frameRole ? [{ label: "Frame Role", value: frameRole }] : []),
+    { label: "Padding & Spacing", value: annotation.spacing },
+    { label: "Accessible Name & ARIA", value: `${annotation.accessibleName} · ${annotation.aria}` },
+    { label: "Behavioral Description", value: annotation.description },
   ];
 
   return (
     <article
       className={cn(
-        "w-[min(100%,320px)] rounded-2xl border border-white/10 bg-neutral-900/80 p-4 text-left shadow-[0_24px_64px_rgba(0,0,0,0.45)] backdrop-blur-md transition-[box-shadow,border-color,transform]",
+        "spatial-glass spatial-glass-hairline spatial-spring-interactive w-[min(100%,320px)] rounded-2xl bg-neutral-900/80 p-4 text-left shadow-[0_24px_64px_rgba(0,0,0,0.45)]",
         active && "scale-[1.02] border-sky-400/40 shadow-[0_28px_72px_rgba(56,189,248,0.15)]",
         className,
       )}

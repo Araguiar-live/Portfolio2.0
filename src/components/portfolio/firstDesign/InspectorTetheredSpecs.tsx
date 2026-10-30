@@ -1,9 +1,9 @@
 import {
   useEffect,
+  useMemo,
   useRef,
   useState,
   type ComponentType,
-  type PointerEvent,
   type Ref,
   type RefObject,
 } from "react";
@@ -43,21 +43,16 @@ const SPEC_KEY: KeyEntry[] = [
 
 const KEY_BY_KIND = Object.fromEntries(SPEC_KEY.map((k) => [k.kind, k])) as Record<SpecKind, KeyEntry>;
 
-const PANEL_INSET = 24;
-/** Phone shell → key pills; the dashed tethers route through this gap. */
-const PANEL_GAP_FROM_ARTBOARD = 112;
-const KEY_TO_CARDS_GAP = 16;
-const CARD_GAP = 16;
-/** 15% smaller than the Figma 466 card so both sides of the phone can hold a cluster. */
-const CARD_W = 396;
 const ELBOW_OFFSET = 36;
 const ELBOW_STAGGER = 10;
-/** Prefer the right-hand side unless the left fits noticeably larger. */
-const RIGHT_SIDE_BIAS = 0.04;
-const MIN_SCALE = 0.3;
+const CARD_W = 260;
+const PANEL_GAP = 20;
+const PANEL_INSET = 12;
 
 type InspectorTetheredSpecsProps = {
   annotations: SpecAnnotation[];
+  /** Frame Role shown on every spec card. */
+  frameRole?: string;
   artboardRef: RefObject<HTMLDivElement | null>;
   activeId: string | null;
   onActiveChange: (id: string | null) => void;
@@ -65,86 +60,42 @@ type InspectorTetheredSpecsProps = {
 
 type Tether = { id: string; kind: SpecKind; d: string; dot: { x: number; y: number } };
 type PanelSide = "left" | "right";
-type CardFlow = "stack" | "row";
 type ClusterLayout = {
+  side: PanelSide;
+  showKey: boolean;
+  annotationIds: string[];
   left: number;
   top: number;
-  scale: number;
-  side: PanelSide;
-  flow: CardFlow;
-  showKey: boolean;
-  annotationIds: string[];
+  maxHeight: number;
 };
 
-type ClusterPlan = {
-  side: PanelSide;
-  flow: CardFlow;
-  showKey: boolean;
-  annotationIds: string[];
-};
-
-function clusterBox(
-  plan: ClusterPlan,
-  keyW: number,
-  keyH: number,
-  heightById: Record<string, number>,
-): { w: number; h: number } {
-  const heights = plan.annotationIds.map((id) => heightById[id] ?? 0);
-  const n = heights.length;
-  const cardsW = n === 0 ? 0 : plan.flow === "stack" ? CARD_W : CARD_W * n + CARD_GAP * (n - 1);
-  const cardsH = n === 0 ? 0 : plan.flow === "stack" ? heights.reduce((s, h) => s + h, 0) + CARD_GAP * (n - 1) : Math.max(...heights, 0);
-  const w = plan.showKey ? (n ? keyW + KEY_TO_CARDS_GAP + cardsW : keyW) : cardsW;
-  const h = plan.showKey ? Math.max(keyH, cardsH) : cardsH;
-  return { w: Math.max(1, w), h: Math.max(1, h) };
-}
-
-function placeCluster(
-  plan: ClusterPlan,
-  box: { w: number; h: number },
-  scale: number,
-  board: DOMRect,
-  stage: DOMRect,
-  vh: number,
-): ClusterLayout {
-  const w = box.w * scale;
-  const h = box.h * scale;
-  const winLeft =
-    plan.side === "right" ? board.right + PANEL_GAP_FROM_ARTBOARD : board.left - PANEL_GAP_FROM_ARTBOARD - w;
-  const centeredTop = board.top + (board.height - h) / 2;
-  const winTop = Math.min(Math.max(centeredTop, PANEL_INSET), Math.max(PANEL_INSET, vh - PANEL_INSET - h));
-  return {
-    ...plan,
-    scale,
-    left: Math.round(winLeft - stage.left),
-    top: Math.round(winTop - stage.top),
-  };
-}
-
-function scoreLayout(scales: number[], keyOnRight: boolean, scattered: boolean) {
-  const min = Math.min(...scales);
-  const full = scales.every((s) => s >= 0.999) ? 0.2 : 0;
-  return min + full + (keyOnRight ? RIGHT_SIDE_BIAS : 0) + (scattered ? 0.05 : 0);
+function clustersFromAnnotations(annotations: SpecAnnotation[]): ClusterLayout[] {
+  const leftIds = annotations.filter((a) => a.toast.side === "left").map((a) => a.id);
+  const rightIds = annotations.filter((a) => a.toast.side === "right").map((a) => a.id);
+  return [
+    { side: "left", showKey: false, annotationIds: leftIds, left: 0, top: 0, maxHeight: 640 },
+    { side: "right", showKey: true, annotationIds: rightIds, left: 0, top: 0, maxHeight: 640 },
+  ];
 }
 
 /**
- * Figma 1992:35567 hand-off — key column (1992:35174) tethered to the artboard with
- * orthogonal dashed lines, spec cards (1992:35214) beside it. Cards sit 15% smaller;
- * when a single side would have to scale, they scatter left and right of the phone.
+ * Floating spec cards on the design-file canvas, tethered to the phone artboard.
+ * Absolutely positioned — never reflows the phone strip.
  */
 export function InspectorTetheredSpecs({
   annotations,
+  frameRole,
   artboardRef,
   activeId,
   onActiveChange,
 }: InspectorTetheredSpecsProps) {
   const rootRef = useRef<HTMLDivElement>(null);
   const keyColumnRef = useRef<HTMLDivElement>(null);
-  const cardRefs = useRef<Partial<Record<string, HTMLElement | null>>>({});
+  const clusterRefs = useRef<Partial<Record<PanelSide, HTMLDivElement | null>>>({});
   const pillRefs = useRef<Partial<Record<SpecKind, HTMLDivElement | null>>>({});
   const [tethers, setTethers] = useState<Tether[]>([]);
-  const [clusters, setClusters] = useState<ClusterLayout[]>([
-    { left: 0, top: PANEL_INSET, scale: 1, side: "right", flow: "stack", showKey: true, annotationIds: [] },
-  ]);
+  const [clusters, setClusters] = useState<ClusterLayout[]>(() => clustersFromAnnotations(annotations));
+  const baseClusters = useMemo(() => clustersFromAnnotations(annotations), [annotations]);
 
   useEffect(() => {
     let frame = 0;
@@ -153,86 +104,45 @@ export function InspectorTetheredSpecs({
       frame = requestAnimationFrame(tick);
       const root = rootRef.current;
       const artboard = artboardRef.current;
-      const keyColumn = keyColumnRef.current;
-      if (!root || !artboard || !keyColumn) return;
+      if (!root || !artboard) return;
 
       const stage = root.getBoundingClientRect();
       const board = artboard.getBoundingClientRect();
-      const vw = window.innerWidth;
-      const vh = window.innerHeight;
-      const keyW = keyColumn.offsetWidth;
-      const keyH = keyColumn.offsetHeight;
-      const heightById: Record<string, number> = {};
-      for (const a of annotations) {
-        heightById[a.id] = cardRefs.current[a.id]?.offsetHeight ?? 0;
-      }
-      const allIds = annotations.map((a) => a.id);
-      const availH = vh - PANEL_INSET * 2;
-      const availW: Record<PanelSide, number> = {
-        right: vw - board.right - PANEL_GAP_FROM_ARTBOARD - PANEL_INSET,
-        left: board.left - PANEL_GAP_FROM_ARTBOARD - PANEL_INSET,
-      };
+      const keyW = keyColumnRef.current?.offsetWidth ?? 110;
 
-      const scaleFor = (plan: ClusterPlan) => {
-        const box = clusterBox(plan, keyW, keyH, heightById);
-        return Math.max(MIN_SCALE, Math.min(1, availW[plan.side] / box.w, availH / box.h));
-      };
+      const placed = baseClusters.map((cluster) => {
+        const top = Math.max(PANEL_INSET, board.top - stage.top);
+        const maxHeight = Math.max(280, Math.round(stage.height - top - PANEL_INSET));
+        const measuredW = clusterRefs.current[cluster.side]?.offsetWidth;
+        const n = cluster.annotationIds.length;
+        const clusterW = measuredW || CARD_W + (cluster.showKey ? keyW + PANEL_GAP : 0) + Math.max(0, n - 1) * (CARD_W + 16);
+        const left =
+          cluster.side === "right"
+            ? board.right - stage.left + PANEL_GAP
+            : board.left - stage.left - PANEL_GAP - clusterW;
+        return { ...cluster, left: Math.round(left), top: Math.round(top), maxHeight };
+      });
 
-      type Candidate = { plans: ClusterPlan[]; scales: number[]; score: number };
-      let best: Candidate | null = null;
-      const consider = (plans: ClusterPlan[]) => {
-        const scales = plans.map(scaleFor);
-        const keyOnRight = plans.some((p) => p.showKey && p.side === "right");
-        const next = { plans, scales, score: scoreLayout(scales, keyOnRight, plans.length > 1) };
-        if (!best || next.score > best.score) best = next;
-      };
-
-      for (const side of ["right", "left"] as const) {
-        for (const flow of ["stack", "row"] as const) {
-          consider([{ side, flow, showKey: true, annotationIds: allIds }]);
-        }
-      }
-
-      const leftIds = annotations.filter((a) => a.toast.side === "left").map((a) => a.id);
-      const rightIds = annotations.filter((a) => a.toast.side === "right").map((a) => a.id);
-      if (leftIds.length && rightIds.length) {
-        for (const keySide of ["right", "left"] as const) {
-          for (const leftFlow of ["stack", "row"] as const) {
-            for (const rightFlow of ["stack", "row"] as const) {
-              consider([
-                { side: "left", flow: leftFlow, showKey: keySide === "left", annotationIds: leftIds },
-                { side: "right", flow: rightFlow, showKey: keySide === "right", annotationIds: rightIds },
-              ]);
-            }
-          }
-        }
-      }
-
-      const chosen = best!;
-      const nextClusters = chosen.plans.map((plan, i) =>
-        placeCluster(plan, clusterBox(plan, keyW, keyH, heightById), chosen.scales[i], board, stage, vh),
-      );
-      const keyCluster = nextClusters.find((c) => c.showKey) ?? nextClusters[0];
-      const keySide = keyCluster.side;
-
-      const boardEdge = (keySide === "right" ? board.right : board.left) - stage.left;
+      const keySide: PanelSide = "right";
+      const boardEdge = board.right - stage.left;
       const r = (v: number) => Math.round(v * 2) / 2;
       const next: Tether[] = annotations.flatMap((a, i) => {
         const pill = pillRefs.current[a.kind];
-        if (!pill) return [];
-        const p = pill.getBoundingClientRect();
-        const x1 = (keySide === "right" ? p.left : p.right) - stage.left;
-        const y1 = p.top - stage.top + p.height / 2;
+        const p = pill?.getBoundingClientRect();
         const node = artboard.querySelector<HTMLElement>(`[data-inspect-id="${a.id}"]`)?.getBoundingClientRect();
         const hx = node
-          ? (keySide === "right" ? node.right : node.left) - stage.left
+          ? (a.toast.side === "right" ? node.right : node.left) - stage.left
           : board.left - stage.left + (board.width * a.hotspot.x) / 100;
         const hy = node
           ? node.top - stage.top + node.height / 2
           : board.top - stage.top + (board.height * a.hotspot.y) / 100;
+        if (!p) {
+          return [{ id: a.id, kind: a.kind, d: `M ${r(hx)} ${r(hy)}`, dot: { x: r(hx), y: r(hy) } }];
+        }
+        const x1 = (keySide === "right" ? p.left : p.right) - stage.left;
+        const y1 = p.top - stage.top + p.height / 2;
         const offset = ELBOW_OFFSET + i * ELBOW_STAGGER;
-        const elbowX =
-          keySide === "right" ? Math.min(x1 - 8, boardEdge + offset) : Math.max(x1 + 8, boardEdge - offset);
+        const elbowX = Math.min(x1 - 8, boardEdge + offset);
         return [
           {
             id: a.id,
@@ -243,28 +153,22 @@ export function InspectorTetheredSpecs({
         ];
       });
 
-      const key = `${nextClusters
-        .map((c) => `${c.left}|${c.top}|${c.scale.toFixed(3)}|${c.side}|${c.flow}|${c.showKey}|${c.annotationIds.join(",")}`)
-        .join("/")}|${next.map((t) => t.d).join(";")}`;
+      const key = `${placed.map((c) => `${c.left}|${c.top}|${c.maxHeight}|${c.annotationIds.join(",")}`).join("/")}|${next.map((t) => t.d).join(";")}`;
       if (key === lastKey) return;
       lastKey = key;
-      setClusters(nextClusters);
+      setClusters(placed);
       setTethers(next);
     };
     frame = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(frame);
-  }, [annotations, artboardRef]);
-
-  if (annotations.length === 0) return null;
+  }, [annotations, artboardRef, baseClusters]);
 
   const activeKinds = new Set(annotations.map((a) => a.kind));
   const activeKind = annotations.find((a) => a.id === activeId)?.kind ?? null;
-  const renderedIds = new Set(clusters.flatMap((c) => c.annotationIds));
-  const pendingIds = annotations.map((a) => a.id).filter((id) => !renderedIds.has(id));
 
   return (
-    <div ref={rootRef} className="pointer-events-none absolute inset-0 z-50">
-      <svg className="absolute inset-0 size-full overflow-visible" aria-hidden>
+    <div ref={rootRef} className="pointer-events-none absolute inset-0 z-30 overflow-visible">
+      <svg className="pointer-events-none absolute inset-0 size-full overflow-visible" aria-hidden>
         {tethers.map((t) => {
           const on = activeId === t.id;
           return (
@@ -287,62 +191,50 @@ export function InspectorTetheredSpecs({
         })}
       </svg>
 
-      {clusters.map((cluster, index) => (
-        <SpecCluster
-          key={`${cluster.side}-${index}`}
-          cluster={cluster}
-          annotations={annotations}
-          activeId={activeId}
-          activeKind={activeKind}
-          activeKinds={activeKinds}
-          keyColumnRef={cluster.showKey ? keyColumnRef : undefined}
-          pillRefs={pillRefs}
-          cardRefs={cardRefs}
-          onActiveChange={onActiveChange}
-        />
-      ))}
-
-      {/* Measure any cards not in the live clusters yet so the first layout pass has heights. */}
-      {pendingIds.length > 0 ? (
-        <div className="pointer-events-none absolute -left-[200vw] top-0 opacity-0" aria-hidden>
-          {pendingIds.map((id) => {
-            const annotation = annotations.find((a) => a.id === id);
-            if (!annotation) return null;
-            return (
-              <SpecDetailCard
-                key={id}
-                ref={(el) => {
-                  cardRefs.current[id] = el;
-                }}
-                annotation={annotation}
-              />
-            );
-          })}
-        </div>
-      ) : null}
+      {clusters.map((cluster) =>
+        cluster.annotationIds.length === 0 && !cluster.showKey ? null : (
+          <SpecCluster
+            key={cluster.side}
+            cluster={cluster}
+            clusterRef={(el) => {
+              clusterRefs.current[cluster.side] = el;
+            }}
+            annotations={annotations}
+            frameRole={frameRole}
+            activeId={activeId}
+            activeKind={activeKind}
+            activeKinds={activeKinds}
+            keyColumnRef={cluster.showKey ? keyColumnRef : undefined}
+            pillRefs={pillRefs}
+            onActiveChange={onActiveChange}
+          />
+        ),
+      )}
     </div>
   );
 }
 
 function SpecCluster({
   cluster,
+  clusterRef,
   annotations,
+  frameRole,
   activeId,
   activeKind,
   activeKinds,
   keyColumnRef,
   pillRefs,
-  cardRefs,
   onActiveChange,
 }: {
   cluster: ClusterLayout;
+  clusterRef?: (el: HTMLDivElement | null) => void;
   annotations: SpecAnnotation[];
+  frameRole?: string;
   activeId: string | null;
   activeKind: SpecKind | null;
   activeKinds: Set<SpecKind>;
   keyColumnRef?: RefObject<HTMLDivElement | null>;
   pillRefs: RefObject<Partial<Record<SpecKind, HTMLDivElement | null>>>;
-  cardRefs: RefObject<Partial<Record<string, HTMLElement | null>>>;
   onActiveChange: (id: string | null) => void;
 }) {
   const items = cluster.annotationIds
@@ -351,20 +243,22 @@ function SpecCluster({
 
   return (
     <div
-      className="pointer-events-auto absolute origin-top-left"
-      style={{ left: cluster.left, top: cluster.top, transform: `scale(${cluster.scale})` }}
+      ref={clusterRef}
+      className="pointer-events-auto absolute z-30 h-auto w-max origin-top-left"
+      style={{ left: cluster.left, top: cluster.top }}
     >
       <div
         className={cn(
-          "flex items-start gap-4 font-['Inter',sans-serif]",
-          cluster.side === "left" && "flex-row-reverse",
+          "flex w-max flex-col content-start items-start gap-3 overflow-visible font-['Inter',sans-serif]",
+          cluster.side === "left" ? "flex-wrap-reverse" : "flex-wrap",
         )}
+        style={{ maxHeight: cluster.maxHeight }}
       >
         {cluster.showKey ? (
           <div
             ref={keyColumnRef}
             className={cn(
-              "relative flex shrink-0 flex-col gap-2.5 overflow-hidden rounded-2xl border border-white/40 bg-white/30 p-2.5 shadow-[0_20px_50px_rgba(0,0,0,0.1)] backdrop-blur-xl before:pointer-events-none before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-white/60 before:to-transparent dark:border-white/10 dark:bg-black/40",
+              "relative flex h-auto shrink-0 flex-col gap-1.5 overflow-visible rounded-2xl border border-white/40 bg-white/30 p-2 shadow-[0_20px_50px_rgba(0,0,0,0.1)] backdrop-blur-xl before:pointer-events-none before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-white/60 before:to-transparent dark:border-white/10 dark:bg-black/40",
               cluster.side === "left" ? "items-end" : "items-start",
             )}
             data-node-id="1992:35174"
@@ -381,7 +275,7 @@ function SpecCluster({
                   onMouseEnter={() => match && onActiveChange(match.id)}
                   onMouseLeave={() => match && onActiveChange(null)}
                   className={cn(
-                    "transition-all duration-300 ease-out hover:scale-[1.04]",
+                    "transition-opacity duration-200",
                     !activeKinds.has(entry.kind) && "opacity-45",
                     activeKind && !active && "opacity-35",
                   )}
@@ -393,28 +287,15 @@ function SpecCluster({
           </div>
         ) : null}
 
-        {items.length > 0 ? (
-          <div
-            className={cn(
-              "flex shrink-0 items-start gap-3 [perspective:1200px]",
-              cluster.flow === "stack" ? "flex-col" : "flex-row",
-              cluster.side === "left" && cluster.flow === "row" && "flex-row-reverse",
-            )}
-          >
-            {items.map((annotation, i) => (
-              <SpecDetailCard
-                key={annotation.id}
-                ref={(el) => {
-                  cardRefs.current[annotation.id] = el;
-                }}
-                annotation={annotation}
-                active={activeId === annotation.id}
-                depth={i}
-                onHover={onActiveChange}
-              />
-            ))}
-          </div>
-        ) : null}
+        {items.map((annotation) => (
+          <SpecDetailCard
+            key={annotation.id}
+            annotation={annotation}
+            frameRole={frameRole}
+            active={activeId === annotation.id}
+            onHover={onActiveChange}
+          />
+        ))}
       </div>
     </div>
   );
@@ -432,7 +313,7 @@ function KeyPill({ entry, active = false }: { entry: KeyEntry; active?: boolean 
   return (
     <div
       className={cn(
-        "flex items-center gap-1.5 whitespace-nowrap rounded-xl border border-solid px-3 py-1.5 text-[14px] font-normal leading-normal transition-all duration-300 ease-out",
+        "spatial-spring-interactive flex items-center gap-1.5 whitespace-nowrap rounded-xl border border-solid px-2 py-1 text-[11px] font-normal leading-tight",
         active && "bg-white/70 shadow-inner backdrop-blur-md dark:bg-white/20",
       )}
       style={
@@ -447,64 +328,45 @@ function KeyPill({ entry, active = false }: { entry: KeyEntry; active?: boolean 
   );
 }
 
-/** Figma 1992:35214 — Button Details card, 15% smaller than the source frame. */
+/** Compact floating spec card — fixed width, natural height, no inner scroll. */
 function SpecDetailCard({
   ref,
   annotation,
+  frameRole,
   active,
-  depth = 0,
   onHover,
 }: {
   ref?: Ref<HTMLElement>;
   annotation: SpecAnnotation;
+  frameRole?: string;
   active?: boolean;
-  depth?: number;
   onHover?: (id: string | null) => void;
 }) {
   const entry = KEY_BY_KIND[annotation.kind];
   const rows: { label: string; value: string }[] = [
-    { label: "Target", value: annotation.target },
-    { label: "Accessible Name", value: annotation.accessibleName },
-    { label: "Description", value: annotation.description },
+    { label: "Type", value: annotation.elementType },
+    { label: "Target / Frame Purpose", value: annotation.target },
+    ...(frameRole ? [{ label: "Frame Role", value: frameRole }] : []),
+    { label: "Padding & Spacing", value: annotation.spacing },
+    { label: "Accessible Name & ARIA", value: `${annotation.accessibleName} · ${annotation.aria}` },
+    { label: "Behavioral Description", value: annotation.description },
   ];
-  const [tilt, setTilt] = useState({ x: 0, y: 0, hover: false });
-
-  const onPointerMove = (event: PointerEvent<HTMLDivElement>) => {
-    const rect = event.currentTarget.getBoundingClientRect();
-    const px = (event.clientX - rect.left) / rect.width - 0.5;
-    const py = (event.clientY - rect.top) / rect.height - 0.5;
-    setTilt({ x: py * -6, y: px * 8, hover: true });
-  };
 
   return (
     <article
       ref={ref}
-      className="w-[396px] [transform-style:preserve-3d]"
-      style={{ transform: `translateY(${depth * 5}px)` }}
-    >
-    <div
-      className="relative flex w-full flex-col items-start gap-3 overflow-hidden rounded-2xl border border-white/40 bg-white/30 p-2.5 text-[#1e1e1e] shadow-[0_20px_50px_rgba(0,0,0,0.1)] backdrop-blur-xl transition-[transform,box-shadow] duration-300 ease-out before:pointer-events-none before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-white/60 before:to-transparent dark:border-white/10 dark:bg-black/40 dark:text-white"
-      style={{
-        transform: `translateZ(${depth * 18}px) translateY(${tilt.hover ? -4 : 0}px) scale(${tilt.hover ? 1.02 : 1}) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)`,
-        boxShadow: active
-          ? `0 0 0 2px ${entry.border}, 0 28px 60px rgba(0,0,0,0.16)`
-          : tilt.hover
-            ? "0 28px 60px rgba(0,0,0,0.16)"
-            : undefined,
-      }}
-      onMouseEnter={() => {
-        onHover?.(annotation.id);
-        setTilt((t) => ({ ...t, hover: true }));
-      }}
-      onMouseLeave={() => {
-        onHover?.(null);
-        setTilt({ x: 0, y: 0, hover: false });
-      }}
-      onPointerMove={onPointerMove}
+      className="spatial-glass spatial-glass-hairline relative flex h-auto w-[min(260px,100%)] shrink-0 flex-col items-start gap-1.5 overflow-visible rounded-2xl bg-white/30 p-3 text-[11px] text-[#1e1e1e] shadow-[0_20px_50px_rgba(0,0,0,0.1)] before:pointer-events-none before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-white/60 before:to-transparent dark:bg-black/40 dark:text-white"
+      style={
+        active
+          ? { boxShadow: `0 0 0 2px ${entry.border}, 0 28px 60px rgba(0,0,0,0.16)` }
+          : undefined
+      }
+      onMouseEnter={() => onHover?.(annotation.id)}
+      onMouseLeave={() => onHover?.(null)}
     >
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/45 via-white/10 to-transparent"
+        className="pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-br from-white/45 via-white/10 to-transparent"
       />
       <header className="relative z-[1] flex w-full items-center gap-2">
         <div className="flex items-center gap-2 self-stretch">
@@ -516,15 +378,15 @@ function SpecDetailCard({
           </div>
           <span aria-hidden className="w-px self-stretch bg-white/50" />
         </div>
-        <h4 className="flex-1 text-[17px] font-semibold leading-normal">{entry.label} Details</h4>
+        <h4 className="flex-1 text-[12px] font-semibold leading-tight">{entry.label} Details</h4>
       </header>
 
-      <dl className="relative z-[1] flex w-full flex-col gap-3">
+      <dl className="relative z-[1] flex h-auto w-full flex-col gap-1.5 overflow-visible">
         <div className="flex w-full flex-col gap-1">
           <div className="flex w-full items-start">
-            <dt className="flex-1 self-stretch text-[17px] font-medium leading-normal">Element</dt>
-            <dd className="flex flex-1 items-center justify-center rounded-xl bg-white/70 px-2.5 py-1.5 shadow-inner backdrop-blur-md dark:bg-white/20">
-              <span className="w-full text-[14px] font-medium leading-normal">{annotation.element}</span>
+            <dt className="flex-1 self-stretch text-[11px] font-medium leading-tight">Element</dt>
+            <dd className="flex flex-1 items-center justify-center rounded-xl bg-white/70 px-2 py-1 shadow-inner backdrop-blur-md dark:bg-white/20">
+              <span className="w-full text-[11px] font-medium leading-tight">{annotation.element}</span>
             </dd>
           </div>
           <span aria-hidden className="h-px w-full bg-white/40" />
@@ -532,15 +394,14 @@ function SpecDetailCard({
 
         {rows.map((row) => (
           <div key={row.label} className="flex w-full flex-col gap-1">
-            <div className="flex w-full items-center justify-between text-[17px] leading-normal">
-              <dt className="flex-1 font-medium">{row.label}</dt>
-              <dd className="flex-1 font-normal">{row.value}</dd>
+            <div className="flex w-full items-start justify-between gap-2 text-[11px] leading-snug">
+              <dt className="w-[42%] shrink-0 font-medium">{row.label}</dt>
+              <dd className="min-w-0 flex-1 whitespace-normal break-words font-normal">{row.value}</dd>
             </div>
             <span aria-hidden className="h-px w-full bg-white/40" />
           </div>
         ))}
       </dl>
-    </div>
     </article>
   );
 }

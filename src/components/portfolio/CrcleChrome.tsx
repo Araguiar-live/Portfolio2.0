@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import navHomeIcon from "@/assets/crcle/nav-home.svg";
 import navMessageIcon from "@/assets/crcle/nav-message-figma.svg";
 import navRadarIcon from "@/assets/crcle/nav-radar.svg";
@@ -292,5 +292,54 @@ export function CrcleMoreButton({
         </span>
       </span>
     </button>
+  );
+}
+
+const PHONE_SCRIM: Record<string, string> = {
+  onboarding: "crcle-phone-scrim",
+  dense: "crcle-phone-scrim crcle-phone-scrim--dense",
+  heavy: "crcle-phone-scrim crcle-phone-scrim--heavy",
+  sheet: "crcle-phone-scrim crcle-phone-scrim--sheet",
+  "sheet-dark": "crcle-phone-scrim crcle-phone-scrim--sheet-dark",
+  mist: "crcle-phone-scrim crcle-phone-scrim--mist",
+  menu: "crcle-phone-scrim crcle-phone-scrim--menu",
+};
+
+/** Full-phone overlay whose frost plate is static — production-safe glass. */
+export function CrclePhoneOverlay({
+  children,
+  className = "",
+  contentClassName = "",
+  zClass = "z-40",
+  scrim = "onboarding",
+  onClick,
+  role = "dialog",
+  "aria-label": ariaLabel,
+  "aria-labelledby": ariaLabelledBy,
+  "aria-modal": ariaModal,
+}: {
+  children: ReactNode;
+  className?: string;
+  contentClassName?: string;
+  zClass?: string;
+  scrim?: keyof typeof PHONE_SCRIM;
+  onClick?: () => void;
+  role?: string;
+  "aria-label"?: string;
+  "aria-labelledby"?: string;
+  "aria-modal"?: boolean | "true" | "false";
+}) {
+  return (
+    <div
+      className={`absolute inset-0 flex flex-col overflow-hidden rounded-[53px] ${zClass} ${className}`}
+      role={role}
+      aria-label={ariaLabel}
+      aria-labelledby={ariaLabelledBy}
+      aria-modal={ariaModal}
+      onClick={onClick}
+    >
+      <div className={PHONE_SCRIM[scrim]} aria-hidden />
+      <div className={`relative z-[1] flex h-full min-h-0 w-full flex-col ${contentClassName}`}>{children}</div>
+    </div>
   );
 }

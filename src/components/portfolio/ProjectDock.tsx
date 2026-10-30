@@ -4,8 +4,8 @@ import { GraduateWorkOverlay } from "@/components/portfolio/GraduateWorkOverlay"
 import { isPhoneViewport } from "@/lib/viewport";
 import { GRADUATE_PROJECTS, type GraduateProject } from "@/components/portfolio/graduateProjects";
 
-/** Uniform icon cell — every sphere + plus shares this footprint. */
-const ICON = 24;
+/** Base icon cell at --deco-scale: 1 (scales with dock via CSS). */
+const ICON_BASE = 24;
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 
@@ -44,45 +44,38 @@ export function ProjectDock({ onPlus }: Props) {
           ) : null}
         </AnimatePresence>
 
-        {/* Sized box + scaled inner keeps the launcher's aspect ratio and anchors the popovers below it. */}
-        <div
-          style={{
-            width: "calc(120px * var(--deco-scale, 1))",
-            height: "calc(120px * var(--deco-scale, 1))",
-          }}
-        >
-          <div className="origin-top-left" style={{ transform: "scale(var(--deco-scale, 1))" }}>
         <motion.nav
           aria-label="Industrial Design Graduate Work"
           title="Industrial Design Graduate Work"
           data-name="app-icon"
-          initial={{ y: 0, scale: 1, rotate: 0 }}
+          initial={{ y: 0, rotate: 0 }}
           animate={
             folderOpen
-              ? { y: 0, scale: 1, rotate: 0 }
+              ? { y: 0, rotate: 0 }
               : {
                   y: [0, -7, 0, -3, 0],
-                  scale: [1, 1.02, 1, 1.01, 1],
                   rotate: [0, -1.4, 0.8, -0.6, 0],
                 }
           }
           whileHover={{
-            scale: 1.08,
             y: -4,
             rotate: 0,
             transition: { type: "spring", stiffness: 420, damping: 16 },
           }}
-          whileTap={{ scale: 0.94, rotate: -2 }}
+          whileTap={{ y: 0, rotate: -2 }}
           transition={
             folderOpen
               ? { duration: 0.2 }
               : {
                   y: { duration: 2.4, repeat: Infinity, ease: "easeInOut", repeatDelay: 0.35 },
-                  scale: { duration: 2.4, repeat: Infinity, ease: "easeInOut", repeatDelay: 0.35 },
                   rotate: { duration: 2.4, repeat: Infinity, ease: "easeInOut", repeatDelay: 0.35 },
                 }
           }
-          className="pointer-events-auto relative flex size-[120px] flex-col items-center justify-center rounded-[30px] border border-zinc-400/45 bg-white/30 p-[15px] shadow-[0px_16px_24px_rgba(11,14,20,0.12),inset_0px_1px_0_rgba(255,255,255,0.55)] backdrop-blur-[14px] supports-[backdrop-filter]:bg-white/25 motion-reduce:animate-none"
+          className="project-dock-app-icon pointer-events-auto relative flex flex-col items-center justify-center overflow-hidden border border-zinc-400/45 bg-white/30 shadow-[0px_16px_24px_rgba(11,14,20,0.12),inset_0px_1px_0_rgba(255,255,255,0.55)] supports-[backdrop-filter]:bg-white/25 motion-reduce:animate-none"
+          onClick={(e) => {
+            if ((e.target as HTMLElement).closest('[data-dock-action="profile"]')) return;
+            openFolder();
+          }}
         >
           <button
             type="button"
@@ -90,18 +83,18 @@ export function ProjectDock({ onPlus }: Props) {
             aria-haspopup="dialog"
             aria-label="Open Industrial Design Graduate Work"
             onClick={openFolder}
-            className="absolute inset-0 rounded-[30px]"
+            className="project-dock-app-icon__hit absolute inset-0 z-0"
           />
 
-          <div className="relative z-[1] grid w-full grid-cols-3 gap-x-[9px] gap-y-[8px]">
+          <div className="project-dock-app-icon__grid pointer-events-none relative z-[1] grid w-full grid-cols-3">
             <PlusButton
               onClick={(e) => {
                 e.stopPropagation();
                 onPlus?.();
               }}
             />
-            <span style={{ width: ICON, height: ICON }} aria-hidden />
-            <span style={{ width: ICON, height: ICON }} aria-hidden />
+            <span className="project-dock-icon-cell pointer-events-none" aria-hidden />
+            <span className="project-dock-icon-cell pointer-events-none" aria-hidden />
 
             {GRADUATE_PROJECTS.slice(0, 2).map((project, i) => (
               <DockSphere
@@ -111,7 +104,7 @@ export function ProjectDock({ onPlus }: Props) {
                 onOpen={openFolder}
               />
             ))}
-            <span style={{ width: ICON, height: ICON }} aria-hidden />
+            <span className="project-dock-icon-cell pointer-events-none" aria-hidden />
 
             {GRADUATE_PROJECTS.slice(2).map((project, i) => (
               <DockSphere
@@ -123,8 +116,6 @@ export function ProjectDock({ onPlus }: Props) {
             ))}
           </div>
         </motion.nav>
-          </div>
-        </div>
       </div>
 
       <GraduateWorkOverlay open={folderOpen} onClose={closeFolder} />
@@ -142,12 +133,12 @@ function PlusButton({
       type="button"
       onClick={onClick}
       aria-label="Open profile"
-      className="relative z-[2] flex shrink-0 items-center justify-center rounded-md transition-transform hover:scale-110 active:scale-95"
-      style={{ width: ICON, height: ICON }}
+      data-dock-action="profile"
+      className="project-dock-icon-cell pointer-events-auto relative z-[2] flex shrink-0 items-center justify-center rounded-md transition-transform hover:scale-110 active:scale-95"
     >
-      <span className="relative inline-grid size-[15px] place-items-start leading-none">
-        <span className="col-start-1 row-start-1 mt-[5.5px] h-[4px] w-[15px] rounded-[2px] bg-[#2c313a] shadow-[0px_2px_3px_rgba(0,0,0,0.25)]" />
-        <span className="col-start-1 row-start-1 ml-[5.5px] h-[15px] w-[4px] rounded-[2px] border border-white/40 bg-[#2c313a] shadow-[0px_2px_4px_rgba(0,0,0,0.3)]" />
+      <span className="project-dock-plus relative inline-grid place-items-start leading-none">
+        <span className="project-dock-plus__bar-h col-start-1 row-start-1 rounded-[2px] bg-[#2c313a] shadow-[0px_2px_3px_rgba(0,0,0,0.25)]" />
+        <span className="project-dock-plus__bar-v col-start-1 row-start-1 rounded-[2px] border border-white/40 bg-[#2c313a] shadow-[0px_2px_4px_rgba(0,0,0,0.3)]" />
       </span>
     </button>
   );
@@ -181,8 +172,8 @@ function DockSphere({
       }}
       whileHover={{ scale: 1.18, y: -1 }}
       whileTap={{ scale: 0.9 }}
-      className="group relative z-[2] flex shrink-0 items-center justify-center overflow-visible rounded-full motion-reduce:animate-none"
-      style={{ width: ICON, height: ICON, ["--glow" as string]: project.glow }}
+      className="project-dock-icon-cell pointer-events-auto group relative z-[2] flex shrink-0 items-center justify-center overflow-visible rounded-full motion-reduce:animate-none"
+      style={{ ["--glow" as string]: project.glow }}
     >
       <span
         aria-hidden
@@ -192,10 +183,11 @@ function DockSphere({
       <img
         src={project.dot}
         alt=""
-        width={ICON}
-        height={ICON}
-        className="relative size-full object-contain transition-[filter] duration-200 group-hover:drop-shadow-[0_0_10px_var(--glow)]"
+        width={ICON_BASE}
+        height={ICON_BASE}
+        className="project-dock-sphere relative size-full object-contain transition-[filter] duration-200 group-hover:drop-shadow-[0_0_10px_var(--glow)]"
         draggable={false}
+        decoding="async"
       />
     </motion.button>
   );

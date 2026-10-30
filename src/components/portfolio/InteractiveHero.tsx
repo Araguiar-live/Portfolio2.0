@@ -1,4 +1,4 @@
-import { useEffect, useRef, type CSSProperties } from "react";
+import { useEffect, useLayoutEffect, useRef, type CSSProperties } from "react";
 import heroMark from "@/assets/hero/hero-mark.svg";
 import toggleKnobHover from "@/assets/hero/hero-toggle-knob-hover.svg";
 import toggleRest from "@/assets/hero/hero-toggle-rest.svg";
@@ -50,11 +50,54 @@ const clamp = (v: number, min: number, max: number) => Math.min(Math.max(v, min)
  * Full-viewport dark hero (araguiar.design): canvas tile grid that parts around the cursor,
  * drifting glow blobs, a liquid lens and frosted glass. The toggle hands off to `#work`.
  */
+function lockMobileHeroViewport(host: HTMLElement | null) {
+  if (!host) return;
+  if (window.innerWidth >= MOBILE_MAX_W) {
+    document.documentElement.style.removeProperty("--hero-mobile-vh");
+    host.style.removeProperty("height");
+    host.style.removeProperty("min-height");
+    host.style.removeProperty("max-height");
+    const shell = host.closest(".portfolio-interactive-hero-shell");
+    if (shell instanceof HTMLElement) {
+      shell.style.removeProperty("height");
+      shell.style.removeProperty("min-height");
+      shell.style.removeProperty("max-height");
+    }
+    return;
+  }
+  const vvh = Math.round(window.visualViewport?.height ?? window.innerHeight);
+  document.documentElement.style.setProperty("--hero-mobile-vh", `${vvh}px`);
+  host.style.setProperty("height", `${vvh}px`, "important");
+  host.style.setProperty("min-height", `${vvh}px`, "important");
+  host.style.setProperty("max-height", `${vvh}px`, "important");
+  const shell = host.closest(".portfolio-interactive-hero-shell");
+  if (shell instanceof HTMLElement) {
+    shell.style.setProperty("min-height", `${vvh}px`, "important");
+    shell.style.setProperty("height", `${vvh}px`, "important");
+    shell.style.setProperty("max-height", `${vvh}px`, "important");
+  }
+}
+
 export function InteractiveHero({ onEnterWork }: { onEnterWork?: () => void }) {
   const hostRef = useRef<HTMLElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const scrollProgressRef = useRef(0);
   const pointerRef = useRef({ x: -1000, y: -1000, active: false });
+
+  useLayoutEffect(() => {
+    const host = hostRef.current;
+    if (!host) return;
+    const sync = () => lockMobileHeroViewport(host);
+    sync();
+    window.visualViewport?.addEventListener("resize", sync);
+    window.visualViewport?.addEventListener("scroll", sync);
+    window.addEventListener("resize", sync);
+    return () => {
+      window.visualViewport?.removeEventListener("resize", sync);
+      window.visualViewport?.removeEventListener("scroll", sync);
+      window.removeEventListener("resize", sync);
+    };
+  }, []);
 
   useEffect(() => {
     const host = hostRef.current;
@@ -411,6 +454,7 @@ export function InteractiveHero({ onEnterWork }: { onEnterWork?: () => void }) {
 
     const resize = () => {
       isMobile = window.innerWidth < MOBILE_MAX_W;
+      lockMobileHeroViewport(host);
       width = host.clientWidth;
       height = host.clientHeight;
       canvas.width = width * dpr;
@@ -495,6 +539,8 @@ export function InteractiveHero({ onEnterWork }: { onEnterWork?: () => void }) {
       ro.observe(host);
       io.observe(host);
       window.addEventListener("resize", resize);
+      window.visualViewport?.addEventListener("resize", resize);
+      window.visualViewport?.addEventListener("scroll", resize);
       window.addEventListener("scroll", onScroll, { passive: true });
       host.addEventListener("mousemove", onMouseMove);
       host.addEventListener("mouseleave", onMouseLeave);
@@ -507,6 +553,8 @@ export function InteractiveHero({ onEnterWork }: { onEnterWork?: () => void }) {
         io.disconnect();
         ro.disconnect();
         window.removeEventListener("resize", resize);
+        window.visualViewport?.removeEventListener("resize", resize);
+        window.visualViewport?.removeEventListener("scroll", resize);
         window.removeEventListener("scroll", onScroll);
         host.removeEventListener("mousemove", onMouseMove);
         host.removeEventListener("mouseleave", onMouseLeave);
@@ -526,7 +574,7 @@ export function InteractiveHero({ onEnterWork }: { onEnterWork?: () => void }) {
   return (
     <section
       ref={hostRef}
-      className="interactive-hero relative flex h-dvh min-h-dvh w-full shrink-0 flex-col overflow-hidden bg-[#090e15] font-sans text-white"
+      className="interactive-hero relative flex h-[100dvh] max-h-[100dvh] min-h-[100dvh] w-full max-w-full shrink-0 flex-col overflow-hidden bg-[#090e15] font-sans text-white max-md:items-stretch max-md:justify-center max-md:overflow-hidden"
       data-name="interactive-hero"
       style={
         {
@@ -545,7 +593,11 @@ export function InteractiveHero({ onEnterWork }: { onEnterWork?: () => void }) {
           <span key={i} />
         ))}
       </div>
-      <canvas ref={canvasRef} aria-hidden className="pointer-events-none absolute inset-0 z-[1]" />
+      <canvas
+        ref={canvasRef}
+        aria-hidden
+        className="pointer-events-none absolute inset-0 z-[1] size-full max-h-none max-w-none"
+      />
       <div
         aria-hidden
         className="interactive-hero__liquid-lens pointer-events-none absolute z-[2]"
@@ -558,21 +610,21 @@ export function InteractiveHero({ onEnterWork }: { onEnterWork?: () => void }) {
       <nav className="pointer-events-none absolute inset-0 z-10 sm:pointer-events-auto sm:relative sm:inset-auto sm:flex sm:w-full sm:items-center sm:justify-between sm:px-9 sm:pt-[139px]">
         <span
           aria-hidden
-          className="interactive-hero__mark absolute bottom-[31px] left-8 shrink-0 sm:static"
+          className="interactive-hero__mark absolute bottom-[max(31px,env(safe-area-inset-bottom))] left-[max(2rem,env(safe-area-inset-left))] shrink-0 sm:static"
           style={{ maskImage: `url("${heroMark}")`, WebkitMaskImage: `url("${heroMark}")` }}
         />
-        <div className="absolute right-[18px] top-14 flex flex-col gap-0.5 text-center font-[family-name:system-ui,sans-serif] leading-normal text-[rgba(255,255,255,0.6)] sm:static sm:gap-0 sm:text-right sm:font-sans">
+        <div className="absolute right-[max(18px,env(safe-area-inset-right))] top-[max(3.5rem,env(safe-area-inset-top))] flex flex-col gap-0.5 text-center font-[family-name:system-ui,sans-serif] leading-normal text-[rgba(255,255,255,0.6)] sm:static sm:gap-0 sm:text-right sm:font-sans">
           <p className="text-[20px]">Ana.R Design</p>
           <p className="text-[12px]">Product Designer</p>
         </div>
       </nav>
 
-      <div className="interactive-hero__content relative z-10 mx-auto flex min-h-0 w-full max-w-[593px] flex-1 flex-col items-center justify-center gap-[42px] px-[18px] text-center sm:px-6 sm:pb-12 sm:pt-6">
+      <div className="interactive-hero__content relative z-10 mx-auto flex min-h-0 w-full max-w-[593px] flex-1 flex-col items-center justify-center gap-[42px] px-[max(18px,env(safe-area-inset-left))] pb-[max(18px,env(safe-area-inset-bottom))] pt-[max(12px,env(safe-area-inset-top))] text-center max-md:flex-none max-md:justify-center sm:px-6 sm:pb-12 sm:pt-6">
         <div className="flex w-full flex-col items-center gap-5">
           <h1 className="w-full whitespace-nowrap font-[family-name:system-ui,sans-serif] text-[min(36px,calc((100vw-36px)/10))] font-normal leading-normal text-[rgba(255,255,255,0.6)] sm:whitespace-normal sm:font-sans sm:text-[clamp(36px,6vw,56px)]">
             {HEADLINE}
           </h1>
-          <p className="hidden max-w-[34rem] text-balance text-base font-normal leading-7 text-[rgba(255,255,255,0.4)] sm:block">
+          <p className="max-w-[min(34rem,calc(100vw-36px))] text-balance px-1 text-sm font-normal leading-6 text-[rgba(255,255,255,0.4)] sm:px-0 sm:text-base sm:leading-7">
             {LEDE}
           </p>
         </div>

@@ -60,7 +60,7 @@ import shareInnerIcon from "@/assets/crcle/share-inner.svg";
 import wifiIcon from "@/assets/crcle/wifi.svg";
 import { CrclePhoneFrame, CrcleThemeToggle } from "@/components/portfolio/CrclePhoneFrame";
 import { useCrclePhoneLight } from "@/lib/crcle-phone-theme";
-import { CrcleMoreButton, CrclePrimaryDock } from "@/components/portfolio/CrcleChrome";
+import { CrcleMoreButton, CrclePhoneOverlay, CrclePrimaryDock } from "@/components/portfolio/CrcleChrome";
 import {
   useCrcleBroadcast,
   type BroadcastState,
@@ -399,13 +399,9 @@ function ProfileOnboarding({
   onContinue: () => void;
 }) {
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.28, ease: EASE }}
-      className="absolute inset-0 z-[55] flex flex-col overflow-hidden rounded-[53px] bg-[rgba(2,3,29,0.4)] backdrop-blur-[9px]"
-      role="dialog"
+    <CrclePhoneOverlay
+      zClass="z-[55]"
+      scrim="onboarding"
       aria-modal="true"
       aria-labelledby="profile-onboarding-title"
     >
@@ -421,7 +417,7 @@ function ProfileOnboarding({
             <IconImg src={closeAddIcon} className="relative z-[1] size-6" />
           </button>
 
-          <div className="w-full overflow-hidden rounded-[24px] border border-[rgba(255,255,255,0.05)] bg-[rgba(255,255,255,0.2)] backdrop-blur-[12px] [-webkit-backdrop-filter:blur(12px)]">
+          <div className="crcle-sheet-frost w-full overflow-hidden rounded-[24px] border border-[rgba(255,255,255,0.05)]">
             <div className="border-b border-[rgba(255,255,255,0.05)] px-4 py-4">
               <p
                 id="profile-onboarding-title"
@@ -488,7 +484,7 @@ function ProfileOnboarding({
           </button>
         </div>
       </div>
-    </motion.div>
+    </CrclePhoneOverlay>
   );
 }
 
@@ -1039,15 +1035,9 @@ function MoodSwitcherModal({
   const activeMood = MOODS.find((m) => m.id === activeState) ?? MOODS[0];
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.28, ease: EASE }}
-      className="absolute inset-0 z-40 flex flex-col overflow-hidden rounded-[53px] bg-[rgba(2,3,29,0.6)] backdrop-blur-[8px]"
-      role="dialog"
+    <CrclePhoneOverlay
+      scrim="dense"
       aria-label="Mood Switch"
-      style={{ clipPath: "inset(0 round 53px)" }}
       onClick={onClose}
     >
       <div
@@ -1249,7 +1239,7 @@ function MoodSwitcherModal({
           </p>
         </div>
       </div>
-    </motion.div>
+    </CrclePhoneOverlay>
   );
 }
 
@@ -1440,14 +1430,10 @@ function RelationshipStatusSheet({
   const [locationEnabled, setLocationEnabled] = useState(true);
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="absolute inset-0 z-40 flex items-center justify-center overflow-hidden rounded-[53px] bg-[rgba(1,2,17,0.35)] px-3 backdrop-blur-[10px]"
-      role="dialog"
+    <CrclePhoneOverlay
+      scrim="sheet"
+      contentClassName="items-center justify-center px-3"
       aria-label="Edit Relationship status"
-      style={{ clipPath: "inset(0 round 53px)" }}
       onClick={onClose}
     >
       <motion.div
@@ -1455,7 +1441,7 @@ function RelationshipStatusSheet({
         animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, y: 12, scale: 0.98 }}
         transition={{ duration: 0.28, ease: EASE }}
-        className="relative w-full max-w-[374px] overflow-hidden rounded-[24px] bg-[rgba(1,2,17,0.55)] backdrop-blur-[24px] shadow-[0_16px_48px_rgba(0,0,0,0.35)]"
+        className="crcle-sheet-frost--dark relative w-full max-w-[374px] overflow-hidden rounded-[24px] shadow-[0_16px_48px_rgba(0,0,0,0.35)]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header — Figma 862:242953 */}
@@ -1554,7 +1540,7 @@ function RelationshipStatusSheet({
           </div>
         </div>
       </motion.div>
-    </motion.div>
+    </CrclePhoneOverlay>
   );
 }
 
@@ -1668,14 +1654,10 @@ function WorkEditSheet({
   const clearLogo = () => setLogoUploaded(false);
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="absolute inset-0 z-40 flex flex-col justify-end overflow-hidden rounded-[53px] bg-[rgba(1,2,17,0.35)] backdrop-blur-[6px]"
-      role="dialog"
+    <CrclePhoneOverlay
+      scrim="sheet"
+      contentClassName="justify-end"
       aria-label="Edit Work"
-      style={{ clipPath: "inset(0 round 53px)" }}
       onClick={onClose}
     >
       <motion.div
@@ -1871,7 +1853,7 @@ function WorkEditSheet({
           </p>
         </div>
       </motion.div>
-    </motion.div>
+    </CrclePhoneOverlay>
   );
 }
 
@@ -1928,14 +1910,10 @@ function EducationHistorySheet({
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="absolute inset-0 z-40 flex flex-col justify-end overflow-hidden rounded-[53px] bg-[rgba(1,2,17,0.35)] backdrop-blur-[6px]"
-      role="dialog"
+    <CrclePhoneOverlay
+      scrim="sheet"
+      contentClassName="justify-end"
       aria-label="Edit Education History"
-      style={{ clipPath: "inset(0 round 53px)" }}
       onClick={onClose}
     >
       <motion.div
@@ -2172,7 +2150,7 @@ function EducationHistorySheet({
           </div>
         </div>
       </motion.div>
-    </motion.div>
+    </CrclePhoneOverlay>
   );
 }
 
@@ -2305,14 +2283,10 @@ function SheetShell({
   onDone?: () => void;
 }) {
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="absolute inset-0 z-40 flex flex-col justify-end overflow-hidden rounded-[53px] bg-[rgba(2,3,29,0.45)] backdrop-blur-[6px]"
-      role="dialog"
+    <CrclePhoneOverlay
+      scrim="sheet-dark"
+      contentClassName="justify-end"
       aria-label={title}
-      style={{ clipPath: "inset(0 round 53px)" }}
     >
       <motion.div
         initial={{ y: 40 }}
@@ -2363,7 +2337,7 @@ function SheetShell({
           />
         </button>
       </motion.div>
-    </motion.div>
+    </CrclePhoneOverlay>
   );
 }
 

@@ -1,6 +1,5 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { useCallback, useEffect, useLayoutEffect, useRef, useState, type RefObject } from "react";
-import { CrclePhoneFrame } from "@/components/portfolio/CrclePhoneFrame";
+import { useCallback, useEffect, useState, type RefObject } from "react";
 import { ProductiveWireframePhone } from "./ProductiveWireframePhone";
 import { InspectorModalHeader } from "./InspectorModalHeader";
 import { INSPECTOR_FRAMES } from "./inspectorTypes";
@@ -21,13 +20,24 @@ type DesignSystemInspectorModalProps = {
 
 const PHONE_W = 402;
 const PHONE_H = 874;
-/** Figma 2238:195139 — drawer inset from file mockup edge. */
-const CANVAS_INSET_PX = 24;
-const COLUMN_GAP_PX = 12;
-const MAX_COLUMN_W = 407;
+/** Matches `h-[874px]` on ProductiveDesignFileFrame's viewport. */
+const FRAME_H = 874;
+const HEADER_H = 40;
+const STACK_GAP = 8;
+/** 384px (20% up from 320) pulled back ~8% so the device sits inside the file frame. */
+const TARGET_PREVIEW_W = 353;
+
+export const INSPECTOR_PREVIEW_INSET = 16;
+
+const MAX_PREVIEW_H = FRAME_H - INSPECTOR_PREVIEW_INSET * 2 - HEADER_H - STACK_GAP;
+const TARGET_PREVIEW_H = TARGET_PREVIEW_W * (PHONE_H / PHONE_W);
+export const INSPECTOR_PREVIEW_H = Math.min(TARGET_PREVIEW_H, MAX_PREVIEW_H);
+export const INSPECTOR_PREVIEW_W = INSPECTOR_PREVIEW_H * (PHONE_W / PHONE_H);
+const PREVIEW_SCALE = INSPECTOR_PREVIEW_W / PHONE_W;
 
 /**
- * Left-pinned preview (Figma 2238:195139 / 2220:174982).
+ * Left-pinned iPhone preview. Fitted to the 874px design-file viewport
+ * so header, bezel, and home indicator stay inside the canvas.
  */
 export function DesignSystemInspectorModal({
   open,
@@ -41,10 +51,6 @@ export function DesignSystemInspectorModal({
   onHotspotHover,
 }: DesignSystemInspectorModalProps) {
   const [frameIndex, setFrameIndex] = useState(initialFrameIndex);
-  const [phoneScale, setPhoneScale] = useState(0.72);
-
-  const asideRef = useRef<HTMLElement>(null);
-  const headerRef = useRef<HTMLElement>(null);
 
   const frame = INSPECTOR_FRAMES[frameIndex];
 
@@ -59,35 +65,6 @@ export function DesignSystemInspectorModal({
     },
     [onFrameIndexChange],
   );
-
-  const measurePhoneScale = useCallback(() => {
-    const aside = asideRef.current;
-    const header = headerRef.current;
-    const viewport = aside?.closest("[data-productive-design-viewport]") as HTMLElement | null;
-    if (!aside || !header || !viewport) return;
-
-    const inset = CANVAS_INSET_PX * 2;
-    const maxColW = Math.min(MAX_COLUMN_W, viewport.clientWidth - inset);
-    const columnH = aside.clientHeight;
-    const availH = columnH - header.offsetHeight - COLUMN_GAP_PX;
-    const byHeight = availH / PHONE_H;
-    const byWidth = maxColW / PHONE_W;
-    const next = Math.min(byHeight, byWidth, 1);
-    setPhoneScale(Math.max(0.48, next));
-  }, []);
-
-  useLayoutEffect(() => {
-    if (!open) return;
-    measurePhoneScale();
-    const aside = asideRef.current;
-    if (!aside) return;
-
-    const viewport = aside.closest("[data-productive-design-viewport]") as HTMLElement | null;
-    const ro = new ResizeObserver(() => measurePhoneScale());
-    ro.observe(aside);
-    if (viewport) ro.observe(viewport);
-    return () => ro.disconnect();
-  }, [open, frameIndex, measurePhoneScale]);
 
   const goPrev = useCallback(() => {
     setFrame((frameIndex - 1 + INSPECTOR_FRAMES.length) % INSPECTOR_FRAMES.length);
@@ -108,36 +85,33 @@ export function DesignSystemInspectorModal({
     return () => window.removeEventListener("keydown", onKey);
   }, [open, onClose, goPrev, goNext]);
 
-  const phoneW = PHONE_W * phoneScale;
-  const phoneH = PHONE_H * phoneScale;
-
   return (
     <AnimatePresence>
       {open ? (
         <motion.aside
-          ref={asideRef}
           key="device-drawer"
           role="dialog"
           aria-label="Device preview"
           initial={{ opacity: 0, x: -12 }}
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: -12 }}
-          transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-          className="pointer-events-auto absolute z-50 flex flex-col overflow-hidden"
+          transition={{ type: "spring", stiffness: 380, damping: 32, mass: 0.85 }}
+          className="spatial-layer pointer-events-auto absolute z-20 flex flex-col overflow-visible"
           style={{
-            top: CANVAS_INSET_PX,
-            bottom: CANVAS_INSET_PX,
-            left: CANVAS_INSET_PX,
-            width: phoneW,
-            maxWidth: `calc(100% - ${CANVAS_INSET_PX * 2}px)`,
+            top: INSPECTOR_PREVIEW_INSET,
+            left: INSPECTOR_PREVIEW_INSET,
+            width: INSPECTOR_PREVIEW_W,
+            maxHeight: FRAME_H - INSPECTOR_PREVIEW_INSET * 2,
           }}
           onPointerDown={(e) => e.stopPropagation()}
           onWheel={(e) => e.stopPropagation()}
         >
-          <div className="flex h-full min-h-0 w-full flex-1 flex-col items-stretch gap-3">
+          <div
+            className="flex min-h-0 w-full flex-col items-stretch overflow-visible"
+            style={{ gap: STACK_GAP }}
+          >
             <InspectorModalHeader
-              ref={headerRef}
-              className="mt-[3px] w-full shrink-0"
+              className="w-full shrink-0"
               frameIndex={frameIndex}
               frameCount={INSPECTOR_FRAMES.length}
               frameLabel={frame.label}
@@ -149,32 +123,27 @@ export function DesignSystemInspectorModal({
             />
 
             <div
-              className="relative w-full min-h-0 flex-1 drop-shadow-[32px_32px_32px_rgba(16,24,40,0.2),16px_16px_16px_rgba(16,24,40,0.08)]"
-              style={{ minHeight: phoneH }}
+              className="relative mx-auto shrink-0 overflow-visible drop-shadow-[32px_32px_32px_rgba(16,24,40,0.2),16px_16px_16px_rgba(16,24,40,0.08)]"
+              style={{ width: INSPECTOR_PREVIEW_W, height: INSPECTOR_PREVIEW_H }}
             >
               <div
                 ref={phoneRef}
-                className="origin-top-left"
+                className="absolute left-0 top-0 origin-top-left"
                 style={{
                   width: PHONE_W,
                   height: PHONE_H,
-                  transform: `scale(${phoneScale})`,
+                  transform: `scale(${PREVIEW_SCALE})`,
                 }}
               >
-                {frame.id === "onboarding" ? (
-                  <CrclePhoneFrame>
-                    <ProductiveFrameScreen
-                      frameId={frame.id}
-                      devMode={isDevModeActive && frame.kind === "hero"}
-                      highlightHotspotId={isDevModeActive ? highlightHotspotId : null}
-                      onHotspotHover={onHotspotHover}
-                    />
-                  </CrclePhoneFrame>
-                ) : (
-                  <ProductiveWireframePhone>
-                    <ProductiveFrameScreen frameId={frame.id} standalone={false} />
-                  </ProductiveWireframePhone>
-                )}
+                <ProductiveWireframePhone>
+                  <ProductiveFrameScreen
+                    frameId={frame.id}
+                    standalone={false}
+                    devMode={isDevModeActive}
+                    highlightHotspotId={isDevModeActive ? highlightHotspotId : null}
+                    onHotspotHover={onHotspotHover}
+                  />
+                </ProductiveWireframePhone>
               </div>
             </div>
           </div>

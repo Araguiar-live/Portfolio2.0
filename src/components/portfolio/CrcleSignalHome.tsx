@@ -30,6 +30,7 @@ import { useCrclePhoneLight } from "@/lib/crcle-phone-theme";
 import {
   CrcleBackButton,
   CrcleMoreButton,
+  CrclePhoneOverlay,
   CrclePrimaryDock,
 } from "@/components/portfolio/CrcleChrome";
 import { SignalTuneDrawer } from "@/components/portfolio/SignalTuneDrawer";
@@ -397,14 +398,10 @@ function SignalOnboarding({
   onContinue: () => void;
 }) {
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.28, ease: EASE }}
-      className="pointer-events-auto absolute inset-0 z-[63] flex flex-col overflow-hidden rounded-[53px] bg-[rgba(2,3,29,0.6)] backdrop-blur-[8px]"
-      style={{ clipPath: "inset(0 round 53px)" }}
-      role="dialog"
+    <CrclePhoneOverlay
+      zClass="z-[63]"
+      scrim="dense"
+      className="pointer-events-auto"
       aria-modal="true"
       aria-labelledby="signal-onboarding-title"
     >
@@ -470,7 +467,7 @@ function SignalOnboarding({
           </button>
         </div>
       </div>
-    </motion.div>
+    </CrclePhoneOverlay>
   );
 }
 
@@ -624,13 +621,10 @@ function LocationRequiredModal({
   const [allowVisible, setAllowVisible] = useState(true);
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.22, ease: EASE }}
-      className="absolute inset-0 z-[60] flex items-center justify-center overflow-hidden rounded-[53px] bg-gradient-to-b from-[rgba(0,0,0,0.01)] to-transparent backdrop-blur-[2px]"
-      role="dialog"
+    <CrclePhoneOverlay
+      zClass="z-[60]"
+      scrim="mist"
+      contentClassName="items-center justify-center"
       aria-modal="true"
       aria-labelledby="location-required-title"
     >
@@ -645,7 +639,7 @@ function LocationRequiredModal({
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.98, y: 8 }}
         transition={{ duration: 0.28, ease: EASE }}
-        className="relative z-[1] mx-3 flex w-full max-w-[387px] flex-col overflow-hidden rounded-[24px] border border-[rgba(255,255,255,0.2)] bg-[rgba(2,3,29,0.4)] p-px shadow-[0px_25px_50px_-12px_rgba(0,0,0,0.25)] backdrop-blur-[12px]"
+        className="crcle-sheet-frost--dark relative z-[1] mx-3 flex w-full max-w-[387px] flex-col overflow-hidden rounded-[24px] border border-[rgba(255,255,255,0.2)] p-px shadow-[0px_25px_50px_-12px_rgba(0,0,0,0.25)]"
       >
         <div className="flex items-center justify-between border-b border-[rgba(255,255,255,0.1)] px-3 pb-[13px] pt-3">
           <p
@@ -802,7 +796,7 @@ function LocationRequiredModal({
           </div>
         </div>
       </motion.div>
-    </motion.div>
+    </CrclePhoneOverlay>
   );
 }
 

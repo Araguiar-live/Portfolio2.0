@@ -1,4 +1,4 @@
-import { useReducedMotion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { useEffect, useState } from "react";
 import peekMouse from "@/assets/portfolio/peek-mouse.svg";
 import { cn } from "@/lib/utils";
@@ -103,7 +103,7 @@ function BackspaceIcon() {
 
 export function CalculatorCard() {
   const readout = useCalculatorReadout();
-  const box = `calc(${CALC_AUTHORED * CALC_BASE_SCALE}px * var(--deco-scale, 1))`;
+  const box = `calc(${CALC_AUTHORED * CALC_BASE_SCALE}px * var(--deco-scale, 1) * var(--deco-boost, 1))`;
 
   return (
     <div
@@ -114,10 +114,12 @@ export function CalculatorCard() {
     >
       <div
         className="absolute left-0 top-0 origin-top-left"
-        style={{ transform: `scale(calc(${CALC_BASE_SCALE} * var(--deco-scale, 1)))` }}
+        style={{
+          transform: `scale(calc(${CALC_BASE_SCALE} * var(--deco-scale, 1) * var(--deco-boost, 1)))`,
+        }}
       >
         <div
-          className="relative flex size-[402px] flex-col justify-between overflow-hidden rounded-[48px] border border-zinc-400/45 bg-white/30 p-6 shadow-[0px_16px_24px_rgba(11,14,20,0.12),inset_0px_1px_0_rgba(255,255,255,0.55)] backdrop-blur-[14px] supports-[backdrop-filter]:bg-white/25"
+          className="spatial-glass spatial-glass-hairline spatial-layer relative flex size-[402px] flex-col justify-between overflow-hidden rounded-[48px] bg-white/30 p-6 shadow-[0px_16px_24px_rgba(11,14,20,0.12),inset_0px_1px_0_rgba(255,255,255,0.55)] supports-[backdrop-filter]:bg-white/25"
           style={{ fontFamily: CALC_FONT }}
         >
           <div
@@ -179,8 +181,8 @@ export function PeekMouse() {
       aria-hidden
       className="pointer-events-none relative shrink-0 select-none"
       style={{
-        width: "calc(117px * var(--deco-scale, 1))",
-        height: "calc(117px * var(--deco-scale, 1))",
+        width: "calc(117px * var(--deco-scale, 1) * var(--deco-boost, 1))",
+        height: "calc(117px * var(--deco-scale, 1) * var(--deco-boost, 1))",
       }}
       data-name="peek-mouse"
     >
@@ -191,8 +193,8 @@ export function PeekMouse() {
           draggable={false}
           className="block max-w-none object-contain"
           style={{
-            width: "calc(74px * var(--deco-scale, 1))",
-            height: "calc(99px * var(--deco-scale, 1))",
+            width: "calc(74px * var(--deco-scale, 1) * var(--deco-boost, 1))",
+            height: "calc(99px * var(--deco-scale, 1) * var(--deco-boost, 1))",
           }}
           loading="lazy"
           decoding="async"

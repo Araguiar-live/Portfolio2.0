@@ -49,7 +49,7 @@ import unlockIcon from "@/assets/crcle/unlock.svg";
 import wifiIcon from "@/assets/crcle/wifi.svg";
 import { CrclePhoneFrame, CrcleThemeToggle } from "@/components/portfolio/CrclePhoneFrame";
 import { useCrclePhoneLight } from "@/lib/crcle-phone-theme";
-import { CrclePrimaryDock } from "@/components/portfolio/CrcleChrome";
+import { CrclePhoneOverlay, CrclePrimaryDock } from "@/components/portfolio/CrcleChrome";
 import { useCrcleBroadcast } from "@/components/portfolio/crcleBroadcast";
 
 /**
@@ -744,13 +744,9 @@ function RadarOnboarding({
   onContinue: () => void;
 }) {
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.28, ease: EASE }}
-      className="absolute inset-0 z-[55] flex flex-col overflow-hidden rounded-[53px] bg-[rgba(2,3,29,0.6)] backdrop-blur-[8px]"
-      role="dialog"
+    <CrclePhoneOverlay
+      zClass="z-[55]"
+      scrim="dense"
       aria-modal="true"
       aria-labelledby="radar-onboarding-title"
     >
@@ -833,7 +829,7 @@ function RadarOnboarding({
           </button>
         </div>
       </div>
-    </motion.div>
+    </CrclePhoneOverlay>
   );
 }
 

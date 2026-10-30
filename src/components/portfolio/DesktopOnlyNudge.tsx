@@ -14,8 +14,13 @@ export function useDesktopOnlyNudge() {
   const nudge = useCallback(() => {
     if (!reduceMotion) {
       void controls.start({
-        x: [0, -10, 10, -7, 7, -3, 3, 0],
-        transition: { duration: 0.5, ease: "easeInOut" },
+        x: [0, -12, 10, -8, 6, -3, 0],
+        rotate: [0, -1.4, 1.2, -0.85, 0.5, -0.2, 0],
+        transition: {
+          duration: 0.52,
+          ease: [0.22, 1.15, 0.36, 1],
+          times: [0, 0.14, 0.28, 0.42, 0.58, 0.76, 1],
+        },
       });
     }
     setPillVisible(true);

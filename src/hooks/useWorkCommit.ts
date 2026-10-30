@@ -1,8 +1,10 @@
 import { useReducedMotion } from "framer-motion";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 
 /** Commit to the work section once its top crosses this fraction of the viewport. */
 const COMMIT_VIEWPORT_RATIO = 0.52;
+/** Sticky chrome fades in once the Figma wireframe stage owns the top of the viewport. */
+const CHROME_REVEAL_TOP_PX = 88;
 const WORK_SECTION_ID = "work";
 
 const getWorkSection = () => document.getElementById(WORK_SECTION_ID);
@@ -14,6 +16,7 @@ const getWorkSection = () => document.getElementById(WORK_SECTION_ID);
 export function useWorkCommit() {
   const reduceMotion = useReducedMotion();
   const [workCommitted, setWorkCommitted] = useState(false);
+  const [chromeVisible, setChromeVisible] = useState(false);
   const committedRef = useRef(false);
   const scrollingRef = useRef(false);
 
@@ -27,6 +30,9 @@ export function useWorkCommit() {
       committedRef.current = true;
       setWorkCommitted(true);
       scrollingRef.current = true;
+      if (window.location.hash !== "#work") {
+        history.replaceState(null, "", `${window.location.pathname}${window.location.search}#work`);
+      }
       window.scrollTo({ top: work.offsetTop, behavior: resolved });
       window.setTimeout(
         () => {
@@ -38,11 +44,48 @@ export function useWorkCommit() {
     [reduceMotion],
   );
 
+  /** Always land on the dark hero. Hash / scroll restoration must not skip it. */
+  useLayoutEffect(() => {
+    if (window.location.hash === "#work") {
+      history.replaceState(null, "", `${window.location.pathname}${window.location.search}`);
+    }
+    window.scrollTo(0, 0);
+  }, []);
+
   useEffect(() => {
     committedRef.current = workCommitted;
   }, [workCommitted]);
 
   useEffect(() => {
+    if (!workCommitted) {
+      setChromeVisible(false);
+      return;
+    }
+
+    const syncChrome = () => {
+      const work = getWorkSection();
+      if (!work) return;
+      setChromeVisible(work.getBoundingClientRect().top <= CHROME_REVEAL_TOP_PX);
+    };
+
+    syncChrome();
+    window.addEventListener("scroll", syncChrome, { passive: true });
+    window.addEventListener("resize", syncChrome);
+    const afterHandoff = window.setTimeout(syncChrome, reduceMotion ? 0 : 920);
+
+    return () => {
+      window.removeEventListener("scroll", syncChrome);
+      window.removeEventListener("resize", syncChrome);
+      window.clearTimeout(afterHandoff);
+    };
+  }, [workCommitted, reduceMotion]);
+
+  useEffect(() => {
+    let armed = false;
+    const arm = window.setTimeout(() => {
+      armed = true;
+    }, 80);
+
     const clampAboveWork = () => {
       if (!committedRef.current || scrollingRef.current) return;
       const top = workTop();
@@ -53,6 +96,7 @@ export function useWorkCommit() {
       const work = getWorkSection();
       if (!work) return;
       if (!committedRef.current) {
+        if (!armed) return;
         if (work.getBoundingClientRect().top < window.innerHeight * COMMIT_VIEWPORT_RATIO) {
           commitToWork();
         }
@@ -82,6 +126,7 @@ export function useWorkCommit() {
     window.addEventListener("touchmove", onTouchMove, { passive: false });
     window.addEventListener("resize", clampAboveWork);
     return () => {
+      window.clearTimeout(arm);
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("wheel", onWheel);
       window.removeEventListener("touchstart", onTouchStart);
@@ -90,5 +135,5 @@ export function useWorkCommit() {
     };
   }, [commitToWork, workTop]);
 
-  return { workCommitted, commitToWork };
+  return { workCommitted, commitToWork, chromeVisible };
 }

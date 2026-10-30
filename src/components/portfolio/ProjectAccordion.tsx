@@ -1,6 +1,8 @@
-import { AnimatePresence, motion } from "framer-motion";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { AnimatePresence, motion, type MotionValue } from "framer-motion";
+import { ArrowUpRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { forwardRef, useEffect, useState, type MutableRefObject } from "react";
+import { createPortal } from "react-dom";
+import { CrcleVideoCard } from "@/components/portfolio/CrcleVideoCard";
 import { DesktopOnlyPill, useDesktopOnlyNudge } from "@/components/portfolio/DesktopOnlyNudge";
 import { MockupGradientRing } from "@/components/portfolio/MockupGradientRing";
 import {
@@ -8,6 +10,7 @@ import {
   useRowHoverPreview,
   type HoverPreviewMedia,
 } from "@/components/portfolio/RowHoverPreview";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { isPhoneViewport } from "@/lib/viewport";
 
 // Tabs shown inside every expanded project row.
@@ -17,7 +20,7 @@ export type ProjectTab = (typeof TABS)[number];
 type Tab = ProjectTab;
 
 /** Shared open-panel body height — tabs + Figma 402×874 phone + padding */
-const EXPANDED_BODY_H = 1060;
+const EXPANDED_BODY_H = 1120;
 
 export interface Project {
   id: string; // e.g. "01"
@@ -25,10 +28,14 @@ export interface Project {
   title: string;
   role: string;
   year: string;
+  /** Live project URL — shown as a diagonal arrow beside the title. */
+  url?: string;
   /** Override the default four case-study steps. */
   tabs?: readonly ProjectTab[];
   /** Cursor-following still that appears on closed desktop rows (live araguiar.design). */
   hoverPreview?: HoverPreviewMedia;
+  /** Cursor-following clip that appears only while hovering the live-site arrow. */
+  linkHoverPreview?: HoverPreviewMedia;
   // Per-tab content slots. Each returns whatever prototype/text you want to drop in later.
   content?: Partial<Record<Tab, ProjectTabContent>>;
 }
@@ -79,6 +86,7 @@ export function ProjectBentoStack({
   /** Bump to play the phone "desktop-only" nudge from outside (e.g. footer links). */
   nudgeSignal?: number;
 }) {
+  const isMobile = useIsMobile();
   const { controls: shake, pillVisible, nudge } = useDesktopOnlyNudge();
 
   useEffect(() => {
@@ -93,7 +101,7 @@ export function ProjectBentoStack({
   return (
     <motion.div
       animate={shake}
-      className="relative z-10 flex w-full shrink-0 flex-col overflow-hidden rounded-[32px] border border-[#f3f4f6] bg-white/70 shadow-[0px_16px_48px_0px_rgba(0,0,0,0.05)] backdrop-blur-[2px] max-sm:rounded-[28px] sm:rounded-[37px]"
+      className="portfolio-mobile-shake-root spatial-glass spatial-glass-hairline spatial-layer relative z-10 flex w-full max-w-full shrink-0 flex-col overflow-hidden rounded-[32px] border-[#f3f4f6]/80 bg-white/70 shadow-[0px_16px_48px_0px_rgba(0,0,0,0.05)] max-md:overflow-x-clip max-md:rounded-[26px] max-sm:rounded-[24px] sm:rounded-[37px]"
     >
       {projects.map((p) => (
         <ProjectAccordion
@@ -102,14 +110,14 @@ export function ProjectBentoStack({
             rowRefs.current[p.slug] = el;
           }}
           project={p}
-          isOpen={openSlug === p.slug}
+          isOpen={!isMobile && openSlug === p.slug}
           onToggle={() => handleToggle(p.slug)}
         />
       ))}
 
       <DesktopOnlyPill
         visible={pillVisible}
-        className="bottom-3 left-1/2 -translate-x-1/2 sm:hidden"
+        className="bottom-3 left-1/2 -translate-x-1/2 md:hidden"
       />
     </motion.div>
   );
@@ -125,44 +133,86 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
   );
   const tabContent = project.content?.[activeTab] ?? {};
   const showTabChrome = tabs.length > 1;
-  const hover = useRowHoverPreview(project.hoverPreview, !isOpen);
+  const rowHover = useRowHoverPreview(project.hoverPreview, !isOpen);
+  const linkHover = useRowHoverPreview(project.linkHoverPreview, Boolean(project.url) && isOpen);
 
   return (
     <div ref={ref} className="border-b border-[#d1d5db] last:border-b-0 max-sm:border-[#ececec]">
       {/* Row header — Figma 530:151817 */}
-      <button
-        type="button"
-        onClick={onToggle}
-        onMouseEnter={hover.onMouseEnter}
-        onMouseMove={hover.onMouseMove}
-        onMouseLeave={hover.onMouseLeave}
-        className="group flex w-full items-center justify-between gap-7 px-[37px] py-8 text-left transition-[background] duration-300 max-sm:flex-col max-sm:items-stretch max-sm:gap-[18px] max-sm:p-6"
+      <div
+        className="group relative flex w-full items-center justify-between gap-7 px-[37px] py-8 text-left transition-[background] duration-300 max-md:flex-col max-md:items-stretch max-md:gap-[15px] max-md:px-5 max-md:py-5 max-sm:gap-[15px] max-sm:p-5"
+        onMouseEnter={rowHover.onMouseEnter}
+        onMouseMove={rowHover.onMouseMove}
+        onMouseLeave={rowHover.onMouseLeave}
       >
-        <div className="flex min-w-0 flex-1 items-center gap-[37px] max-sm:gap-4">
-          <span className="shrink-0 text-[16px] font-medium tracking-[1px] text-[#111]/70 tabular-nums max-sm:text-[12px] max-sm:font-normal max-sm:tracking-normal max-sm:text-[#a3a3a6]">
+        <button
+          type="button"
+          onClick={onToggle}
+          aria-expanded={isOpen}
+          aria-label={`${isOpen ? "Collapse" : "Open"} ${project.title}`}
+          className="absolute inset-0 z-0 cursor-pointer"
+        />
+        <div className="relative z-10 flex min-w-0 flex-1 items-center gap-[37px] pointer-events-none max-md:gap-3 max-sm:gap-3">
+          <span className="shrink-0 text-[16px] font-medium tracking-[1px] text-[#111]/70 tabular-nums max-md:text-[10px] max-md:font-normal max-md:tracking-normal max-md:text-[#a3a3a6] max-sm:text-[10px]">
             {project.id}
           </span>
-          <span className="truncate text-[24px] font-normal tracking-[-0.5px] text-[#111] max-sm:text-[28px] max-sm:leading-[34px] max-sm:tracking-normal sm:text-[37px]">
-            {project.title}
+          <span className="flex min-w-0 items-center gap-2 max-md:gap-1.5">
+            <span className="truncate text-[24px] font-normal tracking-[-0.5px] text-[#111] max-md:text-[24px] max-md:leading-[29px] max-md:tracking-normal max-sm:text-[24px] max-sm:leading-[29px] sm:text-[37px]">
+              {project.title}
+            </span>
+            {project.url && isOpen ? (
+              <a
+                href={project.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={`Open ${project.title} site`}
+                onClick={(e) => e.stopPropagation()}
+                onMouseEnter={(e) => {
+                  e.stopPropagation();
+                  linkHover.onMouseEnter(e);
+                }}
+                onMouseMove={(e) => {
+                  e.stopPropagation();
+                  linkHover.onMouseMove(e);
+                }}
+                onMouseLeave={(e) => {
+                  e.stopPropagation();
+                  linkHover.onMouseLeave();
+                }}
+                className="pointer-events-auto relative z-10 flex size-8 shrink-0 items-center justify-center rounded-full text-[#111]/50 transition-colors hover:bg-black/[0.06] hover:text-[#111] max-md:size-7 sm:size-9 before:absolute before:-inset-3 before:content-['']"
+              >
+                <ArrowUpRight className="size-5 max-md:size-4 sm:size-[22px]" strokeWidth={2.2} />
+              </a>
+            ) : null}
           </span>
         </div>
-        <div className="flex shrink-0 items-center justify-end gap-[18px] text-[16px] text-[#111]/70 max-sm:gap-2.5 max-sm:text-[12px] max-sm:text-[#76767a]">
-          <span className="text-right max-sm:flex-1 max-sm:text-left max-sm:leading-5">
+        <div className="relative z-10 flex shrink-0 items-center justify-end gap-[18px] text-[16px] text-[#111]/70 pointer-events-none max-md:gap-2 max-md:text-[10px] max-md:text-[#76767a] max-sm:gap-2 max-sm:text-[10px]">
+          <span className="text-right max-md:flex-1 max-md:text-left max-md:leading-4 max-sm:flex-1 max-sm:text-left max-sm:leading-4">
             {project.role}
           </span>
           <span className="font-light text-[#111]/70 max-sm:font-normal max-sm:text-[#999]">|</span>
           <span className="tabular-nums">{project.year}</span>
         </div>
-      </button>
+      </div>
 
       {project.hoverPreview ? (
         <RowHoverPreview
-          open={hover.open}
+          open={rowHover.open}
           media={project.hoverPreview}
-          x={hover.x}
-          y={hover.y}
-          rotate={hover.rotate}
-          reduceMotion={hover.reduceMotion}
+          x={rowHover.x}
+          y={rowHover.y}
+          rotate={rowHover.rotate}
+          reduceMotion={rowHover.reduceMotion}
+        />
+      ) : null}
+      {project.linkHoverPreview && project.url ? (
+        <CrcleArrowVideoHover
+          open={linkHover.open}
+          keepAlive={isOpen}
+          videoSrc={project.linkHoverPreview.src}
+          liveUrl={project.url}
+          x={linkHover.x}
+          y={linkHover.y}
         />
       ) : null}
 
@@ -235,7 +285,7 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
 
               {/* Full accordion width — top-aligned like Odicci phone rows (avoids crop) */}
               <div className="mx-auto flex min-h-0 w-full flex-1 items-start overflow-visible px-4 pt-2 sm:px-8 lg:px-12 xl:px-[68px]">
-                  <div className="grid w-full min-w-0 grid-cols-1 items-start gap-8 overflow-x-hidden lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] lg:gap-8">
+                  <div className="grid w-full min-w-0 grid-cols-1 items-start gap-8 overflow-x-clip lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] lg:gap-8">
                     <div className="flex max-h-[874px] min-h-0 min-w-0 flex-col overflow-x-hidden overflow-y-auto overscroll-contain">
                       <CaseStudyCopy project={project} tab={activeTab} content={tabContent} />
                     </div>
@@ -326,6 +376,50 @@ function CaseStudyCopy({
       {approach.trim() ? <TextBlock heading="Approach">{approach}</TextBlock> : null}
       {outcome.trim() ? <TextBlock heading="Outcome">{outcome}</TextBlock> : null}
     </div>
+  );
+}
+
+function CrcleArrowVideoHover({
+  open,
+  keepAlive,
+  videoSrc,
+  liveUrl,
+  x,
+  y,
+}: {
+  open: boolean;
+  keepAlive: boolean;
+  videoSrc: string;
+  liveUrl: string;
+  x: MotionValue<number>;
+  y: MotionValue<number>;
+}) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  if (!mounted || (!keepAlive && !open)) return null;
+
+  const width = Math.min(560, window.innerWidth - 32);
+  const height = width * (720 / 1280);
+
+  return createPortal(
+    <motion.div
+      className="pointer-events-none fixed top-0 left-0 z-[200] will-change-transform"
+      style={{
+        x,
+        y,
+        opacity: open ? 1 : 0,
+        visibility: open ? "visible" : "hidden",
+      }}
+      aria-hidden
+    >
+      <div
+        className="pointer-events-none -translate-x-1/2 -translate-y-1/2 [&>a]:block [&>a]:h-full [&>a]:w-full"
+        style={{ width, height }}
+      >
+        <CrcleVideoCard videoSrc={videoSrc} liveUrl={liveUrl} />
+      </div>
+    </motion.div>,
+    document.body,
   );
 }
 

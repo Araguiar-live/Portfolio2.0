@@ -27,7 +27,7 @@ function useArtboardScale() {
       const width = el.clientWidth;
       const height = el.clientHeight;
       if (width === 0 || height === 0) return;
-      const scale = Math.max(width / PRODUCTIVE_ARTBOARD_W, height / PRODUCTIVE_ARTBOARD_H);
+      const scale = Math.min(width / PRODUCTIVE_ARTBOARD_W, height / PRODUCTIVE_ARTBOARD_H);
       setLayout({
         scale,
         offsetX: (width - PRODUCTIVE_ARTBOARD_W * scale) / 2,

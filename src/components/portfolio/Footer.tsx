@@ -89,7 +89,7 @@ export function Footer({
 
   return (
     <footer
-      className="relative w-full overflow-hidden bg-black px-8 pb-12 pt-16 text-slate-200 max-sm:bg-[#0c0f14] max-sm:py-8"
+      className="relative w-full overflow-hidden bg-black px-8 pb-12 pt-16 text-slate-200 max-sm:bg-[var(--portfolio-bottom-surface,#0a0d11)] max-sm:py-8"
       data-name="portfolio-footer"
     >
       {/* Gradient Pattern — Figma 605:1386 (bottom-right, 664×563) */}
@@ -97,9 +97,9 @@ export function Footer({
       <MobileGradientPattern />
 
       <div className="relative z-10 flex w-full flex-col gap-12 text-white/70 max-sm:gap-10 max-sm:text-[#94a3b8]">
-        <div className="flex flex-col gap-12 max-sm:gap-8 max-sm:pt-20 xl:flex-row xl:items-start xl:justify-between">
-          {/* BrandStack */}
-          <div className="flex w-full max-w-[320px] shrink-0 flex-col items-start gap-6 max-sm:max-w-none">
+        <div className="flex flex-col gap-12 max-md:gap-6 max-md:pt-4 max-sm:gap-6 max-sm:pt-4 xl:flex-row xl:items-start xl:justify-between">
+          {/* BrandStack — desktop only; phones keep Jenga + legal row */}
+          <div className="flex w-full max-w-[320px] shrink-0 flex-col items-start gap-6 max-md:hidden max-sm:max-w-none">
             <div className="flex items-start gap-6">
               <img
                 src={footerLogo}
@@ -132,8 +132,8 @@ export function Footer({
           </div>
 
           {/* MenuGrid — nav columns + jenga sibling with clear gap */}
-          <div className="flex min-w-0 flex-1 flex-col items-start gap-12 max-sm:w-full max-sm:gap-10 sm:flex-row xl:max-w-[900px] xl:flex-initial xl:gap-16">
-            <div className="grid min-w-0 flex-1 grid-cols-2 gap-x-8 gap-y-10 max-sm:flex max-sm:w-full max-sm:flex-col max-sm:gap-8 sm:grid-cols-3 lg:grid-cols-4 lg:gap-x-10">
+          <div className="flex min-w-0 flex-1 flex-col items-start gap-12 max-md:w-full max-md:items-end max-md:gap-0 max-sm:w-full max-sm:gap-0 sm:flex-row xl:max-w-[900px] xl:flex-initial xl:gap-16">
+            <div className="grid min-w-0 flex-1 grid-cols-2 gap-x-8 gap-y-10 max-md:hidden sm:grid-cols-3 lg:grid-cols-4 lg:gap-x-10">
               {COLUMNS.map((col) => (
                 <div
                   key={col.title}
@@ -358,8 +358,8 @@ function MobileGradientPattern() {
           <img src={mobileGradient} alt="" className="block size-full max-w-none" />
         </div>
       </div>
-      <div className="absolute inset-0 bg-[rgba(12,15,20,0.8)]" />
-      <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-[#0c0f14] to-transparent" />
+      <div className="absolute inset-0 bg-[rgba(10,13,17,0.85)]" />
+      <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-[var(--portfolio-bottom-surface,#0a0d11)] to-transparent" />
     </div>
   );
 }

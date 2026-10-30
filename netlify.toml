@@ -1,0 +1,8 @@
+# Align Netlify with TanStack Start + Nitro output (matches local `bun run build` / :5173 source).
+[build]
+  command = "bun run build"
+  publish = "dist"
+
+[functions]
+  directory = ".netlify/functions-internal"
+  node_bundler = "none"

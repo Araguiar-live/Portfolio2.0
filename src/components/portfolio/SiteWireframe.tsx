@@ -380,7 +380,7 @@ export function WireframeStage({
       className={
         expanded
           ? "relative w-full overflow-x-hidden bg-[#f3f4f6] pb-0 pt-[96px]"
-          : "relative aspect-[1262/847] w-full overflow-hidden bg-[#f3f4f6] max-sm:z-30 max-sm:aspect-auto max-sm:min-h-dvh max-sm:overflow-visible"
+          : "relative aspect-[1262/847] w-full overflow-hidden bg-[#f3f4f6] max-md:z-30 max-md:aspect-auto max-md:min-h-[100dvh] max-md:overflow-x-hidden max-sm:overflow-visible"
       }
     >
       {/*
@@ -401,7 +401,9 @@ export function WireframeStage({
       </div>
 
       {corner ? (
-        <div className="absolute right-8 top-[78px] z-[1] max-sm:right-4">{corner}</div>
+        <div className="pointer-events-auto absolute right-8 top-[78px] z-[20] max-md:hidden max-sm:right-4">
+          {corner}
+        </div>
       ) : null}
 
       {/* Content overlay — Figma 530:151856 */}
