@@ -4,7 +4,6 @@ import heroToggle from "@/assets/portfolio/hero/scroll-toggle.svg";
 import heroToggleKnobHover from "@/assets/portfolio/hero/toggle-knob-hover.svg";
 import { heroGridLayout } from "@/lib/portfolio-grid";
 
-const HEADLINE = "Are you looking for me?";
 const SUBTITLE =
   "Product Designer specialising in complex B2B platforms, design systems, and interactive prototypes.";
 const HERO_GRID_CELLS = 14 * 48;
@@ -539,9 +538,10 @@ export function InteractiveHero({ onEnterWork }: InteractiveHeroProps) {
   };
 
   return (
+    <div className="portfolio-interactive-hero-shell max-md:relative max-md:z-10 max-md:shrink-0 max-md:overflow-hidden">
     <section
       ref={containerRef}
-      className="interactive-hero relative flex h-dvh min-h-dvh w-full shrink-0 flex-col overflow-hidden bg-[#090e15] font-sans text-white"
+      className="interactive-hero relative flex h-[100dvh] max-h-[100dvh] min-h-[100dvh] w-full max-w-full shrink-0 flex-col overflow-hidden bg-[#090e15] font-sans text-white max-md:items-stretch max-md:justify-center max-md:overflow-hidden"
       data-name="interactive-hero"
       style={
         {
@@ -597,7 +597,8 @@ export function InteractiveHero({ onEnterWork }: InteractiveHeroProps) {
       <div className="interactive-hero__content relative z-10 mx-auto flex min-h-0 w-full max-w-[593px] flex-1 flex-col items-center justify-center gap-[42px] px-6 pb-16 pt-6 text-center sm:pb-12">
         <div className="flex w-full flex-col items-center gap-5">
           <h1 className="w-full text-[clamp(36px,6vw,56px)] font-normal leading-normal text-[rgba(255,255,255,0.6)]">
-            {HEADLINE}
+            <span className="block">Looking for a</span>
+            <span className="block">designer?</span>
           </h1>
           <p className="max-w-[34rem] text-balance text-[15px] font-normal leading-6 text-[rgba(255,255,255,0.4)] sm:text-base sm:leading-7">
             {SUBTITLE}
@@ -623,5 +624,6 @@ export function InteractiveHero({ onEnterWork }: InteractiveHeroProps) {
         </button>
       </div>
     </section>
+    </div>
   );
 }
