@@ -316,7 +316,7 @@ function Index() {
   }, []);
 
   return (
-    <div className="portfolio-hero-grid relative text-zinc-900 font-sans antialiased overflow-x-hidden">
+    <div className="portfolio-hero-grid relative min-h-[100dvh] w-full text-zinc-900 font-sans antialiased overflow-x-hidden max-md:m-0 max-md:p-0 max-md:isolate max-sm:font-[family-name:system-ui,sans-serif]">
       <InteractiveHero onEnterWork={() => commitToWork()} />
 
       {/* Fixed top chrome — same pattern as bottom dock; hidden until work is committed */}
@@ -356,20 +356,19 @@ function Index() {
       </div>
 
       <section id="work" className="relative z-10 scroll-mt-0">
-        <div id="work-body" className="relative">
           {/*
             Exact Figma auto-layout (530:151045 / 552:158232):
             cells → browser plate UNDER pattern → overlay on top.
             Closed 1262×847 · Open 1262×1522 · overlay scrolls when open.
-            Content column is ~26.5% wider than the original 1336px cap (→ 1690)
-            so the accordion reads larger without changing the stage frame aspect.
+            The closed column stays in the cell band so the embedded site
+            (Logo, Navigation, Button, JSON) stays visible underneath.
           */}
           <WireframeStage expanded={isExpanded} corner={<FoodForThought />}>
             <div
               className={
                 isExpanded
                   ? "mx-auto flex w-full max-w-[1690px] flex-col items-center gap-[78px] overflow-visible px-6 pb-0 pt-10 sm:px-10"
-                  : "absolute left-1/2 top-[calc(50%+18.5px)] flex h-[min(704px,83.1%)] w-[min(1690px,94%)] -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-[78px] overflow-visible"
+                  : "absolute left-1/2 top-0 flex h-[74%] w-[min(1690px,94%)] -translate-x-1/2 flex-col items-center justify-center gap-[78px] overflow-visible"
               }
             >
               <header className="flex w-full max-w-[720px] shrink-0 flex-col items-center gap-5 text-center">
@@ -427,7 +426,6 @@ function Index() {
             <Marquee />
             <Footer onSelectProject={handleDockSelect} onOpenSidebar={() => setSidebarOpen(true)} />
           </div>
-        </div>
       </section>
 
       <div

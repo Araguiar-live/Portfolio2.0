@@ -376,12 +376,7 @@ export function WireframeStage({
       className={
         expanded
           ? "relative w-full overflow-visible bg-[#f3f4f6] pb-0 pt-[96px]"
-          : "relative w-full overflow-visible bg-[#f3f4f6]"
-      }
-      style={
-        expanded
-          ? undefined
-          : { aspectRatio: `${SITE_WIREFRAME_W} / ${SITE_WIREFRAME_H_COLLAPSED}` }
+          : "relative aspect-[1262/847] w-full overflow-hidden bg-[#f3f4f6] max-md:z-30 max-md:aspect-auto max-md:min-h-[100dvh] max-md:overflow-x-hidden max-sm:overflow-visible"
       }
     >
       {/*
