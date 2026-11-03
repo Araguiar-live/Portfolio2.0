@@ -398,7 +398,9 @@ export function WireframeStage({
       {expanded ? (
         <div className="relative z-10 overflow-visible">{children}</div>
       ) : (
-        <div className="absolute inset-0 z-10 overflow-visible">{children}</div>
+        <div className="pointer-events-none absolute inset-0 z-10 overflow-hidden max-sm:relative max-sm:inset-auto max-sm:overflow-visible">
+          {children}
+        </div>
       )}
     </div>
   );

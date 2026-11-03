@@ -18,6 +18,7 @@ import { Sidebar, SIDEBAR_PANEL_ID } from "@/components/portfolio/Sidebar";
 import { requestOpenMessaging } from "@/components/portfolio/crcleBroadcast";
 import { WireframeStage } from "@/components/portfolio/SiteWireframe";
 import { FoodForThought } from "@/components/portfolio/FoodForThought";
+import { SpatialDotBadge } from "@/components/portfolio/SpatialDotBadge";
 import { PortfolioCalculatorCard } from "@/components/portfolio/PortfolioCalculatorCard";
 import { PortfolioPeekMouse } from "@/components/portfolio/PortfolioPeekMouse";
 
@@ -368,7 +369,7 @@ function Index() {
               className={
                 isExpanded
                   ? "mx-auto flex w-full max-w-[1690px] flex-col items-center gap-[78px] overflow-visible px-6 pb-0 pt-10 sm:px-10"
-                  : "absolute left-1/2 top-0 flex h-[74%] w-[min(1690px,94%)] -translate-x-1/2 flex-col items-center justify-center gap-[78px] overflow-visible"
+                  : "pointer-events-auto absolute left-1/2 top-[calc(50%+18.5px)] flex h-[min(760px,86%)] w-[min(1944px,calc(100%-32px))] -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-[78px] overflow-visible max-md:relative max-md:left-auto max-md:top-auto max-md:mx-auto max-md:h-auto max-md:min-h-[100dvh] max-md:w-[min(350px,calc(100%-32px))] max-md:translate-x-0 max-md:translate-y-0 max-md:gap-8 max-md:px-1 max-md:pb-28 max-md:pt-14 max-sm:gap-[37px] max-sm:pb-32 max-sm:pt-[68px]"
               }
             >
               <header className="flex w-full max-w-[720px] shrink-0 flex-col items-center gap-5 text-center">
@@ -395,7 +396,7 @@ function Index() {
                 </p>
               </header>
 
-              <div className="relative w-full shrink-0 overflow-visible">
+              <div className="relative w-full shrink-0 overflow-visible max-md:pb-10 max-md:pt-14">
                 {/* Decorative layer — beneath the accordion, peeking from the corners */}
                 <div
                   aria-hidden
@@ -414,6 +415,11 @@ function Index() {
                   onToggle={toggle}
                   rowRefs={rowRefs}
                 />
+                <div className="pointer-events-auto relative z-20 -mt-6 flex translate-y-10 justify-center max-md:-mt-6 max-md:translate-y-0">
+                  <div className="-translate-x-6 scale-[1.15]">
+                    <SpatialDotBadge />
+                  </div>
+                </div>
               </div>
             </div>
           </WireframeStage>
