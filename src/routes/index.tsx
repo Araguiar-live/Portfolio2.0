@@ -17,6 +17,7 @@ import { Footer } from "@/components/portfolio/Footer";
 import { Sidebar, SIDEBAR_PANEL_ID } from "@/components/portfolio/Sidebar";
 import { requestOpenMessaging } from "@/components/portfolio/crcleBroadcast";
 import { WireframeStage } from "@/components/portfolio/SiteWireframe";
+import { FoodForThought } from "@/components/portfolio/FoodForThought";
 import { PortfolioCalculatorCard } from "@/components/portfolio/PortfolioCalculatorCard";
 import { PortfolioPeekMouse } from "@/components/portfolio/PortfolioPeekMouse";
 
@@ -50,9 +51,9 @@ const CrcleRadar = lazy(() =>
 const CrcleSignalHome = lazy(() =>
   import("@/components/portfolio/CrcleSignalHome").then((m) => ({ default: m.CrcleSignalHome })),
 );
-const FirstDesignComingSoon = lazy(() =>
-  import("@/components/portfolio/FirstDesignComingSoon").then((m) => ({
-    default: m.FirstDesignComingSoon,
+const FirstDesignInspector = lazy(() =>
+  import("@/components/portfolio/firstDesign/FirstDesignInspector").then((m) => ({
+    default: m.FirstDesignInspector,
   })),
 );
 export const Route = createFileRoute("/")({
@@ -199,17 +200,17 @@ const PROJECTS: Project[] = [
     content: {
       Productive: {
         tabLabel: "Productive",
-        label: "First Design — Productive",
-        subtitle: "Where the product actually lives",
+        label: "First Design — Design system inspector",
+        subtitle: "A 24-hour sprint with Bending Spoons mentors",
         overview:
-          "Productive is the hackathon build — a task list that should feel like a product, not a spreadsheet. The interactive loop is coming soon; this frame holds the mark until that prototype lands.",
+          "First Design paired me with nineteen other contestants and mentors from Bending Spoons for a single day on Productive—an existing focus app—not a blank brief. We inherited real flows, constraints, and research, then had to show how the product could feel sharper and more enjoyable without breaking what already worked.",
         challenge:
-          "Show depth without burying the demo in edge cases, and without shipping a hollow placeholder.",
+          "Productive already had users and telemetry. The sprint brief came with data on where people dropped off, which session types stuck, and where the experience felt dutiful instead of motivating. The job was to respect that evidence while pushing the loop—onboarding, session pick, active timer—toward something people would actually want to reopen.",
         approach:
-          "One primary loop, one memorable detail. Until the flow is locked, the phone carries the list mark and ghost frames instead of a fake UI.",
+          "I treated the file like a living design system: wireframe the core loop in context, spec the hero onboarding CTA and session picker, and use the in-canvas inspector so judges could read intent without leaving the canvas. Ideas skewed toward delight—clearer hierarchy, warmer onboarding, less friction into deep work—always checked against the metrics and notes we were given.",
         outcome:
-          "A coming-soon wireframe that still reads as the product: same device language as CRCLE, with the First Design identity already on screen.",
-        customBody: <FirstDesignComingSoon />,
+          "A pannable four-frame file with one shippable onboarding path and coming-soon slots for the rest of the loop, plus an interactive preview drawer for dev-style annotations. The sprint output is a direction for a more fun, data-informed Productive—not a full rebuild in twenty-four hours.",
+        customBody: <FirstDesignInspector />,
       },
     },
   },
@@ -363,7 +364,7 @@ function Index() {
             Content column is ~26.5% wider than the original 1336px cap (→ 1690)
             so the accordion reads larger without changing the stage frame aspect.
           */}
-          <WireframeStage expanded={isExpanded}>
+          <WireframeStage expanded={isExpanded} corner={<FoodForThought />}>
             <div
               className={
                 isExpanded

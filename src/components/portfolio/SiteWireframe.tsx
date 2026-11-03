@@ -361,7 +361,16 @@ function BrowserPlate() {
  * Open: height follows accordion content; bottom seam to marquee is a sibling
  * 2px spacer in index (not padding here — padding was visually collapsing).
  */
-export function WireframeStage({ expanded, children }: { expanded: boolean; children: ReactNode }) {
+export function WireframeStage({
+  expanded,
+  children,
+  corner,
+}: {
+  expanded: boolean;
+  children: ReactNode;
+  /** Sits in the stage, above the cell band, and scrolls with #work. */
+  corner?: ReactNode;
+}) {
   return (
     <div
       className={
@@ -385,6 +394,10 @@ export function WireframeStage({ expanded, children }: { expanded: boolean; chil
           <BrowserPlate />
         </div>
       </div>
+
+      {corner ? (
+        <div className="absolute right-8 top-[78px] z-20 max-sm:right-4">{corner}</div>
+      ) : null}
 
       {/* Content overlay — Figma 530:151856 */}
       {expanded ? (
