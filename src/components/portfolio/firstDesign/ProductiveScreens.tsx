@@ -1,39 +1,30 @@
 import type { InspectorFrameId } from "./inspectorTypes";
-import { ProductiveComingSoonWireframe2317 } from "./ProductiveComingSoonWireframe2317";
-import { ProductiveOnboardingScreen } from "./ProductiveOnboardingScreen";
+import {
+  ProductiveDayWireframe,
+  ProductiveHabitsWireframe,
+  ProductiveReadingWireframe,
+  ProductiveTodayWireframe,
+} from "./ProductiveLiveWireframes";
 
 export { ProductiveOnboardingScreen } from "./ProductiveOnboardingScreen";
 
-/** Placeholder slots use the same Figma wireframe until those frames ship. */
+/** Shipped Productive frames in the Bending Spoons file. */
 export function ProductiveComingSoonScreen({
   standalone = false,
 }: {
   compact?: boolean;
   standalone?: boolean;
 }) {
-  return <ProductiveComingSoonWireframe2317 standalone={standalone} />;
+  return <ProductiveHabitsWireframe standalone={standalone} />;
 }
 
 export function ProductiveSessionSetupScreen({ standalone = false }: { standalone?: boolean }) {
-  return <ProductiveComingSoonWireframe2317 standalone={standalone} />;
-}
-
-function ProductiveSessionActiveScreen({
-  standalone = false,
-}: {
-  compact?: boolean;
-  standalone?: boolean;
-}) {
-  return <ProductiveComingSoonWireframe2317 standalone={standalone} />;
+  return <ProductiveReadingWireframe standalone={standalone} />;
 }
 
 export function ProductiveFrameScreen({
   frameId,
-  compact,
-  devMode,
-  highlightHotspotId,
   standalone,
-  onHotspotHover,
 }: {
   frameId: InspectorFrameId;
   compact?: boolean;
@@ -42,16 +33,8 @@ export function ProductiveFrameScreen({
   standalone?: boolean;
   onHotspotHover?: (id: string | null) => void;
 }) {
-  if (frameId === "onboarding") {
-    return (
-      <ProductiveOnboardingScreen
-        compact={compact}
-        devMode={devMode}
-        highlightHotspotId={highlightHotspotId}
-        standalone={standalone}
-        onHotspotHover={onHotspotHover}
-      />
-    );
-  }
-  return <ProductiveComingSoonWireframe2317 standalone={standalone} />;
+  if (frameId === "onboarding") return <ProductiveTodayWireframe standalone={standalone} />;
+  if (frameId === "session-setup") return <ProductiveReadingWireframe standalone={standalone} />;
+  if (frameId === "session-active") return <ProductiveDayWireframe standalone={standalone} />;
+  return <ProductiveHabitsWireframe standalone={standalone} />;
 }

@@ -126,19 +126,14 @@ export function FirstDesignInspector() {
         ) : (
           HORIZONTAL_ORDER.map((frameIndex) => {
             const f = INSPECTOR_FRAMES[frameIndex];
-            const isHero = f.kind === "hero";
             return (
               <WireframePhone
                 key={f.id}
                 frameId={f.id}
-                interactive={isHero}
-                onClick={isHero ? () => openModal(frameIndex) : undefined}
-                ariaLabel={
-                  isHero
-                    ? "Open onboarding frame in design system inspector"
-                    : `${f.label} — coming soon`
-                }
-                dimmed={!isHero && frameIndex > 1}
+                interactive
+                onClick={() => openModal(frameIndex)}
+                ariaLabel={`Open ${f.label} in the design system inspector`}
+                dimmed={false}
               >
                 <ProductiveFrameScreen frameId={f.id} />
               </WireframePhone>
