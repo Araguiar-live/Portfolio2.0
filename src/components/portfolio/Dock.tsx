@@ -15,7 +15,7 @@ interface Props {
 }
 
 const BASE = 44;
-const GAP = 12 * 1.15;
+const GAP = 8 * 1.15;
 const HOVER_GAP = 6 * 1.15;
 /** Jelly spring — fast, underdamped, so width/height overshoot inside the pill. */
 const SQUISH = { type: "spring" as const, stiffness: 520, damping: 11, mass: 0.38 };
