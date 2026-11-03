@@ -1,5 +1,6 @@
 import type { CSSProperties, ReactNode } from "react";
 import windowControls from "@/assets/portfolio/window-controls.svg";
+import { SpatialDotBadge } from "@/components/portfolio/SpatialDotBadge";
 import logoIcon from "@/assets/portfolio/logo-icon.svg";
 import statusInfo from "@/assets/portfolio/status-info.svg";
 
@@ -213,8 +214,8 @@ function JengaCellBand() {
 
 function WireframeBrowserShell() {
   return (
-    <div className="flex size-full flex-col overflow-hidden rounded-[12px] border border-[#d1d5db] bg-white">
-      <div className="flex h-[7.22%] min-h-[36px] shrink-0 items-center justify-between border-b border-[#e5e7eb] px-5">
+    <div className="flex size-full flex-col overflow-visible rounded-[12px] border border-[#d1d5db] bg-white">
+      <div className="relative flex h-[7.22%] min-h-[36px] shrink-0 items-center justify-between overflow-visible border-b border-[#e5e7eb] px-5">
         <img
           src={windowControls}
           alt=""
@@ -230,6 +231,9 @@ function WireframeBrowserShell() {
           </span>
         </div>
         <div className="hidden w-[60px] sm:block" />
+        <div className="pointer-events-auto absolute left-1/2 top-1/2 z-30 -translate-x-[calc(50%+1.5rem)] -translate-y-1/2 scale-[1.15]">
+          <SpatialDotBadge />
+        </div>
       </div>
 
       <div className="flex h-[8.47%] min-h-[40px] shrink-0 items-center justify-between border-b border-[#e5e7eb] px-8">
