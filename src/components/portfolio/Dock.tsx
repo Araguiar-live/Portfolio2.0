@@ -15,7 +15,8 @@ interface Props {
 }
 
 const BASE = 44;
-const GAP = 12;
+const GAP = 12 * 1.15;
+const HOVER_GAP = 6 * 1.15;
 /** Jelly spring — fast, underdamped, so width/height overshoot inside the pill. */
 const SQUISH = { type: "spring" as const, stiffness: 520, damping: 11, mass: 0.38 };
 const ENTER = { type: "spring" as const, stiffness: 280, damping: 16, mass: 0.7 };
@@ -53,8 +54,10 @@ export function Dock({ items, onSelect, activeSlug, className }: Props) {
         <motion.div
           layout
           transition={spring}
-          animate={{ gap: hovered === null ? GAP : 6 }}
+          initial={false}
+          animate={{ gap: hovered === null ? GAP : HOVER_GAP }}
           className="relative z-[1] flex items-center justify-center"
+          style={{ gap: GAP }}
         >
           {items.map((item, index) => (
             <DockButton
