@@ -673,14 +673,12 @@ html.dark .thought-body-gradient {
 }
 
 .spatial-chrome {
-  will-change: transform, opacity;
-  backface-visibility: hidden;
+  /* Opacity only. A transform here becomes the backdrop root and the docks stop frosting the page. */
+  will-change: opacity;
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  transform: translate3d(0, 12px, 0) scale(0.96);
   transition:
-    transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275),
     opacity 0.35s ease,
     visibility 0.35s ease;
 }
@@ -689,7 +687,6 @@ html.dark .thought-body-gradient {
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
-  transform: translate3d(0, 0, 0) scale(1);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -703,13 +700,6 @@ html.dark .thought-body-gradient {
     transform: translate3d(0, 0, 0) !important;
   }
 
-  .spatial-chrome {
-    transform: none;
-  }
-
-  .spatial-chrome.spatial-chrome--visible {
-    transform: none;
-  }
 }
 
 .dock-glass {
@@ -718,18 +708,12 @@ html.dark .thought-body-gradient {
   will-change: transform, opacity;
   transform: translateZ(0);
   backface-visibility: hidden;
-  background: linear-gradient(
-    165deg,
-    rgba(255, 255, 255, 0.06) 0%,
-    rgba(255, 255, 255, 0.02) 50%,
-    rgba(255, 255, 255, 0.015) 100%
-  );
+  /* Match the project accordion: spatial-glass blur(20px) + bg-white/70. */
+  background-color: rgba(255, 255, 255, 0.7);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
   backdrop-filter: blur(20px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  box-shadow:
-    0 12px 32px rgba(0, 0, 0, 0.22),
-    0 1px 0 rgba(255, 255, 255, 0.2) inset;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0px 16px 48px 0px rgba(0, 0, 0, 0.05);
 }
 
 .dock-glass::before {
@@ -2253,16 +2237,14 @@ html.dark .thought-body-gradient {
 }
 
 .project-dock-app-icon {
-  --project-dock-blur: 15.4px; /* +10% vs 14px base */
+  --project-dock-blur: 28px;
   width: calc(120px * var(--deco-scale, 1));
   height: calc(120px * var(--deco-scale, 1));
   padding: calc(15px * var(--deco-scale, 1));
   border-radius: calc(30px * var(--deco-scale, 1));
-  backface-visibility: hidden;
-  transform: translateZ(0);
-  isolation: isolate;
-  -webkit-backdrop-filter: blur(var(--project-dock-blur));
-  backdrop-filter: blur(var(--project-dock-blur));
+  background-color: rgba(255, 255, 255, 0.42);
+  -webkit-backdrop-filter: blur(var(--project-dock-blur)) saturate(1.6);
+  backdrop-filter: blur(var(--project-dock-blur)) saturate(1.6);
 }
 
 .project-dock-app-icon__hit {

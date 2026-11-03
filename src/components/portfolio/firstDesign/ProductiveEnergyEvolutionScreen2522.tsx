@@ -55,22 +55,30 @@ function EnergyOverlay() {
           <div className="relative flex w-full shrink-0 flex-col items-start gap-[16px] overflow-clip rounded-tl-[24px] rounded-tr-[24px] bg-black px-[16px] pb-[84px] pt-[12px] shadow-[0px_-4px_20px_0px_rgba(0,0,0,0.08)]">
             <div className="absolute left-[-46.3px] top-[22px] flex h-[564.755px] w-[424.33px] items-center justify-center">
               <div
-                className="h-[614.995px] w-[97.643px] rounded-[120px] border border-solid border-[#2295ff] backdrop-blur-[60px]"
+                className="relative h-[614.995px] w-[97.643px] overflow-hidden rounded-[120px] backdrop-blur-[60px]"
                 style={{
                   rotate: "33.93deg",
                   backgroundImage:
                     "linear-gradient(212.9deg, rgba(91, 141, 239, 0.1) 10.91%, rgba(34, 149, 255, 0.1) 73.85%)",
                 }}
-              />
+              >
+                <div
+                  aria-hidden
+                  className="pointer-events-none absolute inset-0 rounded-[120px] p-px"
+                  style={{
+                    background: "linear-gradient(270deg, rgba(34, 149, 255, 0.3), rgba(20, 89, 153, 0.3))",
+                    WebkitMask: "linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0)",
+                    WebkitMaskComposite: "xor",
+                    maskComposite: "exclude",
+                  }}
+                />
+              </div>
             </div>
 
             <div className="absolute left-[271.45px] top-[51.82px] flex items-center rounded-[157.122px] bg-[rgba(245,167,0,0.5)] p-[13.093px] backdrop-blur-[19.925px]">
               <div className="size-[49.813px] shrink-0 rounded-[54.84px] border border-solid border-[#fb2c36] bg-[#f5a700]" />
             </div>
-            <img alt="" src={cloud92} className="absolute left-[302px] top-[10px] size-[92px]" />
-            <img alt="" src={cloud66Left} className="absolute left-[211.09px] top-[74px] size-[66px]" />
-            <img alt="" src={cloud66Right} className="absolute left-[346px] top-[31px] size-[66px]" />
-            <img alt="" src={cloud47} className="absolute left-[242.65px] top-[89.07px] size-[47.348px]" />
+            <FrostedClouds />
 
             <div className="relative flex w-full shrink-0 items-start justify-center overflow-clip">
               <div className="h-[4px] w-[32px] shrink-0 rounded-[2px] bg-[rgba(222,222,222,0.5)]" />
@@ -165,6 +173,48 @@ function EnergyOverlay() {
         </div>
       </div>
     </>
+  );
+}
+
+/** Solid cloud silhouette so the frost covers the whole shape, not the 40% white fill. */
+const CLOUD_MASK = `data:image/svg+xml,${encodeURIComponent(
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 92 92" preserveAspectRatio="none"><path fill="white" d="M49.5727 18.0473C42.2433 18.0473 35.811 21.85 32.1233 27.577C29.0284 26.7613 25.7952 26.6147 22.6392 27.1469C19.4831 27.679 16.4768 28.8778 13.8205 30.6633C11.1642 32.4487 8.91898 34.7798 7.23449 37.5013C5.54999 40.2227 4.46491 43.272 4.05157 46.4457C3.63824 49.6195 3.90613 52.845 4.8374 55.9071C5.76868 58.9692 7.34194 61.7976 9.45232 64.2039C11.5627 66.6101 14.1617 68.5389 17.0762 69.8617C19.9907 71.1844 23.1536 71.8708 26.3542 71.875H71.0048C73.2963 71.8855 75.5667 71.4371 77.6822 70.5563C79.7976 69.6754 81.7153 68.3799 83.3221 66.7461C84.9289 65.1123 86.1924 63.1734 87.0379 61.0436C87.8835 58.9138 88.2941 56.6362 88.2454 54.3452C88.1968 52.0542 87.69 49.7962 86.7548 47.7041C85.8196 45.6121 84.475 43.7285 82.8003 42.1644C81.1256 40.6003 79.1547 39.3874 77.0038 38.597C74.8529 37.8067 72.5655 37.4551 70.2765 37.5628C69.9637 32.284 67.6462 27.324 63.7977 23.6972C59.9493 20.0704 54.8608 18.0469 49.5727 18.0473Z"/></svg>`,
+)}`;
+
+const CLOUD_MASK_STYLE = {
+  maskImage: `url("${CLOUD_MASK}")`,
+  WebkitMaskImage: `url("${CLOUD_MASK}")`,
+  maskSize: "100% 100%",
+  WebkitMaskSize: "100% 100%",
+  maskRepeat: "no-repeat",
+  WebkitMaskRepeat: "no-repeat",
+} as const;
+
+function FrostedClouds() {
+  return (
+    <>
+      <FrostedCloud src={cloud92} blurClass="backdrop-blur-[4px]" className="left-[302px] top-[10px] size-[92px]" />
+      <FrostedCloud src={cloud66Left} blurClass="backdrop-blur-[2.87px]" className="left-[211.09px] top-[74px] size-[66px]" />
+      <FrostedCloud src={cloud66Right} blurClass="backdrop-blur-[4px]" className="left-[346px] top-[31px] size-[66px]" />
+      <FrostedCloud src={cloud47} blurClass="backdrop-blur-[2.87px]" className="left-[242.65px] top-[89.07px] size-[47.348px]" />
+    </>
+  );
+}
+
+function FrostedCloud({
+  src,
+  className,
+  blurClass,
+}: {
+  src: string;
+  className: string;
+  blurClass: string;
+}) {
+  return (
+    <div className={`absolute ${className}`}>
+      <div aria-hidden className={`absolute inset-0 ${blurClass}`} style={CLOUD_MASK_STYLE} />
+      <img alt="" src={src} className="pointer-events-none absolute inset-0 size-full" />
+    </div>
   );
 }
 

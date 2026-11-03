@@ -439,9 +439,14 @@ function Index() {
         </div>
       </section>
 
-      <div className={`max-sm:hidden ${chromeClass}`} aria-hidden={!showChrome}>
+      <div className="max-sm:hidden" aria-hidden={!showChrome}>
         {showChrome ? (
-          <Dock items={DOCK_ITEMS} onSelect={handleDockSelect} activeSlug={openSlug} />
+          <Dock
+            className={chromeClass}
+            items={DOCK_ITEMS}
+            onSelect={handleDockSelect}
+            activeSlug={openSlug}
+          />
         ) : null}
       </div>
       <Sidebar open={sidebarOpen} onOpenChange={setSidebarOpen} />

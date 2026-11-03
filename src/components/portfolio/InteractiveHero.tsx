@@ -3,7 +3,7 @@ import heroMark from "@/assets/hero/hero-mark.svg";
 import toggleKnobHover from "@/assets/hero/hero-toggle-knob-hover.svg";
 import toggleRest from "@/assets/hero/hero-toggle-rest.svg";
 
-const HEADLINE = "Are you looking for me?";
+const HEADLINE = "Looking for a designer?";
 const LEDE =
   "Product Designer specialising in complex B2B platforms, design systems, and interactive prototypes.";
 

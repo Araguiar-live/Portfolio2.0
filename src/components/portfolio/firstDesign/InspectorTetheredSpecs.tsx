@@ -43,11 +43,43 @@ const SPEC_KEY: KeyEntry[] = [
 
 const KEY_BY_KIND = Object.fromEntries(SPEC_KEY.map((k) => [k.kind, k])) as Record<SpecKind, KeyEntry>;
 
-const ELBOW_OFFSET = 36;
-const ELBOW_STAGGER = 10;
 const CARD_W = 260;
 const PANEL_GAP = 20;
 const PANEL_INSET = 12;
+const EDGE_PAD = 28;
+const ANCHOR_GAP = 22;
+
+function clamp(n: number, min: number, max: number) {
+  return Math.min(max, Math.max(min, n));
+}
+
+/** Keep frame-edge anchors in vertical order so leaders never cross. */
+function spreadYs(preferred: number[], min: number, max: number, gap: number) {
+  const n = preferred.length;
+  if (n === 0) return [];
+  if (max - min < gap * Math.max(0, n - 1)) {
+    return Array.from({ length: n }, (_, i) =>
+      n === 1 ? (min + max) / 2 : min + (i / (n - 1)) * (max - min),
+    );
+  }
+  const ys = preferred.map((y) => clamp(y, min, max));
+  for (let i = 1; i < n; i++) {
+    if (ys[i] < ys[i - 1] + gap) ys[i] = ys[i - 1] + gap;
+  }
+  if (ys[n - 1] > max) {
+    ys[n - 1] = max;
+    for (let i = n - 2; i >= 0; i--) {
+      if (ys[i] > ys[i + 1] - gap) ys[i] = ys[i + 1] - gap;
+    }
+  }
+  if (ys[0] < min) {
+    ys[0] = min;
+    for (let i = 1; i < n; i++) {
+      if (ys[i] < ys[i - 1] + gap) ys[i] = ys[i - 1] + gap;
+    }
+  }
+  return ys;
+}
 
 type InspectorTetheredSpecsProps = {
   annotations: SpecAnnotation[];
@@ -93,6 +125,7 @@ export function InspectorTetheredSpecs({
   const keyColumnRef = useRef<HTMLDivElement>(null);
   const clusterRefs = useRef<Partial<Record<PanelSide, HTMLDivElement | null>>>({});
   const pillRefs = useRef<Partial<Record<SpecKind, HTMLDivElement | null>>>({});
+  const cardRefs = useRef<Record<string, HTMLElement | null>>({});
   const [tethers, setTethers] = useState<Tether[]>([]);
   const [clusters, setClusters] = useState<ClusterLayout[]>(() => clustersFromAnnotations(annotations));
   const baseClusters = useMemo(() => clustersFromAnnotations(annotations), [annotations]);
@@ -123,34 +156,52 @@ export function InspectorTetheredSpecs({
         return { ...cluster, left: Math.round(left), top: Math.round(top), maxHeight };
       });
 
-      const keySide: PanelSide = "right";
-      const boardEdge = board.right - stage.left;
       const r = (v: number) => Math.round(v * 2) / 2;
-      const next: Tether[] = annotations.flatMap((a, i) => {
-        const pill = pillRefs.current[a.kind];
-        const p = pill?.getBoundingClientRect();
-        const node = artboard.querySelector<HTMLElement>(`[data-inspect-id="${a.id}"]`)?.getBoundingClientRect();
-        const hx = node
-          ? (a.toast.side === "right" ? node.right : node.left) - stage.left
-          : board.left - stage.left + (board.width * a.hotspot.x) / 100;
-        const hy = node
-          ? node.top - stage.top + node.height / 2
-          : board.top - stage.top + (board.height * a.hotspot.y) / 100;
-        if (!p) {
-          return [{ id: a.id, kind: a.kind, d: `M ${r(hx)} ${r(hy)}`, dot: { x: r(hx), y: r(hy) } }];
-        }
-        const x1 = (keySide === "right" ? p.left : p.right) - stage.left;
-        const y1 = p.top - stage.top + p.height / 2;
-        const offset = ELBOW_OFFSET + i * ELBOW_STAGGER;
-        const elbowX = Math.min(x1 - 8, boardEdge + offset);
-        return [
-          {
-            id: a.id,
-            kind: a.kind,
-            d: `M ${r(x1)} ${r(y1)} H ${r(elbowX)} V ${r(hy)} H ${r(hx)}`,
-            dot: { x: r(hx), y: r(hy) },
-          },
-        ];
+      const boardLeft = board.left - stage.left;
+      const boardRight = board.right - stage.left;
+      const boardTop = board.top - stage.top;
+      const boardBottom = board.bottom - stage.top;
+      const minY = boardTop + EDGE_PAD;
+      const maxY = boardBottom - EDGE_PAD;
+
+      const next: Tether[] = placed.flatMap((cluster) => {
+        if (cluster.annotationIds.length === 0) return [];
+        const measured = cluster.annotationIds
+          .map((id) => annotations.find((a) => a.id === id))
+          .filter((a): a is SpecAnnotation => Boolean(a))
+          .map((a) => {
+            const el = cardRefs.current[a.id];
+            const rect = el?.getBoundingClientRect();
+            const cy = rect
+              ? rect.top - stage.top + Math.min(28, rect.height / 2)
+              : boardTop + (board.height * a.hotspot.y) / 100;
+            const clusterInner =
+              cluster.side === "right"
+                ? cluster.left
+                : cluster.left + (clusterRefs.current[cluster.side]?.offsetWidth ?? CARD_W);
+            const cardEdge = rect
+              ? (cluster.side === "right" ? rect.left : rect.right) - stage.left
+              : clusterInner;
+            return { a, cardEdge, cy };
+          })
+          .sort((p, q) => p.cy - q.cy);
+
+        const endYs = spreadYs(
+          measured.map((m) => m.cy),
+          minY,
+          maxY,
+          ANCHOR_GAP,
+        );
+        const endX = cluster.side === "right" ? boardRight : boardLeft;
+        const cardEdges = measured.map((m) => m.cardEdge);
+        const startX = cluster.side === "right" ? Math.min(...cardEdges) : Math.max(...cardEdges);
+
+        return measured.map((m, i) => {
+          const x0 = r(startX);
+          const x1 = r(endX);
+          const y = r(endYs[i] ?? m.cy);
+          return { id: m.a.id, kind: m.a.kind, d: `M ${x0} ${y} H ${x1}`, dot: { x: x1, y } };
+        });
       });
 
       const key = `${placed.map((c) => `${c.left}|${c.top}|${c.maxHeight}|${c.annotationIds.join(",")}`).join("/")}|${next.map((t) => t.d).join(";")}`;
@@ -206,6 +257,7 @@ export function InspectorTetheredSpecs({
             activeKinds={activeKinds}
             keyColumnRef={cluster.showKey ? keyColumnRef : undefined}
             pillRefs={pillRefs}
+            cardRefs={cardRefs}
             onActiveChange={onActiveChange}
           />
         ),
@@ -224,6 +276,7 @@ function SpecCluster({
   activeKinds,
   keyColumnRef,
   pillRefs,
+  cardRefs,
   onActiveChange,
 }: {
   cluster: ClusterLayout;
@@ -235,6 +288,7 @@ function SpecCluster({
   activeKinds: Set<SpecKind>;
   keyColumnRef?: RefObject<HTMLDivElement | null>;
   pillRefs: RefObject<Partial<Record<SpecKind, HTMLDivElement | null>>>;
+  cardRefs: RefObject<Record<string, HTMLElement | null>>;
   onActiveChange: (id: string | null) => void;
 }) {
   const items = cluster.annotationIds
@@ -290,6 +344,9 @@ function SpecCluster({
         {items.map((annotation) => (
           <SpecDetailCard
             key={annotation.id}
+            ref={(el) => {
+              cardRefs.current[annotation.id] = el;
+            }}
             annotation={annotation}
             frameRole={frameRole}
             active={activeId === annotation.id}

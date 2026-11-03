@@ -44,34 +44,11 @@ export function ProjectDock({ onPlus }: Props) {
           ) : null}
         </AnimatePresence>
 
-        <motion.nav
+        <nav
           aria-label="Industrial Design Graduate Work"
           title="Industrial Design Graduate Work"
           data-name="app-icon"
-          initial={{ y: 0, rotate: 0 }}
-          animate={
-            folderOpen
-              ? { y: 0, rotate: 0 }
-              : {
-                  y: [0, -7, 0, -3, 0],
-                  rotate: [0, -1.4, 0.8, -0.6, 0],
-                }
-          }
-          whileHover={{
-            y: -4,
-            rotate: 0,
-            transition: { type: "spring", stiffness: 420, damping: 16 },
-          }}
-          whileTap={{ y: 0, rotate: -2 }}
-          transition={
-            folderOpen
-              ? { duration: 0.2 }
-              : {
-                  y: { duration: 2.4, repeat: Infinity, ease: "easeInOut", repeatDelay: 0.35 },
-                  rotate: { duration: 2.4, repeat: Infinity, ease: "easeInOut", repeatDelay: 0.35 },
-                }
-          }
-          className="project-dock-app-icon pointer-events-auto relative flex flex-col items-center justify-center overflow-hidden border border-zinc-400/45 bg-white/30 shadow-[0px_16px_24px_rgba(11,14,20,0.12),inset_0px_1px_0_rgba(255,255,255,0.55)] supports-[backdrop-filter]:bg-white/25 motion-reduce:animate-none"
+          className="project-dock-app-icon pointer-events-auto relative flex flex-col items-center justify-center overflow-hidden border border-zinc-400/45 shadow-[0px_16px_24px_rgba(11,14,20,0.12),inset_0px_1px_0_rgba(255,255,255,0.55)]"
           onClick={(e) => {
             if ((e.target as HTMLElement).closest('[data-dock-action="profile"]')) return;
             openFolder();
@@ -86,7 +63,32 @@ export function ProjectDock({ onPlus }: Props) {
             className="project-dock-app-icon__hit absolute inset-0 z-0"
           />
 
-          <div className="project-dock-app-icon__grid pointer-events-none relative z-[1] grid w-full grid-cols-3">
+          <motion.div
+            initial={{ y: 0, rotate: 0 }}
+            animate={
+              folderOpen
+                ? { y: 0, rotate: 0 }
+                : {
+                    y: [0, -7, 0, -3, 0],
+                    rotate: [0, -1.4, 0.8, -0.6, 0],
+                  }
+            }
+            whileHover={{
+              y: -4,
+              rotate: 0,
+              transition: { type: "spring", stiffness: 420, damping: 16 },
+            }}
+            whileTap={{ y: 0, rotate: -2 }}
+            transition={
+              folderOpen
+                ? { duration: 0.2 }
+                : {
+                    y: { duration: 2.4, repeat: Infinity, ease: "easeInOut", repeatDelay: 0.35 },
+                    rotate: { duration: 2.4, repeat: Infinity, ease: "easeInOut", repeatDelay: 0.35 },
+                  }
+            }
+            className="project-dock-app-icon__grid pointer-events-none relative z-[1] grid w-full grid-cols-3 motion-reduce:animate-none"
+          >
             <PlusButton
               onClick={(e) => {
                 e.stopPropagation();
@@ -114,8 +116,8 @@ export function ProjectDock({ onPlus }: Props) {
                 onOpen={openFolder}
               />
             ))}
-          </div>
-        </motion.nav>
+          </motion.div>
+        </nav>
       </div>
 
       <GraduateWorkOverlay open={folderOpen} onClose={closeFolder} />
