@@ -13,7 +13,7 @@ interface Props {
 }
 
 const BASE = 44;
-const GAP = 12;
+const GAP = 8;
 /** Bouncy macOS-style spring — stays inside the glass capsule */
 const SPRING = { type: "spring" as const, stiffness: 280, damping: 13, mass: 0.58 };
 const TAP_SPRING = { type: "spring" as const, stiffness: 520, damping: 16, mass: 0.45 };
