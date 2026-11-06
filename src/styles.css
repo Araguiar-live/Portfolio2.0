@@ -2825,98 +2825,30 @@ html.dark .thought-body-gradient {
   z-index: 3;
   position: relative;
 }
-/* Signal Live pill — frost over the portrait + 15% RGB refraction. */
+/* Signal Live pill — frost only over the portrait (no refraction). */
 .crcle-signal-live-pill {
   position: relative;
   overflow: hidden;
   isolation: auto;
   border-radius: 12px;
-  border: 1px solid rgb(255 255 255 / 0.32);
-  box-shadow:
-    inset 0 1px rgb(255 255 255 / 0.55),
-    inset 0 -1px rgb(255 255 255 / 0.08),
-    -4px 0 12px rgb(255 92 92 / 0.15),
-    4px 0 12px rgb(92 140 255 / 0.15);
+  border: 1px solid rgb(255 255 255 / 0.28);
 }
-.crcle-signal-live-lens,
-.crcle-signal-live-frost,
-.crcle-signal-live-gloss,
-.crcle-signal-live-dispersion {
+.crcle-signal-live-frost {
   z-index: 0;
   border-radius: inherit;
   pointer-events: none;
   position: absolute;
   inset: 0;
-  overflow: hidden;
-}
-.crcle-signal-live-lens img {
-  object-fit: cover;
-  object-position: center 62%;
-  filter: blur(7px) saturate(1.5) contrast(1.06);
-  width: calc(100% + 28px);
-  max-width: none;
-  height: 72px;
-  position: absolute;
-  left: -14px;
-  bottom: -18px;
-}
-.crcle-signal-live-lens img.crcle-signal-live-lens-r {
-  filter: blur(5px) saturate(1.7);
-  mix-blend-mode: screen;
-  opacity: 0.15;
-  transform: translate(-1.5px, 0.4px);
-}
-.crcle-signal-live-lens img.crcle-signal-live-lens-b {
-  filter: blur(5px) saturate(1.7);
-  mix-blend-mode: screen;
-  opacity: 0.15;
-  transform: translate(1.5px, -0.4px);
-}
-.crcle-signal-live-frost {
-  z-index: 1;
-  background: linear-gradient(
-    180deg,
-    rgb(255 255 255 / 0.22) 0%,
-    rgb(247 246 242 / 0.1) 48%,
-    rgb(15 201 80 / 0.08) 100%
-  );
-  -webkit-backdrop-filter: blur(12px) saturate(170%);
-  backdrop-filter: blur(12px) saturate(170%);
+  background: rgb(255 255 255 / 0.12);
+  -webkit-backdrop-filter: blur(9.6px) saturate(160%);
+  backdrop-filter: blur(9.6px) saturate(160%);
   transform: none !important;
   filter: none !important;
   isolation: auto;
   will-change: auto;
 }
-.crcle-signal-live-gloss {
+.crcle-signal-live-pill > :not(.crcle-signal-live-frost) {
   z-index: 1;
-  mix-blend-mode: soft-light;
-  background:
-    linear-gradient(180deg, rgb(255 255 255 / 0.58) 0%, rgb(255 255 255 / 0.12) 36%, transparent 62%),
-    radial-gradient(90% 80% at 18% -20%, rgb(255 255 255 / 0.5), transparent 55%);
-}
-.crcle-signal-live-dispersion {
-  z-index: 2;
-  overflow: visible;
-  inset: -1px;
-  padding: 0.6px;
-  opacity: 0.15;
-  background: linear-gradient(
-    118deg,
-    rgb(255 92 92 / 0.7) 0%,
-    rgb(255 255 255 / 0.35) 42%,
-    rgb(92 140 255 / 0.65) 100%
-  );
-  -webkit-mask:
-    linear-gradient(#fff 0 0) content-box,
-    linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask:
-    linear-gradient(#fff 0 0) content-box,
-    linear-gradient(#fff 0 0);
-  mask-composite: exclude;
-}
-.crcle-signal-live-pill > :not(.crcle-signal-live-lens):not(.crcle-signal-live-frost):not(.crcle-signal-live-gloss):not(.crcle-signal-live-dispersion) {
-  z-index: 3;
   position: relative;
 }
 /* Frost lives on a static plate — never on a Framer motion target.
