@@ -37,7 +37,7 @@ export type UserProfile = {
   isVerified: boolean;
 };
 
-type SignalVariant = "purpose" | "soul" | "love";
+export type SignalVariant = "purpose" | "soul" | "love";
 
 /** Figma 452:81989 Default → Variant2 → Variant3 */
 const VARIANT_ORDER: SignalVariant[] = ["purpose", "soul", "love"];
@@ -510,13 +510,13 @@ function matchCopyFor(variant: SignalVariant, user: UserProfile) {
   }
 }
 
-function CategoryPills({
+export function CategoryPills({
   variant,
   user,
   isLight,
 }: {
   variant: SignalVariant;
-  user: UserProfile;
+  user: Pick<UserProfile, "relationshipStatus" | "orientation">;
   isLight: boolean;
 }) {
   if (variant === "purpose") {

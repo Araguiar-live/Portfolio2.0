@@ -1,5 +1,5 @@
 import { AnimatePresence, motion, type PanInfo } from "framer-motion";
-import { useCallback, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import alexPortrait from "@/assets/crcle/alex-portrait.png";
 import areaArrowLeftIcon from "@/assets/crcle/area-arrow-left.svg";
 import areaArrowRightIcon from "@/assets/crcle/area-arrow-right.svg";
@@ -11,14 +11,19 @@ import areaShareIcon from "@/assets/crcle/area-share.svg";
 import areaUnlockIcon from "@/assets/crcle/area-unlock.svg";
 import arrowChevronIcon from "@/assets/crcle/arrow-chevron.svg";
 import arrowRightIcon from "@/assets/crcle/arrow-right.svg";
-import avatarBackdrop from "@/assets/crcle/avatar.png";
 import fireInnerIcon from "@/assets/crcle/fire-inner.svg";
-import mapPinIcon from "@/assets/crcle/map-pin.svg";
+import fa6SolidMapPin from "@/assets/crcle/fa6-solid-map-pin.svg";
+import mayaPortrait from "@/assets/crcle/maya-okonkwo-portrait.jpg";
 import serenaAreaPhoto from "@/assets/crcle/serena-area-photo.png";
 import serenaPortrait from "@/assets/crcle/serena-portrait.png";
 import laptopStrokeIcon from "@/assets/crcle/signal/laptop-stroke.svg";
-import unlockIcon from "@/assets/crcle/unlock.svg";
 import navRadarIcon from "@/assets/crcle/nav-radar.svg";
+import socialBehanceIcon from "@/assets/crcle/profile/social-behance.svg";
+import socialDribbbleIcon from "@/assets/crcle/profile/social-dribbble.svg";
+import socialInstagramIcon from "@/assets/crcle/profile/social-instagram.svg";
+import socialLinkedinIcon from "@/assets/crcle/profile/social-linkedin.svg";
+import shareIcon from "@/assets/crcle/share.svg";
+import { CategoryPills } from "@/components/portfolio/SignalInterceptModal";
 
 const FONT = "Montserrat, ui-sans-serif, system-ui, sans-serif";
 const EASE = [0.22, 1, 0.36, 1] as const;
@@ -27,6 +32,40 @@ const DRAG_THRESHOLD = 48;
 
 type AreaCategory = "love" | "purpose" | "soul";
 const CATEGORIES: AreaCategory[] = ["love", "purpose", "soul"];
+
+type AreaPerson = {
+  name: string;
+  username: string;
+  age: number;
+  photoUrl: string;
+  relationshipStatus: string;
+  orientation: string;
+};
+
+const SERENA_AREA: AreaPerson = {
+  name: "Serena Min",
+  username: "@SerenaMin",
+  age: 24,
+  photoUrl: serenaAreaPhoto,
+  relationshipStatus: "Single",
+  orientation: "Hetero",
+};
+
+const MAYA_AREA: AreaPerson = {
+  name: "Maya Okonkwo",
+  username: "@MayaOkonkwo",
+  age: 29,
+  photoUrl: mayaPortrait,
+  relationshipStatus: "Open",
+  orientation: "Bi",
+};
+
+const AREA_SOCIALS = [
+  { name: "Behance", href: "https://www.behance.net/", icon: socialBehanceIcon },
+  { name: "Instagram", href: "https://www.instagram.com/", icon: socialInstagramIcon },
+  { name: "LinkedIn", href: "https://www.linkedin.com/", icon: socialLinkedinIcon },
+  { name: "Dribbble", href: "https://dribbble.com/", icon: socialDribbbleIcon },
+] as const;
 
 export type AreaPanelPhase = "off" | "screen" | "drawer";
 export type NearbySheetStep = "prompt" | "request_sent" | "connected";
@@ -49,6 +88,11 @@ export function InTheAreaDropdown({
   onMarkRead: () => void;
 }) {
   const expanded = phase === "drawer";
+  const [openPerson, setOpenPerson] = useState<"serena" | "maya">("serena");
+
+  useEffect(() => {
+    if (!expanded) setOpenPerson("serena");
+  }, [expanded]);
 
   return (
     <motion.div
@@ -56,13 +100,13 @@ export function InTheAreaDropdown({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -12 }}
       transition={{ duration: 0.28, ease: EASE }}
-      className="pointer-events-auto absolute inset-x-[3px] top-[65px] z-[61] flex flex-col"
+      className="pointer-events-auto absolute inset-x-[3px] top-[65px] z-[61] flex max-h-[calc(100%-73px)] flex-col"
       role="dialog"
       aria-label="In The Area"
       data-node-id="1290:39417"
     >
       <div
-        className={`relative flex w-full flex-col items-center gap-4 border-x border-solid border-[rgba(0,0,0,0.25)] px-[13px] pb-3 pt-4 ${
+        className={`relative flex w-full min-h-0 flex-col items-center gap-4 overflow-hidden border-x border-solid border-[rgba(0,0,0,0.25)] px-[13px] pb-3 pt-4 ${
           isLight ? "border-[rgba(2,3,29,0.12)]" : ""
         }`}
         style={{
@@ -75,12 +119,10 @@ export function InTheAreaDropdown({
         <button
           type="button"
           onClick={() => (expanded ? onCollapse() : onExpand())}
-          className="flex w-full items-center gap-3"
+          className="flex w-full shrink-0 items-center gap-3"
           aria-expanded={expanded}
         >
-          <span className="flex size-5 shrink-0 items-center justify-center rounded-[64px] border border-[rgba(0,0,0,0.25)] bg-[rgba(17,223,89,0.8)] p-1">
-            <img alt="" src={mapPinIcon} className="h-3 w-[7px] object-contain brightness-0 invert" />
-          </span>
+          <NearbyPinMark />
           <p
             className="min-w-0 flex-1 text-center text-[19px] font-medium leading-[1.4] text-[#f7f6f2] [.crcle-phone--light_&]:text-[#030426]"
             style={{ fontFamily: FONT }}
@@ -94,15 +136,25 @@ export function InTheAreaDropdown({
           {expanded ? (
             <motion.div
               key="drawer"
-              initial={{ height: 0 }}
-              animate={{ height: "auto" }}
-              exit={{ height: 0 }}
-              transition={{ duration: 0.32, ease: EASE }}
-              className="w-full overflow-hidden"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.22, ease: EASE }}
+              className="flex min-h-0 w-full flex-col overflow-y-auto overflow-x-hidden overscroll-contain [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
             >
               <div className="flex w-full flex-col items-center gap-4">
-                <AreaMatchCard onConnect={onConnect} />
-                <EmmaConnectRow onConnect={onConnect} variant="outlined" />
+                <AreaPersonSlot
+                  person={SERENA_AREA}
+                  open={openPerson === "serena"}
+                  onOpen={() => setOpenPerson("serena")}
+                  onConnect={onConnect}
+                />
+                <AreaPersonSlot
+                  person={MAYA_AREA}
+                  open={openPerson === "maya"}
+                  onOpen={() => setOpenPerson("maya")}
+                  onConnect={onConnect}
+                />
                 <button
                   type="button"
                   onClick={onMarkRead}
@@ -115,16 +167,16 @@ export function InTheAreaDropdown({
             </motion.div>
           ) : (
             <div key="peek" className="w-full">
-              <EmmaConnectRow onConnect={onConnect} variant="outlined" />
+              <AreaConnectRow name={SERENA_AREA.name} onConnect={onConnect} variant="outlined" />
             </div>
           )}
         </AnimatePresence>
 
         <button
           type="button"
-          aria-label={expanded ? "Collapse In The Area" : "Expand In The Area"}
-          onClick={() => (expanded ? onCollapse() : onExpand())}
-          className="mx-auto flex h-[3px] w-[39px] touch-none items-center justify-center"
+          aria-label="Close In The Area"
+          onClick={onMarkRead}
+          className="mx-auto flex h-6 w-[39px] shrink-0 items-center justify-center"
         >
           <img alt="" src={areaHandleIcon} width={39} height={3} draggable={false} />
         </button>
@@ -133,11 +185,60 @@ export function InTheAreaDropdown({
   );
 }
 
-function EmmaConnectRow({
+function AreaPersonSlot({
+  person,
+  open,
+  onOpen,
   onConnect,
+}: {
+  person: AreaPerson;
+  open: boolean;
+  onOpen: () => void;
+  onConnect: () => void;
+}) {
+  return (
+    <AnimatePresence initial={false} mode="wait">
+      {open ? (
+        <motion.div
+          key={`${person.name}-card`}
+          initial={{ height: 0, opacity: 0 }}
+          animate={{ height: "auto", opacity: 1 }}
+          exit={{ height: 0, opacity: 0 }}
+          transition={{ duration: 0.28, ease: EASE }}
+          className="w-full overflow-hidden"
+        >
+          <AreaMatchCard person={person} onConnect={onConnect} />
+        </motion.div>
+      ) : (
+        <motion.div
+          key={`${person.name}-row`}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.16 }}
+          className="w-full"
+        >
+          <AreaConnectRow
+            name={person.name}
+            variant="outlined"
+            onConnect={onConnect}
+            onPress={onOpen}
+          />
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
+function AreaConnectRow({
+  name,
+  onConnect,
+  onPress,
   variant = "plain",
 }: {
+  name: string;
   onConnect: () => void;
+  onPress?: () => void;
   variant?: "plain" | "outlined";
 }) {
   const outlined = variant === "outlined";
@@ -150,12 +251,27 @@ function EmmaConnectRow({
       }
     >
       <div className="flex w-full items-center gap-2">
-        <div className="min-w-0 flex-1 text-left">
+        <div
+          role={onPress ? "button" : undefined}
+          tabIndex={onPress ? 0 : undefined}
+          onClick={onPress}
+          onKeyDown={
+            onPress
+              ? (e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    onPress();
+                  }
+                }
+              : undefined
+          }
+          className={`min-w-0 flex-1 text-left ${onPress ? "cursor-pointer" : ""}`}
+        >
           <p
             className="text-[13px] font-semibold leading-[1.4] text-[#f7f6f2] [.crcle-phone--light_&]:text-[#030426]"
             style={{ fontFamily: FONT }}
           >
-            Emma Rodriguez
+            {name}
           </p>
           <p className="text-[12px] leading-normal text-[#9ca3af]" style={{ fontFamily: FONT }}>
             Same venue detected · <span className="text-[#0fc950]">privacy protected</span>
@@ -181,9 +297,125 @@ function EmmaConnectRow({
   );
 }
 
-function AreaMatchCard({ onConnect }: { onConnect: () => void }) {
+function AreaCategoryContent({
+  category,
+  relationshipStatus,
+  orientation,
+}: {
+  category: AreaCategory;
+  relationshipStatus: string;
+  orientation: string;
+}) {
+  if (category === "love") {
+    return (
+      <>
+        <span className="flex h-9 min-w-0 flex-1 basis-0 items-center justify-center gap-1 rounded-[120px] bg-[#f7f6f2] px-2 py-1.5">
+          <img alt="" src={areaUnlockIcon} width={16} height={16} draggable={false} className="shrink-0" />
+          <span
+            className="min-w-0 text-center text-[16px] leading-[1.2] text-[#030426]"
+            style={{ fontFamily: FONT }}
+          >
+            {relationshipStatus}
+          </span>
+        </span>
+        <span
+          className="flex h-9 min-w-0 flex-1 basis-0 items-center justify-center rounded-[120px] border border-[#f7f6f2] px-3 py-1.5 text-center text-[16px] leading-[1.2] text-white"
+          style={{ fontFamily: FONT }}
+        >
+          {orientation}
+        </span>
+      </>
+    );
+  }
+
+  if (category === "purpose") {
+    return (
+      <span
+        className="flex h-9 w-full min-w-0 items-center justify-center rounded-[120px] bg-[rgba(247,246,242,0.15)] px-3 py-1.5 text-center text-[16px] leading-[1.2] text-white"
+        style={{ fontFamily: FONT }}
+      >
+        Learn · Mind
+      </span>
+    );
+  }
+
+  return (
+    <span
+      className="flex h-9 w-full min-w-0 items-center justify-center rounded-[120px] bg-[rgba(247,246,242,0.4)] px-3 py-1.5 text-center text-[16px] leading-[1.2] text-[#020426]"
+      style={{ fontFamily: FONT }}
+    >
+      Product Designer
+    </span>
+  );
+}
+
+function AreaLinksPopover() {
+  return (
+    <motion.div
+      role="menu"
+      aria-label="Social links"
+      initial={{ opacity: 0, y: -4 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -4 }}
+      transition={{ duration: 0.18, ease: EASE }}
+      className="pointer-events-auto absolute inset-x-2 top-[46px] z-20 flex flex-col gap-2 rounded-[24px] border border-[rgba(247,246,242,0.2)] bg-[rgba(2,3,29,0.92)] p-2 shadow-[0_12px_32px_rgba(0,0,0,0.28)]"
+      data-node-id="851:225812"
+    >
+      <div className="flex items-start justify-between">
+        <div className="flex items-center gap-1 pl-1 pt-0.5">
+          <img alt="" src={shareIcon} width={12} height={12} className="size-3" draggable={false} />
+          <span className="text-[13px] leading-[1.4] text-[#fefefe]" style={{ fontFamily: FONT }}>
+            Social links
+          </span>
+        </div>
+        <span
+          className="rounded-[40px] bg-white/20 px-2 py-1 text-[13px] leading-[1.4] text-[#e6e6e9]"
+          style={{ fontFamily: FONT }}
+        >
+          05 Active Links
+        </span>
+      </div>
+      <div className="flex items-center gap-3">
+        {AREA_SOCIALS.map((social) => (
+          <a
+            key={social.name}
+            href={social.href}
+            target="_blank"
+            rel="noreferrer"
+            role="menuitem"
+            aria-label={social.name}
+            className="size-9 shrink-0 overflow-hidden rounded-full transition hover:brightness-110"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <img alt="" src={social.icon} className="size-9 object-contain" draggable={false} />
+          </a>
+        ))}
+      </div>
+    </motion.div>
+  );
+}
+
+function AreaMatchCard({
+  person,
+  onConnect,
+}: {
+  person: AreaPerson;
+  onConnect: () => void;
+}) {
   const [index, setIndex] = useState(0);
   const [direction, setDirection] = useState(0);
+  const [linksOpen, setLinksOpen] = useState(false);
+  const linksRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!linksOpen) return;
+    const onDown = (event: PointerEvent) => {
+      if (linksRef.current?.contains(event.target as Node)) return;
+      setLinksOpen(false);
+    };
+    window.addEventListener("pointerdown", onDown);
+    return () => window.removeEventListener("pointerdown", onDown);
+  }, [linksOpen]);
   const category = CATEGORIES[index];
   const icon = category === "love" ? areaHeartIcon : category === "purpose" ? fireInnerIcon : laptopStrokeIcon;
 
@@ -202,13 +434,16 @@ function AreaMatchCard({ onConnect }: { onConnect: () => void }) {
   return (
     <div className="flex w-full flex-col items-start">
       <div className="flex w-full items-center justify-center rounded-tl-[24px] rounded-tr-[24px] border-x border-t border-[rgba(0,0,0,0.25)] bg-[#02031d] p-3 [.crcle-phone--light_&]:bg-[#f7f6f2]">
-        <EmmaConnectRow onConnect={onConnect} variant="plain" />
+        <AreaConnectRow name={person.name} onConnect={onConnect} variant="plain" />
       </div>
 
-      <div className="relative flex h-[251px] w-full flex-col justify-between overflow-hidden rounded-bl-[24px] rounded-br-[24px] border border-[rgba(247,246,242,0.3)] p-2">
+      <div
+        ref={linksRef}
+        className="relative flex h-[251px] w-full flex-col justify-between overflow-hidden rounded-bl-[24px] rounded-br-[24px] border border-[rgba(247,246,242,0.3)] p-2"
+      >
         <img
           alt=""
-          src={serenaAreaPhoto}
+          src={person.photoUrl}
           className="pointer-events-none absolute inset-0 size-full rounded-bl-[24px] rounded-br-[24px] object-cover"
           draggable={false}
         />
@@ -217,7 +452,7 @@ function AreaMatchCard({ onConnect }: { onConnect: () => void }) {
           <div className="flex items-center gap-2 rounded-[120px] bg-[rgba(247,246,242,0.1)] p-1">
             <span className="inline-flex items-center gap-2.5 rounded-[64px] border border-[#f7f6f2] bg-[rgba(247,246,242,0.2)] p-2.5 backdrop-blur-[6px]">
               <span className="text-[11px] leading-[1.4] text-white" style={{ fontFamily: FONT }}>
-                @SerenaMin
+                {person.username}
               </span>
               <img alt="" src={areaShareIcon} width={12} height={12} draggable={false} />
             </span>
@@ -225,15 +460,32 @@ function AreaMatchCard({ onConnect }: { onConnect: () => void }) {
               className="rounded-[120px] bg-[#f7f6f2] px-3 py-1.5 text-[13px] leading-[1.4] text-black"
               style={{ fontFamily: FONT }}
             >
-              24 Yrs
+              {person.age} Yrs
             </span>
           </div>
-          <span className="flex size-8 items-center justify-center rounded-[120px] bg-[#f7f6f2] p-1">
+          <button
+            type="button"
+            aria-label="Open links"
+            aria-expanded={linksOpen}
+            aria-haspopup="menu"
+            onPointerDown={(event) => event.stopPropagation()}
+            onClick={() => setLinksOpen((open) => !open)}
+            className="flex size-8 items-center justify-center rounded-[120px] bg-[#f7f6f2] p-1"
+          >
             <img alt="" src={areaLinkIcon} width={16} height={16} draggable={false} />
-          </span>
+          </button>
         </div>
+        <AnimatePresence>{linksOpen ? <AreaLinksPopover /> : null}</AnimatePresence>
 
-        <div className="relative z-[1] flex w-full flex-col items-center gap-2 rounded-[20px] bg-[rgba(247,246,242,0.2)] p-3">
+        <div className="crcle-area-card-glass relative z-[1] flex w-full flex-col items-center gap-2 overflow-hidden rounded-[20px] p-3">
+          <div aria-hidden className="crcle-area-card-lens">
+            <img alt="" src={person.photoUrl} draggable={false} />
+            <img alt="" src={person.photoUrl} className="crcle-area-card-lens-r" draggable={false} />
+            <img alt="" src={person.photoUrl} className="crcle-area-card-lens-b" draggable={false} />
+          </div>
+          <div aria-hidden className="crcle-area-card-frost" />
+          <div aria-hidden className="crcle-area-card-gloss" />
+          <div aria-hidden className="crcle-area-card-dispersion" />
           <div className="flex w-full items-start justify-between">
             <AnimatePresence mode="wait" initial={false}>
               <motion.span
@@ -251,7 +503,7 @@ function AreaMatchCard({ onConnect }: { onConnect: () => void }) {
           </div>
 
           <motion.div
-            className="flex items-center gap-[50px]"
+            className="flex w-full items-center justify-between"
             drag="x"
             dragConstraints={{ left: 0, right: 0 }}
             dragElastic={0.25}
@@ -269,53 +521,32 @@ function AreaMatchCard({ onConnect }: { onConnect: () => void }) {
               </span>
             </motion.button>
 
-            <AnimatePresence mode="wait" custom={direction} initial={false}>
-              <motion.div
-                key={category}
-                custom={direction}
-                variants={{
-                  enter: (dir: number) => ({ x: dir >= 0 ? 36 : -36, opacity: 0 }),
-                  center: { x: 0, opacity: 1 },
-                  exit: (dir: number) => ({ x: dir >= 0 ? -36 : 36, opacity: 0 }),
-                }}
-                initial="enter"
-                animate="center"
-                exit="exit"
-                transition={SPRING}
-                className="flex items-center gap-3 rounded-[120px] bg-[rgba(2,3,29,0.16)] p-1.5"
-              >
-                {category === "love" ? (
-                  <>
-                    <span className="flex items-center gap-1 rounded-[120px] bg-[#f7f6f2] px-2 py-1.5">
-                      <img alt="" src={areaUnlockIcon} width={16} height={16} draggable={false} />
-                      <span className="text-[16px] leading-[1.4] text-[#030426]" style={{ fontFamily: FONT }}>
-                        Single
-                      </span>
-                    </span>
-                    <span
-                      className="rounded-[120px] border border-[#f7f6f2] px-3 py-1.5 text-[16px] leading-[1.4] text-white"
-                      style={{ fontFamily: FONT }}
-                    >
-                      Hetero
-                    </span>
-                  </>
-                ) : category === "purpose" ? (
-                  <span
-                    className="rounded-[120px] bg-[rgba(247,246,242,0.15)] px-3 py-1.5 text-[16px] text-white"
-                    style={{ fontFamily: FONT }}
+            <div className="flex min-w-0 flex-1 items-center">
+              <div className="flex h-12 w-full min-w-0 items-center justify-center gap-3 rounded-[120px] bg-[rgba(2,3,29,0.16)] p-1.5">
+                <AnimatePresence mode="wait" custom={direction} initial={false}>
+                  <motion.div
+                    key={category}
+                    custom={direction}
+                    variants={{
+                      enter: (dir: number) => ({ x: dir >= 0 ? 36 : -36, opacity: 0 }),
+                      center: { x: 0, opacity: 1 },
+                      exit: (dir: number) => ({ x: dir >= 0 ? -36 : 36, opacity: 0 }),
+                    }}
+                    initial="enter"
+                    animate="center"
+                    exit="exit"
+                    transition={SPRING}
+                    className="flex w-full min-w-0 items-center justify-center gap-3"
                   >
-                    Learn · Mind
-                  </span>
-                ) : (
-                  <span
-                    className="rounded-[120px] bg-[rgba(247,246,242,0.4)] px-3 py-1.5 text-[16px] text-[#020426]"
-                    style={{ fontFamily: FONT }}
-                  >
-                    Product Designer
-                  </span>
-                )}
-              </motion.div>
-            </AnimatePresence>
+                    <AreaCategoryContent
+                      category={category}
+                      relationshipStatus={person.relationshipStatus}
+                      orientation={person.orientation}
+                    />
+                  </motion.div>
+                </AnimatePresence>
+              </div>
+            </div>
 
             <motion.button
               type="button"
@@ -343,16 +574,25 @@ export function AreaNotificationsButton({ onClick }: { onClick: () => void }) {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 8 }}
       transition={{ duration: 0.22, ease: EASE }}
-      className="pointer-events-auto absolute bottom-5 left-[calc(50%-127.2px)] z-[62] flex items-center"
+      transformTemplate={() => ""}
+      className="pointer-events-auto absolute bottom-5 left-[calc(50%-127.2px)] z-[21] flex items-start"
       aria-label="Open nearby notifications"
       data-node-id="1142:34918"
     >
-      <span className="mr-[-12px] flex h-11 w-11 items-center justify-center rounded-[46px] bg-[rgba(247,246,242,0.4)] p-2.5 backdrop-blur-[6px]">
-        <img alt="" src={navRadarIcon} className="size-6 max-w-none object-contain" draggable={false} />
+      <span className="dock-glass crcle-area-notify-radar relative z-0 mr-[-12px] flex h-11 w-11 items-center justify-center overflow-hidden rounded-[46px] border border-white/12 p-2.5">
+        <span
+          aria-hidden
+          className="pointer-events-none absolute inset-0 z-0 rounded-[46px] bg-gradient-to-b from-white/[0.096] via-transparent to-transparent"
+        />
+        <span className="dock-glass-lens z-0 opacity-[0.12]" aria-hidden />
+        <img
+          alt=""
+          src={navRadarIcon}
+          className="crcle-theme-icon relative z-[1] size-6 max-w-none object-contain"
+          draggable={false}
+        />
       </span>
-      <span className="flex size-5 flex-col items-center justify-center rounded-[64px] bg-[rgba(17,223,89,0.8)] p-1">
-        <img alt="" src={mapPinIcon} className="h-3 w-[7px] object-contain brightness-0 invert" />
-      </span>
+      <NearbyPinMark className="relative z-[1]" />
     </motion.button>
   );
 }
@@ -365,47 +605,37 @@ function NearbyGlassSheet({
   isLight?: boolean;
 }) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 40 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: 24 }}
-      transition={{ duration: 0.32, ease: EASE }}
-      className="pointer-events-auto absolute bottom-2 left-2 right-2 z-10"
-    >
+    <div className="pointer-events-auto absolute bottom-2 left-2 right-2 z-10">
       <div
         className={`pointer-events-none crcle-nearby-modal-glass relative flex w-full flex-col items-center gap-4 overflow-hidden rounded-[52px] p-6 shadow-2xl ${
           isLight ? "crcle-nearby-modal-glass--light" : ""
         }`}
       >
-        <div aria-hidden className="crcle-nearby-modal-glass-backdrop rounded-[inherit]">
-          <img
-            alt=""
-            src={avatarBackdrop}
-            className="absolute left-1/2 top-1/2 h-[220%] w-[220%] max-w-none -translate-x-1/2 -translate-y-[58%] scale-110 object-cover object-[center_20%]"
-            draggable={false}
-          />
-          <div className="absolute inset-0 bg-[rgba(2,3,29,0.52)]" />
-        </div>
-        <div aria-hidden className="crcle-nearby-modal-glass-plate rounded-[inherit]" />
+        {/* Static frost plate — backdrop-filter cannot live on a motion.div. */}
         <div aria-hidden className="crcle-nearby-modal-glass-frost rounded-[inherit]" />
+        <div aria-hidden className="crcle-nearby-modal-glass-plate rounded-[inherit]" />
         <div aria-hidden className="crcle-nearby-modal-glass-lens rounded-[inherit]" />
         <div aria-hidden className="crcle-nearby-modal-glass-dispersion rounded-[inherit]" />
-        <div className="pointer-events-auto relative z-[1] flex w-full flex-col items-center gap-4">
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 16 }}
+          transition={{ duration: 0.32, ease: EASE }}
+          className="pointer-events-auto relative z-[1] flex w-full flex-col items-center gap-4 bg-transparent"
+        >
           {children}
-        </div>
+        </motion.div>
       </div>
-    </motion.div>
+    </div>
   );
 }
 
-function NearbyPinMark({ isLight = false, className = "" }: { isLight?: boolean; className?: string }) {
+function NearbyPinMark({ className = "" }: { isLight?: boolean; className?: string }) {
   return (
     <span
-      className={`flex size-5 shrink-0 items-center justify-center rounded-[64px] bg-[rgba(17,223,89,0.8)] p-1 ${
-        isLight ? "border border-[rgba(0,0,0,0.25)]" : ""
-      } ${className}`}
+      className={`flex size-5 shrink-0 flex-col items-center justify-center rounded-[64px] bg-[rgba(17,223,89,0.8)] p-1 ${className}`}
     >
-      <img alt="" src={mapPinIcon} className="h-3 w-[7px] object-contain brightness-0 invert" />
+      <img alt="" src={fa6SolidMapPin} width={7} height={12} className="max-w-none" draggable={false} />
     </span>
   );
 }
@@ -454,13 +684,8 @@ export function NearbyConnectionModal({
         : "Connection established";
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.22, ease: EASE }}
-      className="pointer-events-auto absolute inset-0 z-[63] isolate overflow-hidden rounded-[53px]"
-      style={{ clipPath: "inset(0 round 53px)" }}
+    <div
+      className="pointer-events-auto absolute inset-0 z-[63] overflow-hidden rounded-[53px]"
       role="dialog"
       aria-modal="true"
       aria-label={title}
@@ -468,8 +693,8 @@ export function NearbyConnectionModal({
       <button
         type="button"
         aria-label="Dismiss"
-        className={`pointer-events-auto absolute inset-0 z-0 backdrop-blur-[8px] ${
-          isLight ? "bg-[rgba(2,3,29,0.28)]" : "bg-black/45"
+        className={`crcle-nearby-scrim pointer-events-auto absolute inset-0 z-0 ${
+          isLight ? "crcle-nearby-scrim--light" : ""
         }`}
         onClick={() => {
           if (step === "prompt") onDismiss();
@@ -507,7 +732,7 @@ export function NearbyConnectionModal({
           )}
         </AnimatePresence>
       </NearbyGlassSheet>
-    </motion.div>
+    </div>
   );
 }
 
@@ -567,7 +792,7 @@ function NearbyPromptSheet({
         onDragEnd={onDragEnd}
       >
         <button type="button" aria-label="Previous category" onClick={goPrev} className="flex size-6 items-center justify-center">
-          <div className="relative size-6 -scale-y-100 rotate-180 overflow-hidden">
+          <div className="crcle-theme-icon relative size-6 -scale-y-100 rotate-180 overflow-hidden">
             <img alt="" src={arrowRightIcon} className="size-6" />
             <div className="absolute inset-[29.17%_37.5%]">
               <img alt="" src={arrowChevronIcon} className="size-full" />
@@ -587,33 +812,17 @@ function NearbyPromptSheet({
             animate="center"
             exit="exit"
             transition={SPRING}
-            className="flex items-center gap-3 rounded-[120px] bg-[rgba(247,246,242,0.1)] p-1.5"
+            className="flex min-w-0 items-center justify-center"
           >
-            {category === "love" ? (
-              <>
-                <span className="flex items-center gap-1 rounded-[120px] bg-[#f7f6f2] px-2 py-1.5">
-                  <img alt="" src={unlockIcon} className="size-4" />
-                  <span className="text-[16px] leading-[1.4] text-[#030426]" style={{ fontFamily: FONT }}>
-                    Single
-                  </span>
-                </span>
-                <span className="rounded-[120px] border border-[#f7f6f2] px-3 py-1.5 text-[16px] leading-[1.4] text-white [.crcle-phone--light_&]:border-[#030426] [.crcle-phone--light_&]:text-[#030426]" style={{ fontFamily: FONT }}>
-                  Hetero
-                </span>
-              </>
-            ) : category === "purpose" ? (
-              <span className="rounded-[120px] bg-[rgba(247,246,242,0.15)] px-3 py-1.5 text-[16px] text-white" style={{ fontFamily: FONT }}>
-                Learn · Mind
-              </span>
-            ) : (
-              <span className="rounded-[120px] bg-[rgba(247,246,242,0.4)] px-3 py-1.5 text-[16px] text-[#020426]" style={{ fontFamily: FONT }}>
-                Product Designer
-              </span>
-            )}
+            <CategoryPills
+              variant={category}
+              isLight={isLight}
+              user={{ relationshipStatus: "Single", orientation: "Hetero" }}
+            />
           </motion.div>
         </AnimatePresence>
         <button type="button" aria-label="Next category" onClick={goNext} className="flex size-6 items-center justify-center">
-          <div className="relative size-6 overflow-hidden">
+          <div className="crcle-theme-icon relative size-6 overflow-hidden">
             <img alt="" src={arrowRightIcon} className="size-6" />
             <div className="absolute inset-[29.17%_37.5%]">
               <img alt="" src={arrowChevronIcon} className="size-full" />

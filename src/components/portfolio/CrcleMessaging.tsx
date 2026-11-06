@@ -266,6 +266,7 @@ export function CrcleMessaging({
   const [broadcastMood] = useCrcleBroadcast();
   const [areaPhase, setAreaPhase] = useState<AreaPanelPhase>("off");
   const [nearbyStep, setNearbyStep] = useState<NearbySheetStep | null>(null);
+  const [notifyOverlayOpen, setNotifyOverlayOpen] = useState(false);
   const [locusOpen, setLocusOpen] = useState(false);
   const [attachOpen, setAttachOpen] = useState(false);
   const [locusDraft, setLocusDraft] = useState<LocusSignalPayload | null>(null);
@@ -435,6 +436,7 @@ export function CrcleMessaging({
     if (broadcastMood !== "in_the_area") {
       setAreaPhase("off");
       setNearbyStep(null);
+      setNotifyOverlayOpen(false);
       return;
     }
     setOnboardingOpen(false);
@@ -444,6 +446,7 @@ export function CrcleMessaging({
     setAreaPhase("screen");
     const expand = window.setTimeout(() => setAreaPhase("drawer"), 420);
     areaConnectedTimer.current = window.setTimeout(() => {
+      setNotifyOverlayOpen(false);
       setAreaPhase("off");
       setNotificationsOpen(true);
       setNearbyStep("prompt");
@@ -462,10 +465,26 @@ export function CrcleMessaging({
       window.clearTimeout(areaConnectedTimer.current);
       areaConnectedTimer.current = null;
     }
+    setNotifyOverlayOpen(false);
     setAreaPhase("off");
     setNotificationsOpen(true);
     setNearbyStep("prompt");
   }, []);
+
+  const openNotifyCenter = useCallback(() => {
+    setNotificationsOpen(false);
+    setNotifyOverlayOpen(true);
+    setAreaPhase("drawer");
+  }, []);
+
+  const closeNotifyCenter = useCallback(() => {
+    setNotifyOverlayOpen(false);
+    setAreaPhase("off");
+    setNotificationsOpen(true);
+  }, []);
+
+  const areaDropdownOpen =
+    nearbyStep === null && (notifyOverlayOpen || areaPhase === "screen" || areaPhase === "drawer");
 
   const closeNearbySheet = useCallback(() => {
     setNearbyStep(null);
@@ -478,53 +497,17 @@ export function CrcleMessaging({
       <CrclePhoneFrame
         light={isLightMode}
         overlay={
-          <>
-            <AnimatePresence>
-              {phase === "inbox" && !onboardingOpen && nearbyStep === null && (areaPhase === "screen" || areaPhase === "drawer") ? (
-                <InTheAreaDropdown
-                  key="in-the-area"
-                  phase={areaPhase}
-                  isLight={isLightMode}
-                  onExpand={() => setAreaPhase("drawer")}
-                  onCollapse={() => setAreaPhase("screen")}
-                  onConnect={openNearbyPrompt}
-                  onMarkRead={() => setAreaPhase("off")}
-                />
-              ) : null}
-            </AnimatePresence>
-            <AnimatePresence>
-              {phase === "inbox" && !onboardingOpen && (areaPhase !== "off" || nearbyStep) ? (
-                <AreaNotificationsButton key="area-notify" onClick={openNearbyPrompt} />
-              ) : null}
-            </AnimatePresence>
-            <AnimatePresence>
-              {nearbyStep ? (
-                <NearbyConnectionModal
-                  key="nearby"
-                  step={nearbyStep}
-                  isLight={isLightMode}
-                  onDismiss={closeNearbySheet}
-                  onAccept={() => setNearbyStep("request_sent")}
-                  onAdvance={() => setNearbyStep("connected")}
-                  onDone={() => {
-                    closeNearbySheet();
-                    setAreaPhase("screen");
-                  }}
-                />
-              ) : null}
-            </AnimatePresence>
-            <AnimatePresence>
-              {activeMatch ? (
-                <SignalInterceptModal
-                  key={activeMatch.id}
-                  user={activeMatch}
-                  isLight={isLightMode}
-                  onDecline={declineSignal}
-                  onAccept={acceptSignal}
-                />
-              ) : null}
-            </AnimatePresence>
-          </>
+          <AnimatePresence>
+            {activeMatch ? (
+              <SignalInterceptModal
+                key={activeMatch.id}
+                user={activeMatch}
+                isLight={isLightMode}
+                onDecline={declineSignal}
+                onAccept={acceptSignal}
+              />
+            ) : null}
+          </AnimatePresence>
         }
       >
         <AnimatePresence mode="wait">
@@ -594,20 +577,13 @@ export function CrcleMessaging({
               />
             </motion.div>
           ) : (
-            <motion.div
-              key="hub"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.25 }}
-              className="relative flex h-full min-h-0 flex-col"
-            >
+            <div key="hub" className="relative flex h-full min-h-0 flex-col">
               {/* Header stack — status always; Messages hides while In The Area is up */}
-              <div className="relative z-30 shrink-0">
-                <div className={areaPhase === "off" ? "" : "bg-[#02031d]"}>
-                  <StatusBar onAccent={areaPhase !== "off"} />
+              <div className={`relative shrink-0 ${areaDropdownOpen ? "z-[64]" : "z-30"}`}>
+                <div className={areaPhase === "off" && !notifyOverlayOpen ? "" : "bg-[#02031d]"}>
+                  <StatusBar onAccent={areaPhase !== "off" || notifyOverlayOpen} />
                 </div>
-                {areaPhase === "off" ? (
+                {areaPhase === "off" && !notifyOverlayOpen ? (
                   <MessagesHeader
                     onBack={goProfile}
                     menuOpen={menuOpen}
@@ -621,13 +597,7 @@ export function CrcleMessaging({
                 className="relative z-10 min-h-0 flex-1"
                 onClick={() => menuOpen && setMenuOpen(false)}
               >
-                <motion.div
-                  key="inbox"
-                  initial={{ opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.35, ease: EASE }}
-                  className="absolute inset-x-3 top-0 bottom-[100px] overflow-hidden"
-                >
+                <div className="absolute inset-x-3 top-0 bottom-[100px] overflow-hidden">
                   {/* Chat list under overlay — fixed offset for Closed header (Figma ~95px) */}
                   <div
                     className={`absolute inset-0 z-0 overflow-y-auto overflow-x-hidden pb-6 ${
@@ -640,7 +610,7 @@ export function CrcleMessaging({
                     />
                   </div>
 
-                  {areaPhase === "off" || nearbyStep ? (
+                  {(areaPhase === "off" || nearbyStep) && !notifyOverlayOpen ? (
                     <NotificationCenter
                       expanded={notificationsOpen}
                       onExpandedChange={setNotificationsOpen}
@@ -651,7 +621,7 @@ export function CrcleMessaging({
                       onViewDailyDrop={goRadar}
                     />
                   ) : null}
-                </motion.div>
+                </div>
               </div>
 
               {!onboardingOpen ? (
@@ -663,7 +633,7 @@ export function CrcleMessaging({
                   onSignalHome={goHome}
                 />
               ) : null}
-            </motion.div>
+            </div>
           )}
         </AnimatePresence>
 
@@ -677,6 +647,60 @@ export function CrcleMessaging({
           {phase === "inbox" && onboardingOpen && (
             <MessagingOnboarding onClose={dismissOnboarding} onContinue={continueFromOnboarding} />
           )}
+        </AnimatePresence>
+
+        {/* Inside the screen so backdrop-filter can sample the chat. The overlay
+            slot sits in a clip-path stacking context that only contains the modal. */}
+        <AnimatePresence>
+          {phase === "inbox" && !onboardingOpen && nearbyStep === null && !areaDropdownOpen && broadcastMood === "in_the_area" ? (
+            <AreaNotificationsButton key="area-notify" onClick={openNotifyCenter} />
+          ) : null}
+        </AnimatePresence>
+        <AnimatePresence>
+          {phase === "inbox" && !onboardingOpen && areaDropdownOpen ? (
+            <div
+              key="notify-overlay"
+              className="pointer-events-auto absolute inset-0 z-[63] overflow-hidden rounded-[53px]"
+              role="dialog"
+              aria-modal="true"
+              aria-label="In The Area"
+            >
+              <button
+                type="button"
+                aria-label="Dismiss In The Area"
+                className={`crcle-nc-overlay-frost pointer-events-auto absolute inset-0 z-0 ${
+                  isLightMode ? "crcle-nc-overlay-frost--light" : ""
+                }`}
+                onClick={closeNotifyCenter}
+              />
+              <InTheAreaDropdown
+                phase={areaPhase === "screen" ? "screen" : "drawer"}
+                isLight={isLightMode}
+                onExpand={() => setAreaPhase("drawer")}
+                onCollapse={() => setAreaPhase("screen")}
+                onConnect={openNearbyPrompt}
+                onMarkRead={() => {
+                  closeNotifyCenter();
+                }}
+              />
+            </div>
+          ) : null}
+        </AnimatePresence>
+        <AnimatePresence>
+          {nearbyStep ? (
+            <NearbyConnectionModal
+              key="nearby"
+              step={nearbyStep}
+              isLight={isLightMode}
+              onDismiss={closeNearbySheet}
+              onAccept={() => setNearbyStep("request_sent")}
+              onAdvance={() => setNearbyStep("connected")}
+              onDone={() => {
+                closeNearbySheet();
+                setAreaPhase("screen");
+              }}
+            />
+          ) : null}
         </AnimatePresence>
 
       </CrclePhoneFrame>
@@ -718,7 +742,7 @@ function MessagesHeader({
   onToggleMenu: () => void;
 }) {
   return (
-    <div className="relative z-20 flex h-10 shrink-0 items-center justify-between px-3">
+    <div className="relative z-20 mt-[4px] flex h-10 shrink-0 items-center justify-between px-3">
       <CrcleBackButton onClick={onBack} disabled={!onBack} />
 
       <h1
@@ -1108,40 +1132,40 @@ function NotificationCenter({
           </div>
         </div>
 
-        {/* Opened body — Figma 257:63476 */}
-        <motion.div
-          initial={false}
-          animate={{
-            height: expanded ? "auto" : 0,
-            opacity: expanded ? 1 : 0,
-          }}
-          transition={{ duration: 0.32, ease: EASE }}
-          className="w-full overflow-hidden"
+        {/* Opened body — Figma 257:63476. CSS grid expand (no Framer) + static
+            frost plate so overlay blur can sample the inbox. */}
+        <div
+          className={`crcle-nc-expand w-full ${expanded ? "is-open" : ""}`}
           aria-hidden={!expanded}
           style={{ pointerEvents: expanded ? "auto" : "none" }}
         >
-          <div className="relative flex w-full flex-col items-start gap-4 rounded-bl-[28px] rounded-br-[28px] border-x border-b border-[var(--crcle-panel-border)] bg-[var(--crcle-panel)] px-[9px] pb-[11px] pt-[10px] shadow-[0_12px_40px_rgba(0,0,0,0.18)] transition-all duration-300 hover:bg-[rgba(247,246,242,0.1)] hover:backdrop-blur-[14px]">
-            <DailyDropBanner onView={onViewDailyDrop} />
-            <div className="flex items-start gap-4">
-              {profiles.map((profile) => (
-                <ConnectionAvatar
-                  key={profile.id}
-                  badge="laptop"
-                  photoUrl={profile.photoUrl}
-                  name={profile.name}
-                  onClick={() => onViewSignal(profile)}
+          <div className="crcle-nc-expand-clip">
+            <div className="crcle-nc-body relative flex w-full flex-col items-start rounded-bl-[28px] rounded-br-[28px] border-x border-b border-[var(--crcle-panel-border)] px-[9px] pb-[11px] pt-[10px] shadow-[0_12px_40px_rgba(0,0,0,0.18)]">
+              <div aria-hidden className="crcle-nc-body-frost absolute inset-0 rounded-[inherit]" />
+              <div className="relative z-[1] flex w-full flex-col items-start gap-4">
+                <DailyDropBanner onView={onViewDailyDrop} />
+                <div className="flex items-start gap-4">
+                  {profiles.map((profile) => (
+                    <ConnectionAvatar
+                      key={profile.id}
+                      badge="laptop"
+                      photoUrl={profile.photoUrl}
+                      name={profile.name}
+                      onClick={() => onViewSignal(profile)}
+                    />
+                  ))}
+                </div>
+                <SwipeHandle
+                  label="Collapse notifications"
+                  onToggle={() => onExpandedChange(false)}
+                  onPointerDown={onHandlePointerDown}
+                  onPointerMove={onHandlePointerMove}
+                  onPointerUp={onHandlePointerUp}
                 />
-              ))}
+              </div>
             </div>
-            <SwipeHandle
-              label="Collapse notifications"
-              onToggle={() => onExpandedChange(false)}
-              onPointerDown={onHandlePointerDown}
-              onPointerMove={onHandlePointerMove}
-              onPointerUp={onHandlePointerUp}
-            />
           </div>
-        </motion.div>
+        </div>
       </div>
     </div>
   );
@@ -1211,8 +1235,9 @@ function SentReceivedToggle({
 
 function DailyDropBanner({ onView }: { onView: () => void }) {
   return (
-    <div className="w-full rounded-[64px] bg-[rgba(222,221,218,0.6)] backdrop-blur-[13px] py-1.5 pl-4 pr-2">
-      <div className="flex items-center justify-center gap-2">
+    <div className="relative w-full overflow-hidden rounded-[64px] py-1.5 pl-4 pr-2">
+      <div aria-hidden className="crcle-nc-drop-frost absolute inset-0 rounded-[inherit]" />
+      <div className="relative z-[1] flex items-center justify-center gap-2">
         <div className="min-w-0 flex-1">
           <p className="text-[13px] leading-[1.4] text-[#030426]" style={{ fontFamily: FONT }}>
             Daily Drop is ready

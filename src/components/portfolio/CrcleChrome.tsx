@@ -1,4 +1,3 @@
-import { AnimatePresence, motion } from "framer-motion";
 import { useState, type ReactNode } from "react";
 import navHomeIcon from "@/assets/crcle/nav-home.svg";
 import navMessageIcon from "@/assets/crcle/nav-message-figma.svg";
@@ -10,7 +9,6 @@ import moreDotsIcon from "@/assets/crcle/more-dots.svg";
 
 export type CrcleDockTab = "profile" | "signal" | "messages";
 
-const EASE = [0.22, 1, 0.36, 1] as const;
 const FONT = "Montserrat, ui-sans-serif, system-ui, sans-serif";
 
 /**
@@ -72,15 +70,8 @@ export function CrclePrimaryDock({
         setForceClosed(false);
       }}
     >
-      <AnimatePresence>
-        {panelVisible ? (
-          <motion.div
-            initial={{ opacity: 0, y: 10, scale: 0.96 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 10, scale: 0.96 }}
-            transition={{ duration: 0.22, ease: EASE }}
-            className="crcle-signal-panel pointer-events-auto flex w-full flex-col gap-2 rounded-[24px] p-2"
-          >
+      {panelVisible ? (
+          <div className="crcle-signal-panel pointer-events-auto flex w-full flex-col gap-2 rounded-[24px] p-2">
             <div className="flex items-center justify-center gap-0.5">
               <div className="flex size-6 items-center justify-center">
                 <SoundWaveIcon size={16} active />
@@ -120,20 +111,19 @@ export function CrclePrimaryDock({
                 />
               </button>
             </div>
-          </motion.div>
+          </div>
         ) : null}
-      </AnimatePresence>
 
       <nav
-        className="dock-glass crcle-primary-dock pointer-events-auto relative box-border flex h-[44px] w-[134.4px] shrink-0 items-center gap-4 overflow-hidden rounded-[36px] border border-white/15 bg-white/5 px-4 shadow-2xl backdrop-blur-sm"
+        className="dock-glass crcle-primary-dock pointer-events-auto relative box-border flex h-[44px] w-[134.4px] shrink-0 items-center gap-4 overflow-hidden rounded-[36px] border border-white/12 px-4 shadow-2xl backdrop-blur-sm"
         role="navigation"
         aria-label="Primary"
       >
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-0 z-0 rounded-[36px] bg-gradient-to-b from-white/12 via-transparent to-transparent"
+          className="pointer-events-none absolute inset-0 z-0 rounded-[36px] bg-gradient-to-b from-white/[0.096] via-transparent to-transparent"
         />
-        <div className="dock-glass-lens z-0 opacity-25" aria-hidden />
+        <div className="dock-glass-lens z-0 opacity-20" aria-hidden />
         <DockIconButton
           label="Profile"
           active={active === "profile"}
@@ -236,12 +226,14 @@ export function CrcleBackButton({
       onClick={onClick}
       disabled={disabled || !onClick}
       aria-label="Back"
-      className={`crcle-glass-btn relative flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-[40px] p-1 backdrop-blur-[12px] transition hover:brightness-110 ${
-        onClick && !disabled ? "" : "opacity-40"
-      }`}
+      className="crcle-glass-btn relative flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-[40px] p-1"
     >
       <div className="dock-glass-lens opacity-40" aria-hidden />
-      <span className="relative z-[1] flex size-8 items-center justify-center">
+      <span
+        className={`relative z-[1] flex size-8 items-center justify-center ${
+          onClick && !disabled ? "" : "opacity-40"
+        }`}
+      >
         <img
           alt=""
           src={arrowLeftIcon}
@@ -270,7 +262,7 @@ export function CrcleMoreButton({
       }}
       aria-expanded={expanded}
       aria-label="More options"
-      className="crcle-glass-btn relative flex h-10 w-12 shrink-0 items-center justify-center overflow-hidden rounded-[24px] px-2 py-0.5 backdrop-blur-[12px] transition hover:brightness-110"
+      className="crcle-glass-btn relative flex h-10 w-12 shrink-0 items-center justify-center overflow-hidden rounded-[24px] px-2 py-0.5"
     >
       <div className="dock-glass-lens opacity-40" aria-hidden />
       <span className="relative z-[1] flex size-8 items-center justify-center">

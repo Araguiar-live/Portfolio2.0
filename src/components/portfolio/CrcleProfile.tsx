@@ -27,6 +27,16 @@ import graduationIcon from "@/assets/crcle/profile/graduation.svg";
 import heartDatingIcon from "@/assets/crcle/profile/heart-dating.svg";
 import laptopWorkIcon from "@/assets/crcle/profile/laptop-work.svg";
 import locationMapImg from "@/assets/crcle/profile/location-map.png";
+import kycArrowRightIcon from "@/assets/crcle/kyc/arrow-right.svg";
+import kycArrowRight24Icon from "@/assets/crcle/kyc/arrow-right-24.svg";
+import kycCloseIcon from "@/assets/crcle/kyc/close.svg";
+import kycCrcleWordmark from "@/assets/crcle/kyc/crcle-wordmark.svg";
+import kycFourthlineIcon from "@/assets/crcle/kyc/fourthline.svg";
+import kycHandleIcon from "@/assets/crcle/kyc/handle.svg";
+import kycLicenseIcon from "@/assets/crcle/kyc/license.svg";
+import kycNationalIdIcon from "@/assets/crcle/kyc/national-id.svg";
+import kycPassportIcon from "@/assets/crcle/kyc/passport.svg";
+import kycShieldIcon from "@/assets/crcle/kyc/shield.svg";
 import lockFilledIcon from "@/assets/crcle/profile/lock-filled.svg";
 import loughboroughCrest from "@/assets/crcle/profile/loughborough-crest.png";
 import mapPinPreciseIcon from "@/assets/crcle/profile/map-pin-precise.svg";
@@ -153,7 +163,15 @@ export type ProfileState = {
   };
 };
 
-type Overlay = null | "mood" | "education" | "work" | "relationship" | "location" | "socials";
+type Overlay =
+  | null
+  | "mood"
+  | "education"
+  | "work"
+  | "relationship"
+  | "location"
+  | "socials"
+  | "kyc";
 
 const MOODS: {
   id: BroadcastState;
@@ -236,6 +254,7 @@ export function CrcleProfile({
   }));
   const [overlay, setOverlay] = useState<Overlay>(null);
   const [onboardingOpen, setOnboardingOpen] = useState(true);
+  const [identityVerified, setIdentityVerified] = useState(false);
   const dismissOnboarding = () => setOnboardingOpen(false);
 
   const socialCount = Object.values(profile.socials).filter(Boolean).length;
@@ -251,12 +270,14 @@ export function CrcleProfile({
               <ProfileMainView
                 profile={profile}
                 socialCount={socialCount}
+                identityVerified={identityVerified}
                 onOpenMood={() => setOverlay("mood")}
                 onOpenEducation={() => setOverlay("education")}
                 onOpenWork={() => setOverlay("work")}
                 onOpenRelationship={() => setOverlay("relationship")}
                 onOpenLocation={() => setOverlay("location")}
                 onOpenSocials={() => setOverlay("socials")}
+                onOpenKyc={() => setOverlay("kyc")}
               />
             </div>
 
@@ -272,7 +293,7 @@ export function CrcleProfile({
 
             <div
               aria-hidden
-              className="pointer-events-none absolute inset-x-2 bottom-2 z-20 h-[6rem] bg-gradient-to-t from-[#010211] from-45% via-[#010211]/92 to-transparent transition-colors duration-300 [.crcle-phone--light_&]:from-[var(--crcle-bg)] [.crcle-phone--light_&]:via-[var(--crcle-bg)]/92"
+              className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-[11rem] bg-gradient-to-t from-[#010211] from-[22%] via-[#010211]/88 to-transparent transition-colors duration-300 [.crcle-phone--light_&]:from-[var(--crcle-bg)] [.crcle-phone--light_&]:via-[var(--crcle-bg)]/88"
             />
 
             <CrclePrimaryDock
@@ -384,6 +405,16 @@ export function CrcleProfile({
                 onClose={() => setOverlay(null)}
               />
             ) : null}
+
+            {overlay === "kyc" ? (
+              <KycVerifySheet
+                onOkay={() => {
+                  setIdentityVerified(true);
+                  setOverlay(null);
+                }}
+                onClose={() => setOverlay(null)}
+              />
+            ) : null}
           </AnimatePresence>
         </div>
       </CrclePhoneFrame>
@@ -488,27 +519,233 @@ function ProfileOnboarding({
   );
 }
 
+const KYC_DOCUMENTS = [
+  { id: "passport", label: "Passport", icon: kycPassportIcon, chevron: true },
+  { id: "license", label: "Driver’s License", icon: kycLicenseIcon, chevron: false },
+  { id: "national", label: "National Identity Card", icon: kycNationalIdIcon, chevron: false },
+] as const;
+
+/** Untitled 12:15612 / CRCLE 355:305165 — KYC verify identity drawer. */
+function KycVerifySheet({
+  onOkay,
+  onClose,
+}: {
+  onOkay: () => void;
+  onClose: () => void;
+}) {
+  const [selectedId, setSelectedId] = useState<(typeof KYC_DOCUMENTS)[number]["id"]>("license");
+
+  return (
+    <CrclePhoneOverlay
+      scrim="sheet"
+      contentClassName="justify-end"
+      aria-label="Verify your identity"
+      aria-modal="true"
+      onClick={onClose}
+    >
+      <div
+        className="relative flex h-[67%] max-h-[641px] w-full flex-col overflow-hidden rounded-t-[16px] rounded-b-[53px] border border-[rgba(2,3,29,0.1)] border-b-0"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div aria-hidden className="crcle-sheet-frost--kyc absolute inset-0 rounded-[inherit]" />
+
+        <div className="relative z-[1] flex shrink-0 items-start gap-[25px] border border-[rgba(2,3,29,0.1)] border-b-0 bg-[#f7f6f2] px-3 pb-3 pt-4">
+          <img
+            alt=""
+            src={kycHandleIcon}
+            className="pointer-events-none absolute left-1/2 top-[5px] h-[3px] w-[56.5px] -translate-x-1/2 max-w-none"
+            draggable={false}
+          />
+          <div className="flex min-w-0 flex-1 flex-col gap-0.5 pt-0.5">
+            <p
+              id="kyc-verify-title"
+              className="w-full text-[16px] font-medium leading-none text-[#02031d]"
+              style={{ fontFamily: FONT }}
+            >
+              Verify your identity
+            </p>
+            <p
+              className="w-full text-[14px] font-normal leading-none tracking-[-0.15px] text-[#02031d]"
+              style={{ fontFamily: FONT }}
+            >
+              Exclusive access for verified members
+            </p>
+          </div>
+          <button
+            type="button"
+            aria-label="Close"
+            onClick={onClose}
+            className="flex shrink-0 items-center justify-center rounded-full bg-[rgba(2,3,29,0.05)] p-1"
+          >
+            <img alt="" src={kycCloseIcon} className="size-4 max-w-none" draggable={false} />
+          </button>
+        </div>
+
+        <div className="relative z-[1] flex min-h-0 flex-1 flex-col items-center justify-between border-t border-[rgba(2,3,29,0.1)] px-3 py-4">
+          <img
+            alt=""
+            src={kycShieldIcon}
+            className="size-9 max-w-none object-contain"
+            draggable={false}
+          />
+
+          <div className="flex w-full flex-col gap-2 rounded-xl bg-[rgba(2,3,29,0.15)] p-3">
+            <p className="w-full text-[16px] font-normal leading-[1.4]" style={{ fontFamily: FONT }}>
+              <span className="text-[#02031d]">Citizenship:</span>
+              <span className="text-[#99a1af]"> United Kingdom</span>
+            </p>
+            <button
+              type="button"
+              className="flex w-full items-center gap-2"
+            >
+              <span
+                className="min-w-0 flex-1 text-left text-[16px] font-medium leading-[1.4] text-[#02031d]"
+                style={{ fontFamily: FONT }}
+              >
+                Change citizenship
+              </span>
+              <img
+                alt=""
+                src={kycArrowRightIcon}
+                className="size-3 max-w-none object-contain"
+                draggable={false}
+              />
+            </button>
+          </div>
+
+          <div className="flex w-full flex-col gap-9">
+            <p
+              className="w-full text-center text-[13px] font-normal leading-[1.4] text-[#02031d]"
+              style={{ fontFamily: FONT }}
+            >
+              Select the document you want to use for verification.
+            </p>
+            <div className="flex w-full flex-col gap-1">
+              <p
+                className="w-full text-[11px] font-normal leading-[1.4] text-[rgba(2,3,29,0.4)]"
+                style={{ fontFamily: FONT }}
+              >
+                CHOOSE YOUR ID
+              </p>
+              <div className="flex w-full flex-col gap-2">
+                {KYC_DOCUMENTS.map((doc) => {
+                  const selected = selectedId === doc.id;
+                  return (
+                    <button
+                      key={doc.id}
+                      type="button"
+                      aria-pressed={selected}
+                      onClick={() => setSelectedId(doc.id)}
+                      className={`flex w-full items-center justify-center gap-2.5 rounded-lg p-2.5 text-left ${
+                        selected
+                          ? "border border-[rgba(2,3,29,0.1)] bg-[#f7f6f2]"
+                          : "border border-[rgba(2,3,29,0.2)] bg-transparent"
+                      }`}
+                    >
+                      <img
+                        alt=""
+                        src={doc.icon}
+                        className="size-6 max-w-none object-contain"
+                        draggable={false}
+                      />
+                      <span
+                        className="min-w-0 flex-1 text-[13px] font-normal leading-[1.4] text-[#02031d]"
+                        style={{ fontFamily: FONT }}
+                      >
+                        {doc.label}
+                      </span>
+                      {doc.chevron ? (
+                        <ChevronDown className="size-4 shrink-0 text-[#02031d]" strokeWidth={1.5} />
+                      ) : null}
+                      <img
+                        alt=""
+                        src={kycArrowRight24Icon}
+                        className="size-6 max-w-none object-contain"
+                        draggable={false}
+                      />
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-1">
+            <img
+              alt="Fourthline"
+              src={kycFourthlineIcon}
+              className="h-[15px] w-[102px] max-w-none object-contain"
+              draggable={false}
+            />
+            <span
+              className="text-[8px] font-normal leading-[1.4] text-[#02031d]"
+              style={{ fontFamily: FONT }}
+            >
+              X
+            </span>
+            <img
+              alt="crcle"
+              src={kycCrcleWordmark}
+              className="h-[13px] w-[38px] max-w-none object-contain"
+              draggable={false}
+            />
+          </div>
+
+          <div className="flex w-full flex-col items-center gap-4">
+            <p
+              className="w-full text-center text-[9px] font-normal leading-[1.1] tracking-[-0.15px] text-[rgba(2,3,29,0.4)]"
+              style={{ fontFamily: FONT }}
+            >
+              Your data is encrypted and used only to identify verification
+            </p>
+            <button
+              type="button"
+              onClick={onOkay}
+              className="flex items-center justify-center rounded-full bg-[#02031d] px-9 py-3"
+            >
+              <span
+                className="whitespace-nowrap text-[16px] font-medium leading-[1.2] tracking-[-0.44px] text-[#f7f6f2]"
+                style={{ fontFamily: FONT }}
+              >
+                Start Verification
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </CrclePhoneOverlay>
+  );
+}
+
 function ProfileMainView({
   profile,
   socialCount,
+  identityVerified,
   onOpenMood,
   onOpenEducation,
   onOpenWork,
   onOpenRelationship,
   onOpenLocation,
   onOpenSocials,
+  onOpenKyc,
 }: {
   profile: ProfileState;
   socialCount: number;
+  identityVerified: boolean;
   onOpenMood: () => void;
   onOpenEducation: () => void;
   onOpenWork: () => void;
   onOpenRelationship: () => void;
   onOpenLocation: () => void;
   onOpenSocials: () => void;
+  onOpenKyc: () => void;
 }) {
   const { user, widgets } = profile;
   const isIncognito = profile.broadcast.isIncognito;
+  const activeMood =
+    MOODS.find((m) => m.id === profile.broadcast.activeState) ?? MOODS[0];
+  const moodChipIcon = isIncognito ? profileMaskGreenIcon : activeMood.icon;
+  const moodChipLabel = isIncognito ? "Incognito Mode" : activeMood.label;
   const [locationEnabled, setLocationEnabled] = useState(false);
   const lookingForWork = widgets.work?.location?.toLowerCase().includes("looking") ?? false;
   const relationshipMeta =
@@ -523,21 +760,32 @@ function ProfileMainView({
 
   return (
     <div className="flex flex-col gap-4 pb-4">
-      {/* Identity — Figma 851:225654 */}
-      <div className="flex w-full items-end justify-between px-0">
-        <div className="flex flex-col items-start justify-center">
+      {/* Identity — Figma 851:225654 / Untitled 12:10596 */}
+      <div className="flex w-full items-end justify-between gap-2 px-0">
+        <div className="flex min-w-0 flex-col items-start justify-center">
           <div className="flex items-center gap-2">
             <p className="text-[16px] leading-[1.4] text-[#f7f6f2] [.crcle-phone--light_&]:text-black" style={{ fontFamily: FONT }}>
               {user.name}
             </p>
-            <span className="flex h-[22px] w-[22px] items-center justify-center rounded-[36px] bg-[#f7f6f2] p-1 [.crcle-phone--light_&]:hidden">
-              <img
-                alt=""
-                src={raindropBadgeIcon}
-                className="h-[11px] w-2.5 object-contain"
-                draggable={false}
-              />
-            </span>
+            {identityVerified ? (
+              <span className="flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-[36px] bg-[#f7f6f2] p-1">
+                <img
+                  alt=""
+                  src={raindropBadgeIcon}
+                  className="h-[11px] w-2.5 object-contain"
+                  draggable={false}
+                />
+              </span>
+            ) : (
+              <button
+                type="button"
+                onClick={onOpenKyc}
+                className="flex h-[22px] shrink-0 items-center rounded-[36px] border border-[rgba(247,246,242,0.35)] px-2.5 text-[11px] leading-[1.4] text-[#f7f6f2] transition hover:bg-white/10 [.crcle-phone--light_&]:border-[rgba(2,4,38,0.28)] [.crcle-phone--light_&]:text-[#030426] [.crcle-phone--light_&]:hover:bg-[rgba(2,4,38,0.06)]"
+                style={{ fontFamily: FONT }}
+              >
+                Verify
+              </button>
+            )}
           </div>
           <p className="text-[11px] leading-[1.4] text-[#b1b1bc]" style={{ fontFamily: FONT }}>
             {user.handle}
@@ -567,9 +815,13 @@ function ProfileMainView({
         <button
           type="button"
           onClick={onOpenMood}
+          aria-label={`Broadcast mood: ${moodChipLabel}`}
           className="crcle-glass-btn relative flex items-center justify-center gap-1 self-stretch overflow-hidden rounded-[64px] py-1 pl-2 pr-1"
         >
-          <IconImg src={profileMaskGreenIcon} className="relative z-[1] size-6" />
+          <IconImg
+            src={moodChipIcon}
+            className={`relative z-[1] size-6 ${isIncognito ? "" : "crcle-mood-chip-icon"}`}
+          />
           <ChevronDown className="relative z-[1] size-5 text-white/50 [.crcle-phone--light_&]:text-[rgba(2,3,29,0.45)]" strokeWidth={1.5} />
         </button>
       </div>
@@ -865,9 +1117,9 @@ function ProfileMainView({
                       </p>
                     </div>
                   </div>
-                  <div className="flex w-full items-center justify-between rounded-[24px] border border-[rgba(247,246,242,0.1)] py-1 pl-2 pr-1.5">
+                  <div className="flex w-full items-center justify-between rounded-[24px] border border-[rgba(247,246,242,0.1)] py-1 pl-2 pr-1.5 [.crcle-phone--light_&]:border-[rgba(2,4,38,0.28)]">
                     <span
-                      className="text-[11px] leading-[1.4] text-[#f7f6f2]"
+                      className="text-[11px] leading-[1.4] text-[#f7f6f2] [.crcle-phone--light_&]:text-[#949491]"
                       style={{ fontFamily: FONT }}
                     >
                       Looking for work
@@ -1088,43 +1340,43 @@ function MoodSwitcherModal({
           </button>
         </div>
 
-        {/* Center hero — active mood */}
+        {/* Center hero — Figma 949:30008 / 949:30006 (Untitled 21:10179) */}
+        <div className="relative min-h-0 flex-1" aria-hidden />
         <div
-          className={`relative mt-8 flex min-h-0 flex-1 flex-col items-center justify-center transition ${
-            isIncognito ? "pointer-events-none opacity-35" : "opacity-100"
+          className={`pointer-events-none absolute inset-x-0 top-0 z-[1] h-full transition ${
+            isIncognito ? "opacity-35" : "opacity-100"
           }`}
         >
           <AnimatePresence mode="wait">
             <motion.div
               key={activeMood.id}
-              initial={{ opacity: 0, y: 94, scale: 0.92 }}
-              animate={{ opacity: 1, y: 80, scale: 1 }}
-              exit={{ opacity: 0, y: 70, scale: 0.96 }}
-              transition={{ type: "spring", stiffness: 380, damping: 28 }}
-              className="flex w-full max-w-[300px] flex-col items-center gap-4 text-center"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.28, ease: EASE }}
+              className="absolute inset-0"
             >
-              <IconImg src={activeMood.icon} className="size-6" />
-              <motion.p
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.28, ease: EASE, delay: 0.04 }}
-                className="text-[16px] font-normal leading-[1.4] text-[rgba(247,246,242,0.6)]"
+              <div className="absolute left-1/2 top-[527px] size-6 -translate-x-1/2">
+                <IconImg src={activeMood.icon} className="size-6" />
+              </div>
+              <p
+                className="absolute left-1/2 top-[564px] w-[360px] -translate-x-1/2 text-center text-[16px] font-normal leading-[1.4] text-[rgba(247,246,242,0.6)]"
                 style={{ fontFamily: FONT }}
               >
                 {activeMood.description}
-              </motion.p>
+              </p>
             </motion.div>
           </AnimatePresence>
         </div>
 
-        {/* Right floating mood dock — Figma 949:29977 */}
+        {/* Right floating mood dock — Figma 949:29977 / Untitled 21:10332 */}
         <div
           className={`pointer-events-none absolute right-3 top-[282px] z-[2] flex items-center gap-[11px] transition ${
             isIncognito ? "opacity-30" : "opacity-100"
           }`}
         >
           <div
-            className="flex h-[170px] flex-col justify-between text-right text-[13px] font-medium leading-[1.4] text-white"
+            className="flex flex-col gap-[11px] py-2 text-right text-[13px] font-medium leading-[1.4] text-white"
             style={{ fontFamily: FONT }}
           >
             {MOODS.map((m) => {
@@ -1132,7 +1384,9 @@ function MoodSwitcherModal({
               return (
                 <span
                   key={m.id}
-                  className={`transition-opacity duration-200 ${show ? "opacity-100" : "opacity-0"}`}
+                  className={`flex h-11 items-center justify-end whitespace-nowrap transition-opacity duration-200 ${
+                    show ? "opacity-100" : "opacity-0"
+                  }`}
                   aria-hidden={!show}
                 >
                   {m.label}
@@ -1141,12 +1395,20 @@ function MoodSwitcherModal({
             })}
           </div>
 
-          <div className="pointer-events-auto flex flex-col gap-[11px] rounded-[36px] bg-[rgba(255,255,255,0.1)] p-2 backdrop-blur-[12px]">
+          <div className="pointer-events-auto relative flex flex-col gap-[11px] overflow-hidden rounded-[36px] p-2">
+            <span
+              aria-hidden
+              className="pointer-events-none absolute inset-0 rounded-[inherit] bg-[rgba(255,255,255,0.1)]"
+              style={{
+                WebkitBackdropFilter: "blur(12px) saturate(140%)",
+                backdropFilter: "blur(12px) saturate(140%)",
+              }}
+            />
             {MOODS.map((m) => {
               const active = activeState === m.id;
               const rimId = `mood-dock-rim-${m.id}`;
               return (
-                <motion.button
+                <button
                   key={m.id}
                   type="button"
                   aria-label={m.label}
@@ -1155,12 +1417,11 @@ function MoodSwitcherModal({
                   onClick={() => onSelectMood(m.id)}
                   onMouseEnter={() => setHoveredMood(m.id)}
                   onMouseLeave={() => setHoveredMood(null)}
-                  whileTap={{ scale: 0.88 }}
-                  transition={{ type: "spring", stiffness: 500, damping: 28 }}
-                  className={`crcle-intent-chip relative flex size-11 items-center justify-center rounded-[24px] p-1 opacity-40 disabled:cursor-not-allowed ${
+                  className={`crcle-intent-chip relative z-[1] flex size-11 items-center justify-center rounded-[24px] p-1 disabled:cursor-not-allowed ${
                     active ? "is-lit" : ""
                   }`}
                 >
+                  <span aria-hidden className="crcle-intent-chip__frost" />
                   {/* Glass crescent rim — same as Signal intent chips */}
                   <svg
                     aria-hidden
@@ -1222,7 +1483,7 @@ function MoodSwitcherModal({
                       draggable={false}
                     />
                   </span>
-                </motion.button>
+                </button>
               );
             })}
           </div>
@@ -1436,14 +1697,12 @@ function RelationshipStatusSheet({
       aria-label="Edit Relationship status"
       onClick={onClose}
     >
-      <motion.div
-        initial={{ opacity: 0, y: 16, scale: 0.98 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        exit={{ opacity: 0, y: 12, scale: 0.98 }}
-        transition={{ duration: 0.28, ease: EASE }}
-        className="crcle-sheet-frost--dark relative w-full max-w-[374px] overflow-hidden rounded-[24px] shadow-[0_16px_48px_rgba(0,0,0,0.35)]"
+      <div
+        className="relative w-full max-w-[374px] overflow-hidden rounded-[24px] shadow-[0_16px_48px_rgba(0,0,0,0.35)]"
         onClick={(e) => e.stopPropagation()}
       >
+        <div aria-hidden className="crcle-sheet-frost--dark absolute inset-0 rounded-[24px]" />
+        <div className="relative z-[1]">
         {/* Header — Figma 862:242953 */}
         <div className="flex h-[62px] items-center justify-between border-b border-[rgba(255,255,255,0.1)] bg-[rgba(1,2,17,0.5)] px-3">
           <p
@@ -1539,7 +1798,8 @@ function RelationshipStatusSheet({
             </button>
           </div>
         </div>
-      </motion.div>
+        </div>
+      </div>
     </CrclePhoneOverlay>
   );
 }

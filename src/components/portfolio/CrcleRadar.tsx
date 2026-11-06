@@ -360,8 +360,9 @@ export function CrcleRadar({
               aria-label="Back to Signal Home"
               onClick={onGoToSignalHome}
               className="crcle-intent-chip relative z-[1] flex size-10 shrink-0 items-center justify-center rounded-full p-1"
-              style={{ background: "rgba(247, 246, 242, 0.15)" }}
+              style={{ ["--chip-fill"]: "rgba(247, 246, 242, 0.15)" } as CSSProperties}
             >
+              <span aria-hidden className="crcle-intent-chip__frost" />
               <svg
                 aria-hidden
                 viewBox="0 0 40 40"
@@ -439,17 +440,25 @@ export function CrcleRadar({
                 ) : null}
                 <div className="relative z-[1] flex w-full items-center justify-between px-4 pt-4">
                   <div
-                    className={`flex items-center gap-2.5 rounded-[64px] p-2.5 backdrop-blur-[6px] ${
-                      caughtUp ? "bg-[#010211] opacity-0" : "bg-[rgba(2,3,29,0.3)]"
+                    className={`relative flex items-center gap-2.5 overflow-hidden rounded-[64px] p-2.5 ${
+                      caughtUp ? "invisible" : ""
                     }`}
                   >
                     <span
-                      className="text-[11px] leading-[1.4] text-white"
+                      aria-hidden
+                      className="pointer-events-none absolute inset-0 rounded-[inherit] bg-[rgba(2,3,29,0.3)]"
+                      style={{
+                        WebkitBackdropFilter: "blur(6px) saturate(140%)",
+                        backdropFilter: "blur(6px) saturate(140%)",
+                      }}
+                    />
+                    <span
+                      className="relative z-[1] text-[11px] leading-[1.4] text-white"
                       style={{ fontFamily: FONT }}
                     >
                       {user.handle}
                     </span>
-                    <span className="relative size-3 shrink-0 overflow-hidden">
+                    <span className="relative z-[1] size-3 shrink-0 overflow-hidden">
                       <img alt="" src={shareIcon} className="absolute inset-0 size-full" />
                       <span className="absolute inset-[8.33%_12.5%_8.67%_12.5%]">
                         <img alt="" src={shareInnerIcon} className="absolute inset-0 size-full" />
@@ -473,12 +482,20 @@ export function CrcleRadar({
                       type="button"
                       aria-label="Next recommendation"
                       onClick={goNextUser}
-                      className="flex h-[35px] shrink-0 items-center justify-center rounded-[36px] bg-[#02031d] px-3 py-1 backdrop-blur-[2px] transition hover:brightness-110"
+                      className="relative flex h-[35px] shrink-0 items-center justify-center overflow-hidden rounded-[36px] px-3 py-1"
                     >
+                      <span
+                        aria-hidden
+                        className="pointer-events-none absolute inset-0 rounded-[inherit] bg-[#02031d]"
+                        style={{
+                          WebkitBackdropFilter: "blur(2px) saturate(140%)",
+                          backdropFilter: "blur(2px) saturate(140%)",
+                        }}
+                      />
                       <img
                         alt=""
                         src={arrowForwardIcon}
-                        className="size-4 object-contain"
+                        className="relative z-[1] size-4 object-contain"
                         draggable={false}
                       />
                     </button>
@@ -501,103 +518,91 @@ export function CrcleRadar({
                   </div>
                 ) : null}
 
-                {/* Intent push — Figma 841:225007; same bounds as recommendation card */}
-                <AnimatePresence>
-                  {state.isIntentOverlayOpen ? (
-                    <motion.div
-                      key="intent-push"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.22, ease: EASE }}
-                      className="absolute inset-0 z-30 overflow-hidden rounded-[36px]"
-                    >
-                      <IntentPushOverlay
-                        selectedIntent={state.selectedIntent}
-                        onSelect={selectIntent}
-                        onConfirm={confirmIntent}
-                        onClose={() =>
-                          setState((s) => ({
-                            ...s,
-                            isIntentOverlayOpen: false,
-                            selectedIntent: null,
-                          }))
-                        }
-                      />
-                    </motion.div>
-                  ) : null}
-                </AnimatePresence>
+                {/* Intent push — Figma 841:225007; static wrapper so frost can sample the portrait. */}
+                {state.isIntentOverlayOpen ? (
+                  <div className="absolute inset-0 z-30 overflow-hidden rounded-[36px]">
+                    <IntentPushOverlay
+                      selectedIntent={state.selectedIntent}
+                      onSelect={selectIntent}
+                      onConfirm={confirmIntent}
+                      onClose={() =>
+                        setState((s) => ({
+                          ...s,
+                          isIntentOverlayOpen: false,
+                          selectedIntent: null,
+                        }))
+                      }
+                    />
+                  </div>
+                ) : null}
 
                 {/* All caught up — next-drop card after last recommendation */}
-                <AnimatePresence>
-                  {caughtUp ? (
-                    <motion.div
-                      key="caught-up"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.28, ease: EASE }}
-                      className="absolute inset-0 z-40 overflow-hidden rounded-[36px]"
-                    >
-                      <RadarCaughtUp onGoToProfile={onGoToProfile} />
-                    </motion.div>
-                  ) : null}
-                </AnimatePresence>
+                {caughtUp ? (
+                  <div className="absolute inset-0 z-40 overflow-hidden rounded-[36px]">
+                    <RadarCaughtUp onGoToProfile={onGoToProfile} />
+                  </div>
+                ) : null}
 
                 {/* Signal Sent — Figma 849:225257; exact portrait card bounds */}
-                <AnimatePresence>
-                  {showSignalModal ? (
-                    <motion.div
-                      key="signal-sent"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.22, ease: EASE }}
-                      className="absolute inset-0 z-40 overflow-hidden rounded-[36px]"
-                    >
-                      <SignalSentSuccessModal
-                        userName={user.name}
-                        onGoToMessages={goToMessages}
-                        onClose={closeSuccess}
-                      />
-                    </motion.div>
-                  ) : null}
-                </AnimatePresence>
+                {showSignalModal ? (
+                  <div className="absolute inset-0 z-40 overflow-hidden rounded-[36px]">
+                    <SignalSentSuccessModal
+                      userName={user.name}
+                      onGoToMessages={goToMessages}
+                      onClose={closeSuccess}
+                    />
+                  </div>
+                ) : null}
               </div>
             </div>
 
             {/* Swipe feature — Figma 839:224515 / NOC glass 957:31087 */}
             <div className="relative z-10 w-full">
-              <AnimatePresence>
-                {state.pushPhase === "success" ? (
-                  <motion.button
-                    key="undo-push"
-                    type="button"
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 4 }}
-                    transition={{ duration: 0.2, ease: EASE }}
-                    onClick={undoPush}
-                    className="absolute bottom-full left-1/2 z-20 mb-2 -translate-x-1/2 rounded-[64px] border border-[rgba(2,3,29,0.2)] bg-white/40 px-1 py-2 backdrop-blur-[8px]"
-                    style={{ fontFamily: FONT }}
-                  >
-                    <span className="block w-[67px] text-center text-[14px] font-medium leading-[1.2] text-[#020426]">
-                      Undo
-                    </span>
-                  </motion.button>
-                ) : null}
-              </AnimatePresence>
+              {state.pushPhase === "success" ? (
+                <button
+                  type="button"
+                  onClick={undoPush}
+                  className="absolute bottom-full left-1/2 z-20 mb-2 -translate-x-1/2 overflow-hidden rounded-[64px] border border-[rgba(2,3,29,0.2)] bg-transparent px-1 py-2"
+                  style={{ fontFamily: FONT }}
+                >
+                  <span
+                    aria-hidden
+                    className="pointer-events-none absolute inset-0 rounded-[inherit] bg-white/40"
+                    style={{
+                      WebkitBackdropFilter: "blur(8px) saturate(160%)",
+                      backdropFilter: "blur(8px) saturate(160%)",
+                    }}
+                  />
+                  <span className="relative z-[1] block w-[67px] text-center text-[14px] font-medium leading-[1.2] text-[#020426]">
+                    Undo
+                  </span>
+                </button>
+              ) : null}
 
               <div
-                className={`relative flex h-[138px] w-full items-end justify-center rounded-[36px] p-4 backdrop-blur-xl transition-opacity duration-300 ${
-                  caughtUp ? "pointer-events-none opacity-0" : ""
+                className={`relative flex h-[138px] w-full items-end justify-center overflow-hidden rounded-[36px] p-4 ${
+                  caughtUp ? "pointer-events-none invisible" : ""
                 } ${
                   isNoc
-                    ? "border border-white/10 bg-black/40"
-                    : "border border-[rgba(247,246,242,0.4)] bg-[rgba(2,3,29,0.2)] backdrop-blur-[12px]"
+                    ? "border border-white/10"
+                    : "border border-[rgba(247,246,242,0.4)]"
                 }`}
               >
-              <div className="absolute left-1/2 top-[7px] h-0 w-[58px] -translate-x-1/2">
+                <div
+                  aria-hidden
+                  className={`pointer-events-none absolute inset-0 rounded-[inherit] ${
+                    isNoc ? "bg-black/40" : "bg-[rgba(2,3,29,0.2)]"
+                  }`}
+                  style={{
+                    WebkitBackdropFilter: isNoc
+                      ? "blur(24px) saturate(160%)"
+                      : "blur(12px) saturate(160%)",
+                    backdropFilter: isNoc
+                      ? "blur(24px) saturate(160%)"
+                      : "blur(12px) saturate(160%)",
+                  }}
+                />
+              <div className="absolute left-1/2 top-[7px] z-[1] h-0 w-[58px] -translate-x-1/2">
                 <img
                   alt=""
                   src={dragHandleModal}
@@ -624,7 +629,7 @@ export function CrcleRadar({
               </motion.button>
 
               <motion.div
-                className="relative mr-[-24px] ml-[-24px] flex h-full min-w-0 flex-1 touch-pan-y flex-col"
+                className="relative z-[1] mr-[-24px] ml-[-24px] flex h-full min-w-0 flex-1 touch-pan-y flex-col"
                 drag="x"
                 dragConstraints={{ left: 0, right: 0 }}
                 dragElastic={0.25}
@@ -1072,10 +1077,11 @@ function IntentPushOverlay({
 }) {
   return (
     <div
-      className="relative size-full overflow-hidden rounded-[36px] bg-[rgba(2,3,29,0.4)] backdrop-blur-[6px]"
+      className="relative size-full overflow-hidden rounded-[36px]"
       role="dialog"
       aria-label="Set intent"
     >
+      <div aria-hidden className="crcle-phone-scrim crcle-phone-scrim--sheet" />
       <button
         type="button"
         aria-label="Close"
@@ -1147,16 +1153,17 @@ function IntentPushOverlay({
           aria-label="Push signal"
           disabled={!selectedIntent}
           onClick={onConfirm}
-          className={`crcle-intent-chip relative z-[1] flex h-9 w-[54px] shrink-0 items-center justify-center rounded-[36px] p-1 transition-[background,opacity] duration-200 ${
-            selectedIntent
-              ? "opacity-100 hover:bg-[rgba(247,246,242,0.36)]"
-              : "pointer-events-none opacity-70"
+          className={`crcle-intent-chip relative z-[1] flex h-9 w-[54px] shrink-0 items-center justify-center rounded-[36px] p-1 ${
+            selectedIntent ? "is-lit" : "pointer-events-none"
           }`}
         >
+          <span aria-hidden className="crcle-intent-chip__frost" />
           <img
             alt=""
             src={locusPlusIcon}
-            className="crcle-intent-chip__icon relative size-4 object-contain"
+            className={`crcle-intent-chip__icon relative size-4 object-contain ${
+              selectedIntent ? "" : "opacity-70"
+            }`}
             draggable={false}
           />
         </button>
@@ -1201,9 +1208,7 @@ function IntentChipDock({
   const [hovered, setHovered] = useState<number | null>(null);
 
   return (
-    <motion.div
-      layout
-      transition={DOCK_SPRING}
+    <div
       onMouseLeave={() => setHovered(null)}
       className="grid grid-cols-2"
       style={{ gap: CHIP_GAP }}
@@ -1219,7 +1224,7 @@ function IntentChipDock({
           onSelect={onSelect}
         />
       ))}
-    </motion.div>
+    </div>
   );
 }
 
@@ -1249,31 +1254,23 @@ function IntentChip({
 
   return (
     <motion.div
-      layout
       onMouseEnter={() => onHover(index)}
       animate={{ width: slot, height: slot }}
       transition={DOCK_SPRING}
+      transformTemplate={() => ""}
       className="relative flex shrink-0 items-center justify-center"
     >
-      <motion.button
+      <button
         type="button"
         aria-label={chip.intent}
         aria-pressed={active}
         onClick={() => onSelect(chip.intent)}
-        animate={{ scale }}
-        transition={DOCK_SPRING}
-        whileTap={{ scale: scale * 0.9 }}
-        className={`crcle-intent-chip relative flex shrink-0 items-center justify-center rounded-[46px] p-1 ${
+        className={`crcle-intent-chip relative flex size-full items-center justify-center rounded-[46px] p-1 ${
           lit ? "is-lit" : ""
         }`}
-        style={
-          {
-            width: CHIP_BASE,
-            height: CHIP_BASE,
-            ["--chip-accent"]: chip.accent,
-          } as CSSProperties
-        }
+        style={{ ["--chip-accent"]: chip.accent } as CSSProperties}
       >
+        <span aria-hidden className="crcle-intent-chip__frost" />
         {/* Glass crescent rim — absolute so it never affects icon layout */}
         <svg
           aria-hidden
@@ -1335,7 +1332,7 @@ function IntentChip({
             className="pointer-events-none relative size-5 max-h-full max-w-full object-contain"
           />
         </span>
-      </motion.button>
+      </button>
     </motion.div>
   );
 }
@@ -1424,12 +1421,20 @@ function RadarCaughtUp({ onGoToProfile }: { onGoToProfile?: () => void }) {
 
   return (
     <div
-      className="relative flex size-full flex-col items-center justify-center rounded-[36px] bg-[rgba(222,221,218,0.08)] p-4 backdrop-blur-[4px]"
+      className="relative flex size-full flex-col items-center justify-center overflow-hidden rounded-[36px] p-4"
       role="dialog"
       aria-modal="true"
       aria-labelledby="radar-caught-up-title"
     >
-      <div className="w-[min(283px,100%)] overflow-hidden rounded-[24px] bg-white shadow-[0px_4px_4px_0px_rgba(0,0,0,0.05)]">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 rounded-[inherit] bg-[rgba(222,221,218,0.08)]"
+        style={{
+          WebkitBackdropFilter: "blur(4px) saturate(140%)",
+          backdropFilter: "blur(4px) saturate(140%)",
+        }}
+      />
+      <div className="relative z-[1] w-[min(283px,100%)] overflow-hidden rounded-[24px] bg-white shadow-[0px_4px_4px_0px_rgba(0,0,0,0.05)]">
         <div className="flex flex-col gap-5 p-4">
           <p
             id="radar-caught-up-title"
@@ -1484,16 +1489,20 @@ function SignalSentSuccessModal({
   onClose: () => void;
 }) {
   return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.98 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.99 }}
-      transition={{ duration: 0.28, ease: EASE }}
-      className="relative flex size-full flex-col items-center justify-between rounded-[36px] bg-[rgba(1,2,17,0.8)] p-4 backdrop-blur-[8px]"
+    <div
+      className="relative flex size-full flex-col items-center justify-between overflow-hidden rounded-[36px] p-4"
       role="dialog"
       aria-label="Signal Sent"
     >
-      <div className="flex w-full items-center justify-end">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 rounded-[inherit] bg-[rgba(1,2,17,0.8)]"
+        style={{
+          WebkitBackdropFilter: "blur(8px) saturate(160%)",
+          backdropFilter: "blur(8px) saturate(160%)",
+        }}
+      />
+      <div className="relative z-[1] flex w-full items-center justify-end">
         <button
           type="button"
           aria-label="Close"
@@ -1504,7 +1513,7 @@ function SignalSentSuccessModal({
         </button>
       </div>
 
-      <div className="flex h-[121px] w-full flex-col items-center justify-center gap-[33px]">
+      <div className="relative z-[1] flex h-[121px] w-full flex-col items-center justify-center gap-[33px]">
         <div className="flex items-center gap-[7px]" aria-hidden>
           <span className="h-[27px] w-[14px] rounded-[35px] bg-[#f7f6f2]" />
           <span className="h-[45px] w-[14px] rounded-[35px] bg-[#f7f6f2]" />
@@ -1518,7 +1527,7 @@ function SignalSentSuccessModal({
         </p>
       </div>
 
-      <div className="mb-4 flex w-full flex-col items-center gap-3">
+      <div className="relative z-[1] mb-4 flex w-full flex-col items-center gap-3">
         <button
           type="button"
           onClick={onGoToMessages}
@@ -1534,7 +1543,7 @@ function SignalSentSuccessModal({
           {userName} will be notified of your intercepted signal
         </p>
       </div>
-    </motion.div>
+    </div>
   );
 }
 

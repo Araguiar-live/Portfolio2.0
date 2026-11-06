@@ -1,5 +1,6 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { useCallback, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
+import type { RadarIntent } from "@/components/portfolio/CrcleRadar";
 import batteryIcon from "@/assets/crcle/battery.svg";
 import cellularIcon from "@/assets/crcle/cellular.svg";
 import crcleLogo from "@/assets/crcle/crcle-logo.svg";
@@ -12,6 +13,10 @@ import radarFireIcon from "@/assets/crcle/onboarding/radar-fire.svg";
 import radarHeartIcon from "@/assets/crcle/onboarding/radar-heart.svg";
 import radarLaptopIcon from "@/assets/crcle/onboarding/radar-laptop.svg";
 import radarYinIcon from "@/assets/crcle/onboarding/radar-yin.svg";
+import intentFireIcon from "@/assets/crcle/radar/intent-fire.svg";
+import intentHeartIcon from "@/assets/crcle/radar/intent-heart.svg";
+import intentLaptopIcon from "@/assets/crcle/radar/intent-laptop.svg";
+import intentYinYangIcon from "@/assets/crcle/radar/intent-yin-yang.svg";
 import signalDividerIcon from "@/assets/crcle/onboarding/signal-divider.svg";
 import signalPrivacyIcon from "@/assets/crcle/onboarding/signal-privacy.svg";
 import signalPulseIcon from "@/assets/crcle/onboarding/signal-pulse.svg";
@@ -24,6 +29,8 @@ import locationIcon from "@/assets/crcle/signal-home/location.svg";
 import philosophyDivider from "@/assets/crcle/signal-home/philosophy-divider.svg";
 import pulseIcon from "@/assets/crcle/signal-home/pulse.svg";
 import radarIcon from "@/assets/crcle/signal-home/radar.svg";
+import signalRingInner from "@/assets/crcle/signal-home/signal-ring-inner.svg";
+import signalRingOuter from "@/assets/crcle/signal-home/signal-ring-outer.svg";
 import wifiIcon from "@/assets/crcle/wifi.svg";
 import { CrclePhoneFrame, CrcleThemeToggle } from "@/components/portfolio/CrclePhoneFrame";
 import { useCrclePhoneLight } from "@/lib/crcle-phone-theme";
@@ -57,21 +64,35 @@ export function CrcleSignalHome({
 } = {}) {
   const [screen, setScreen] = useState<Screen>("empty");
   const [tuneOpen, setTuneOpen] = useState(false);
+  const [homeDone, setHomeDone] = useState(false);
   const [locationOpen, setLocationOpen] = useState(false);
   const [locationDone, setLocationDone] = useState(false);
-  const [signalStrength, setSignalStrength] = useState(10);
   /* Figma 322:118233 — Signal Features overlay on light Daily 3 */
   const [onboardingOpen, setOnboardingOpen] = useState(true);
   const [isLightMode, toggleLight] = useCrclePhoneLight();
-  /** Fine-tune drawer completed (stage 3) */
-  const tuned = signalStrength >= 90;
-  /** Stage 1 photo → 1 bar; stage 2 location → 2 bars; fine-tune → 3 bars */
+  /** Untitled 24:10888 — Intent Settings overlay over the Daily 3 photo */
+  const [intentOpen, setIntentOpen] = useState(false);
+  const [selectedIntent, setSelectedIntent] = useState<RadarIntent | null>(null);
+  /** Pulse master ignition — profile live in the network */
+  const [pulseOpen, setPulseOpen] = useState(false);
+  const [pulseLive, setPulseLive] = useState(false);
+  const intentDone = selectedIntent !== null;
+  const filledCount = Number(homeDone) + Number(locationDone) + Number(intentDone);
+  const remaining = 3 - filledCount;
+  /** Photo 33% → each filled rail tool (Home / Location / Intent) → 100% only when all three are done. */
+  const signalStrength =
+    screen !== "photo" ? 10 : ([33, 55, 78, 100] as const)[filledCount];
+  const tuned = screen === "photo" && filledCount === 3;
   const activeBars =
-    screen !== "photo" ? 0 : tuned ? 3 : locationDone ? 2 : 1;
+    screen !== "photo" ? 0 : tuned || pulseLive ? 3 : filledCount >= 2 ? 2 : 1;
 
   const dismissOnboarding = useCallback(() => {
     setOnboardingOpen(false);
   }, []);
+
+  useEffect(() => {
+    if (tuned) setIntentOpen(false);
+  }, [tuned]);
 
   return (
     <div className="relative ml-auto flex w-fit flex-col items-center">
@@ -82,7 +103,11 @@ export function CrcleSignalHome({
           <SignalTuneDrawer
             open={tuneOpen}
             onClose={() => setTuneOpen(false)}
-            onSave={() => setSignalStrength(100)}
+            onSave={() => {
+              setHomeDone(true);
+              setIntentOpen(false);
+              setPulseOpen(false);
+            }}
             backdropImage={screen === "photo" ? dropPhoto : undefined}
           />
           <AnimatePresence>
@@ -91,9 +116,20 @@ export function CrcleSignalHome({
                 onClose={() => setLocationOpen(false)}
                 onSave={() => {
                   setLocationDone(true);
-                  setSignalStrength(65);
                   setLocationOpen(false);
                 }}
+              />
+            ) : null}
+          </AnimatePresence>
+          <AnimatePresence>
+            {intentOpen ? (
+              <IntentSettingsOverlay
+                selectedIntent={selectedIntent}
+                onSave={(intent) => {
+                  setSelectedIntent(intent);
+                  setIntentOpen(false);
+                }}
+                onClose={() => setIntentOpen(false)}
               />
             ) : null}
           </AnimatePresence>
@@ -107,10 +143,14 @@ export function CrcleSignalHome({
               <CrcleBackButton
                 onClick={() => {
                   setScreen("empty");
-                  setSignalStrength(10);
+                  setHomeDone(false);
                   setLocationDone(false);
                   setLocationOpen(false);
                   setTuneOpen(false);
+                  setIntentOpen(false);
+                  setSelectedIntent(null);
+                  setPulseOpen(false);
+                  setPulseLive(false);
                 }}
               />
               <CrcleMoreButton />
@@ -151,7 +191,7 @@ export function CrcleSignalHome({
               }
             >
               <AnimatePresence>
-                {screen === "photo" ? (
+                {screen === "photo" && !pulseOpen && !intentOpen ? (
                   <motion.div
                     key="signal-strength"
                     initial={{ opacity: 0, y: -6 }}
@@ -164,21 +204,31 @@ export function CrcleSignalHome({
                       <div className="flex shrink-0 items-center gap-[3.2px]" aria-hidden>
                         <span
                           className={`h-3 w-[6px] rounded-[5px] transition-colors duration-300 ${
-                            activeBars >= 1 ? "bg-[#22c55e]" : "bg-[#020426]"
+                            tuned
+                              ? "bg-[#020426]"
+                              : activeBars >= 1
+                                ? "bg-[#22c55e]"
+                                : "bg-[#020426]"
                           }`}
                         />
                         <span
                           className={`h-5 w-[6.4px] rounded-[5px] transition-colors duration-300 ${
-                            activeBars >= 2 ? "bg-[#22c55e]" : "bg-[#020426]"
+                            tuned
+                              ? "bg-[#020426]"
+                              : activeBars >= 2
+                                ? "bg-[#22c55e]"
+                                : "bg-[#020426]"
                           }`}
                         />
                         <span
                           className={`h-3 w-[6px] rounded-[5px] transition-colors duration-300 ${
-                            activeBars >= 3
-                              ? "bg-[#22c55e]"
-                              : activeBars >= 2
-                                ? "bg-[rgba(2,4,38,0.2)]"
-                                : "bg-[#020426]"
+                            tuned
+                              ? "bg-[#020426]"
+                              : activeBars >= 3
+                                ? "bg-[#22c55e]"
+                                : activeBars >= 2
+                                  ? "bg-[rgba(2,4,38,0.2)]"
+                                  : "bg-[#020426]"
                           }`}
                         />
                       </div>
@@ -186,27 +236,45 @@ export function CrcleSignalHome({
                         <p className="text-[14px] font-medium" style={{ fontFamily: FONT }}>
                           Signal Strength: {signalStrength}%
                         </p>
-                        <p className="text-[12px] font-normal" style={{ fontFamily: FONT }}>
-                          {activeBars >= 3
-                            ? "Signal fully calibrated."
-                            : activeBars >= 2
+                        {tuned ? (
+                          <p
+                            className="flex flex-wrap items-center gap-1 text-[12px] font-normal"
+                            style={{ fontFamily: FONT }}
+                          >
+                            <span>You can now calibrate your signal. Press</span>
+                            <IconImg src={pulseIcon} className="size-[15px] brightness-0" />
+                            <span>to calibrate.</span>
+                          </p>
+                        ) : (
+                          <p className="text-[12px] font-normal" style={{ fontFamily: FONT }}>
+                            {remaining === 1
                               ? "Add 1 more detail to hit 100%."
-                              : "Add 3 more details to hit 100%."}
-                        </p>
+                              : `Add ${remaining} more details to hit 100%.`}
+                          </p>
+                        )}
                       </div>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => setTuneOpen(true)}
-                      className="flex h-9 shrink-0 items-center justify-center rounded-[36px] bg-[#030426] px-4 py-2"
-                    >
-                      <span
-                        className="text-[13px] leading-[1.4] text-[#fefefe]"
-                        style={{ fontFamily: FONT }}
+                    {tuned ? null : (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (!homeDone) setTuneOpen(true);
+                          else if (!locationDone) setLocationOpen(true);
+                          else {
+                            setPulseOpen(false);
+                            setIntentOpen(true);
+                          }
+                        }}
+                        className="flex h-9 shrink-0 items-center justify-center rounded-[36px] bg-[#030426] px-4 py-2"
                       >
-                        {tuned ? "Edit" : "Complete"}
-                      </span>
-                    </button>
+                        <span
+                          className="text-[13px] leading-[1.4] text-[#fefefe]"
+                          style={{ fontFamily: FONT }}
+                        >
+                          Complete
+                        </span>
+                      </button>
+                    )}
                   </motion.div>
                 ) : null}
               </AnimatePresence>
@@ -278,7 +346,6 @@ export function CrcleSignalHome({
                       type="button"
                       onClick={() => {
                         setScreen("photo");
-                        setSignalStrength(33);
                       }}
                       className={`absolute inset-0 z-0 flex flex-col items-center justify-center gap-2 px-3 pt-24 transition active:scale-[0.995] ${
                         isLightMode ? "hover:bg-black/[0.03]" : "hover:bg-white/[0.03]"
@@ -314,30 +381,31 @@ export function CrcleSignalHome({
                 )}
               </AnimatePresence>
 
+              {pulseOpen ? (
+                <PulseLiveOverlay
+                  onClose={() => setPulseOpen(false)}
+                  onGoToRadar={onGoToRadar}
+                  onGoToProfile={onGoToProfile}
+                />
+              ) : null}
+
               {screen === "photo" ? (
-                <div className="pointer-events-none absolute left-3 top-1/2 z-[1] flex -translate-y-1/2 flex-col gap-1.5">
+                <div className="pointer-events-none absolute left-3 top-1/2 z-[25] -translate-y-1/2">
                   <div className="pointer-events-auto">
-                    <OverlayToolButton ariaLabel="Home" onClick={() => setTuneOpen(true)}>
-                      <IconImg src={navHomeIcon} className="size-6" />
-                    </OverlayToolButton>
-                  </div>
-                  <div className="pointer-events-auto">
-                    <OverlayToolButton
-                      ariaLabel="Location"
-                      onClick={() => setLocationOpen(true)}
-                      lit={locationDone || locationOpen}
-                    >
-                      <IconImg src={locationIcon} className="size-6" />
-                    </OverlayToolButton>
-                  </div>
-                  <div className="pointer-events-auto">
-                    <OverlayToolButton ariaLabel="Intent">
-                      <div className="flex items-center gap-[2.9px]">
-                        <span className="h-[12.3px] w-[4.8px] rounded-[4.7px] border border-[#f7f6f2] bg-[#f7f6f2]" />
-                        <span className="h-[20.4px] w-[5.2px] rounded-[4.7px] bg-[#f7f6f2]" />
-                        <span className="h-[12.3px] w-[4.8px] rounded-[4.7px] border border-[#f7f6f2] bg-[#f7f6f2]" />
-                      </div>
-                    </OverlayToolButton>
+                    <SignalRailTools
+                      direction="col"
+                      homeDone={homeDone}
+                      locationDone={locationDone}
+                      intentDone={intentDone}
+                      intentOpen={intentOpen}
+                      tuned={tuned}
+                      onHome={() => setTuneOpen(true)}
+                      onLocation={() => setLocationOpen(true)}
+                      onIntent={() => {
+                        setPulseOpen(false);
+                        setIntentOpen((open) => !open);
+                      }}
+                    />
                   </div>
                 </div>
               ) : null}
@@ -345,13 +413,38 @@ export function CrcleSignalHome({
               <div className="relative z-[1] mt-auto flex w-full items-end justify-between pb-0.5">
                 {screen === "photo" ? (
                   <>
+                    {tuned && !intentOpen ? (
+                      <div className="pointer-events-none absolute bottom-10 left-1/2 z-[2] flex -translate-x-1/2 items-center gap-1 rounded-xl bg-white/10 px-3 py-1">
+                        <span className="size-2 rounded-full bg-[#22c55e]" aria-hidden />
+                        <span
+                          className="text-[11px] leading-[1.4] text-[#22c55e]"
+                          style={{ fontFamily: FONT }}
+                        >
+                          {pulseLive ? "Signal Live" : "Activating..."}
+                        </span>
+                      </div>
+                    ) : null}
                     <div className="flex w-full items-center justify-center gap-2">
                       <span className="h-1.5 w-6 rounded-full bg-white" />
                       <span className="size-1.5 rounded-full bg-white/40" />
                       <span className="size-1.5 rounded-full bg-white/40" />
                     </div>
-                    <div className="absolute bottom-0 right-0">
-                      <OverlayToolButton ariaLabel="Pulse" size={36} soft>
+                    <div className="absolute bottom-0 right-0 z-[25]">
+                      <OverlayToolButton
+                        ariaLabel="Pulse"
+                        size={36}
+                        soft={!tuned || pulseLive || pulseOpen}
+                        green={tuned && !pulseLive && !pulseOpen}
+                        onClick={() => {
+                          if (!tuned) return;
+                          setIntentOpen(false);
+                          setPulseOpen((open) => {
+                            const next = !open;
+                            if (next) setPulseLive(true);
+                            return next;
+                          });
+                        }}
+                      >
                         <IconImg src={pulseIcon} className="size-6" />
                       </OverlayToolButton>
                     </div>
@@ -364,6 +457,7 @@ export function CrcleSignalHome({
               tone={screen === "photo" ? "live" : "neutral"}
               activeBars={activeBars}
               isLight={isLightMode}
+              pulsing={tuned && !pulseLive}
             />
           </div>
 
@@ -548,6 +642,8 @@ function OverlayToolButton({
   size = 46,
   soft = false,
   lit = false,
+  green = false,
+  complete = false,
 }: {
   children: ReactNode;
   ariaLabel: string;
@@ -555,22 +651,26 @@ function OverlayToolButton({
   size?: number;
   soft?: boolean;
   lit?: boolean;
+  green?: boolean;
+  complete?: boolean;
 }) {
   const rimId = `signal-overlay-rim-${ariaLabel.toLowerCase().replace(/\s+/g, "-")}`;
   const mid = size / 2;
-  const radius = mid - 1.25;
+  const radius = mid - 1.5;
 
   return (
     <button
       type="button"
       aria-label={ariaLabel}
+      aria-pressed={green || complete || lit || undefined}
       onClick={onClick}
       className={`crcle-intent-chip relative z-[1] flex shrink-0 items-center justify-center rounded-full p-1${
         soft ? " crcle-intent-chip--soft" : ""
-      }${lit ? " is-lit" : ""}`}
+      }${green ? " is-green" : complete ? " is-complete" : lit ? " is-lit" : ""}`}
       style={{ width: size, height: size }}
     >
-      {/* Glass crescent rim — same treatment as Radar intent chips */}
+      <span aria-hidden className="crcle-intent-chip__frost" />
+      {/* Glass crescent rim — completed chips get a solid green outline */}
       <svg
         aria-hidden
         viewBox={`0 0 ${size} ${size}`}
@@ -585,10 +685,25 @@ function OverlayToolButton({
             y2={size * 0.935}
             gradientUnits="userSpaceOnUse"
           >
-            <stop offset="0%" stopColor="#ffffff" stopOpacity="0.95" />
-            <stop offset="28%" stopColor="#ffffff" stopOpacity="0.4" />
-            <stop offset="55%" stopColor="#ffffff" stopOpacity="0.1" />
-            <stop offset="100%" stopColor="#ffffff" stopOpacity="0.18" />
+            {green ? (
+              <>
+                <stop offset="0%" stopColor="#b8ffd2" stopOpacity="1" />
+                <stop offset="42%" stopColor="#0fc950" stopOpacity="0.85" />
+                <stop offset="100%" stopColor="#0fc950" stopOpacity="0.2" />
+              </>
+            ) : complete ? (
+              <>
+                <stop offset="0%" stopColor="#0fc950" stopOpacity="1" />
+                <stop offset="100%" stopColor="#0fc950" stopOpacity="1" />
+              </>
+            ) : (
+              <>
+                <stop offset="0%" stopColor="#ffffff" stopOpacity="0.95" />
+                <stop offset="28%" stopColor="#ffffff" stopOpacity="0.4" />
+                <stop offset="55%" stopColor="#ffffff" stopOpacity="0.1" />
+                <stop offset="100%" stopColor="#ffffff" stopOpacity="0.18" />
+              </>
+            )}
           </linearGradient>
         </defs>
         <circle
@@ -597,7 +712,7 @@ function OverlayToolButton({
           r={radius}
           fill="none"
           stroke={`url(#${rimId})`}
-          strokeWidth="1.5"
+          strokeWidth={complete ? "2" : "1.5"}
           strokeLinecap="round"
         />
       </svg>
@@ -605,6 +720,269 @@ function OverlayToolButton({
         {children}
       </span>
     </button>
+  );
+}
+
+const TUNE_INTENTS: {
+  id: RadarIntent;
+  src: string;
+  title: string;
+  subtitle: string;
+}[] = [
+  { id: "social", src: intentFireIcon, title: "The Seeker", subtitle: "Energy alignment" },
+  { id: "romantic", src: intentHeartIcon, title: "The Romantic", subtitle: "Love Oriented" },
+  { id: "balanced", src: intentYinYangIcon, title: "The Balanced", subtitle: "See what clicks" },
+  { id: "professional", src: intentLaptopIcon, title: "The Builder", subtitle: "Network & grow" },
+];
+
+/** Untitled 24:10888 / CRCLE 355:354833 — Tune Intent sheet, same hover as Location Required. */
+function IntentSettingsOverlay({
+  selectedIntent,
+  onSave,
+  onClose,
+}: {
+  selectedIntent: RadarIntent | null;
+  onSave: (intent: RadarIntent) => void;
+  onClose: () => void;
+}) {
+  const [draft, setDraft] = useState<RadarIntent | null>(selectedIntent);
+
+  return (
+    <CrclePhoneOverlay
+      zClass="z-[60]"
+      scrim="mist"
+      contentClassName="items-center justify-center"
+      aria-modal="true"
+      aria-labelledby="tune-intent-title"
+    >
+      <button
+        type="button"
+        aria-label="Dismiss intent settings"
+        className="absolute inset-0 cursor-default"
+        onClick={onClose}
+      />
+      <div className="relative z-[1] flex h-[421px] w-[290px] shrink-0 flex-col overflow-hidden rounded-[24px] border border-[rgba(247,246,242,0.2)] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)]">
+        <div aria-hidden className="crcle-sheet-frost--tune absolute inset-0 rounded-[inherit]" />
+        <div className="relative z-[1] flex min-h-0 flex-1 flex-col">
+            <div className="flex items-center justify-between border-b border-[rgba(255,255,255,0.1)] px-3 pb-[13px] pt-3">
+              <span className="size-5 shrink-0" aria-hidden />
+              <p
+                id="tune-intent-title"
+                className="min-w-0 flex-1 text-center text-[14px] font-medium leading-[1.4] text-white"
+                style={{ fontFamily: FONT }}
+              >
+                Tune Intent
+              </p>
+              <button
+                type="button"
+                aria-label="Close"
+                onClick={onClose}
+                className="flex size-5 shrink-0 items-center justify-center rounded-full bg-[rgba(255,255,255,0.1)]"
+              >
+                <IconImg src={locusCloseIcon} className="size-3 brightness-0 invert" />
+              </button>
+            </div>
+
+            <div className="flex min-h-0 flex-1 flex-col items-center justify-between px-3 pb-4 pt-3">
+              <div className="flex h-2 w-[17px] items-center justify-center gap-[5px]" aria-hidden>
+                <span className="size-1 rounded-full bg-[rgba(247,246,242,0.45)]" />
+                <span className="size-1 rounded-full bg-[rgba(247,246,242,0.45)]" />
+              </div>
+              <p
+                className="w-full text-center text-[11px] font-normal leading-[1.4] text-[#b1b1bc]"
+                style={{ fontFamily: FONT }}
+              >
+                Define what you&apos;re seeking
+              </p>
+              <div className="grid w-full grid-cols-2 gap-3">
+                {TUNE_INTENTS.map((item) => {
+                  const active = draft === item.id;
+                  return (
+                    <button
+                      key={item.id}
+                      type="button"
+                      aria-label={item.title}
+                      aria-pressed={active}
+                      onClick={() => setDraft(item.id)}
+                      className={`flex min-h-[110px] flex-col items-center rounded-2xl border border-[rgba(247,246,242,0.4)] px-3 py-4 ${
+                        active ? "justify-center gap-2 bg-[rgba(255,255,255,0.2)]" : "justify-between"
+                      }`}
+                    >
+                      <img
+                        alt=""
+                        src={item.src}
+                        className="size-6 object-contain"
+                        draggable={false}
+                      />
+                      <span className="flex w-full flex-col items-center text-center leading-[1.2] text-[#f7f6f2]">
+                        <span
+                          className="w-full text-[14px] font-semibold tracking-[0.4px]"
+                          style={{ fontFamily: FONT }}
+                        >
+                          {item.title}
+                        </span>
+                        <span
+                          className="w-full text-[10px] font-normal tracking-[-0.15px]"
+                          style={{ fontFamily: FONT }}
+                        >
+                          {item.subtitle}
+                        </span>
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+              <button
+                type="button"
+                disabled={!draft}
+                onClick={() => {
+                  if (!draft) return;
+                  onSave(draft);
+                }}
+                className="flex w-full items-center justify-center rounded-[36px] bg-[#f7f6f2] px-[46px] py-1.5 disabled:opacity-40"
+              >
+                <span
+                  className="text-center text-[16px] font-normal leading-[1.2] text-[#030426]"
+                  style={{ fontFamily: FONT }}
+                >
+                  Save Intent
+                </span>
+              </button>
+            </div>
+        </div>
+      </div>
+    </CrclePhoneOverlay>
+  );
+}
+
+/** Untitled 28:20859 — You're all set sheet after Pulse. Photo stays sharp. */
+function PulseLiveOverlay({
+  onClose,
+  onGoToRadar,
+  onGoToProfile,
+}: {
+  onClose: () => void;
+  onGoToRadar?: () => void;
+  onGoToProfile?: () => void;
+}) {
+  return (
+    <>
+      <button
+        type="button"
+        aria-label="Close pulse"
+        onClick={onClose}
+        className="absolute inset-0 z-20 rounded-[28px]"
+      />
+      <div
+        className="pointer-events-none absolute inset-x-[7px] top-2 z-[30] flex flex-col items-center gap-3"
+        role="dialog"
+        aria-label="You're all set"
+      >
+        <div className="pointer-events-auto relative w-full overflow-hidden rounded-[24px] border border-[rgba(253,252,251,0.7)]">
+        <div
+          aria-hidden
+          className="absolute inset-0 rounded-[inherit]"
+          style={{
+            background: "rgba(2, 2, 23, 0.3)",
+            backdropFilter: "blur(6px) saturate(140%)",
+            WebkitBackdropFilter: "blur(6px) saturate(140%)",
+          }}
+        />
+        <div className="relative z-[1] flex w-full flex-col">
+          <div className="flex w-full flex-col gap-2 px-4 pb-2 pt-5">
+            <p
+              className="w-full text-center text-[16px] font-medium leading-[1.4] text-[#f7f6f2]"
+              style={{ fontFamily: FONT }}
+            >
+              You&apos;re all set
+            </p>
+            <p
+              className="w-full text-center text-[13px] font-normal leading-[1.4] text-[#f7f6f2]"
+              style={{ fontFamily: FONT }}
+            >
+              Your profile is locked in for the next drop. Sit tight, your new matches will appear
+              when the timer runs out.
+            </p>
+          </div>
+          <div className="flex w-full flex-col items-center gap-2.5 p-3 pt-2">
+            <button
+              type="button"
+              onClick={() => {
+                onClose();
+                onGoToRadar?.();
+              }}
+              className="flex w-full items-center justify-center rounded-full bg-[#020217] px-3 py-2"
+            >
+              <span
+                className="text-[15px] leading-[21px] text-[#f7f6f2]"
+                style={{ fontFamily: FONT }}
+              >
+                Go to recommendations
+              </span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                onClose();
+                onGoToProfile?.();
+              }}
+              className="w-full text-center text-[11px] leading-[1.4] text-[rgba(247,246,242,0.6)]"
+              style={{ fontFamily: FONT }}
+            >
+              Go back to profile
+            </button>
+            <span aria-hidden className="mt-0.5 h-px w-[66.5px] rounded-full bg-[rgba(247,246,242,0.35)]" />
+          </div>
+        </div>
+        </div>
+      </div>
+    </>
+  );
+}
+
+function SignalRailTools({
+  direction = "col",
+  homeDone,
+  locationDone,
+  intentDone,
+  intentOpen,
+  tuned = false,
+  onHome,
+  onLocation,
+  onIntent,
+}: {
+  direction?: "col" | "row";
+  homeDone: boolean;
+  locationDone: boolean;
+  intentDone: boolean;
+  intentOpen: boolean;
+  tuned?: boolean;
+  onHome: () => void;
+  onLocation: () => void;
+  onIntent: () => void;
+}) {
+  return (
+    <div
+      className={`flex items-center gap-1.5 ${direction === "row" ? "flex-row" : "flex-col"}`}
+    >
+      <OverlayToolButton ariaLabel="Home" complete={homeDone && !tuned} onClick={onHome}>
+        <IconImg src={navHomeIcon} className="size-6" />
+      </OverlayToolButton>
+      <OverlayToolButton ariaLabel="Location" onClick={onLocation} complete={locationDone && !tuned}>
+        <IconImg src={locationIcon} className="size-6" />
+      </OverlayToolButton>
+      <OverlayToolButton
+        ariaLabel="Intent"
+        complete={(intentOpen || intentDone) && !tuned}
+        onClick={onIntent}
+      >
+        <div className="flex items-center gap-[2.9px]">
+          <span className="h-[12.3px] w-[4.8px] rounded-[4.7px] border border-[#f7f6f2] bg-[#f7f6f2]" />
+          <span className="h-[20.4px] w-[5.2px] rounded-[4.7px] bg-[#f7f6f2]" />
+          <span className="h-[12.3px] w-[4.8px] rounded-[4.7px] border border-[#f7f6f2] bg-[#f7f6f2]" />
+        </div>
+      </OverlayToolButton>
+    </div>
   );
 }
 
@@ -634,13 +1012,9 @@ function LocationRequiredModal({
         className="absolute inset-0 cursor-default"
         onClick={onClose}
       />
-      <motion.div
-        initial={{ opacity: 0, scale: 0.96, y: 10 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.98, y: 8 }}
-        transition={{ duration: 0.28, ease: EASE }}
-        className="crcle-sheet-frost--dark relative z-[1] mx-3 flex w-full max-w-[387px] flex-col overflow-hidden rounded-[24px] border border-[rgba(255,255,255,0.2)] p-px shadow-[0px_25px_50px_-12px_rgba(0,0,0,0.25)]"
-      >
+      <div className="relative z-[1] mx-3 w-full max-w-[387px] overflow-hidden rounded-[24px] border border-[rgba(255,255,255,0.2)] p-px shadow-[0px_25px_50px_-12px_rgba(0,0,0,0.25)]">
+        <div aria-hidden className="crcle-sheet-frost--dark absolute inset-0 rounded-[inherit]" />
+        <div className="relative z-[1] flex w-full flex-col">
         <div className="flex items-center justify-between border-b border-[rgba(255,255,255,0.1)] px-3 pb-[13px] pt-3">
           <p
             id="location-required-title"
@@ -795,7 +1169,8 @@ function LocationRequiredModal({
             </div>
           </div>
         </div>
-      </motion.div>
+        </div>
+      </div>
     </CrclePhoneOverlay>
   );
 }
@@ -804,26 +1179,28 @@ function FooterSignal({
   tone,
   activeBars = 0,
   isLight = false,
+  pulsing = false,
 }: {
   tone: "neutral" | "live";
   activeBars?: number;
   isLight?: boolean;
+  pulsing?: boolean;
 }) {
   return (
     <div className="flex w-full flex-col items-center gap-4 px-3">
-      <SignalBars tone={tone} activeBars={activeBars} isLight={isLight} />
+      <SignalBars tone={tone} activeBars={activeBars} isLight={isLight} pulsing={pulsing} />
       <p
         className="max-w-[392px] text-center text-[11px] leading-[1.4] text-[#b1b1bc]"
         style={{ fontFamily: FONT }}
       >
-        {tone === "live" || !isLight ? (
-          <>Your signal will connect you with compatible users nearby when your drop goes live.</>
-        ) : (
+        {activeBars >= 3 || (tone !== "live" && isLight) ? (
           <>
             Your tuned signal will broadcast to compatible users.
             <br />
             The algorithm calibrates high-fidelity matches based on your frequency
           </>
+        ) : (
+          <>Your signal will connect you with compatible users nearby when your drop goes live.</>
         )}
       </p>
     </div>
@@ -891,13 +1268,15 @@ function SignalBars({
   tone = "neutral",
   activeBars = 0,
   isLight = false,
+  pulsing = false,
 }: {
   tone?: "neutral" | "live";
   activeBars?: number;
   isLight?: boolean;
+  pulsing?: boolean;
 }) {
-  return (
-    <div className="flex h-[30.6px] items-center gap-[4.9px]" aria-hidden>
+  const bars = (
+    <div className="relative z-[1] flex h-[30.6px] items-center gap-[4.9px]" aria-hidden>
       {SIGNAL_WIDTHS.map((width, i) => {
         const { heights, times, duration } = buildSignalKeyframes(i);
         const lit = i < activeBars;
@@ -924,6 +1303,36 @@ function SignalBars({
           />
         );
       })}
+    </div>
+  );
+
+  if (!pulsing) return bars;
+
+  return (
+    <div className="relative flex size-[54px] items-center justify-center overflow-visible" aria-hidden>
+      {/* Untitled 28:20978 — concentric rings ping until Pulse is pressed. */}
+      {[0, 0.7].map((delay) => (
+        <span key={delay} className="pointer-events-none absolute left-0 top-0">
+          <motion.span
+            className="flex origin-center"
+            initial={{ opacity: 0.85, scale: 0.82 }}
+            animate={{ opacity: [0.85, 0], scale: [0.82, 1.42] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeOut", delay }}
+          >
+            <img alt="" src={signalRingOuter} className="max-w-none" draggable={false} />
+          </motion.span>
+        </span>
+      ))}
+      {bars}
+      <span className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+        <motion.span
+          className="flex origin-center"
+          animate={{ opacity: [0.45, 1, 0.45], scale: [0.88, 1.08, 0.88] }}
+          transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
+        >
+          <img alt="" src={signalRingInner} className="max-w-none" draggable={false} />
+        </motion.span>
+      </span>
     </div>
   );
 }
