@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronDown } from "lucide-react";
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import batteryIcon from "@/assets/crcle/battery.svg";
 import cellularIcon from "@/assets/crcle/cellular.svg";
 import crcleLogo from "@/assets/crcle/crcle-logo.svg";
@@ -257,6 +257,10 @@ export function CrcleProfile({
   const [identityVerified, setIdentityVerified] = useState(false);
   const dismissOnboarding = () => setOnboardingOpen(false);
 
+  useEffect(() => {
+    if (!isLightMode && overlay === "kyc") setOverlay(null);
+  }, [isLightMode, overlay]);
+
   const socialCount = Object.values(profile.socials).filter(Boolean).length;
 
   return (
@@ -406,7 +410,7 @@ export function CrcleProfile({
               />
             ) : null}
 
-            {overlay === "kyc" ? (
+            {overlay === "kyc" && isLightMode ? (
               <KycVerifySheet
                 onOkay={() => {
                   setIdentityVerified(true);
@@ -780,7 +784,7 @@ function ProfileMainView({
               <button
                 type="button"
                 onClick={onOpenKyc}
-                className="flex h-[22px] shrink-0 items-center rounded-[36px] border border-[rgba(247,246,242,0.35)] px-2.5 text-[11px] leading-[1.4] text-[#f7f6f2] transition hover:bg-white/10 [.crcle-phone--light_&]:border-[rgba(2,4,38,0.28)] [.crcle-phone--light_&]:text-[#030426] [.crcle-phone--light_&]:hover:bg-[rgba(2,4,38,0.06)]"
+                className="hidden h-[22px] shrink-0 items-center rounded-[36px] border border-[rgba(2,4,38,0.28)] px-2.5 text-[11px] leading-[1.4] text-[#030426] transition hover:bg-[rgba(2,4,38,0.06)] [.crcle-phone--light_&]:flex"
                 style={{ fontFamily: FONT }}
               >
                 Verify

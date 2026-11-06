@@ -414,14 +414,24 @@ export function CrcleSignalHome({
                 {screen === "photo" ? (
                   <>
                     {tuned && !intentOpen ? (
-                      <div className="pointer-events-none absolute bottom-10 left-1/2 z-[2] flex -translate-x-1/2 items-center gap-1 rounded-xl bg-white/10 px-3 py-1">
-                        <span className="size-2 rounded-full bg-[#22c55e]" aria-hidden />
-                        <span
-                          className="text-[11px] leading-[1.4] text-[#22c55e]"
-                          style={{ fontFamily: FONT }}
-                        >
-                          {pulseLive ? "Signal Live" : "Activating..."}
-                        </span>
+                      <div className="pointer-events-none absolute inset-x-0 bottom-10 z-[2] flex justify-center">
+                        <div className="crcle-signal-live-pill relative flex items-center gap-1 px-3 py-1">
+                          <div aria-hidden className="crcle-signal-live-lens">
+                            <img alt="" src={dropPhoto} draggable={false} />
+                            <img alt="" src={dropPhoto} className="crcle-signal-live-lens-r" draggable={false} />
+                            <img alt="" src={dropPhoto} className="crcle-signal-live-lens-b" draggable={false} />
+                          </div>
+                          <div aria-hidden className="crcle-signal-live-frost" />
+                          <div aria-hidden className="crcle-signal-live-gloss" />
+                          <div aria-hidden className="crcle-signal-live-dispersion" />
+                          <span className="relative z-[1] size-2 shrink-0 rounded-full bg-[#22c55e] shadow-[0_0_6px_rgba(34,197,94,0.85)]" aria-hidden />
+                          <span
+                            className="relative z-[1] text-[11px] leading-[1.4] text-[#22c55e]"
+                            style={{ fontFamily: FONT }}
+                          >
+                            {pulseLive ? "Signal Live" : "Activating..."}
+                          </span>
+                        </div>
                       </div>
                     ) : null}
                     <div className="flex w-full items-center justify-center gap-2">
