@@ -271,16 +271,18 @@ function DemoToolbarButton({
   );
 }
 
-/** Figma Rfaea toolbar — 2774:208563. Play runs the profile demo. */
+/** Figma Rfaea toolbar — 2774:208563. Play runs the demo. Design hands the prototype to the user. */
 function DemoToolbar({
   playing,
   onPlay,
+  onDesign,
 }: {
   playing: boolean;
   onPlay: () => void;
+  onDesign: () => void;
 }) {
-  const [designOn, setDesignOn] = useState(false);
   const [codeOn, setCodeOn] = useState(false);
+  const designOn = !playing;
 
   return (
     <div className="flex w-[224px] items-center gap-1 rounded-full bg-white p-1">
@@ -294,8 +296,8 @@ function DemoToolbar({
       </DemoToolbarButton>
       <DemoToolbarButton
         active={designOn}
-        label="Design"
-        onClick={() => setDesignOn((on) => !on)}
+        label="Design mode"
+        onClick={onDesign}
         activeClassName="border border-[rgba(250,131,46,0.2)] bg-[linear-gradient(126deg,rgba(139,92,247,0.4)_19.75%,rgba(3,86,229,0.284)_86.39%)]"
       >
         <img src={designOn ? penActiveIcon : penIdleIcon} alt="" className="size-6 object-contain" />
@@ -644,7 +646,7 @@ export function CrcleProfile({
         </div>
       </CrclePhoneFrame>
       <div className="mt-3 flex items-center justify-center">
-        <DemoToolbar playing={!demoPaused} onPlay={replayDemo} />
+        <DemoToolbar playing={!demoPaused} onPlay={replayDemo} onDesign={pauseDemo} />
       </div>
     </div>
   );
