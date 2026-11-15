@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronDown } from "lucide-react";
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import batteryIcon from "@/assets/crcle/battery.svg";
 import cellularIcon from "@/assets/crcle/cellular.svg";
 import crcleLogo from "@/assets/crcle/crcle-logo.svg";
@@ -256,6 +256,135 @@ export function CrcleProfile({
   const [onboardingOpen, setOnboardingOpen] = useState(true);
   const [identityVerified, setIdentityVerified] = useState(false);
   const dismissOnboarding = () => setOnboardingOpen(false);
+  const screenRef = useRef<HTMLDivElement>(null);
+  const [demoPaused, setDemoPaused] = useState(false);
+  const [demoRun, setDemoRun] = useState(0);
+  const [demoLabel, setDemoLabel] = useState("Demo: Completing onboarding");
+  const [touch, setTouch] = useState<{ x: number; y: number; pressing: boolean } | null>(null);
+  const demoGen = useRef(0);
+  const demoPausedRef = useRef(false);
+  demoPausedRef.current = demoPaused;
+
+  const pauseDemo = () => {
+    demoGen.current += 1;
+    setDemoPaused(true);
+    setTouch(null);
+  };
+
+  const replayDemo = () => {
+    setOnboardingOpen(true);
+    setOverlay(null);
+    setDemoLabel("Demo: Completing onboarding");
+    setDemoPaused(false);
+    setDemoRun((n) => n + 1);
+  };
+
+  useEffect(() => {
+    if (demoPaused) return;
+    const gen = ++demoGen.current;
+    let cancelled = false;
+    const alive = () => !cancelled && demoGen.current === gen && !demoPausedRef.current;
+    const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+    const find = (selector: string) =>
+      screenRef.current?.querySelector<HTMLElement>(selector) ?? null;
+
+    const reveal = (el: HTMLElement) => {
+      const scroller = el.closest<HTMLElement>("[data-demo-scroll]");
+      if (!scroller) return;
+      const er = el.getBoundingClientRect();
+      const sr = scroller.getBoundingClientRect();
+      if (er.top < sr.top + 12 || er.bottom > sr.bottom - 12) {
+        scroller.scrollTop += er.top - sr.top - sr.height / 2 + er.height / 2;
+      }
+    };
+
+    const pointAt = async (el: HTMLElement) => {
+      reveal(el);
+      await wait(360);
+      if (!alive() || !screenRef.current) return false;
+      const er = el.getBoundingClientRect();
+      const rr = screenRef.current.getBoundingClientRect();
+      setTouch({
+        x: er.left - rr.left + er.width / 2,
+        y: er.top - rr.top + er.height / 2,
+        pressing: false,
+      });
+      await wait(560);
+      if (!alive()) return false;
+      setTouch((current) => (current ? { ...current, pressing: true } : current));
+      await wait(170);
+      if (!alive()) return false;
+      setTouch((current) => (current ? { ...current, pressing: false } : current));
+      return true;
+    };
+
+    const run = async () => {
+      setOnboardingOpen(true);
+      setOverlay(null);
+      await wait(520);
+      while (alive()) {
+        setDemoLabel("Demo: Completing onboarding");
+        const start = find('[data-demo-target="onboarding-done"]');
+        if (start && (await pointAt(start)) && alive()) {
+          setOnboardingOpen(false);
+          await wait(760);
+        }
+        if (!alive()) return;
+
+        setDemoLabel("Demo: Switching live mood");
+        const moodBtn = find('[data-demo-target="mood-toggle"]');
+        if (moodBtn && (await pointAt(moodBtn)) && alive()) {
+          setOverlay("mood");
+          await wait(700);
+        }
+        if (!alive()) return;
+        const options = [
+          ...(screenRef.current?.querySelectorAll<HTMLElement>('[data-demo-target="mood-option"]') ??
+            []),
+        ];
+        const next = options.find(
+          (button) =>
+            button.getAttribute("aria-pressed") !== "true" && button.dataset.mood !== "in_the_area",
+        );
+        if (next && (await pointAt(next)) && alive()) {
+          const id = next.dataset.mood as BroadcastState;
+          setBroadcastMood(id);
+          setProfile((current) => ({
+            ...current,
+            broadcast: { ...current.broadcast, activeState: id },
+          }));
+          setOverlay(null);
+          await wait(720);
+        }
+        if (!alive()) return;
+
+        setDemoLabel("Demo: Opening a profile widget");
+        const work = find('[data-demo-target="bento-work"]');
+        if (work && (await pointAt(work)) && alive()) {
+          setOverlay("work");
+          await wait(760);
+        }
+        if (!alive()) return;
+
+        setDemoLabel("Demo: Closing the edit sheet");
+        const close = find('[data-demo-target="sheet-close"]');
+        if (close && (await pointAt(close)) && alive()) {
+          setOverlay(null);
+          await wait(860);
+        }
+        const scroller = screenRef.current?.querySelector<HTMLElement>("[data-demo-scroll]");
+        if (scroller) scroller.scrollTop = 0;
+        await wait(480);
+      }
+    };
+
+    void run();
+    return () => {
+      cancelled = true;
+      setTouch(null);
+    };
+  }, [demoPaused, demoRun, setBroadcastMood]);
 
   useEffect(() => {
     if (!isLightMode && overlay === "kyc") setOverlay(null);
@@ -267,10 +396,20 @@ export function CrcleProfile({
     <div className="relative ml-auto flex w-fit flex-col items-center">
       <CrcleThemeToggle light={isLightMode} onToggle={toggleLight} />
       <CrclePhoneFrame light={isLightMode}>
-        <div className="relative flex h-full min-h-0 w-full flex-col overflow-hidden bg-[#010211] transition-colors duration-300 [.crcle-phone--light_&]:bg-[var(--crcle-bg)]">
+        <div
+          ref={screenRef}
+          onPointerDownCapture={() => {
+            if (demoPausedRef.current) return;
+            pauseDemo();
+          }}
+          className="relative flex h-full min-h-0 w-full flex-col overflow-hidden bg-[#010211] transition-colors duration-300 [.crcle-phone--light_&]:bg-[var(--crcle-bg)]"
+        >
           <div className="relative min-h-0 flex-1">
             {/* Absolute scroll so the dock can sample this layer for backdrop-filter */}
-            <div className="absolute inset-0 overflow-x-hidden overflow-y-auto px-3 pb-28 pt-[86px]">
+            <div
+              data-demo-scroll
+              className="absolute inset-0 overflow-x-hidden overflow-y-auto px-3 pb-28 pt-[86px]"
+            >
               <ProfileMainView
                 profile={profile}
                 socialCount={socialCount}
@@ -420,8 +559,35 @@ export function CrcleProfile({
               />
             ) : null}
           </AnimatePresence>
+          {touch && !demoPaused ? (
+            <motion.div
+              aria-hidden
+              className="pointer-events-none absolute z-[80]"
+              initial={false}
+              animate={{ left: touch.x, top: touch.y, scale: touch.pressing ? 0.78 : 1 }}
+              transition={{ type: "spring", stiffness: 280, damping: 24, mass: 0.6 }}
+              style={{ x: "-50%", y: "-50%" }}
+            >
+              <span className="absolute left-1/2 top-1/2 size-11 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/35 animate-ping" />
+              <span className="relative block size-7 rounded-full border border-white/80 bg-white/90 shadow-[0_8px_24px_rgba(0,0,0,0.28)]" />
+            </motion.div>
+          ) : null}
         </div>
       </CrclePhoneFrame>
+      <div className="mt-3 flex items-center justify-center gap-2">
+        {!demoPaused ? (
+          <p className="rounded-full border border-zinc-200/80 bg-white/75 px-3 py-1.5 text-[11px] font-medium tracking-tight text-zinc-600 shadow-[0_8px_24px_rgba(15,23,42,0.08)] backdrop-blur-md">
+            {demoLabel}
+          </p>
+        ) : null}
+        <button
+          type="button"
+          onClick={replayDemo}
+          className="rounded-full border border-zinc-200/80 bg-white/75 px-3 py-1.5 text-[11px] font-medium tracking-tight text-zinc-700 shadow-[0_8px_24px_rgba(15,23,42,0.08)] backdrop-blur-md transition hover:bg-white"
+        >
+          Replay Demo
+        </button>
+      </div>
     </div>
   );
 }
@@ -487,6 +653,7 @@ function ProfileOnboarding({
               </button>
               <button
                 type="button"
+                data-demo-target="onboarding-done"
                 onClick={onContinue}
                 className="flex h-[49px] flex-1 items-center justify-center rounded-full bg-[#010211] text-[15px] font-normal leading-[21px] text-[#b1b1bc] transition hover:brightness-110"
                 style={{ fontFamily: FONT }}
@@ -818,6 +985,7 @@ function ProfileMainView({
         </button>
         <button
           type="button"
+          data-demo-target="mood-toggle"
           onClick={onOpenMood}
           aria-label={`Broadcast mood: ${moodChipLabel}`}
           className="crcle-glass-btn relative flex items-center justify-center gap-1 self-stretch overflow-hidden rounded-[64px] py-1 pl-2 pr-1"
@@ -1082,6 +1250,7 @@ function ProfileMainView({
               {hasWork ? (
                 <button
                   type="button"
+                  data-demo-target="bento-work"
                   onClick={onOpenWork}
                   className="crcle-glass-btn flex min-w-0 flex-col gap-2 rounded-[20px] p-2 text-left"
                 >
@@ -1415,6 +1584,8 @@ function MoodSwitcherModal({
                 <button
                   key={m.id}
                   type="button"
+                  data-demo-target="mood-option"
+                  data-mood={m.id}
                   aria-label={m.label}
                   aria-pressed={active}
                   disabled={isIncognito}
@@ -1956,6 +2127,7 @@ function WorkEditSheet({
           </div>
           <button
             type="button"
+            data-demo-target="sheet-close"
             onClick={handleDone}
             className="flex h-[37px] w-[72px] items-center justify-center rounded-[20px] bg-[rgba(247,246,242,0.2)]"
           >
