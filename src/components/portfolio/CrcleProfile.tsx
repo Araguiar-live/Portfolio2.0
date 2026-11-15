@@ -1,6 +1,7 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronDown } from "lucide-react";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import batteryIcon from "@/assets/crcle/battery.svg";
 import cellularIcon from "@/assets/crcle/cellular.svg";
 import crcleLogo from "@/assets/crcle/crcle-logo.svg";
@@ -74,6 +75,10 @@ import logoRadioDotIcon from "@/assets/crcle/profile/logo-radio-dot.svg";
 import shareIcon from "@/assets/crcle/share.svg";
 import shareInnerIcon from "@/assets/crcle/share-inner.svg";
 import wifiIcon from "@/assets/crcle/wifi.svg";
+import { crcleInspectForScreen } from "@/components/portfolio/crcleInspect";
+import { getDevInspection, setDevInspection, subscribeDevInspection } from "@/components/portfolio/devInspection";
+import { InspectHotspotOverlay } from "@/components/portfolio/firstDesign/InspectHotspotOverlay";
+import { InspectorTetheredSpecs } from "@/components/portfolio/firstDesign/InspectorTetheredSpecs";
 import { CrclePhoneFrame, CrcleThemeToggle } from "@/components/portfolio/CrclePhoneFrame";
 import { useCrclePhoneLight } from "@/lib/crcle-phone-theme";
 import { CrcleMoreButton, CrclePhoneOverlay, CrclePrimaryDock } from "@/components/portfolio/CrcleChrome";
@@ -271,17 +276,20 @@ function DemoToolbarButton({
   );
 }
 
-/** Figma Rfaea toolbar — 2774:208563. Play runs the demo. Design hands the prototype to the user. */
+/** Figma Rfaea toolbar — 2774:208563. Play runs the demo. Design hands the prototype to the user. Code opens Dev inspection. */
 function DemoToolbar({
   playing,
+  codeOn,
   onPlay,
   onDesign,
+  onCode,
 }: {
   playing: boolean;
+  codeOn: boolean;
   onPlay: () => void;
   onDesign: () => void;
+  onCode: () => void;
 }) {
-  const [codeOn, setCodeOn] = useState(false);
   const designOn = !playing;
 
   return (
@@ -304,8 +312,8 @@ function DemoToolbar({
       </DemoToolbarButton>
       <DemoToolbarButton
         active={codeOn}
-        label="Code"
-        onClick={() => setCodeOn((on) => !on)}
+        label="Dev inspection"
+        onClick={onCode}
         activeClassName="border border-[rgba(1,208,180,0.13)] bg-[linear-gradient(126deg,rgba(1,208,129,0.104)_19.75%,rgba(1,208,129,0.48)_86.39%)]"
       >
         <img src={codeOn ? codeActiveIcon : codeIdleIcon} alt="" className="h-6 w-6" />
@@ -335,6 +343,8 @@ export function CrcleProfile({
   const dismissOnboarding = () => setOnboardingOpen(false);
   const screenRef = useRef<HTMLDivElement>(null);
   const [demoPaused, setDemoPaused] = useState(false);
+  const [inspectId, setInspectId] = useState<string | null>(null);
+  const devInspection = useSyncExternalStore(subscribeDevInspection, getDevInspection, () => false);
   const [demoRun, setDemoRun] = useState(0);
   const [touch, setTouch] = useState<{ x: number; y: number; pressing: boolean } | null>(null);
   const demoGen = useRef(0);
@@ -347,7 +357,16 @@ export function CrcleProfile({
     setTouch(null);
   };
 
+  const toggleDevInspection = () => {
+    const next = !getDevInspection();
+    setDevInspection(next);
+    setInspectId(null);
+    if (next) pauseDemo();
+  };
+
   const replayDemo = () => {
+    setDevInspection(false);
+    setInspectId(null);
     setOnboardingOpen(true);
     setOverlay(null);
     setDemoPaused(false);
@@ -630,6 +649,14 @@ export function CrcleProfile({
               />
             ) : null}
           </AnimatePresence>
+          {devInspection ? (
+            <InspectHotspotOverlay
+              className="z-[70]"
+              annotations={crcleInspectForScreen(onboardingOpen, overlay)}
+              highlightHotspotId={inspectId}
+              onHotspotHover={setInspectId}
+            />
+          ) : null}
           {touch && !demoPaused ? (
             <motion.div
               aria-hidden
@@ -646,8 +673,28 @@ export function CrcleProfile({
         </div>
       </CrclePhoneFrame>
       <div className="mt-3 flex items-center justify-center">
-        <DemoToolbar playing={!demoPaused} onPlay={replayDemo} onDesign={pauseDemo} />
+        <DemoToolbar
+          playing={!demoPaused}
+          codeOn={devInspection}
+          onPlay={replayDemo}
+          onDesign={pauseDemo}
+          onCode={toggleDevInspection}
+        />
       </div>
+      {devInspection && typeof document !== "undefined"
+        ? createPortal(
+            <div className="pointer-events-none fixed inset-0 z-[45]">
+              <InspectorTetheredSpecs
+                annotations={crcleInspectForScreen(onboardingOpen, overlay)}
+                frameRole="CRCLE profile — live prototype under the work toolbar."
+                artboardRef={screenRef}
+                activeId={inspectId}
+                onActiveChange={setInspectId}
+              />
+            </div>,
+            document.body,
+          )
+        : null}
     </div>
   );
 }
@@ -714,6 +761,7 @@ function ProfileOnboarding({
               <button
                 type="button"
                 data-demo-target="onboarding-done"
+                data-inspect-id="onboarding-done"
                 onClick={onContinue}
                 className="flex h-[49px] flex-1 items-center justify-center rounded-full bg-[#010211] text-[15px] font-normal leading-[21px] text-[#b1b1bc] transition hover:brightness-110"
                 style={{ fontFamily: FONT }}
@@ -1046,6 +1094,7 @@ function ProfileMainView({
         <button
           type="button"
           data-demo-target="mood-toggle"
+          data-inspect-id="mood-toggle"
           onClick={onOpenMood}
           aria-label={`Broadcast mood: ${moodChipLabel}`}
           className="crcle-glass-btn relative flex items-center justify-center gap-1 self-stretch overflow-hidden rounded-[64px] py-1 pl-2 pr-1"
@@ -1311,6 +1360,7 @@ function ProfileMainView({
                 <button
                   type="button"
                   data-demo-target="bento-work"
+                  data-inspect-id="bento-work"
                   onClick={onOpenWork}
                   className="crcle-glass-btn flex min-w-0 flex-col gap-2 rounded-[20px] p-2 text-left"
                 >
@@ -2188,6 +2238,7 @@ function WorkEditSheet({
           <button
             type="button"
             data-demo-target="sheet-close"
+            data-inspect-id="sheet-close"
             onClick={handleDone}
             className="flex h-[37px] w-[72px] items-center justify-center rounded-[20px] bg-[rgba(247,246,242,0.2)]"
           >

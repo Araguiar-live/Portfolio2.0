@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import type { InspectorFrameId } from "./inspectorTypes";
 import { ProductiveWireframePhone } from "./ProductiveWireframePhone";
@@ -17,6 +17,7 @@ import {
 import { INSPECTOR_FRAMES } from "./inspectorTypes";
 import { ProductiveFrameScreen } from "./ProductiveScreens";
 import { ProductiveUnframedArtboard, UNFRAMED_ARTBOARD_W } from "./ProductiveUnframedArtboard";
+import { getDevInspection, setDevInspection, subscribeDevInspection } from "@/components/portfolio/devInspection";
 
 const HORIZONTAL_ORDER = [0, 1, 2, 3, 4, 5] as const;
 const DRAWER_TO_ARTBOARD_GAP = 40;
@@ -33,7 +34,7 @@ const INSPECTOR_ARTBOARD_ZOOM = 0.85;
 export function FirstDesignInspector() {
   const [modalOpen, setModalOpen] = useState(false);
   const [modalFrameIndex, setModalFrameIndex] = useState(0);
-  const [isDevModeActive, setIsDevModeActive] = useState(false);
+  const isDevModeActive = useSyncExternalStore(subscribeDevInspection, getDevInspection, () => false);
   const [activeAnnotationId, setActiveAnnotationId] = useState<string | null>(null);
 
   const [inspectorCamX, setInspectorCamX] = useState(0);
@@ -63,7 +64,7 @@ export function FirstDesignInspector() {
       highlightHotspotId={activeAnnotationId}
       onHotspotHover={setActiveAnnotationId}
       isDevModeActive={isDevModeActive}
-      onToggleDevMode={() => setIsDevModeActive((v) => !v)}
+      onToggleDevMode={() => setDevInspection(!getDevInspection())}
       onClose={() => {
         setModalOpen(false);
         setActiveAnnotationId(null);
