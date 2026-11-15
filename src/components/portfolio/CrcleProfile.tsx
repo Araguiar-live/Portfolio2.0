@@ -276,7 +276,7 @@ function DemoToolbarButton({
   );
 }
 
-/** Figma Rfaea toolbar — 2774:208563. Play runs the demo. Design hands the prototype to the user. Code opens Dev inspection. */
+/** Figma Rfaea toolbar — 2774:208563. One tab at a time: Play, Design, or Dev inspection. */
 function DemoToolbar({
   playing,
   codeOn,
@@ -290,7 +290,7 @@ function DemoToolbar({
   onDesign: () => void;
   onCode: () => void;
 }) {
-  const designOn = !playing;
+  const designOn = !playing && !codeOn;
 
   return (
     <div className="flex w-[224px] items-center gap-1 rounded-full bg-white p-1">
@@ -357,11 +357,16 @@ export function CrcleProfile({
     setTouch(null);
   };
 
-  const toggleDevInspection = () => {
-    const next = !getDevInspection();
-    setDevInspection(next);
+  const selectDesign = () => {
+    setDevInspection(false);
     setInspectId(null);
-    if (next) pauseDemo();
+    pauseDemo();
+  };
+
+  const selectCode = () => {
+    setInspectId(null);
+    setDevInspection(true);
+    pauseDemo();
   };
 
   const replayDemo = () => {
@@ -480,6 +485,13 @@ export function CrcleProfile({
     if (!isLightMode && overlay === "kyc") setOverlay(null);
   }, [isLightMode, overlay]);
 
+  useEffect(() => {
+    if (!devInspection) return;
+    demoGen.current += 1;
+    setDemoPaused(true);
+    setTouch(null);
+  }, [devInspection]);
+
   const socialCount = Object.values(profile.socials).filter(Boolean).length;
 
   return (
@@ -490,6 +502,7 @@ export function CrcleProfile({
           ref={screenRef}
           onPointerDownCapture={() => {
             if (demoPausedRef.current) return;
+            setDevInspection(false);
             pauseDemo();
           }}
           className="relative flex h-full min-h-0 w-full flex-col overflow-hidden bg-[#010211] transition-colors duration-300 [.crcle-phone--light_&]:bg-[var(--crcle-bg)]"
@@ -677,8 +690,8 @@ export function CrcleProfile({
           playing={!demoPaused}
           codeOn={devInspection}
           onPlay={replayDemo}
-          onDesign={pauseDemo}
-          onCode={toggleDevInspection}
+          onDesign={selectDesign}
+          onCode={selectCode}
         />
       </div>
       {devInspection && typeof document !== "undefined"
