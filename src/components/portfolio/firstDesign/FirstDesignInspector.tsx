@@ -109,7 +109,7 @@ export function FirstDesignInspector() {
         : null}
       <ProductiveDesignFileFrame
         key={modalOpen ? `inspector-open-${inspectorCamX}` : "inspector-closed"}
-        frameHeight={modalOpen ? 874 : 500}
+        frameHeight={874}
         initialCamera={
           modalOpen
             ? { x: inspectorCamX, y: 0, z: INSPECTOR_ARTBOARD_ZOOM }

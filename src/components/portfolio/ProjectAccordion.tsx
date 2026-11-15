@@ -284,38 +284,14 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
                 </>
               ) : null}
 
-              {/* Full accordion width — top-aligned like Odicci phone rows (avoids crop) */}
-              <div
-                className={
-                  project.slug === "first-design"
-                    ? "mx-auto flex min-h-0 w-full flex-1 items-start overflow-visible px-0 pt-2"
-                    : "mx-auto flex min-h-0 w-full flex-1 items-start overflow-visible px-4 pt-2 sm:px-8 lg:px-12 xl:px-[68px]"
-                }
-              >
-                  <div
-                    className={
-                      project.slug === "first-design"
-                        ? "flex w-full min-w-0 flex-col items-stretch gap-6"
-                        : "grid w-full min-w-0 grid-cols-1 items-start gap-8 overflow-x-clip lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] lg:gap-8"
-                    }
-                  >
-                    <div
-                      className={
-                        project.slug === "first-design"
-                          ? "max-h-[200px] min-h-0 min-w-0 overflow-y-auto px-6 sm:px-10"
-                          : "flex max-h-[874px] min-h-0 min-w-0 flex-col overflow-x-hidden overflow-y-auto overscroll-contain"
-                      }
-                    >
+              {/* Copy and prototype sit side by side at 1:2 */}
+              <div className="mx-auto flex min-h-0 w-full flex-1 items-start overflow-visible px-4 pt-2 sm:px-8 lg:px-12 xl:px-[68px]">
+                  <div className="grid w-full min-w-0 grid-cols-1 items-start gap-8 overflow-x-clip lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] lg:gap-8">
+                    <div className="flex max-h-[874px] min-h-0 min-w-0 flex-col overflow-x-hidden overflow-y-auto overscroll-contain">
                       <CaseStudyCopy project={project} tab={activeTab} content={tabContent} />
                     </div>
 
-                    <div
-                      className={
-                        project.slug === "first-design"
-                          ? "relative -mx-6 flex w-[calc(100%+3rem)] min-w-0 items-start justify-center overflow-visible"
-                          : "relative flex w-full min-w-0 items-start justify-end overflow-visible"
-                      }
-                    >
+                    <div className="relative flex w-full min-w-0 items-start justify-end overflow-visible">
                       <div className="ml-auto flex w-full min-w-0 max-w-full items-start justify-end overflow-visible">
                         {tabContent.customBody ? (
                           typeof tabContent.customBody === "function"
