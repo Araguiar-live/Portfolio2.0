@@ -2758,20 +2758,6 @@ function SheetShell({
           )}
         </div>
         <div className="min-h-0 overflow-y-auto">{children}</div>
-        <button
-          type="button"
-          aria-label="Close sheet"
-          onClick={onClose}
-          className="crcle-glass-btn crcle-glass-btn--frost relative mx-auto mt-4 flex h-10 w-[60px] items-center justify-center overflow-hidden rounded-[24px]"
-        >
-          <div className="dock-glass-lens opacity-40" aria-hidden />
-          <img
-            alt=""
-            src={locusCloseIcon}
-            className="relative z-[1] size-6 object-contain"
-            draggable={false}
-          />
-        </button>
       </motion.div>
     </CrclePhoneOverlay>
   );
