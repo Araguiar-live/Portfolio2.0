@@ -1915,7 +1915,7 @@ function RelationshipStatusSheet({
       onClick={onClose}
     >
       <div
-        className="relative w-full max-w-[374px] overflow-hidden rounded-[24px] shadow-[0_16px_48px_rgba(0,0,0,0.35)]"
+        className="crcle-edit-sheet relative w-full max-w-[374px] overflow-hidden rounded-[24px] border border-transparent shadow-[0_16px_48px_rgba(0,0,0,0.35)]"
         onClick={(e) => e.stopPropagation()}
       >
         <div aria-hidden className="crcle-sheet-frost--dark absolute inset-0 rounded-[24px]" />
@@ -1931,7 +1931,7 @@ function RelationshipStatusSheet({
           <button
             type="button"
             onClick={() => onSave(selected)}
-            className="flex h-[37px] w-[72px] items-center justify-center rounded-[20px] bg-[rgba(247,246,242,0.2)]"
+            className="crcle-edit-done flex h-[37px] w-[72px] items-center justify-center rounded-[20px] bg-[rgba(247,246,242,0.2)]"
           >
             <span
               className="text-[14px] leading-[21px] text-[#e6e6e9]"
@@ -2137,12 +2137,8 @@ function WorkEditSheet({
       aria-label="Edit Work"
       onClick={onClose}
     >
-      <motion.div
-        initial={{ y: 40 }}
-        animate={{ y: 0 }}
-        exit={{ y: 28 }}
-        transition={{ duration: 0.28, ease: EASE }}
-        className="relative flex max-h-[86%] w-full flex-col overflow-hidden rounded-t-[16px] border border-[rgba(255,255,255,0.3)] border-b-0 bg-[rgba(1,2,17,0.8)]"
+      <div
+        className="crcle-edit-sheet relative flex max-h-[86%] w-full flex-col overflow-hidden rounded-t-[16px] border border-[rgba(255,255,255,0.3)] border-b-0 bg-[rgba(1,2,17,0.8)]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header — matches EducationHistorySheet / Figma 55:25680 fields */}
@@ -2172,7 +2168,7 @@ function WorkEditSheet({
             data-demo-target="sheet-close"
             data-inspect-id="sheet-close"
             onClick={handleDone}
-            className="flex h-[37px] w-[72px] items-center justify-center rounded-[20px] bg-[rgba(247,246,242,0.2)]"
+            className="crcle-edit-done flex h-[37px] w-[72px] items-center justify-center rounded-[20px] bg-[rgba(247,246,242,0.2)]"
           >
             <span
               className="text-[14px] leading-[21px] text-[#e6e6e9]"
@@ -2331,7 +2327,7 @@ function WorkEditSheet({
             This helps find common ground and start conversations
           </p>
         </div>
-      </motion.div>
+      </div>
     </CrclePhoneOverlay>
   );
 }
@@ -2395,12 +2391,8 @@ function EducationHistorySheet({
       aria-label="Edit Education History"
       onClick={onClose}
     >
-      <motion.div
-        initial={{ y: 40 }}
-        animate={{ y: 0 }}
-        exit={{ y: 28 }}
-        transition={{ duration: 0.28, ease: EASE }}
-        className="relative flex max-h-[86%] w-full flex-col overflow-hidden rounded-t-[16px] border border-[rgba(255,255,255,0.3)] border-b-0 bg-[rgba(1,2,17,0.8)]"
+      <div
+        className="crcle-edit-sheet relative flex max-h-[86%] w-full flex-col overflow-hidden rounded-t-[16px] border border-[rgba(255,255,255,0.3)] border-b-0 bg-[rgba(1,2,17,0.8)]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header — Figma 866:243243 */}
@@ -2428,7 +2420,7 @@ function EducationHistorySheet({
           <button
             type="button"
             onClick={handleDone}
-            className="flex h-[37px] w-[72px] items-center justify-center rounded-[20px] bg-[rgba(247,246,242,0.2)]"
+            className="crcle-edit-done flex h-[37px] w-[72px] items-center justify-center rounded-[20px] bg-[rgba(247,246,242,0.2)]"
           >
             <span
               className="text-[14px] leading-[21px] text-[#e6e6e9]"
@@ -2628,7 +2620,7 @@ function EducationHistorySheet({
             </p>
           </div>
         </div>
-      </motion.div>
+      </div>
     </CrclePhoneOverlay>
   );
 }
