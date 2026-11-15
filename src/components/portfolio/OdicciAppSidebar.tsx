@@ -121,8 +121,6 @@ function SidebarNavButton({
         src={icon}
         className={`size-[22px] ${active ? "opacity-100" : "opacity-70"}`}
         draggable={false}
-        loading="lazy"
-        decoding="async"
       />
     </button>
   );

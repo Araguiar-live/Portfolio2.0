@@ -20,9 +20,9 @@ const FONT_MONO =
 export const SIDEBAR_PANEL_ID = "profile-sidebar-panel";
 
 const CONTACT = {
-  email: "A.rafaela.aguiar@outlook.com",
+  email: "hello@example.com",
   phone: "+44 0000 000000",
-  linkedin: "https://www.linkedin.com/feed/",
+  linkedin: "https://www.linkedin.com/",
   github: "https://github.com/",
 } as const;
 
@@ -352,6 +352,7 @@ export function Sidebar({
                     })}
                   </ul>
                 </div>
+
               </div>
             </motion.aside>
           </>

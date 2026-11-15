@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import footerLogo from "@/assets/portfolio/footer/logo.svg";
 import arrowUpRight from "@/assets/portfolio/footer/arrow-up-right.svg";
+import mobileGradient from "@/assets/portfolio/footer/gradient-pattern-mobile.svg";
+import { cn } from "@/lib/utils";
 
 /**
  * Figma Portfolio footer 603:1362 / portfolio-footer 597:35531
@@ -16,6 +18,8 @@ type FooterLink = {
   slug?: string;
   external?: boolean;
   action?: "sidebar";
+  /** Left out of the condensed phone footer (Figma 597:35531). */
+  desktopOnly?: boolean;
 };
 
 const COLUMNS: { title: string; links: FooterLink[] }[] = [
@@ -32,20 +36,20 @@ const COLUMNS: { title: string; links: FooterLink[] }[] = [
     title: "About / CV",
     links: [
       { label: "Experience", href: "#", action: "sidebar" },
-      { label: "Philosophy", href: "#" },
-      { label: "Stack", href: "#" },
-      { label: "Design Tokens", href: "#" },
+      { label: "Philosophy", href: "#", desktopOnly: true },
+      { label: "Stack", href: "#", desktopOnly: true },
+      { label: "Design Tokens", href: "#", desktopOnly: true },
       { label: "Contact", href: `mailto:${EMAIL}` },
     ],
   },
   {
     title: "Socials",
     links: [
-      { label: "LinkedIn", href: "https://www.linkedin.com/feed/", external: true },
-      { label: "GitHub", href: "https://github.com/", external: true },
-      { label: "Twitter / X", href: "https://x.com/", external: true },
-      { label: "ReadCV", href: "https://read.cv/", external: true },
-      { label: "Figma", href: "https://www.figma.com/", external: true },
+      { label: "LinkedIn", href: "https://www.linkedin.com/", external: true },
+      { label: "GitHub", href: "https://github.com/", external: true, desktopOnly: true },
+      { label: "Twitter / X", href: "https://x.com/", external: true, desktopOnly: true },
+      { label: "ReadCV", href: "https://read.cv/", external: true, desktopOnly: true },
+      { label: "Figma", href: "https://www.figma.com/", external: true, desktopOnly: true },
     ],
   },
 ];
@@ -85,16 +89,17 @@ export function Footer({
 
   return (
     <footer
-      className="relative w-full overflow-hidden bg-black px-6 pb-12 pt-16 text-slate-200 sm:px-10 lg:px-12"
+      className="relative w-full overflow-hidden bg-black px-8 pb-12 pt-16 text-slate-200 max-sm:bg-[var(--portfolio-bottom-surface,#0a0d11)] max-sm:py-8"
       data-name="portfolio-footer"
     >
       {/* Gradient Pattern — Figma 605:1386 (bottom-right, 664×563) */}
       <FooterGradientPattern />
+      <MobileGradientPattern />
 
-      <div className="relative z-10 mx-auto flex w-full max-w-[1440px] flex-col gap-12 text-white/70">
-        <div className="flex flex-col gap-12 xl:flex-row xl:items-start xl:justify-between">
-          {/* BrandStack */}
-          <div className="flex w-full max-w-[320px] shrink-0 flex-col items-start gap-6">
+      <div className="relative z-10 flex w-full flex-col gap-12 text-white/70 max-sm:gap-10 max-sm:text-[#94a3b8]">
+        <div className="flex flex-col gap-12 max-md:gap-6 max-md:pt-4 max-sm:gap-6 max-sm:pt-4 xl:flex-row xl:items-start xl:justify-between">
+          {/* BrandStack — desktop only; phones keep Jenga + legal row */}
+          <div className="flex w-full max-w-[320px] shrink-0 flex-col items-start gap-6 max-md:hidden max-sm:max-w-none">
             <div className="flex items-start gap-6">
               <img
                 src={footerLogo}
@@ -102,10 +107,8 @@ export function Footer({
                 width={33}
                 height={30}
                 className="mt-0.5 h-[30px] w-[33px] object-contain"
-                loading="lazy"
-                decoding="async"
               />
-              <p className="text-[24px] font-medium leading-none tracking-tight text-white">
+              <p className="text-[24px] font-medium leading-none tracking-tight text-white max-sm:leading-[30px] max-sm:tracking-normal max-sm:text-[#f8fafc]">
                 Portfolio.
               </p>
             </div>
@@ -115,7 +118,7 @@ export function Footer({
             </p>
             <a
               href={`mailto:${EMAIL}`}
-              className="inline-flex items-center justify-center gap-2 rounded-full border border-white/70 bg-white/[0.04] px-4 py-2.5 text-[13px] font-light backdrop-blur-[4px] transition-colors hover:bg-white/[0.08] hover:text-white"
+              className="inline-flex items-center justify-center gap-2 rounded-full border border-white/70 bg-white/[0.04] px-4 py-2.5 text-[13px] font-light backdrop-blur-[4px] transition-colors hover:bg-white/[0.08] hover:text-white max-sm:border-white max-sm:text-[#f8fafc] max-sm:self-end"
             >
               Get in touch
               <img
@@ -124,23 +127,24 @@ export function Footer({
                 width={16}
                 height={16}
                 className="size-4 object-contain opacity-70"
-                loading="lazy"
-                decoding="async"
               />
             </a>
           </div>
 
           {/* MenuGrid — nav columns + jenga sibling with clear gap */}
-          <div className="flex min-w-0 flex-1 flex-col items-start gap-12 sm:flex-row xl:max-w-[900px] xl:flex-none xl:gap-16">
-            <div className="grid min-w-0 flex-1 grid-cols-2 gap-x-8 gap-y-10 sm:grid-cols-3 lg:grid-cols-4 lg:gap-x-10">
+          <div className="flex min-w-0 flex-1 flex-col items-start gap-12 max-md:w-full max-md:items-end max-md:gap-0 max-sm:w-full max-sm:gap-0 sm:flex-row xl:max-w-[900px] xl:flex-initial xl:gap-16">
+            <div className="grid min-w-0 flex-1 grid-cols-2 gap-x-8 gap-y-10 max-md:hidden sm:grid-cols-3 lg:grid-cols-4 lg:gap-x-10">
               {COLUMNS.map((col) => (
-                <div key={col.title} className="flex w-full max-w-[160px] flex-col gap-4">
-                  <p className="text-[12px] font-bold uppercase tracking-wide text-white">
+                <div
+                  key={col.title}
+                  className="flex w-full max-w-[160px] flex-col gap-4 max-sm:max-w-none max-sm:items-center max-sm:text-center"
+                >
+                  <p className="text-[12px] font-bold uppercase tracking-wide text-white max-sm:tracking-normal max-sm:text-[#f8fafc]">
                     {col.title}
                   </p>
-                  <ul className="flex flex-col gap-3 text-[14px] leading-[1.4]">
+                  <ul className="flex flex-col gap-3 text-[14px] leading-[1.4] max-sm:items-center">
                     {col.links.map((link) => (
-                      <li key={link.label}>
+                      <li key={link.label} className={cn(link.desktopOnly && "max-sm:hidden")}>
                         <FooterNavLink
                           link={link}
                           onSelectProject={onSelectProject}
@@ -153,12 +157,12 @@ export function Footer({
               ))}
 
               <div className="flex min-w-0 flex-col gap-4 lg:min-w-[220px]">
-                <p className="text-[12px] font-bold uppercase tracking-wide text-white">
+                <p className="text-[12px] font-bold uppercase tracking-wide text-white max-sm:tracking-normal max-sm:text-[#f8fafc]">
                   Get in touch
                 </p>
                 <a
                   href={`mailto:${EMAIL}`}
-                  className="whitespace-nowrap text-[14px] font-medium underline decoration-solid underline-offset-2 transition-opacity hover:text-white hover:opacity-100"
+                  className="whitespace-nowrap text-[14px] font-medium underline decoration-solid underline-offset-2 transition-opacity hover:text-white hover:opacity-100 max-sm:text-[#f8fafc]"
                 >
                   {EMAIL}
                 </a>
@@ -168,7 +172,7 @@ export function Footer({
             {/* Jenga Pattern — Figma 598:1352 */}
             <div
               aria-hidden
-              className="mx-auto shrink-0 pb-2 sm:mx-0 sm:self-end xl:self-start xl:pt-[91px]"
+              className="mx-auto shrink-0 pb-2 max-sm:mx-0 max-sm:rotate-90 max-sm:self-end max-sm:pb-0 sm:mx-0 sm:self-end xl:self-start xl:pt-[91px]"
             >
               <JengaPattern />
             </div>
@@ -177,12 +181,12 @@ export function Footer({
 
         <div className="h-px w-full bg-white/10" />
 
-        <div className="relative z-20 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-[12px]">© 2026 Portfolio. All rights reserved.</p>
+        <div className="relative z-20 flex flex-col gap-3 max-sm:items-center max-sm:gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-[12px] max-sm:text-[#64748b]">
+            © 2026 Portfolio. All rights reserved.
+          </p>
           <p className="text-[11px]">{clock}</p>
         </div>
-
-        <p className="text-center text-[10px] leading-none text-white/20">proverbs 3:5</p>
       </div>
     </footer>
   );
@@ -316,7 +320,7 @@ function FooterGradientPattern() {
   return (
     <div
       aria-hidden
-      className="pointer-events-none absolute z-0 h-[563px] w-[664px] opacity-80"
+      className="pointer-events-none absolute z-0 h-[563px] w-[664px] opacity-80 max-sm:hidden"
       style={{ right: "-8%", bottom: "calc(-8% - 120px)" }}
       data-name="Gradient Pattern"
     >
@@ -341,6 +345,21 @@ function FooterGradientPattern() {
             "radial-gradient(ellipse at center, rgba(220,70,40,0.35) 0%, transparent 65%)",
         }}
       />
+    </div>
+  );
+}
+
+/** Figma 605:1386 + 598:1316 on phones — top-left glow behind a heavy frosted veil. */
+function MobileGradientPattern() {
+  return (
+    <div aria-hidden className="pointer-events-none absolute inset-0 z-0 overflow-hidden sm:hidden">
+      <div className="absolute left-[-120px] top-[-120px] h-[563px] w-[664px]">
+        <div className="absolute inset-[-21.31%_-18.07%] blur-[60px]">
+          <img src={mobileGradient} alt="" className="block size-full max-w-none" />
+        </div>
+      </div>
+      <div className="absolute inset-0 bg-[rgba(10,13,17,0.85)]" />
+      <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-[var(--portfolio-bottom-surface,#0a0d11)] to-transparent" />
     </div>
   );
 }

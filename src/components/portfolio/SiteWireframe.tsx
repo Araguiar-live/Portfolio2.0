@@ -32,12 +32,12 @@ type Mark = "dot" | "none" | "house" | "modules" | "modules-tall" | "modules-l" 
 const MARK = "bg-[#e5e7eb]";
 const MARK_SOFT = "bg-[#eceff3]";
 
-/** Figma 530:151786 — two horizontal chips */
 function HouseMark({ soft = false }: { soft?: boolean }) {
   const chip = soft ? MARK_SOFT : MARK;
   return (
     <div className="flex w-4 flex-col items-center" aria-hidden>
-      <div className="flex w-full items-center justify-center gap-1">
+      <div className={`mb-[-2px] size-1.5 rounded-[1px] ${chip}`} />
+      <div className="flex gap-1">
         <div className={`size-1.5 rounded-[1px] ${chip}`} />
         <div className={`size-1.5 rounded-[1px] ${chip}`} />
       </div>
@@ -154,7 +154,19 @@ function JengaCellBand() {
       <div className="absolute inset-0 flex flex-col gap-[2px]">
         {/* Row 1 — 14 × 1 */}
         <div className="flex min-h-0 w-full flex-[88] gap-[2px]">
-          <TileRow count={14} marks={{ 0: "modules-l" }} />
+          <TileRow
+            count={14}
+            marks={{
+              0: "house",
+              2: "none",
+              4: "none",
+              5: "modules-grid",
+              7: "none",
+              9: "none",
+              11: "modules-l",
+              13: "none",
+            }}
+          />
         </div>
 
         {/* Middle jenga — 270 units */}
@@ -163,24 +175,24 @@ function JengaCellBand() {
             {/* Upper 178: 7 | tall(88×178) | 5 */}
             <div className="flex min-h-0 flex-[178] gap-[2px]">
               <div className="flex min-h-0 min-w-0 flex-[630] flex-col gap-[2px]">
-                <TileRow count={7} marks={{ 3: "modules-tall" }} />
-                <TileRow count={7} />
+                <TileRow count={7} marks={{ 1: "none", 3: "modules-tall", 5: "none" }} />
+                <TileRow count={7} marks={{ 0: "none", 2: "none", 4: "modules-l", 6: "none" }} />
               </div>
               <Tile className="min-h-0 min-w-0 flex-[88] self-stretch" mark="none" />
               <div className="flex min-h-0 min-w-0 flex-[446] flex-col gap-[2px]">
-                <TileRow count={5} marks={{ 3: "house" }} />
-                <TileRow count={5} />
+                <TileRow count={5} marks={{ 0: "none", 3: "house" }} />
+                <TileRow count={5} marks={{ 1: "none", 2: "modules-l", 4: "none" }} />
               </div>
             </div>
 
             {/* Lower 90: 4 | wide(178) | 7 */}
             <div className="flex min-h-0 flex-[90] gap-[2px]">
               <div className="flex min-h-0 min-w-0 flex-[358] gap-[2px]">
-                <TileRow count={4} marks={{ 0: "none", 1: "none", 2: "none", 3: "none" }} />
+                <TileRow count={4} marks={{ 0: "none", 2: "modules-grid" }} />
               </div>
               <Tile className="min-h-0 min-w-0 flex-[178] self-stretch" mark="none" />
               <div className="flex min-h-0 min-w-0 flex-[628] gap-[2px]">
-                <TileRow count={7} />
+                <TileRow count={7} marks={{ 1: "none", 3: "none", 5: "modules-grid", 6: "none" }} />
               </div>
             </div>
           </div>
@@ -192,17 +204,42 @@ function JengaCellBand() {
         {/* Lower band — 268 units */}
         <div className="flex min-h-0 w-full flex-[268] flex-col gap-[2px]">
           <div className="flex min-h-0 flex-[88]">
-            <TileRow count={14} />
+            <TileRow
+              count={14}
+              marks={{
+                1: "none",
+                3: "modules-l",
+                5: "none",
+                7: "none",
+                9: "modules-grid",
+                11: "none",
+                12: "none",
+              }}
+            />
           </div>
           <div className="flex min-h-0 flex-[178] flex-col gap-[2px]">
             <div className="flex min-h-0 flex-1 gap-[2px]">
               <Tile className="min-h-0 min-w-0 flex-[178] self-stretch" mark="none" />
               <div className="flex min-h-0 min-w-0 flex-[1078] gap-[2px]">
-                <TileRow count={12} marks={{ 1: "modules" }} />
+                <TileRow
+                  count={12}
+                  marks={{ 1: "modules", 3: "none", 5: "none", 8: "none", 10: "modules-grid" }}
+                />
               </div>
             </div>
             <div className="flex min-h-0 flex-1">
-              <TileRow count={14} />
+              <TileRow
+                count={14}
+                marks={{
+                  0: "none",
+                  2: "modules-grid",
+                  4: "none",
+                  6: "none",
+                  8: "modules-l",
+                  10: "none",
+                  13: "none",
+                }}
+              />
             </div>
           </div>
         </div>
@@ -215,15 +252,7 @@ function WireframeBrowserShell() {
   return (
     <div className="flex size-full flex-col overflow-hidden rounded-[12px] border border-[#d1d5db] bg-white">
       <div className="flex h-[7.22%] min-h-[36px] shrink-0 items-center justify-between border-b border-[#e5e7eb] px-5">
-        <img
-          src={windowControls}
-          alt=""
-          className="h-2.5 w-[42px]"
-          width={42}
-          height={10}
-          loading="lazy"
-          decoding="async"
-        />
+        <img src={windowControls} alt="" className="h-2.5 w-[42px]" width={42} height={10} />
         <div className="mx-4 hidden max-w-[480px] flex-1 items-center justify-center rounded-md border border-[#e5e7eb] bg-[#f3f4f6] px-4 py-1.5 sm:flex">
           <span className="truncate font-mono text-[11px] text-[#9ca3af]">
             https://scraping-wireframe-tool.internal
@@ -234,15 +263,7 @@ function WireframeBrowserShell() {
 
       <div className="flex h-[8.47%] min-h-[40px] shrink-0 items-center justify-between border-b border-[#e5e7eb] px-8">
         <div className="flex items-center gap-2 rounded-md border border-[#d1d5db] px-3 py-1.5">
-          <img
-            src={logoIcon}
-            alt=""
-            className="size-3.5"
-            width={14}
-            height={14}
-            loading="lazy"
-            decoding="async"
-          />
+          <img src={logoIcon} alt="" className="size-3.5" width={14} height={14} />
           <span className="text-xs font-bold text-[#1f2937]">Logo</span>
         </div>
         <div className="hidden rounded-md border border-[#e5e7eb] bg-[#f3f4f6] px-4 py-1.5 sm:block">
@@ -292,15 +313,7 @@ function WireframeBrowserShell() {
 
         <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-[12px] border border-[#d1d5db] bg-[#f3f4f6]">
           <div className="flex h-10 shrink-0 items-center justify-between border-b border-[#e5e7eb] bg-white px-5">
-            <img
-              src={windowControls}
-              alt=""
-              className="h-2.5 w-[42px]"
-              width={42}
-              height={10}
-              loading="lazy"
-              decoding="async"
-            />
+            <img src={windowControls} alt="" className="h-2.5 w-[42px]" width={42} height={10} />
             <span className="font-mono text-[11px] font-bold text-[#6b7280]">[ ..JSON ]</span>
           </div>
           <div className="flex min-h-0 flex-1 gap-4 overflow-hidden bg-white p-6 font-mono text-xs leading-relaxed">
@@ -319,15 +332,7 @@ function WireframeBrowserShell() {
             </div>
           </div>
           <div className="flex h-[68px] shrink-0 items-center justify-between border-t border-[#e5e7eb] bg-[#f3f4f6] px-6">
-            <img
-              src={statusInfo}
-              alt=""
-              className="h-2 w-[136px]"
-              width={136}
-              height={8}
-              loading="lazy"
-              decoding="async"
-            />
+            <img src={statusInfo} alt="" className="h-2 w-[136px]" width={136} height={8} />
             <div className="rounded-lg border border-[#d1d5db] bg-white px-4 py-2.5">
               <span className="font-mono text-[11px] font-bold text-[#1f2937]">Sc*ping...</span>
             </div>
@@ -361,36 +366,53 @@ function BrowserPlate() {
  * Open: height follows accordion content; bottom seam to marquee is a sibling
  * 2px spacer in index (not padding here — padding was visually collapsing).
  */
-export function WireframeStage({ expanded, children }: { expanded: boolean; children: ReactNode }) {
+export function WireframeStage({
+  expanded,
+  children,
+  corner,
+}: {
+  expanded: boolean;
+  children: ReactNode;
+  corner?: ReactNode;
+}) {
   return (
     <div
       className={
         expanded
-          ? "relative w-full overflow-visible bg-[#f3f4f6] pb-0 pt-[96px]"
-          : "relative w-full overflow-visible bg-[#f3f4f6]"
-      }
-      style={
-        expanded
-          ? undefined
-          : { aspectRatio: `${SITE_WIREFRAME_W} / ${SITE_WIREFRAME_H_COLLAPSED}` }
+          ? "relative w-full overflow-x-hidden bg-[#f3f4f6] pb-0 pt-[96px]"
+          : "relative aspect-[1262/847] w-full overflow-hidden bg-[#f3f4f6] max-md:z-30 max-md:aspect-auto max-md:min-h-[100dvh] max-md:overflow-x-hidden max-sm:overflow-visible"
       }
     >
       {/*
         Background fills the full stage (including expanded top padding).
         Cell band + browser plate stay top-aligned; solid #f3f4f6 covers the rest.
       */}
-      <div aria-hidden className="pointer-events-none absolute inset-0 z-0 bg-[#f3f4f6]">
-        <div className="absolute inset-x-0 top-0 flex w-full flex-col gap-[2px] px-[2px] pb-[2px]">
+      <div aria-hidden className="pointer-events-none absolute inset-0 z-0 overflow-hidden bg-[#f3f4f6]">
+        {/* Phones keep the desktop tile size (Figma 2250:24937) and crop the band instead. */}
+        <div className="absolute inset-x-0 top-0 flex w-full flex-col gap-[2px] p-[2px] max-sm:w-[1113px]">
           <JengaCellBand />
-          <BrowserPlate />
+          <div className="contents sm:hidden">
+            <JengaCellBand />
+          </div>
+          <div className="contents max-sm:hidden">
+            <BrowserPlate />
+          </div>
         </div>
       </div>
 
+      {corner ? (
+        <div className="pointer-events-auto absolute right-8 top-[78px] z-[20] max-md:hidden max-sm:right-4">
+          {corner}
+        </div>
+      ) : null}
+
       {/* Content overlay — Figma 530:151856 */}
       {expanded ? (
-        <div className="relative z-10 overflow-visible">{children}</div>
+        <div className="pointer-events-none relative z-10">{children}</div>
       ) : (
-        <div className="absolute inset-0 z-10 overflow-visible">{children}</div>
+        <div className="pointer-events-none absolute inset-0 z-10 overflow-hidden max-sm:relative max-sm:inset-auto max-sm:overflow-visible">
+          {children}
+        </div>
       )}
     </div>
   );

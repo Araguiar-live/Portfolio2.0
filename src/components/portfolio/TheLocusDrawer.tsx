@@ -1,37 +1,35 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useState, type ReactNode } from "react";
+import { useLayoutEffect, useState, type ReactNode } from "react";
 import locusCinemaIcon from "@/assets/crcle/locus/cinema.svg";
 import locusCloseIcon from "@/assets/crcle/locus/close-x.svg";
 import locusCoffeeIcon from "@/assets/crcle/locus/coffee.svg";
 import locusCrosshairIcon from "@/assets/crcle/locus/crosshair.svg";
-import locusCrosshairPlusIcon from "@/assets/crcle/locus/crosshair-plus.svg";
+import locusCrosshairDarkIcon from "@/assets/crcle/locus/crosshair-dark.svg";
+import locusDeleteIcon from "@/assets/crcle/locus/delete.svg";
 import locusDinnerAIcon from "@/assets/crcle/locus/dinner-a.svg";
 import locusDinnerBIcon from "@/assets/crcle/locus/dinner-b.svg";
+import locusEditIcon from "@/assets/crcle/locus/edit.svg";
 import locusIcecreamAIcon from "@/assets/crcle/locus/icecream-a.svg";
 import locusIcecreamBIcon from "@/assets/crcle/locus/icecream-b.svg";
 import locusMoonAccentIcon from "@/assets/crcle/locus/moon-accent.svg";
+import locusMoonDarkIcon from "@/assets/crcle/locus/moon-dark.svg";
 import locusMoonFilledIcon from "@/assets/crcle/locus/moon-filled.svg";
 import locusPinIcon from "@/assets/crcle/locus/pin.svg";
+import locusPinDarkIcon from "@/assets/crcle/locus/pin-dark.svg";
 import locusPinRedIcon from "@/assets/crcle/locus/pin-red.svg";
 import locusPinSmIcon from "@/assets/crcle/locus/pin-sm.svg";
 import locusPizzaIcon from "@/assets/crcle/locus/pizza.svg";
 import locusPlusIcon from "@/assets/crcle/locus/plus.svg";
-import locusRainFillIcon from "@/assets/crcle/locus/rain-fill.svg";
+import locusPlusDarkIcon from "@/assets/crcle/locus/plus-dark.svg";
+import locusRainResponseIcon from "@/assets/crcle/locus/rain-response.svg";
+import locusRaincheckCloudIcon from "@/assets/crcle/locus/raincheck-cloud.svg";
 import locusSendLightIcon from "@/assets/crcle/locus/send-light.svg";
-import locusSentCrosshairIcon from "@/assets/crcle/locus/sent-crosshair.svg";
-import locusSentDotIcon from "@/assets/crcle/locus/sent-dot.svg";
-import locusSentMoonIcon from "@/assets/crcle/locus/sent-moon.svg";
-import locusSentPenIcon from "@/assets/crcle/locus/sent-pen.svg";
-import locusSentPinIcon from "@/assets/crcle/locus/sent-pin.svg";
-import locusSentPlusIcon from "@/assets/crcle/locus/sent-plus.svg";
-import locusSentRainIcon from "@/assets/crcle/locus/sent-rain.svg";
-import locusSentSunIcon from "@/assets/crcle/locus/sent-sun.svg";
-import locusSentTrashIcon from "@/assets/crcle/locus/sent-trash.svg";
+import locusSunDarkIcon from "@/assets/crcle/locus/sun-dark.svg";
 import locusSunDuotoneIcon from "@/assets/crcle/locus/sun-duotone.svg";
 import locusSunFillIcon from "@/assets/crcle/locus/sun-fill.svg";
-import locusThumbsUpIcon from "@/assets/crcle/locus/thumbs-up.svg";
-import locusThumbsUpInIcon from "@/assets/crcle/locus/thumbs-up-in.svg";
-import locusThumbsUpInDarkIcon from "@/assets/crcle/locus/thumbs-up-in-dark.svg";
+import locusThumbsResponseIcon from "@/assets/crcle/locus/thumbs-response.svg";
+import locusYoureInDarkIcon from "@/assets/crcle/locus/youre-in-dark.svg";
+import locusYoureInLightIcon from "@/assets/crcle/locus/youre-in-light.svg";
 
 const FONT = "Montserrat, ui-sans-serif, system-ui, sans-serif";
 const EASE = [0.22, 1, 0.36, 1] as const;
@@ -65,8 +63,6 @@ const ACTIVITIES: {
             src={locusCinemaIcon}
             className="absolute inset-0 size-full max-w-none object-contain brightness-0 invert"
             draggable={false}
-            loading="lazy"
-            decoding="async"
           />
         </span>
       </span>
@@ -83,8 +79,6 @@ const ACTIVITIES: {
             src={locusIcecreamAIcon}
             className="absolute inset-0 size-full max-w-none object-contain brightness-0 invert"
             draggable={false}
-            loading="lazy"
-            decoding="async"
           />
         </span>
         <span className="absolute inset-[56.55%_32.02%_3.13%_38.63%]">
@@ -93,8 +87,6 @@ const ACTIVITIES: {
             src={locusIcecreamBIcon}
             className="absolute inset-0 size-full max-w-none object-contain brightness-0 invert"
             draggable={false}
-            loading="lazy"
-            decoding="async"
           />
         </span>
       </span>
@@ -111,8 +103,6 @@ const ACTIVITIES: {
             src={locusPizzaIcon}
             className="absolute inset-0 size-full max-w-none object-contain brightness-0 invert"
             draggable={false}
-            loading="lazy"
-            decoding="async"
           />
         </span>
       </span>
@@ -129,8 +119,6 @@ const ACTIVITIES: {
             src={locusCoffeeIcon}
             className="absolute inset-0 size-full max-w-none object-contain brightness-0 invert"
             draggable={false}
-            loading="lazy"
-            decoding="async"
           />
         </span>
       </span>
@@ -147,8 +135,6 @@ const ACTIVITIES: {
             src={locusDinnerAIcon}
             className="absolute inset-0 size-full max-w-none object-contain brightness-0 invert"
             draggable={false}
-            loading="lazy"
-            decoding="async"
           />
         </span>
         <span className="absolute inset-[61.24%_55.79%_3.12%_3.14%]">
@@ -157,8 +143,6 @@ const ACTIVITIES: {
             src={locusDinnerBIcon}
             className="absolute inset-0 size-full max-w-none object-contain brightness-0 invert"
             draggable={false}
-            loading="lazy"
-            decoding="async"
           />
         </span>
       </span>
@@ -166,7 +150,15 @@ const ACTIVITIES: {
   },
 ];
 
-const WHEN_OPTIONS: LocusWhen[] = ["Today", "Tonight", "Tomorrow", "Fri", "Sat", "Sun", "Later…"];
+const WHEN_OPTIONS: LocusWhen[] = [
+  "Today",
+  "Tonight",
+  "Tomorrow",
+  "Fri",
+  "Sat",
+  "Sun",
+  "Later…",
+];
 
 const TIME_OPTIONS: {
   id: LocusTimeOfDay;
@@ -200,9 +192,7 @@ type TheLocusDrawerProps = {
   open: boolean;
   onClose: () => void;
   onSendSignal: (payload: LocusSignalPayload) => void;
-  /** Figma 769:205283 — ice cream preselected when opening from chat plus */
   presetActivityId?: LocusActivityId;
-  /** Reopen the builder with a signal the user is editing. */
   draft?: LocusSignalPayload | null;
 };
 
@@ -219,7 +209,7 @@ export function TheLocusDrawer({
   const [timeOfDay, setTimeOfDay] = useState<LocusTimeOfDay>("evening");
   const [location, setLocation] = useState("Nearby café");
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!open) {
       setTab("intent");
       setActivityId(null);
@@ -285,8 +275,6 @@ export function TheLocusDrawer({
                     src={locusCrosshairIcon}
                     className="absolute inset-[-5.56%] size-[111.12%] max-w-none"
                     draggable={false}
-                    loading="lazy"
-                    decoding="async"
                   />
                 </span>
               </span>
@@ -318,7 +306,9 @@ export function TheLocusDrawer({
                       type="button"
                       onClick={() => setTab("venue")}
                       className={`relative z-[1] flex flex-1 items-center justify-center gap-1 rounded-[20px] p-1 text-center text-[11px] leading-[1.4] transition ${
-                        tab === "venue" ? "bg-[rgba(247,246,242,0.2)] text-white" : "text-white"
+                        tab === "venue"
+                          ? "bg-[rgba(247,246,242,0.2)] text-white"
+                          : "text-white"
                       }`}
                       style={{ fontFamily: FONT }}
                     >
@@ -328,8 +318,6 @@ export function TheLocusDrawer({
                           src={locusPinSmIcon}
                           className="size-2.5 shrink-0 object-contain"
                           draggable={false}
-                          loading="lazy"
-                          decoding="async"
                         />
                       ) : null}
                       Venue
@@ -351,9 +339,7 @@ export function TheLocusDrawer({
                             type="button"
                             onClick={() => selectActivity(a.id)}
                             className={`w-full text-left transition ${
-                              activityId === a.id
-                                ? "text-[#f7f6f2]"
-                                : "text-white hover:text-[#f7f6f2]"
+                              activityId === a.id ? "text-[#f7f6f2]" : "text-white hover:text-[#f7f6f2]"
                             }`}
                             style={{ fontFamily: FONT }}
                           >
@@ -442,8 +428,6 @@ export function TheLocusDrawer({
                                   src={option.icon}
                                   className={option.leafClass}
                                   draggable={false}
-                                  loading="lazy"
-                                  decoding="async"
                                 />
                               </span>
                             </button>
@@ -465,8 +449,6 @@ export function TheLocusDrawer({
                           src={locusPinIcon}
                           className="size-4 shrink-0 object-contain"
                           draggable={false}
-                          loading="lazy"
-                          decoding="async"
                         />
                         <input
                           value={location}
@@ -487,8 +469,6 @@ export function TheLocusDrawer({
                             src={locusSendLightIcon}
                             className="relative z-[1] size-7 max-w-none -translate-x-[1.5px] translate-y-[1.5px] object-contain"
                             draggable={false}
-                            loading="lazy"
-                            decoding="async"
                           />
                         </button>
                       </div>
@@ -508,14 +488,7 @@ export function TheLocusDrawer({
           >
             <div className="dock-glass-lens opacity-40" aria-hidden />
             <span className="relative z-[1] flex size-8 items-center justify-center">
-              <img
-                alt=""
-                src={locusCloseIcon}
-                className="size-6 max-w-none object-contain"
-                draggable={false}
-                loading="lazy"
-                decoding="async"
-              />
+              <img alt="" src={locusCloseIcon} className="size-6 max-w-none object-contain" draggable={false} />
             </span>
           </button>
         </motion.div>
@@ -525,15 +498,18 @@ export function TheLocusDrawer({
 }
 
 export type SignalCardStatus = "pending" | "accepted" | "raincheck";
+export type SignalCardDirection = "sent" | "received";
 
 export type SignalCardModel = LocusSignalPayload & {
   id: string;
   status: SignalCardStatus;
-  /** Received locus vs sent by the current user — Figma 769:204909 / 769:204994 */
-  direction: "received" | "sent";
+  direction: SignalCardDirection;
 };
 
-const TIME_GLYPH: Record<LocusTimeOfDay, { icon: string; leafClass: string }> = {
+const TIME_GLYPH: Record<
+  LocusTimeOfDay,
+  { icon: string; leafClass: string }
+> = {
   morning: {
     icon: locusSunDuotoneIcon,
     leafClass: "absolute inset-[4.17%] size-[91.66%] max-w-none",
@@ -570,19 +546,25 @@ export function SignalCard({
   isLight?: boolean;
 }) {
   const [counterText, setCounterText] = useState("Try tomorrow instead");
-  const [responseOpen, setResponseOpen] = useState(false);
-  const [editOpen, setEditOpen] = useState(false);
+  const [showResponse, setShowResponse] = useState(false);
+  const [showEdit, setShowEdit] = useState(false);
   const activity = ACTIVITIES.find((a) => a.id === signal.activityId) ?? ACTIVITIES[1];
   const timeGlyph = TIME_GLYPH[signal.timeOfDay];
   const isSent = signal.direction === "sent";
-  const isReceivedLight = isLight && !isSent;
+  const receivedLight = isLight && !isSent;
   const canRespond = !isSent && signal.status === "pending";
   const canEdit = isSent && signal.status !== "raincheck";
-  const showResponsePill = canRespond && responseOpen;
-  const showEditToolbar = canEdit && editOpen;
+  const responseOpen = canRespond && showResponse;
+  const editOpen = canEdit && showEdit;
   const prompt = isSent
     ? `Up for ${signal.activityLabel.toLowerCase()} ${signal.when.toLowerCase()} ${signal.timeOfDay}?`
     : `Up for ${signal.activityLabel} ${signal.when.toLowerCase()}?`;
+  const timeIcon =
+    isSent && signal.timeOfDay === "evening"
+      ? locusMoonDarkIcon
+      : isSent && signal.timeOfDay === "morning"
+        ? locusSunDarkIcon
+        : timeGlyph.icon;
 
   return (
     <div
@@ -591,7 +573,7 @@ export function SignalCard({
       }`}
     >
       <AnimatePresence>
-        {showEditToolbar ? (
+        {editOpen ? (
           <motion.div
             key="signal-edit-toolbar"
             initial={{ opacity: 0, y: 6, scale: 0.98 }}
@@ -604,42 +586,33 @@ export function SignalCard({
               type="button"
               aria-label="Edit signal"
               onClick={() => {
-                setEditOpen(false);
+                setShowEdit(false);
                 onEdit?.();
               }}
               className="flex size-6 shrink-0 items-center justify-center"
             >
-              <img
-                alt=""
-                src={locusSentPenIcon}
-                className="size-6 max-w-none"
-                draggable={false}
-                loading="lazy"
-                decoding="async"
-              />
+              <img alt="" src={locusEditIcon} className="size-6 max-w-none" draggable={false} />
             </button>
             <button
               type="button"
               aria-label="Delete signal"
               onClick={(e) => {
                 e.stopPropagation();
-                setEditOpen(false);
+                setShowEdit(false);
                 onDelete?.();
               }}
               className="flex size-6 shrink-0 items-center justify-center"
             >
               <img
                 alt=""
-                src={locusSentTrashIcon}
+                src={locusDeleteIcon}
                 className="h-5 w-[18px] max-w-none object-contain"
                 draggable={false}
-                loading="lazy"
-                decoding="async"
               />
             </button>
           </motion.div>
         ) : null}
-        {showResponsePill ? (
+        {responseOpen ? (
           <motion.div
             key="signal-response-pill"
             initial={{ opacity: 0, y: 6, scale: 0.98 }}
@@ -651,65 +624,58 @@ export function SignalCard({
             <button
               type="button"
               aria-label="I'm down"
+              title="I'm down"
               onClick={() => {
-                setResponseOpen(false);
+                setShowResponse(false);
                 onAccept();
               }}
               className="relative z-[1] flex size-8 shrink-0 items-center justify-center transition active:scale-95"
-              title="I'm down"
             >
               <img
                 alt=""
-                src={locusThumbsUpIcon}
+                src={locusThumbsResponseIcon}
                 className="crcle-signal-response-thumb size-8 max-w-none object-contain"
                 draggable={false}
-                loading="lazy"
-                decoding="async"
               />
             </button>
             <button
               type="button"
               aria-label="Raincheck"
+              title="Raincheck"
               onClick={() => {
-                setResponseOpen(false);
+                setShowResponse(false);
                 onRaincheck();
               }}
               className="relative z-[1] flex size-8 shrink-0 items-center justify-center transition active:scale-95"
-              title="Raincheck"
             >
               <img
                 alt=""
-                src={locusRainFillIcon}
+                src={locusRainResponseIcon}
                 className="size-8 max-w-none object-contain"
                 draggable={false}
-                loading="lazy"
-                decoding="async"
               />
             </button>
           </motion.div>
         ) : null}
       </AnimatePresence>
 
-      {/* Figma 984:85497 · received 769:204909 · sent 769:204994 */}
       <div
         className={`crcle-signal-card flex w-full flex-col p-4 text-left ${
           isSent
             ? "crcle-signal-card--sent gap-6 rounded-tl-[36px] rounded-tr-[36px] rounded-br-[4px] rounded-bl-[36px]"
-            : "crcle-signal-card--received gap-6 rounded-tl-[36px] rounded-tr-[36px] rounded-br-[36px] rounded-bl-[4px]"
-        } ${isLight && !isSent ? "crcle-signal-card--received-light" : ""}`}
+            : `crcle-signal-card--received gap-6 rounded-tl-[36px] rounded-tr-[36px] rounded-br-[36px] rounded-bl-[4px]${
+                receivedLight ? " crcle-signal-card--received-light" : ""
+              }`
+        }`}
       >
         <div className="flex w-full items-start justify-between">
-          <span className="crcle-signal-card-icon relative block size-6 shrink-0">
-            {activity.icon}
-          </span>
+          <span className="crcle-signal-card-icon relative block size-6 shrink-0">{activity.icon}</span>
           <span className="crcle-signal-card-crosshair relative block size-6 shrink-0">
             <img
               alt=""
-              src={isSent ? locusSentCrosshairIcon : locusCrosshairPlusIcon}
+              src={isSent ? locusCrosshairDarkIcon : locusCrosshairIcon}
               className="size-6 max-w-none"
               draggable={false}
-              loading="lazy"
-              decoding="async"
             />
           </span>
         </div>
@@ -727,24 +693,16 @@ export function SignalCard({
               className={`crcle-signal-card-time flex shrink-0 items-center justify-center rounded-[24px] ${
                 isSent
                   ? "border border-[rgba(2,3,29,0.3)] bg-[rgba(247,246,242,0.4)] p-2.5"
-                  : isReceivedLight
+                  : receivedLight
                     ? "border border-[rgba(0,0,0,0.25)]"
                     : "size-[46px]"
               }`}
             >
               <img
                 alt=""
-                src={
-                  isSent && signal.timeOfDay === "evening"
-                    ? locusSentMoonIcon
-                    : isSent && signal.timeOfDay === "morning"
-                      ? locusSentSunIcon
-                      : timeGlyph.icon
-                }
+                src={timeIcon}
                 className="size-6 max-w-none object-contain object-center"
                 draggable={false}
-                loading="lazy"
-                decoding="async"
               />
             </span>
 
@@ -752,18 +710,16 @@ export function SignalCard({
               className={`crcle-signal-card-venue flex min-w-0 flex-1 items-center rounded-[24px] ${
                 isSent
                   ? "h-11 gap-1.5 py-0.5 pl-3 pr-1"
-                  : isReceivedLight
+                  : receivedLight
                     ? ""
                     : "gap-1.5 py-1 pl-3 pr-1"
               }`}
             >
               <img
                 alt=""
-                src={isSent ? locusSentPinIcon : locusPinRedIcon}
+                src={isSent ? locusPinDarkIcon : locusPinRedIcon}
                 className="size-4 shrink-0 object-contain"
                 draggable={false}
-                loading="lazy"
-                decoding="async"
               />
               <span
                 className="crcle-signal-card-venue-text min-w-0 flex-1 truncate text-[13px] leading-[1.4]"
@@ -775,38 +731,36 @@ export function SignalCard({
                 type="button"
                 aria-label={
                   isSent
-                    ? editOpen
+                    ? showEdit
                       ? "Hide edit options"
                       : "Edit signal"
-                    : responseOpen
+                    : showResponse
                       ? "Hide response options"
                       : "Show response options"
                 }
-                aria-expanded={isSent ? editOpen : responseOpen}
+                aria-expanded={isSent ? showEdit : showResponse}
                 disabled={!isSent && !canRespond}
                 onClick={(e) => {
                   e.stopPropagation();
-                  if (canRespond) setResponseOpen((open) => !open);
-                  if (canEdit) setEditOpen((open) => !open);
+                  if (canRespond) setShowResponse((v) => !v);
+                  if (canEdit) setShowEdit((v) => !v);
                 }}
                 className={`crcle-signal-card-plus relative flex shrink-0 items-center justify-center overflow-hidden transition hover:brightness-110 disabled:opacity-50 ${
                   isSent
                     ? "size-9 rounded-[24px] bg-[rgba(2,3,29,0.1)] p-2.5"
-                    : isReceivedLight
+                    : receivedLight
                       ? "crcle-glass-btn size-9 rounded-[24px] p-2.5"
                       : "crcle-glass-btn size-10 rounded-[40px] p-1 backdrop-blur-[12px]"
-                } ${responseOpen && canRespond ? "is-open brightness-110" : ""}`}
+                } ${showResponse && canRespond ? "is-open brightness-110" : ""}`}
               >
-                {!isSent && !isReceivedLight ? (
+                {!isSent && !receivedLight ? (
                   <div className="dock-glass-lens opacity-40" aria-hidden />
                 ) : null}
                 <img
                   alt=""
-                  src={isSent ? locusSentPlusIcon : locusPlusIcon}
+                  src={isSent ? locusPlusDarkIcon : locusPlusIcon}
                   className="relative z-[1] size-5 max-w-none"
                   draggable={false}
-                  loading="lazy"
-                  decoding="async"
                 />
               </button>
             </div>
@@ -814,21 +768,10 @@ export function SignalCard({
         </div>
 
         {signal.status === "accepted" && !isSent ? (
-          <div
-            className={`flex w-full justify-center ${
-              isReceivedLight ? "pt-2" : "border-t border-white/10 pt-2"
-            }`}
-          >
-            {isReceivedLight ? (
+          <div className={`flex w-full justify-center ${receivedLight ? "pt-2" : "border-t border-white/10 pt-2"}`}>
+            {receivedLight ? (
               <div className="flex items-center justify-center gap-2" aria-label="You're in">
-                <img
-                  alt=""
-                  src={locusThumbsUpInIcon}
-                  className="size-8 shrink-0"
-                  draggable={false}
-                  loading="lazy"
-                  decoding="async"
-                />
+                <img alt="" src={locusYoureInLightIcon} className="size-8 shrink-0" draggable={false} />
                 <span
                   className="whitespace-nowrap text-[13px] font-normal leading-[1.4] text-black"
                   style={{ fontFamily: FONT }}
@@ -838,14 +781,7 @@ export function SignalCard({
               </div>
             ) : (
               <div className="flex items-center justify-center gap-2" aria-label="You're in">
-                <img
-                  alt=""
-                  src={locusThumbsUpInDarkIcon}
-                  className="size-8 shrink-0"
-                  draggable={false}
-                  loading="lazy"
-                  decoding="async"
-                />
+                <img alt="" src={locusYoureInDarkIcon} className="size-8 shrink-0" draggable={false} />
                 <span
                   className="whitespace-nowrap text-[13px] font-normal leading-[1.4] text-[#0eb247]"
                   style={{ fontFamily: FONT }}
@@ -859,16 +795,14 @@ export function SignalCard({
 
         {signal.status === "raincheck" && isSent ? (
           <div className="flex w-full flex-col items-center gap-2">
-            <img alt="" src={locusSentDotIcon} className="size-[3px] shrink-0" draggable={false} />
+            <span className="size-[3px] shrink-0 rounded-full bg-[#02031d]" aria-hidden />
             <div className="flex items-center justify-center gap-1.5">
               <span className="relative flex size-8 shrink-0 items-center justify-center">
                 <img
                   alt=""
-                  src={locusSentRainIcon}
+                  src={locusRaincheckCloudIcon}
                   className="h-[24px] w-6 max-w-none"
                   draggable={false}
-                  loading="lazy"
-                  decoding="async"
                 />
               </span>
               <span
@@ -905,8 +839,6 @@ export function SignalCard({
                 src={locusSendLightIcon}
                 className="size-6 max-w-none object-contain"
                 draggable={false}
-                loading="lazy"
-                decoding="async"
               />
             </button>
           </div>

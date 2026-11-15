@@ -9,12 +9,12 @@ import cellularIcon from "@/assets/crcle/cellular.svg";
 import crcleLogo from "@/assets/crcle/crcle-logo.svg";
 import dragHandleModal from "@/assets/crcle/drag-handle-modal.svg";
 import fireInnerIcon from "@/assets/crcle/fire-inner.svg";
-import jordanEllisPortrait from "@/assets/crcle/jordan-ellis-portrait.png";
 import linkIcon from "@/assets/crcle/link.svg";
 import linkInnerIcon from "@/assets/crcle/link-inner.svg";
 import locusCloseIcon from "@/assets/crcle/locus/close-x.svg";
 import locusPlusIcon from "@/assets/crcle/locus/plus.svg";
 import mapPinIcon from "@/assets/crcle/map-pin.svg";
+import radarCloseIcon from "@/assets/crcle/onboarding/radar-close.svg";
 import radarDividerIcon from "@/assets/crcle/onboarding/radar-divider.svg";
 import radarFireIcon from "@/assets/crcle/onboarding/radar-fire.svg";
 import radarHeartIcon from "@/assets/crcle/onboarding/radar-heart.svg";
@@ -37,8 +37,9 @@ import intentYinYangIcon from "@/assets/crcle/radar/intent-yin-yang.svg";
 import nocDotIcon from "@/assets/crcle/radar/noc-dot.svg";
 import nocMoonIcon from "@/assets/crcle/radar/noc-moon.svg";
 import nocTimerIcon from "@/assets/crcle/radar/noc-timer.svg";
+import jordanPortrait from "@/assets/crcle/jordan-ellis-portrait.png";
+import sarahPortrait from "@/assets/crcle/sarah-chen-portrait.png";
 import serenaPortrait from "@/assets/crcle/serena-portrait.png";
-import sarahChenPortrait from "@/assets/crcle/sarah-chen-portrait.png";
 import shareIcon from "@/assets/crcle/share.svg";
 import shareInnerIcon from "@/assets/crcle/share-inner.svg";
 import brainIcon from "@/assets/crcle/signal/brain.svg";
@@ -46,18 +47,10 @@ import laptopStrokeIcon from "@/assets/crcle/signal/laptop-stroke.svg";
 import lightbulbIcon from "@/assets/crcle/signal/lightbulb.svg";
 import unlockIcon from "@/assets/crcle/unlock.svg";
 import wifiIcon from "@/assets/crcle/wifi.svg";
-import { CrclePhoneFrame } from "@/components/portfolio/CrclePhoneFrame";
-import {
-  CrcleOnboardingCloseButton,
-  CrclePrimaryDock,
-  CrcleThemeToggle,
-  crcleThemeToggleAboveClass,
-} from "@/components/portfolio/CrcleChrome";
-import {
-  requestAreaNearbyNotification,
-  requestOpenMessaging,
-  useCrcleBroadcast,
-} from "@/components/portfolio/crcleBroadcast";
+import { CrclePhoneFrame, CrcleThemeToggle } from "@/components/portfolio/CrclePhoneFrame";
+import { useCrclePhoneLight } from "@/lib/crcle-phone-theme";
+import { CrclePhoneOverlay, CrclePrimaryDock } from "@/components/portfolio/CrcleChrome";
+import { useCrcleBroadcast } from "@/components/portfolio/crcleBroadcast";
 
 /**
  * CRCLE Radar — Figma 839:224363 + SwipeFeature 839:224515.
@@ -82,9 +75,8 @@ const CHIP_GAP = 8;
 const SUCCESS = "#0eb247";
 const PUSH_LOAD_MS = 1400;
 const PUSH_SUCCESS_HOLD_MS = 1100;
-/** Daily recommendation cap — Figma 257:85518 */
-const DAILY_RECOMMENDATION_LIMIT = 3;
-const NEXT_DROP_SECONDS = 4 * 3600 + 2 * 60 + 46;
+/** Live next-drop countdown seed (~4h 2m 46s). */
+const NEXT_DROP_SECONDS = 14566;
 
 type PushPhase = "idle" | "loading" | "success" | "modal";
 
@@ -172,7 +164,7 @@ const USERS: RecommendedUser[] = [
     id: "jordan",
     name: "Jordan Ellis",
     handle: "@JordanEllis",
-    avatarUrl: jordanEllisPortrait,
+    avatarUrl: jordanPortrait,
     distance: "1.1km",
     age: 27,
     relationshipStatus: "Open",
@@ -184,7 +176,7 @@ const USERS: RecommendedUser[] = [
     id: "sarah",
     name: "Sarah Chen",
     handle: "@SarahChen",
-    avatarUrl: sarahChenPortrait,
+    avatarUrl: sarahPortrait,
     distance: "3.2km",
     age: 26,
     relationshipStatus: "Single",
@@ -212,7 +204,7 @@ export function CrcleRadar({
 } = {}) {
   const [broadcastMood] = useCrcleBroadcast();
   const isNoc = broadcastMood === "night_owl";
-  const [isLightMode, setIsLightMode] = useState(false);
+  const [isLightMode, toggleLight] = useCrclePhoneLight();
   /* Figma 322:118007 — Radar onboarding over live Radar */
   const [onboardingOpen, setOnboardingOpen] = useState(true);
   const [caughtUp, setCaughtUp] = useState(false);
@@ -264,20 +256,25 @@ export function CrcleRadar({
   const goPrev = useCallback(() => goTo(categoryIndex - 1, -1), [goTo, categoryIndex]);
   const goNext = useCallback(() => goTo(categoryIndex + 1, 1), [goTo, categoryIndex]);
 
-  const goNextRecommendation = useCallback(() => {
-    if (caughtUp || onboardingOpen || isPushBusy || state.isIntentOverlayOpen || showSignalModal) {
+  const goNextUser = useCallback(() => {
+    if (
+      caughtUp ||
+      onboardingOpen ||
+      isPushBusy ||
+      state.isIntentOverlayOpen ||
+      showSignalModal
+    ) {
       return;
     }
-
     setState((s) => {
-      const nextIndex = s.activeCardIndex + 1;
-      if (nextIndex >= DAILY_RECOMMENDATION_LIMIT) {
+      const next = s.activeCardIndex + 1;
+      if (next >= s.recommendedUsers.length) {
         setCaughtUp(true);
         return s;
       }
       return {
         ...s,
-        activeCardIndex: nextIndex,
+        activeCardIndex: next,
         activeCategory: "signal",
         isIntentOverlayOpen: false,
         selectedIntent: null,
@@ -293,7 +290,7 @@ export function CrcleRadar({
   };
 
   const openIntent = () => {
-    if (isPushBusy || caughtUp) return;
+    if (isPushBusy) return;
     setState((s) => ({
       ...s,
       isIntentOverlayOpen: true,
@@ -302,7 +299,8 @@ export function CrcleRadar({
     }));
   };
 
-  const selectIntent = (intent: RadarIntent) => setState((s) => ({ ...s, selectedIntent: intent }));
+  const selectIntent = (intent: RadarIntent) =>
+    setState((s) => ({ ...s, selectedIntent: intent }));
 
   const undoPush = useCallback(() => {
     clearPushTimers();
@@ -335,18 +333,12 @@ export function CrcleRadar({
 
   const goToMessages = () => {
     closeSuccess();
-    requestOpenMessaging();
     onGoToMessages?.();
   };
 
   return (
-    <div className="relative ml-auto w-fit">
-      <CrcleThemeToggle
-        light={light}
-        onToggle={() => setIsLightMode((v) => !v)}
-        disabled={isNoc}
-        className={crcleThemeToggleAboveClass}
-      />
+    <div className="relative ml-auto flex w-fit flex-col items-center">
+      <CrcleThemeToggle light={light} onToggle={toggleLight} disabled={isNoc} />
 
       <CrclePhoneFrame light={light}>
         {/* Dark Figma 257:87258 / Light cream — toggled via crcle-phone--light.
@@ -358,7 +350,7 @@ export function CrcleRadar({
         >
           {isNoc ? <NocDotField /> : null}
           <StatusBar />
-          <div className="relative z-[1] mt-[5px] flex shrink-0 justify-center pb-[12px]">
+          <div className="relative z-[1] mt-[5px] flex shrink-0 justify-center pb-1">
             <IconImg src={crcleLogo} className="crcle-theme-icon h-[13px] w-[38px]" />
           </div>
 
@@ -368,8 +360,9 @@ export function CrcleRadar({
               aria-label="Back to Signal Home"
               onClick={onGoToSignalHome}
               className="crcle-intent-chip relative z-[1] flex size-10 shrink-0 items-center justify-center rounded-full p-1"
-              style={{ background: "rgba(247, 246, 242, 0.15)" }}
+              style={{ ["--chip-fill"]: "rgba(247, 246, 242, 0.15)" } as CSSProperties}
             >
+              <span aria-hidden className="crcle-intent-chip__frost" />
               <svg
                 aria-hidden
                 viewBox="0 0 40 40"
@@ -407,8 +400,6 @@ export function CrcleRadar({
                   light ? "brightness-0" : ""
                 }`}
                 draggable={false}
-                loading="lazy"
-                decoding="async"
               />
             </button>
             <p
@@ -417,16 +408,7 @@ export function CrcleRadar({
               }`}
               style={{ fontFamily: FONT }}
             >
-              {caughtUp ? (
-                <span className="inline-flex items-center justify-center gap-2">
-                  <span className="inline-block size-4 -scale-x-100 rotate-180 opacity-80">
-                    <IconImg src={arrowRightIcon} className="size-4" />
-                  </span>
-                  Second Look
-                </span>
-              ) : (
-                "Found a signal? Tap + to intercept"
-              )}
+              Found a signal? Tap + to intercept
             </p>
           </div>
 
@@ -440,19 +422,16 @@ export function CrcleRadar({
               }`}
             >
               <div className="crcle-portrait-card relative flex h-full w-full flex-col overflow-hidden rounded-[36px]">
-                <AnimatePresence mode="wait" initial={false}>
-                  <motion.img
-                    key={caughtUp ? "caught-up" : user.id}
-                    alt=""
-                    src={user.avatarUrl}
-                    initial={{ opacity: 0, x: 28 }}
-                    animate={{ opacity: caughtUp ? 0.35 : 1, x: 0 }}
-                    exit={{ opacity: 0, x: -28 }}
-                    transition={{ duration: 0.32, ease: EASE }}
-                    className="absolute inset-0 size-full rounded-[36px] object-cover"
-                    draggable={false}
-                  />
-                </AnimatePresence>
+                <motion.img
+                  key={user.id}
+                  alt=""
+                  src={user.avatarUrl}
+                  initial={{ opacity: 0, x: 28 }}
+                  animate={{ opacity: caughtUp ? 0.35 : 1, x: 0 }}
+                  transition={{ duration: 0.32, ease: EASE }}
+                  className="absolute inset-0 size-full rounded-[36px] object-cover"
+                  draggable={false}
+                />
                 {caughtUp ? (
                   <div
                     aria-hidden
@@ -461,52 +440,32 @@ export function CrcleRadar({
                 ) : null}
                 <div className="relative z-[1] flex w-full items-center justify-between px-4 pt-4">
                   <div
-                    className={`flex items-center gap-2.5 rounded-[64px] p-2.5 backdrop-blur-[6px] ${
-                      caughtUp ? "bg-[#010211] opacity-0" : "bg-[rgba(2,3,29,0.3)]"
+                    className={`relative flex items-center gap-2.5 overflow-hidden rounded-[64px] p-2.5 ${
+                      caughtUp ? "invisible" : ""
                     }`}
                   >
                     <span
-                      className="text-[11px] leading-[1.4] text-white"
+                      aria-hidden
+                      className="pointer-events-none absolute inset-0 rounded-[inherit] bg-[rgba(2,3,29,0.3)]"
+                      style={{
+                        WebkitBackdropFilter: "blur(6px) saturate(140%)",
+                        backdropFilter: "blur(6px) saturate(140%)",
+                      }}
+                    />
+                    <span
+                      className="relative z-[1] text-[11px] leading-[1.4] text-white"
                       style={{ fontFamily: FONT }}
                     >
                       {user.handle}
                     </span>
-                    <span className="relative size-3 shrink-0 overflow-hidden">
-                      <img
-                        alt=""
-                        src={shareIcon}
-                        className="absolute inset-0 size-full"
-                        loading="lazy"
-                        decoding="async"
-                      />
+                    <span className="relative z-[1] size-3 shrink-0 overflow-hidden">
+                      <img alt="" src={shareIcon} className="absolute inset-0 size-full" />
                       <span className="absolute inset-[8.33%_12.5%_8.67%_12.5%]">
-                        <img
-                          alt=""
-                          src={shareInnerIcon}
-                          className="absolute inset-0 size-full"
-                          loading="lazy"
-                          decoding="async"
-                        />
+                        <img alt="" src={shareInnerIcon} className="absolute inset-0 size-full" />
                       </span>
                     </span>
                   </div>
-                  {!caughtUp ? (
-                    <button
-                      type="button"
-                      aria-label="Next recommendation"
-                      onClick={goNextRecommendation}
-                      className="flex h-[35px] shrink-0 items-center justify-center rounded-[36px] bg-[#02031d] px-3 py-1 backdrop-blur-[2px] transition hover:brightness-110"
-                    >
-                      <img
-                        alt=""
-                        src={arrowForwardIcon}
-                        className="size-4 object-contain"
-                        draggable={false}
-                        loading="lazy"
-                        decoding="async"
-                      />
-                    </button>
-                  ) : (
+                  {caughtUp ? (
                     <div
                       aria-hidden
                       className="flex h-[35px] w-[42px] shrink-0 items-center justify-center rounded-[36px] bg-[#010211] px-3 py-1 opacity-40 backdrop-blur-[2px]"
@@ -516,10 +475,30 @@ export function CrcleRadar({
                         src={arrowForwardIcon}
                         className="size-4 object-contain"
                         draggable={false}
-                        loading="lazy"
-                        decoding="async"
                       />
                     </div>
+                  ) : (
+                    <button
+                      type="button"
+                      aria-label="Next recommendation"
+                      onClick={goNextUser}
+                      className="relative flex h-[35px] shrink-0 items-center justify-center overflow-hidden rounded-[36px] px-3 py-1"
+                    >
+                      <span
+                        aria-hidden
+                        className="pointer-events-none absolute inset-0 rounded-[inherit] bg-[#02031d]"
+                        style={{
+                          WebkitBackdropFilter: "blur(2px) saturate(140%)",
+                          backdropFilter: "blur(2px) saturate(140%)",
+                        }}
+                      />
+                      <img
+                        alt=""
+                        src={arrowForwardIcon}
+                        className="relative z-[1] size-4 object-contain"
+                        draggable={false}
+                      />
+                    </button>
                   )}
                 </div>
 
@@ -539,178 +518,164 @@ export function CrcleRadar({
                   </div>
                 ) : null}
 
-                {/* Intent push — Figma 841:225007; same bounds as recommendation card */}
-                <AnimatePresence>
-                  {state.isIntentOverlayOpen ? (
-                    <motion.div
-                      key="intent-push"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.22, ease: EASE }}
-                      className="absolute inset-0 z-30 overflow-hidden rounded-[36px]"
-                    >
-                      <IntentPushOverlay
-                        selectedIntent={state.selectedIntent}
-                        onSelect={selectIntent}
-                        onConfirm={confirmIntent}
-                        onClose={() =>
-                          setState((s) => ({
-                            ...s,
-                            isIntentOverlayOpen: false,
-                            selectedIntent: null,
-                          }))
-                        }
-                      />
-                    </motion.div>
-                  ) : null}
-                </AnimatePresence>
+                {/* Intent push — Figma 841:225007; static wrapper so frost can sample the portrait. */}
+                {state.isIntentOverlayOpen ? (
+                  <div className="absolute inset-0 z-30 overflow-hidden rounded-[36px]">
+                    <IntentPushOverlay
+                      selectedIntent={state.selectedIntent}
+                      onSelect={selectIntent}
+                      onConfirm={confirmIntent}
+                      onClose={() =>
+                        setState((s) => ({
+                          ...s,
+                          isIntentOverlayOpen: false,
+                          selectedIntent: null,
+                        }))
+                      }
+                    />
+                  </div>
+                ) : null}
 
-                {/* Daily limit — Figma 257:85518 */}
-                <AnimatePresence>
-                  {caughtUp ? (
-                    <motion.div
-                      key="caught-up"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.28, ease: EASE }}
-                      className="absolute inset-0 z-40 overflow-hidden rounded-[36px]"
-                    >
-                      <RadarCaughtUpModal onGoToProfile={onGoToProfile} />
-                    </motion.div>
-                  ) : null}
-                </AnimatePresence>
+                {/* All caught up — next-drop card after last recommendation */}
+                {caughtUp ? (
+                  <div className="absolute inset-0 z-40 overflow-hidden rounded-[36px]">
+                    <RadarCaughtUp onGoToProfile={onGoToProfile} />
+                  </div>
+                ) : null}
 
                 {/* Signal Sent — Figma 849:225257; exact portrait card bounds */}
-                <AnimatePresence>
-                  {showSignalModal ? (
-                    <motion.div
-                      key="signal-sent"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.22, ease: EASE }}
-                      className="absolute inset-0 z-40 overflow-hidden rounded-[36px]"
-                    >
-                      <SignalSentSuccessModal
-                        userName={user.name}
-                        onGoToMessages={goToMessages}
-                        onClose={closeSuccess}
-                      />
-                    </motion.div>
-                  ) : null}
-                </AnimatePresence>
+                {showSignalModal ? (
+                  <div className="absolute inset-0 z-40 overflow-hidden rounded-[36px]">
+                    <SignalSentSuccessModal
+                      userName={user.name}
+                      onGoToMessages={goToMessages}
+                      onClose={closeSuccess}
+                    />
+                  </div>
+                ) : null}
               </div>
             </div>
 
             {/* Swipe feature — Figma 839:224515 / NOC glass 957:31087 */}
             <div className="relative z-10 w-full">
-              <AnimatePresence>
-                {state.pushPhase === "success" ? (
-                  <motion.button
-                    key="undo-push"
-                    type="button"
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 4 }}
-                    transition={{ duration: 0.2, ease: EASE }}
-                    onClick={undoPush}
-                    className="absolute bottom-full left-1/2 z-20 mb-2 -translate-x-1/2 rounded-[64px] border border-[rgba(2,3,29,0.2)] bg-white/40 px-1 py-2 backdrop-blur-[8px]"
-                    style={{ fontFamily: FONT }}
-                  >
-                    <span className="block w-[67px] text-center text-[14px] font-medium leading-[1.2] text-[#020426]">
-                      Undo
-                    </span>
-                  </motion.button>
-                ) : null}
-              </AnimatePresence>
+              {state.pushPhase === "success" ? (
+                <button
+                  type="button"
+                  onClick={undoPush}
+                  className="absolute bottom-full left-1/2 z-20 mb-2 -translate-x-1/2 overflow-hidden rounded-[64px] border border-[rgba(2,3,29,0.2)] bg-transparent px-1 py-2"
+                  style={{ fontFamily: FONT }}
+                >
+                  <span
+                    aria-hidden
+                    className="pointer-events-none absolute inset-0 rounded-[inherit] bg-white/40"
+                    style={{
+                      WebkitBackdropFilter: "blur(8px) saturate(160%)",
+                      backdropFilter: "blur(8px) saturate(160%)",
+                    }}
+                  />
+                  <span className="relative z-[1] block w-[67px] text-center text-[14px] font-medium leading-[1.2] text-[#020426]">
+                    Undo
+                  </span>
+                </button>
+              ) : null}
 
               <div
-                className={`relative flex h-[138px] w-full items-end justify-center rounded-[36px] p-4 backdrop-blur-xl transition-opacity duration-300 ${
-                  caughtUp ? "pointer-events-none opacity-0" : ""
+                className={`relative flex h-[138px] w-full items-end justify-center overflow-hidden rounded-[36px] p-4 ${
+                  caughtUp ? "pointer-events-none invisible" : ""
                 } ${
                   isNoc
-                    ? "border border-white/10 bg-black/40"
-                    : "border border-[rgba(247,246,242,0.4)] bg-[rgba(2,3,29,0.2)] backdrop-blur-[12px]"
+                    ? "border border-white/10"
+                    : "border border-[rgba(247,246,242,0.4)]"
                 }`}
               >
-                <div className="absolute left-1/2 top-[7px] h-0 w-[58px] -translate-x-1/2">
-                  <img
-                    alt=""
-                    src={dragHandleModal}
-                    className="block size-full max-w-none opacity-90"
-                    draggable={false}
-                    loading="lazy"
-                    decoding="async"
-                  />
-                </div>
-
-                <motion.button
-                  type="button"
-                  aria-label="Previous category"
-                  onClick={goPrev}
-                  className="relative z-[1] mb-2 flex size-8 shrink-0 items-center justify-center"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.92 }}
-                  transition={SPRING}
-                >
-                  <div className="relative size-6 -scale-y-100 rotate-180 overflow-hidden">
-                    <IconImg src={arrowRightIcon} className="size-6" />
-                    <div className="absolute inset-[29.17%_37.5%]">
-                      <IconImg src={arrowChevronIcon} className="size-full" />
-                    </div>
-                  </div>
-                </motion.button>
-
-                <motion.div
-                  className="relative mr-[-24px] ml-[-24px] flex h-full min-w-0 flex-1 touch-pan-y flex-col"
-                  drag="x"
-                  dragConstraints={{ left: 0, right: 0 }}
-                  dragElastic={0.25}
-                  dragTransition={SPRING}
-                  onDragEnd={onSwipeDragEnd}
-                >
-                  <AnimatePresence mode="wait" custom={direction} initial={false}>
-                    <motion.div
-                      key={state.activeCategory}
-                      custom={direction}
-                      variants={pillSlideVariants}
-                      initial="enter"
-                      animate="center"
-                      exit="exit"
-                      transition={SPRING}
-                      className="absolute inset-0 flex flex-col items-center justify-between"
-                    >
-                      <SwipeFeatureContent
-                        category={state.activeCategory}
-                        user={user}
-                        onIntercept={openIntent}
-                        hideIntercept={state.isIntentOverlayOpen}
-                        pushPhase={state.pushPhase}
-                        isNoc={isNoc}
-                      />
-                    </motion.div>
-                  </AnimatePresence>
-                </motion.div>
-
-                <motion.button
-                  type="button"
-                  aria-label="Next category"
-                  onClick={goNext}
-                  className="relative z-[1] mb-2 flex size-8 shrink-0 items-center justify-center"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.92 }}
-                  transition={SPRING}
-                >
-                  <div className="relative size-6 overflow-hidden">
-                    <IconImg src={arrowRightIcon} className="size-6" />
-                    <div className="absolute inset-[29.17%_37.5%]">
-                      <IconImg src={arrowChevronIcon} className="size-full" />
-                    </div>
-                  </div>
-                </motion.button>
+                <div
+                  aria-hidden
+                  className={`pointer-events-none absolute inset-0 rounded-[inherit] ${
+                    isNoc ? "bg-black/40" : "bg-[rgba(2,3,29,0.2)]"
+                  }`}
+                  style={{
+                    WebkitBackdropFilter: isNoc
+                      ? "blur(24px) saturate(160%)"
+                      : "blur(12px) saturate(160%)",
+                    backdropFilter: isNoc
+                      ? "blur(24px) saturate(160%)"
+                      : "blur(12px) saturate(160%)",
+                  }}
+                />
+              <div className="absolute left-1/2 top-[7px] z-[1] h-0 w-[58px] -translate-x-1/2">
+                <img
+                  alt=""
+                  src={dragHandleModal}
+                  className="block size-full max-w-none opacity-90"
+                  draggable={false}
+                />
               </div>
+
+              <motion.button
+                type="button"
+                aria-label="Previous category"
+                onClick={goPrev}
+                className="relative z-[1] mb-2 flex size-8 shrink-0 items-center justify-center"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.92 }}
+                transition={SPRING}
+              >
+                <div className="relative size-6 -scale-y-100 rotate-180 overflow-hidden">
+                  <IconImg src={arrowRightIcon} className="size-6" />
+                  <div className="absolute inset-[29.17%_37.5%]">
+                    <IconImg src={arrowChevronIcon} className="size-full" />
+                  </div>
+                </div>
+              </motion.button>
+
+              <motion.div
+                className="relative z-[1] mr-[-24px] ml-[-24px] flex h-full min-w-0 flex-1 touch-pan-y flex-col"
+                drag="x"
+                dragConstraints={{ left: 0, right: 0 }}
+                dragElastic={0.25}
+                dragTransition={SPRING}
+                onDragEnd={onSwipeDragEnd}
+              >
+                <AnimatePresence mode="wait" custom={direction} initial={false}>
+                  <motion.div
+                    key={`${user.id}-${state.activeCategory}`}
+                    custom={direction}
+                    variants={pillSlideVariants}
+                    initial="enter"
+                    animate="center"
+                    exit="exit"
+                    transition={SPRING}
+                    className="absolute inset-0 flex flex-col items-center justify-between"
+                  >
+                    <SwipeFeatureContent
+                      category={state.activeCategory}
+                      user={user}
+                      onIntercept={openIntent}
+                      hideIntercept={state.isIntentOverlayOpen}
+                      pushPhase={state.pushPhase}
+                      isNoc={isNoc}
+                    />
+                  </motion.div>
+                </AnimatePresence>
+              </motion.div>
+
+              <motion.button
+                type="button"
+                aria-label="Next category"
+                onClick={goNext}
+                className="relative z-[1] mb-2 flex size-8 shrink-0 items-center justify-center"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.92 }}
+                transition={SPRING}
+              >
+                <div className="relative size-6 overflow-hidden">
+                  <IconImg src={arrowRightIcon} className="size-6" />
+                  <div className="absolute inset-[29.17%_37.5%]">
+                    <IconImg src={arrowChevronIcon} className="size-full" />
+                  </div>
+                </div>
+              </motion.button>
+            </div>
             </div>
 
             <p
@@ -721,22 +686,20 @@ export function CrcleRadar({
             >
               {isNoc ? (
                 <>
-                  Noc signal unlocks every night at <span className="font-medium">10PM</span>. Act
-                  before they fade.
+                  Noc signal unlocks every night at{" "}
+                  <span className="font-medium">10PM</span>. Act before they fade.
                 </>
               ) : (
                 <>
-                  New signals arrive every day at <span className="font-medium">7 PM</span>. Act
-                  before they fade.
+                  New signals arrive every day at{" "}
+                  <span className="font-medium">7 PM</span>. Act before they fade.
                 </>
               )}
             </p>
           </div>
 
           <div className="absolute bottom-5 left-0 right-0 z-20 flex flex-col items-center gap-2 px-2">
-            <div
-              className={`flex w-full items-center ${isNoc ? "justify-between px-3" : "justify-center"}`}
-            >
+            <div className={`flex w-full items-center ${isNoc ? "justify-between px-3" : "justify-center"}`}>
               {isNoc ? (
                 <div
                   className="relative size-9 shrink-0 backdrop-blur-[10px]"
@@ -752,10 +715,6 @@ export function CrcleRadar({
                 onMessages={goToMessages}
                 onRadar={() => {}}
                 onSignalHome={onGoToSignalHome}
-                onAreaRadar={() => {
-                  requestAreaNearbyNotification();
-                  goToMessages();
-                }}
               />
               {isNoc ? <div className="size-9 shrink-0" aria-hidden /> : null}
             </div>
@@ -782,15 +741,17 @@ export function CrcleRadar({
 
 /* ——— Radar Onboarding (Figma 322:118007 / overlay 322:118087) ——— */
 
-function RadarOnboarding({ onClose, onContinue }: { onClose: () => void; onContinue: () => void }) {
+function RadarOnboarding({
+  onClose,
+  onContinue,
+}: {
+  onClose: () => void;
+  onContinue: () => void;
+}) {
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.28, ease: EASE }}
-      className="absolute inset-0 z-[55] flex flex-col overflow-hidden rounded-[53px] bg-[rgba(2,3,29,0.6)] backdrop-blur-[8px]"
-      role="dialog"
+    <CrclePhoneOverlay
+      zClass="z-[55]"
+      scrim="dense"
       aria-modal="true"
       aria-labelledby="radar-onboarding-title"
     >
@@ -798,7 +759,15 @@ function RadarOnboarding({ onClose, onContinue }: { onClose: () => void; onConti
         <div className="flex min-h-0 flex-1 flex-col items-center gap-[39px]">
           <div className="flex w-full shrink-0 flex-col items-center gap-9">
             <div className="flex w-full flex-col items-end">
-              <CrcleOnboardingCloseButton onClick={onClose} />
+              <button
+                type="button"
+                onClick={onClose}
+                aria-label="Close onboarding"
+                className="crcle-glass-btn relative flex h-10 w-12 shrink-0 items-center justify-center overflow-hidden rounded-[24px] px-2 py-0.5"
+              >
+                <div className="dock-glass-lens opacity-40" aria-hidden />
+                <IconImg src={radarCloseIcon} className="relative z-[1] size-6" />
+              </button>
             </div>
 
             <IconImg src={radarOutlineIcon} className="size-9 shrink-0" />
@@ -815,12 +784,11 @@ function RadarOnboarding({ onClose, onContinue }: { onClose: () => void; onConti
                 className="w-full text-[13px] font-light leading-[1.4] text-[rgba(247,246,242,0.7)]"
                 style={{ fontFamily: FONT }}
               >
-                Driven by intent.&nbsp;Your active signal constantly feeds the radar behind the
-                scenes. The moment the countdown hits{" "}
-                <span className="font-semibold text-[rgba(247,246,242,0.7)]">00:00</span>, the frost
-                clears to reveal your curated matches. Every single connection unlocked is filtered
-                entirely on the basis of mutual intent—matching you only with those who choose to be
-                perceived exactly the way you do.
+                Driven by intent.&nbsp;Your active signal constantly feeds the radar behind the scenes. The
+                moment the countdown hits{" "}
+                <span className="font-semibold text-[rgba(247,246,242,0.7)]">00:00</span>, the frost clears to
+                reveal your curated matches. Every single connection unlocked is filtered entirely on the basis
+                of mutual intent—matching you only with those who choose to be perceived exactly the way you do.
               </p>
             </div>
           </div>
@@ -866,7 +834,7 @@ function RadarOnboarding({ onClose, onContinue }: { onClose: () => void; onConti
           </button>
         </div>
       </div>
-    </motion.div>
+    </CrclePhoneOverlay>
   );
 }
 
@@ -906,21 +874,9 @@ function SwipeFeatureContent({
             </div>
             <div className="flex size-10 items-center justify-center rounded-full bg-[#02031d] p-1">
               <span className="relative size-6 overflow-hidden rounded-sm">
-                <img
-                  alt=""
-                  src={linkIcon}
-                  className="absolute inset-0 size-full"
-                  loading="lazy"
-                  decoding="async"
-                />
+                <img alt="" src={linkIcon} className="absolute inset-0 size-full" />
                 <span className="absolute inset-[29.17%_8.33%]">
-                  <img
-                    alt=""
-                    src={linkInnerIcon}
-                    className="absolute inset-0 size-full"
-                    loading="lazy"
-                    decoding="async"
-                  />
+                  <img alt="" src={linkInnerIcon} className="absolute inset-0 size-full" />
                 </span>
               </span>
             </div>
@@ -954,14 +910,7 @@ function SwipeFeatureContent({
                 whileTap={{ scale: 0.92 }}
                 transition={SPRING}
               >
-                <img
-                  alt=""
-                  src={locusPlusIcon}
-                  className="size-6 object-contain"
-                  draggable={false}
-                  loading="lazy"
-                  decoding="async"
-                />
+                <img alt="" src={locusPlusIcon} className="size-6 object-contain" draggable={false} />
               </motion.button>
             )}
           </div>
@@ -984,7 +933,13 @@ function SwipeFeatureContent({
   );
 }
 
-function CategoryPills({ category, user }: { category: RadarCategory; user: RecommendedUser }) {
+function CategoryPills({
+  category,
+  user,
+}: {
+  category: RadarCategory;
+  user: RecommendedUser;
+}) {
   if (category === "signal") {
     return (
       <motion.div
@@ -1122,10 +1077,11 @@ function IntentPushOverlay({
 }) {
   return (
     <div
-      className="relative size-full overflow-hidden rounded-[36px] bg-[rgba(2,3,29,0.4)] backdrop-blur-[6px]"
+      className="relative size-full overflow-hidden rounded-[36px]"
       role="dialog"
       aria-label="Set intent"
     >
+      <div aria-hidden className="crcle-phone-scrim crcle-phone-scrim--sheet" />
       <button
         type="button"
         aria-label="Close"
@@ -1159,8 +1115,6 @@ function IntentPushOverlay({
             className="h-[19px] w-[5px] shrink-0 object-contain"
             draggable={false}
             aria-hidden
-            loading="lazy"
-            decoding="async"
           />
 
           <div className="flex h-full flex-col items-center justify-between">
@@ -1199,19 +1153,18 @@ function IntentPushOverlay({
           aria-label="Push signal"
           disabled={!selectedIntent}
           onClick={onConfirm}
-          className={`crcle-intent-chip relative z-[1] flex h-9 w-[54px] shrink-0 items-center justify-center rounded-[36px] p-1 transition-[background,opacity] duration-200 ${
-            selectedIntent
-              ? "opacity-100 hover:bg-[rgba(247,246,242,0.36)]"
-              : "pointer-events-none opacity-70"
+          className={`crcle-intent-chip relative z-[1] flex h-9 w-[54px] shrink-0 items-center justify-center rounded-[36px] p-1 ${
+            selectedIntent ? "is-lit" : "pointer-events-none"
           }`}
         >
+          <span aria-hidden className="crcle-intent-chip__frost" />
           <img
             alt=""
             src={locusPlusIcon}
-            className="crcle-intent-chip__icon relative size-4 object-contain"
+            className={`crcle-intent-chip__icon relative size-4 object-contain ${
+              selectedIntent ? "" : "opacity-70"
+            }`}
             draggable={false}
-            loading="lazy"
-            decoding="async"
           />
         </button>
       </div>
@@ -1240,14 +1193,7 @@ function IntentLargeButton({
       onClick={() => onSelect(intent)}
       className={`relative transition ${active ? "scale-110 drop-shadow-[0_0_12px_rgba(247,246,242,0.45)]" : "opacity-80 hover:opacity-100"}`}
     >
-      <img
-        alt=""
-        src={src}
-        className={`${className} object-contain`}
-        draggable={false}
-        loading="lazy"
-        decoding="async"
-      />
+      <img alt="" src={src} className={`${className} object-contain`} draggable={false} />
     </button>
   );
 }
@@ -1262,9 +1208,7 @@ function IntentChipDock({
   const [hovered, setHovered] = useState<number | null>(null);
 
   return (
-    <motion.div
-      layout
-      transition={DOCK_SPRING}
+    <div
       onMouseLeave={() => setHovered(null)}
       className="grid grid-cols-2"
       style={{ gap: CHIP_GAP }}
@@ -1280,7 +1224,7 @@ function IntentChipDock({
           onSelect={onSelect}
         />
       ))}
-    </motion.div>
+    </div>
   );
 }
 
@@ -1310,31 +1254,23 @@ function IntentChip({
 
   return (
     <motion.div
-      layout
       onMouseEnter={() => onHover(index)}
       animate={{ width: slot, height: slot }}
       transition={DOCK_SPRING}
+      transformTemplate={() => ""}
       className="relative flex shrink-0 items-center justify-center"
     >
-      <motion.button
+      <button
         type="button"
         aria-label={chip.intent}
         aria-pressed={active}
         onClick={() => onSelect(chip.intent)}
-        animate={{ scale }}
-        transition={DOCK_SPRING}
-        whileTap={{ scale: scale * 0.9 }}
-        className={`crcle-intent-chip relative flex shrink-0 items-center justify-center rounded-[46px] p-1 ${
+        className={`crcle-intent-chip relative flex size-full items-center justify-center rounded-[46px] p-1 ${
           lit ? "is-lit" : ""
         }`}
-        style={
-          {
-            width: CHIP_BASE,
-            height: CHIP_BASE,
-            ["--chip-accent"]: chip.accent,
-          } as CSSProperties
-        }
+        style={{ ["--chip-accent"]: chip.accent } as CSSProperties}
       >
+        <span aria-hidden className="crcle-intent-chip__frost" />
         {/* Glass crescent rim — absolute so it never affects icon layout */}
         <svg
           aria-hidden
@@ -1396,7 +1332,7 @@ function IntentChip({
             className="pointer-events-none relative size-5 max-h-full max-w-full object-contain"
           />
         </span>
-      </motion.button>
+      </button>
     </motion.div>
   );
 }
@@ -1466,39 +1402,46 @@ function SignalPushCheck() {
   );
 }
 
-function formatNextDropCountdown(totalSeconds: number) {
-  const h = Math.floor(totalSeconds / 3600);
-  const m = Math.floor((totalSeconds % 3600) / 60);
-  const s = totalSeconds % 60;
-  return `${h}h ${m}m ${s}s`;
+function formatDropCountdown(total: number) {
+  const hours = Math.floor(total / 3600);
+  const minutes = Math.floor((total % 3600) / 60);
+  const seconds = total % 60;
+  return `${hours}h ${minutes}m ${seconds}s`;
 }
 
-/** Figma 257:85518 — daily recommendations exhausted */
-function RadarCaughtUpModal({ onGoToProfile }: { onGoToProfile?: () => void }) {
+function RadarCaughtUp({ onGoToProfile }: { onGoToProfile?: () => void }) {
   const [remaining, setRemaining] = useState(NEXT_DROP_SECONDS);
 
   useEffect(() => {
     const id = window.setInterval(() => {
-      setRemaining((value) => (value > 0 ? value - 1 : 0));
+      setRemaining((n) => (n > 0 ? n - 1 : 0));
     }, 1000);
     return () => window.clearInterval(id);
   }, []);
 
   return (
     <div
-      className="relative flex size-full flex-col items-center justify-center rounded-[36px] bg-[rgba(222,221,218,0.08)] p-4 backdrop-blur-[4px]"
+      className="relative flex size-full flex-col items-center justify-center overflow-hidden rounded-[36px] p-4"
       role="dialog"
       aria-modal="true"
       aria-labelledby="radar-caught-up-title"
     >
-      <div className="w-[min(283px,100%)] overflow-hidden rounded-[24px] bg-white shadow-[0px_4px_4px_0px_rgba(0,0,0,0.05)]">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 rounded-[inherit] bg-[rgba(222,221,218,0.08)]"
+        style={{
+          WebkitBackdropFilter: "blur(4px) saturate(140%)",
+          backdropFilter: "blur(4px) saturate(140%)",
+        }}
+      />
+      <div className="relative z-[1] w-[min(283px,100%)] overflow-hidden rounded-[24px] bg-white shadow-[0px_4px_4px_0px_rgba(0,0,0,0.05)]">
         <div className="flex flex-col gap-5 p-4">
           <p
             id="radar-caught-up-title"
             className="text-center text-[18px] font-normal leading-[25px] text-[#020426]"
             style={{ fontFamily: FONT }}
           >
-            You&apos;re all caught up
+            You're all caught up
           </p>
           <div className="flex flex-col gap-0.5 text-center">
             <p
@@ -1518,7 +1461,7 @@ function RadarCaughtUpModal({ onGoToProfile }: { onGoToProfile?: () => void }) {
             className="text-center text-[23px] font-normal leading-[1.4] text-[#030426] tabular-nums"
             style={{ fontFamily: FONT }}
           >
-            {formatNextDropCountdown(remaining)}
+            {formatDropCountdown(remaining)}
           </p>
         </div>
         <div className="border-t border-[#e6e6e9] p-3">
@@ -1546,34 +1489,31 @@ function SignalSentSuccessModal({
   onClose: () => void;
 }) {
   return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.98 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.99 }}
-      transition={{ duration: 0.28, ease: EASE }}
-      className="relative flex size-full flex-col items-center justify-between rounded-[36px] bg-[rgba(1,2,17,0.8)] p-4 backdrop-blur-[8px]"
+    <div
+      className="relative flex size-full flex-col items-center justify-between overflow-hidden rounded-[36px] p-4"
       role="dialog"
       aria-label="Signal Sent"
     >
-      <div className="flex w-full items-center justify-end">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 rounded-[inherit] bg-[rgba(1,2,17,0.8)]"
+        style={{
+          WebkitBackdropFilter: "blur(8px) saturate(160%)",
+          backdropFilter: "blur(8px) saturate(160%)",
+        }}
+      />
+      <div className="relative z-[1] flex w-full items-center justify-end">
         <button
           type="button"
           aria-label="Close"
           onClick={onClose}
           className="flex size-6 items-center justify-center rounded-full bg-white/10"
         >
-          <img
-            alt=""
-            src={locusCloseIcon}
-            className="size-3.5 object-contain"
-            draggable={false}
-            loading="lazy"
-            decoding="async"
-          />
+          <img alt="" src={locusCloseIcon} className="size-3.5 object-contain" draggable={false} />
         </button>
       </div>
 
-      <div className="flex h-[121px] w-full flex-col items-center justify-center gap-[33px]">
+      <div className="relative z-[1] flex h-[121px] w-full flex-col items-center justify-center gap-[33px]">
         <div className="flex items-center gap-[7px]" aria-hidden>
           <span className="h-[27px] w-[14px] rounded-[35px] bg-[#f7f6f2]" />
           <span className="h-[45px] w-[14px] rounded-[35px] bg-[#f7f6f2]" />
@@ -1587,7 +1527,7 @@ function SignalSentSuccessModal({
         </p>
       </div>
 
-      <div className="mb-4 flex w-full flex-col items-center gap-3">
+      <div className="relative z-[1] mb-4 flex w-full flex-col items-center gap-3">
         <button
           type="button"
           onClick={onGoToMessages}
@@ -1603,7 +1543,7 @@ function SignalSentSuccessModal({
           {userName} will be notified of your intercepted signal
         </p>
       </div>
-    </motion.div>
+    </div>
   );
 }
 
@@ -1641,8 +1581,6 @@ function NocDotField() {
                 src={nocDotIcon}
                 className="size-9 max-w-none shrink-0"
                 draggable={false}
-                loading="lazy"
-                decoding="async"
               />
             ))}
           </div>
@@ -1684,13 +1622,7 @@ const staggerPill = {
 function IconImg({ src, className = "size-6" }: { src: string; className?: string }) {
   return (
     <div className={`relative shrink-0 overflow-hidden ${className}`}>
-      <img
-        alt=""
-        src={src}
-        className="absolute inset-0 size-full max-w-none object-contain"
-        loading="lazy"
-        decoding="async"
-      />
+      <img alt="" src={src} className="absolute inset-0 size-full max-w-none object-contain" />
     </div>
   );
 }

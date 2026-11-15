@@ -1,6 +1,11 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import alexPortrait from "@/assets/crcle/alex-portrait.png";
 import avatarImg from "@/assets/crcle/avatar.png";
+import emmaPortrait from "@/assets/crcle/emma-rodriguez-portrait.jpg";
+import jordanPortrait from "@/assets/crcle/jordan-ellis-portrait.png";
+import mayaPortrait from "@/assets/crcle/maya-okonkwo-portrait.jpg";
+import sarahPortrait from "@/assets/crcle/sarah-chen-portrait.png";
 import batteryIcon from "@/assets/crcle/battery.svg";
 import cellularIcon from "@/assets/crcle/cellular.svg";
 import chatCameraIcon from "@/assets/crcle/chat/camera.svg";
@@ -21,6 +26,7 @@ import chatHeaderBlobB from "@/assets/crcle/chat-header-blob-b.svg";
 import chatHeaderBlobC from "@/assets/crcle/chat-header-blob-c.svg";
 import chatHeaderBlobD from "@/assets/crcle/chat-header-blob-d.svg";
 import chatDotsIcon from "@/assets/crcle/onboarding/chat-dots.svg";
+import closeAddIcon from "@/assets/crcle/onboarding/close-add.svg";
 import listIcon from "@/assets/crcle/onboarding/list.svg";
 import message2Icon from "@/assets/crcle/onboarding/message-2.svg";
 import onboardLaptopIcon from "@/assets/crcle/onboarding/laptop-mini.svg";
@@ -28,50 +34,27 @@ import userFilledIcon from "@/assets/crcle/onboarding/user-filled.svg";
 import serenaPortrait from "@/assets/crcle/serena-portrait.png";
 import wifiIcon from "@/assets/crcle/wifi.svg";
 import { ChatListItem, type ChatConversation } from "@/components/portfolio/ChatListItem";
-import { CrclePhoneFrame } from "@/components/portfolio/CrclePhoneFrame";
+import { CrclePhoneFrame, CrcleThemeToggle } from "@/components/portfolio/CrclePhoneFrame";
+import { useCrcleBroadcast } from "@/components/portfolio/crcleBroadcast";
+import {
+  AREA_CONNECTED_DELAY_MS,
+  AreaNotificationsButton,
+  InTheAreaDropdown,
+  NearbyConnectionModal,
+  type AreaPanelPhase,
+  type NearbySheetStep,
+} from "@/components/portfolio/InTheAreaPanel";
+import { useCrclePhoneLight } from "@/lib/crcle-phone-theme";
 import {
   CrcleBackButton,
   CrcleMoreButton,
-  CrcleOnboardingCloseButton,
+  CrclePhoneOverlay,
   CrclePrimaryDock,
-  CrcleThemeToggle,
-  crcleThemeToggleAboveClass,
 } from "@/components/portfolio/CrcleChrome";
 import {
   SignalInterceptModal,
   type UserProfile,
 } from "@/components/portfolio/SignalInterceptModal";
-import { AreaNearbyNotificationModal } from "@/components/portfolio/AreaNearbyNotificationModal";
-import { CrcleInTheAreaInbox } from "@/components/portfolio/CrcleInTheAreaInbox";
-import { CrcleMoodSwitch } from "@/components/portfolio/CrcleMoodSwitch";
-import {
-  consumeAreaInboxOnMessaging,
-  consumeAreaNearbyNotification,
-  consumeMoodSwitchOnMessaging,
-  consumeOpenMessaging,
-  getCrcleBroadcast,
-  isAreaNearbyFlowComplete,
-  markAreaNearbyFlowComplete,
-  setAreaNearbyBadgeActive,
-  setCrcleAreaInboxOpen,
-  subscribeCrcleBroadcast,
-} from "@/components/portfolio/crcleBroadcast";
-
-/** Figma 1387:214097 — nearby sheet appears 2s after entering Messaging Hub */
-const AREA_NEARBY_NOTIFICATION_DELAY_MS = 2000;
-/** Figma 769:204909 — received Locus signal card appears 3s after entering chat */
-const LOCUS_NOTIFICATION_DELAY_MS = 3000;
-
-const DEMO_RECEIVED_LOCUS_SIGNAL: SignalCardModel = {
-  id: "locus-demo-received",
-  activityId: "icecream",
-  activityLabel: "ice cream",
-  when: "Tonight",
-  timeOfDay: "evening",
-  location: "Nearby café",
-  status: "pending",
-  direction: "received",
-};
 import {
   SignalCard,
   TheLocusDrawer,
@@ -81,14 +64,24 @@ import {
 
 /**
  * CRCLE Messaging & Signal — multi-state interactive flow (Figma Messaging section).
- * Light inbox: Figma 257:74236 / 257:63418. Dark inbox + chat: Figma 257:63596 / 769:205653.
  * inbox (notifications) → signal gate → active chat, with context menu overlay.
  */
 
 const FONT = "Montserrat, ui-sans-serif, system-ui, sans-serif";
 const GLASS =
-  "backdrop-blur-xl border transition-colors duration-300 bg-[rgba(2,3,29,0.55)] border-[rgba(247,246,242,0.18)] [.crcle-phone--light_&]:bg-[rgba(255,255,255,0.88)] [.crcle-phone--light_&]:border-[rgba(0,0,0,0.1)]";
+  "backdrop-blur-xl bg-[rgba(2,3,29,0.55)] border border-[rgba(247,246,242,0.18)]";
 const EASE = [0.22, 1, 0.36, 1] as const;
+const RECEIVED_SIGNAL_DELAY_MS = 3000;
+const DEMO_RECEIVED_SIGNAL: SignalCardModel = {
+  id: "locus-demo-received",
+  activityId: "icecream",
+  activityLabel: "ice cream",
+  when: "Tonight",
+  timeOfDay: "evening",
+  location: "Nearby café",
+  status: "pending",
+  direction: "received",
+};
 
 type Phase = "inbox" | "chat";
 
@@ -102,7 +95,7 @@ const CONNECTION_PROFILES: UserProfile[] = [
     orientation: "Queer",
     distance: "1.1km",
     age: 27,
-    photoUrl: avatarImg,
+    photoUrl: jordanPortrait,
     matchType: "Purpose Match",
     matchBio: "Building intentional communities and late-night design critiques",
     isVerified: false,
@@ -122,27 +115,11 @@ const CONNECTION_PROFILES: UserProfile[] = [
   },
 ];
 
-const SENT_PROFILES: UserProfile[] = [
-  {
-    id: "sent-jordan",
-    name: "Jordan Ellis",
-    username: "@JordanEllis",
-    relationshipStatus: "Open",
-    orientation: "Queer",
-    distance: "1.1km",
-    age: 27,
-    photoUrl: avatarImg,
-    matchType: "Sent Request",
-    matchBio: "Waiting on a reply",
-    isVerified: false,
-  },
-];
-
 const MOCK_CONVERSATIONS: ChatConversation[] = [
   {
     id: "chat-sarah",
     userName: "Sarah Chen",
-    userAvatarUrl: avatarImg,
+    userAvatarUrl: sarahPortrait,
     lastMessage: "Let's catch up next week",
     timestamp: "1d",
     unreadCount: 2,
@@ -166,7 +143,7 @@ const MOCK_CONVERSATIONS: ChatConversation[] = [
   {
     id: "chat-jordan",
     userName: "Jordan Ellis",
-    userAvatarUrl: avatarImg,
+    userAvatarUrl: jordanPortrait,
     lastMessage: "That workshop was wild — coffee soon?",
     timestamp: "3h",
     unreadCount: 1,
@@ -208,7 +185,7 @@ const MOCK_CONVERSATIONS: ChatConversation[] = [
   {
     id: "chat-maya",
     userName: "Maya Okonkwo",
-    userAvatarUrl: avatarImg,
+    userAvatarUrl: mayaPortrait,
     lastMessage: "Sent you the deck",
     timestamp: "1w",
     unreadCount: 0,
@@ -220,6 +197,48 @@ const MOCK_CONVERSATIONS: ChatConversation[] = [
         text: "Sent you the deck — let me know what you think.",
         sentAt: "1w ago",
         fromMe: false,
+      },
+    ],
+  },
+  {
+    id: "chat-emma",
+    userName: "Emma Rodriguez",
+    userAvatarUrl: emmaPortrait,
+    lastMessage: "Same venue — should we say hi?",
+    timestamp: "2d",
+    unreadCount: 1,
+    isOnline: true,
+    showFlame: false,
+    messages: [
+      {
+        id: "m1",
+        text: "Same venue detected — should we say hi in person?",
+        sentAt: "2d ago",
+        fromMe: false,
+      },
+    ],
+  },
+  {
+    id: "chat-alex",
+    userName: "Alex Hart",
+    userAvatarUrl: alexPortrait,
+    lastMessage: "You can message each other safely now",
+    timestamp: "4d",
+    unreadCount: 0,
+    isOnline: false,
+    showFlame: false,
+    messages: [
+      {
+        id: "m1",
+        text: "You're connected — we can message each other safely now.",
+        sentAt: "4d ago",
+        fromMe: false,
+      },
+      {
+        id: "m2",
+        text: "Nice to meet you, Alex.",
+        sentAt: "4d ago",
+        fromMe: true,
       },
     ],
   },
@@ -243,143 +262,32 @@ export function CrcleMessaging({
   const [activeConversation, setActiveConversation] = useState<ChatConversation | null>(null);
   const [tab, setTab] = useState<"sent" | "received">("received");
   const [draft, setDraft] = useState("");
-  /** Light Figma 257:63418 · Dark Figma 257:63596 */
-  const [light, setLight] = useState(true);
+  const [isLightMode, toggleLight] = useCrclePhoneLight();
+  const [broadcastMood] = useCrcleBroadcast();
+  const [areaPhase, setAreaPhase] = useState<AreaPanelPhase>("off");
+  const [nearbyStep, setNearbyStep] = useState<NearbySheetStep | null>(null);
+  const [notifyOverlayOpen, setNotifyOverlayOpen] = useState(false);
   const [locusOpen, setLocusOpen] = useState(false);
-  const [locusDraft, setLocusDraft] = useState<LocusSignalPayload | null>(null);
   const [attachOpen, setAttachOpen] = useState(false);
+  const [locusDraft, setLocusDraft] = useState<LocusSignalPayload | null>(null);
   const [signalCard, setSignalCard] = useState<SignalCardModel | null>(null);
-  const [moodOpen, setMoodOpen] = useState(false);
-  const [areaNotificationOpen, setAreaNotificationOpen] = useState(false);
-  const [areaInbox, setAreaInboxState] = useState<"off" | "screen" | "drawer">("off");
-  const areaNotificationTimerRef = useRef<number | null>(null);
-  const areaNotificationScheduledRef = useRef(false);
-  const locusNotificationTimerRef = useRef<number | null>(null);
+  const receivedSignalTimer = useRef<number | null>(null);
+  const areaConnectedTimer = useRef<number | null>(null);
 
-  const clearLocusNotificationTimer = useCallback(() => {
-    if (locusNotificationTimerRef.current != null) {
-      window.clearTimeout(locusNotificationTimerRef.current);
-      locusNotificationTimerRef.current = null;
+  const clearReceivedSignalTimer = useCallback(() => {
+    if (receivedSignalTimer.current != null) {
+      window.clearTimeout(receivedSignalTimer.current);
+      receivedSignalTimer.current = null;
     }
   }, []);
 
-  const scheduleLocusNotification = useCallback(() => {
-    clearLocusNotificationTimer();
-    locusNotificationTimerRef.current = window.setTimeout(() => {
-      locusNotificationTimerRef.current = null;
-      setSignalCard((current) => current ?? DEMO_RECEIVED_LOCUS_SIGNAL);
-    }, LOCUS_NOTIFICATION_DELAY_MS);
-  }, [clearLocusNotificationTimer]);
-
-  const openLocusComposer = useCallback(() => {
-    setLocusDraft(null);
-    setAttachOpen(true);
-    setLocusOpen(true);
-  }, []);
-
-  const closeLocusComposer = useCallback(() => {
-    setAttachOpen(false);
-    setLocusOpen(false);
-    setLocusDraft(null);
-  }, []);
-
-  const clearAreaNotificationTimer = useCallback(() => {
-    if (areaNotificationTimerRef.current != null) {
-      window.clearTimeout(areaNotificationTimerRef.current);
-      areaNotificationTimerRef.current = null;
-    }
-    areaNotificationScheduledRef.current = false;
-  }, []);
-
-  const scheduleAreaNearbyNotification = useCallback(() => {
-    if (isAreaNearbyFlowComplete()) return;
-    clearAreaNotificationTimer();
-    areaNotificationScheduledRef.current = true;
-    setOnboardingOpen(false);
-    setPhase("inbox");
-    setMoodOpen(false);
-    setMenuOpen(false);
-    setNotificationsOpen(true);
-    setTab("sent");
-    areaNotificationTimerRef.current = window.setTimeout(() => {
-      areaNotificationTimerRef.current = null;
-      setAreaNearbyBadgeActive(true);
-      setAreaNotificationOpen(true);
-    }, AREA_NEARBY_NOTIFICATION_DELAY_MS);
-  }, [clearAreaNotificationTimer]);
-
-  const setAreaInbox = useCallback((next: "off" | "screen" | "drawer") => {
-    setAreaInboxState(next);
-    setCrcleAreaInboxOpen(next !== "off");
-  }, []);
-
-  useEffect(() => {
-    return () => setCrcleAreaInboxOpen(false);
-  }, []);
-
-  useEffect(() => {
-    if (phase === "chat") {
-      scheduleLocusNotification();
-    } else {
-      clearLocusNotificationTimer();
-      setAttachOpen(false);
-    }
-    return () => clearLocusNotificationTimer();
-  }, [phase, activeConversation?.id, scheduleLocusNotification, clearLocusNotificationTimer]);
-
-  const openAreaInbox = useCallback(() => {
-    setMoodOpen(false);
-    setMenuOpen(false);
-    setOnboardingOpen(false);
-    setPhase("inbox");
-    setNotificationsOpen(false);
-    setAreaInbox("screen");
-  }, [setAreaInbox]);
-
-  useEffect(() => {
-    const tryOpen = () => {
-      if (consumeOpenMessaging()) {
-        setPhase("inbox");
-        setNotificationsOpen(true);
-        setMenuOpen(false);
-      }
-      if (consumeAreaInboxOnMessaging()) {
-        clearAreaNotificationTimer();
-        openAreaInbox();
-        return;
-      }
-      if (consumeAreaNearbyNotification()) {
-        scheduleAreaNearbyNotification();
-        return;
-      }
-      if (consumeMoodSwitchOnMessaging()) {
-        setOnboardingOpen(false);
-        setPhase("inbox");
-        setMoodOpen(true);
-        return;
-      }
-      /* Figma 1387:214097 — entered Messaging Hub with In The Area already active */
-      if (
-        getCrcleBroadcast() === "in_the_area" &&
-        !isAreaNearbyFlowComplete() &&
-        !areaNotificationScheduledRef.current
-      ) {
-        scheduleAreaNearbyNotification();
-      }
-    };
-    tryOpen();
-    const unsub = subscribeCrcleBroadcast(tryOpen);
-    return () => {
-      unsub();
-      clearAreaNotificationTimer();
-    };
-  }, [openAreaInbox, scheduleAreaNearbyNotification, clearAreaNotificationTimer]);
-
-  useEffect(() => {
-    if (areaInbox !== "screen") return;
-    const id = window.setTimeout(() => setAreaInbox("drawer"), 420);
-    return () => window.clearTimeout(id);
-  }, [areaInbox]);
+  const scheduleReceivedDemo = useCallback(() => {
+    clearReceivedSignalTimer();
+    receivedSignalTimer.current = window.setTimeout(() => {
+      receivedSignalTimer.current = null;
+      setSignalCard((current) => current ?? DEMO_RECEIVED_SIGNAL);
+    }, RECEIVED_SIGNAL_DELAY_MS);
+  }, [clearReceivedSignalTimer]);
 
   const openInbox = useCallback(() => {
     setPhase("inbox");
@@ -408,6 +316,7 @@ export function CrcleMessaging({
     setDraft("");
     setLocusOpen(false);
     setAttachOpen(false);
+    setLocusDraft(null);
     setSignalCard(null);
     setPhase("chat");
   }, []);
@@ -419,6 +328,7 @@ export function CrcleMessaging({
     setMenuOpen(false);
     setLocusOpen(false);
     setAttachOpen(false);
+    setLocusDraft(null);
     setSignalCard(null);
     setPhase("chat");
   }, []);
@@ -466,7 +376,7 @@ export function CrcleMessaging({
 
   const handleSendSignal = useCallback(
     (payload: LocusSignalPayload) => {
-      clearLocusNotificationTimer();
+      clearReceivedSignalTimer();
       setLocusOpen(false);
       setAttachOpen(false);
       setLocusDraft(null);
@@ -477,93 +387,127 @@ export function CrcleMessaging({
         direction: "sent",
       });
     },
-    [clearLocusNotificationTimer],
+    [clearReceivedSignalTimer],
   );
 
-  const showPrimaryDock =
-    phase === "inbox" &&
-    !onboardingOpen &&
-    !activeMatch &&
-    areaInbox === "off" &&
-    !moodOpen &&
-    !areaNotificationOpen &&
-    !locusOpen;
+  const openComposer = useCallback(() => {
+    setLocusDraft(null);
+    setAttachOpen(true);
+    setLocusOpen(true);
+  }, []);
 
-  const inboxBottomInset = showPrimaryDock ? "bottom-[100px]" : "bottom-6";
+  const closeComposer = useCallback(() => {
+    setAttachOpen(false);
+    setLocusOpen(false);
+    setLocusDraft(null);
+  }, []);
+
+  const deleteSignal = useCallback(() => {
+    clearReceivedSignalTimer();
+    setLocusDraft(null);
+    setLocusOpen(false);
+    setSignalCard(null);
+  }, [clearReceivedSignalTimer]);
+
+  const editSignal = useCallback(() => {
+    if (!signalCard || signalCard.direction !== "sent") return;
+    setLocusDraft({
+      activityId: signalCard.activityId,
+      activityLabel: signalCard.activityLabel,
+      when: signalCard.when,
+      timeOfDay: signalCard.timeOfDay,
+      location: signalCard.location,
+    });
+    setAttachOpen(true);
+    setLocusOpen(true);
+  }, [signalCard]);
+
+  useEffect(() => {
+    if (phase === "chat") {
+      scheduleReceivedDemo();
+    } else {
+      clearReceivedSignalTimer();
+      setAttachOpen(false);
+    }
+    return () => clearReceivedSignalTimer();
+  }, [phase, activeConversation?.id, scheduleReceivedDemo, clearReceivedSignalTimer]);
+
+  useEffect(() => {
+    if (broadcastMood !== "in_the_area") {
+      setAreaPhase("off");
+      setNearbyStep(null);
+      setNotifyOverlayOpen(false);
+      return;
+    }
+    setOnboardingOpen(false);
+    setNotificationsOpen(false);
+    setPhase("inbox");
+    setNearbyStep(null);
+    setAreaPhase("screen");
+    const expand = window.setTimeout(() => setAreaPhase("drawer"), 420);
+    areaConnectedTimer.current = window.setTimeout(() => {
+      setNotifyOverlayOpen(false);
+      setAreaPhase("off");
+      setNotificationsOpen(true);
+      setNearbyStep("prompt");
+    }, AREA_CONNECTED_DELAY_MS);
+    return () => {
+      window.clearTimeout(expand);
+      if (areaConnectedTimer.current != null) {
+        window.clearTimeout(areaConnectedTimer.current);
+        areaConnectedTimer.current = null;
+      }
+    };
+  }, [broadcastMood]);
+
+  const openNearbyPrompt = useCallback(() => {
+    if (areaConnectedTimer.current != null) {
+      window.clearTimeout(areaConnectedTimer.current);
+      areaConnectedTimer.current = null;
+    }
+    setNotifyOverlayOpen(false);
+    setAreaPhase("off");
+    setNotificationsOpen(true);
+    setNearbyStep("prompt");
+  }, []);
+
+  const openNotifyCenter = useCallback(() => {
+    setNotificationsOpen(false);
+    setNotifyOverlayOpen(true);
+    setAreaPhase("drawer");
+  }, []);
+
+  const closeNotifyCenter = useCallback(() => {
+    setNotifyOverlayOpen(false);
+    setAreaPhase("off");
+    setNotificationsOpen(true);
+  }, []);
+
+  const areaDropdownOpen =
+    nearbyStep === null && (notifyOverlayOpen || areaPhase === "screen" || areaPhase === "drawer");
+
+  const closeNearbySheet = useCallback(() => {
+    setNearbyStep(null);
+  }, []);
 
   return (
-    <div className="relative ml-auto w-fit">
-      <CrcleThemeToggle
-        light={light}
-        onToggle={() => setLight((v) => !v)}
-        className={crcleThemeToggleAboveClass}
-      />
+    <div className="relative ml-auto flex w-fit flex-col items-center">
+      <CrcleThemeToggle light={isLightMode} onToggle={toggleLight} />
 
       <CrclePhoneFrame
-        light={light}
+        light={isLightMode}
         overlay={
-          areaInbox !== "off" || activeMatch != null || areaNotificationOpen ? (
-            <>
-              {areaInbox !== "off" ? (
-                <CrcleInTheAreaInbox
-                  phase={areaInbox === "drawer" ? "drawer" : "screen"}
-                  isLight={light}
-                  backdropUrl={avatarImg}
-                  onExpand={() => setAreaInbox("drawer")}
-                  onCollapse={() => setAreaInbox("screen")}
-                  onConnect={() => {
-                    setAreaInbox("off");
-                    openSignal(CONNECTION_PROFILES[1]);
-                  }}
-                  onMarkRead={() => setAreaInbox("off")}
-                />
-              ) : null}
-              <AnimatePresence>
-                {activeMatch ? (
-                  <SignalInterceptModal
-                    key={activeMatch.id}
-                    user={activeMatch}
-                    isLight={light}
-                    onDecline={declineSignal}
-                    onAccept={acceptSignal}
-                  />
-                ) : null}
-              </AnimatePresence>
-              <AnimatePresence mode="wait">
-                {areaNotificationOpen ? (
-                  <AreaNearbyNotificationModal
-                    key="area-nearby-notification"
-                    backdropUrl={avatarImg}
-                    isLight={light}
-                    onDismiss={() => {
-                      setAreaNotificationOpen(false);
-                      clearAreaNotificationTimer();
-                      setAreaNearbyBadgeActive(false);
-                    }}
-                    onComplete={() => {
-                      setAreaNotificationOpen(false);
-                      clearAreaNotificationTimer();
-                      markAreaNearbyFlowComplete();
-                      openAreaInbox();
-                    }}
-                  />
-                ) : null}
-              </AnimatePresence>
-            </>
-          ) : undefined
-        }
-        bottomChrome={
-          showPrimaryDock ? (
-            <CrclePrimaryDock
-              embedded
-              active="messages"
-              onProfile={goProfile}
-              onMessages={openInbox}
-              onRadar={goRadar}
-              onSignalHome={goHome}
-              onAreaRadar={openAreaInbox}
-            />
-          ) : null
+          <AnimatePresence>
+            {activeMatch ? (
+              <SignalInterceptModal
+                key={activeMatch.id}
+                user={activeMatch}
+                isLight={isLightMode}
+                onDecline={declineSignal}
+                onAccept={acceptSignal}
+              />
+            ) : null}
+          </AnimatePresence>
         }
       >
         <AnimatePresence mode="wait">
@@ -581,6 +525,8 @@ export function CrcleMessaging({
                 conversation={activeConversation}
                 onBack={() => {
                   setLocusOpen(false);
+                  setAttachOpen(false);
+                  setLocusDraft(null);
                   setPhase("inbox");
                 }}
                 onMenu={() => setMenuOpen((v) => !v)}
@@ -588,8 +534,10 @@ export function CrcleMessaging({
               <ChatThread
                 conversation={activeConversation}
                 signal={signalCard}
-                isLight={light}
-                onAcceptSignal={() => setSignalCard((s) => (s ? { ...s, status: "accepted" } : s))}
+                isLight={isLightMode}
+                onAcceptSignal={() =>
+                  setSignalCard((s) => (s ? { ...s, status: "accepted" } : s))
+                }
                 onRaincheckSignal={() =>
                   setSignalCard((s) => (s ? { ...s, status: "raincheck" } : s))
                 }
@@ -605,24 +553,8 @@ export function CrcleMessaging({
                       : s,
                   )
                 }
-                onDeleteSignal={() => {
-                  clearLocusNotificationTimer();
-                  setLocusDraft(null);
-                  setLocusOpen(false);
-                  setSignalCard(null);
-                }}
-                onEditSignal={() => {
-                  if (!signalCard || signalCard.direction !== "sent") return;
-                  setLocusDraft({
-                    activityId: signalCard.activityId,
-                    activityLabel: signalCard.activityLabel,
-                    when: signalCard.when,
-                    timeOfDay: signalCard.timeOfDay,
-                    location: signalCard.location,
-                  });
-                  setAttachOpen(true);
-                  setLocusOpen(true);
-                }}
+                onDeleteSignal={deleteSignal}
+                onEditSignal={editSignal}
               />
               <TheLocusDrawer
                 open={locusOpen}
@@ -639,111 +571,76 @@ export function CrcleMessaging({
                 onDraftChange={setDraft}
                 attachOpen={attachOpen}
                 locusOpen={locusOpen}
-                onOpenComposer={openLocusComposer}
-                onCloseComposer={closeLocusComposer}
+                onOpenComposer={openComposer}
+                onCloseComposer={closeComposer}
                 onToggleLocus={() => setLocusOpen((v) => !v)}
               />
             </motion.div>
           ) : (
-            <motion.div
-              key="hub"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.25 }}
-              transformTemplate={() => ""}
-              className="relative flex h-full min-h-0 flex-col bg-[var(--crcle-bg-deep)] transition-colors duration-300"
-            >
-              {/* Active Chats under In The Area — flat z-stack so blur samples rows at panel top */}
-              {areaInbox !== "off" ? (
-                <div
-                  className={`absolute inset-x-3 top-0 z-[1] overflow-y-auto overflow-x-hidden pb-6 pt-[88px] ${inboxBottomInset}`}
-                >
-                  <ActiveChatList
-                    conversations={MOCK_CONVERSATIONS}
-                    onSelectConversation={openConversation}
+            <div key="hub" className="relative flex h-full min-h-0 flex-col">
+              {/* Header stack — status always; Messages hides while In The Area is up */}
+              <div className={`relative shrink-0 ${areaDropdownOpen ? "z-[64]" : "z-30"}`}>
+                <div className={areaPhase === "off" && !notifyOverlayOpen ? "" : "bg-[#02031d]"}>
+                  <StatusBar onAccent={areaPhase !== "off" || notifyOverlayOpen} />
+                </div>
+                {areaPhase === "off" && !notifyOverlayOpen ? (
+                  <MessagesHeader
+                    onBack={goProfile}
+                    menuOpen={menuOpen}
+                    onToggleMenu={() => setMenuOpen((v) => !v)}
                   />
-                </div>
-              ) : null}
-
-              {/* Header stack — status → Messages row (never overlapped) */}
-              <div
-                className={`relative z-30 shrink-0 ${areaInbox !== "off" ? "hidden" : ""}`}
-                aria-hidden={areaInbox !== "off"}
-              >
-                <StatusBar />
-                <div className="mt-[5px] flex justify-center pb-[12px]">
-                  <IconImg src={crcleLogo} className="crcle-theme-icon h-[13px] w-[38px]" />
-                </div>
-                <MessagesHeader
-                  onBack={goProfile}
-                  menuOpen={menuOpen}
-                  onToggleMenu={() => setMenuOpen((v) => !v)}
-                />
+                ) : null}
               </div>
 
               {/* Content below header */}
               <div
-                className={`relative min-h-0 flex-1 ${areaInbox !== "off" ? "" : "z-10"}`}
+                className="relative z-10 min-h-0 flex-1"
                 onClick={() => menuOpen && setMenuOpen(false)}
               >
-                {areaInbox === "off" ? (
-                  onboardingOpen ? (
-                    <OnboardingInboxBackdrop />
-                  ) : (
-                  <motion.div
-                    key="inbox"
-                    initial={{ opacity: 0, y: 12 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.35, ease: EASE }}
-                    transformTemplate={() => ""}
-                    className={`absolute inset-x-3 top-0 overflow-hidden ${inboxBottomInset}`}
+                <div className="absolute inset-x-3 top-0 bottom-[100px] overflow-hidden">
+                  {/* Chat list under overlay — fixed offset for Closed header (Figma ~95px) */}
+                  <div
+                    className={`absolute inset-0 z-0 overflow-y-auto overflow-x-hidden pb-6 ${
+                      areaPhase === "off" || nearbyStep ? "pt-[155px]" : "pt-[210px]"
+                    }`}
                   >
-                    <div className="absolute inset-0 z-0 overflow-y-auto overflow-x-hidden pb-6 pt-[155px]">
-                      <ActiveChatList
-                        conversations={MOCK_CONVERSATIONS}
-                        onSelectConversation={openConversation}
-                      />
-                    </div>
+                    <ActiveChatList
+                      conversations={MOCK_CONVERSATIONS}
+                      onSelectConversation={openConversation}
+                    />
+                  </div>
 
+                  {(areaPhase === "off" || nearbyStep) && !notifyOverlayOpen ? (
                     <NotificationCenter
                       expanded={notificationsOpen}
                       onExpandedChange={setNotificationsOpen}
                       tab={tab}
                       onTabChange={setTab}
-                      profiles={tab === "sent" ? SENT_PROFILES : CONNECTION_PROFILES}
+                      profiles={CONNECTION_PROFILES}
                       onViewSignal={openSignal}
                       onViewDailyDrop={goRadar}
                     />
-                  </motion.div>
-                  )
-                ) : null}
+                  ) : null}
+                </div>
               </div>
-            </motion.div>
+
+              {!onboardingOpen ? (
+                <CrclePrimaryDock
+                  active="messages"
+                  onProfile={goProfile}
+                  onMessages={openInbox}
+                  onRadar={goRadar}
+                  onSignalHome={goHome}
+                />
+              ) : null}
+            </div>
           )}
         </AnimatePresence>
 
         <AnimatePresence>
           {menuOpen && (
-            <ContextMenu
-              onClose={() => setMenuOpen(false)}
-              onMoodSwitch={() => {
-                setMenuOpen(false);
-                setOnboardingOpen(false);
-                setMoodOpen(true);
-              }}
-              top={phase === "chat" ? 100 : 132}
-            />
+            <ContextMenu onClose={() => setMenuOpen(false)} top={phase === "chat" ? 100 : 132} />
           )}
-        </AnimatePresence>
-
-        <AnimatePresence>
-          {moodOpen ? (
-            <CrcleMoodSwitch
-              onClose={() => setMoodOpen(false)}
-              onInTheAreaSelect={scheduleAreaNearbyNotification}
-            />
-          ) : null}
         </AnimatePresence>
 
         <AnimatePresence>
@@ -751,6 +648,61 @@ export function CrcleMessaging({
             <MessagingOnboarding onClose={dismissOnboarding} onContinue={continueFromOnboarding} />
           )}
         </AnimatePresence>
+
+        {/* Inside the screen so backdrop-filter can sample the chat. The overlay
+            slot sits in a clip-path stacking context that only contains the modal. */}
+        <AnimatePresence>
+          {phase === "inbox" && !onboardingOpen && nearbyStep === null && !areaDropdownOpen && broadcastMood === "in_the_area" ? (
+            <AreaNotificationsButton key="area-notify" onClick={openNotifyCenter} />
+          ) : null}
+        </AnimatePresence>
+        <AnimatePresence>
+          {phase === "inbox" && !onboardingOpen && areaDropdownOpen ? (
+            <div
+              key="notify-overlay"
+              className="pointer-events-auto absolute inset-0 z-[63] overflow-hidden rounded-[53px]"
+              role="dialog"
+              aria-modal="true"
+              aria-label="In The Area"
+            >
+              <button
+                type="button"
+                aria-label="Dismiss In The Area"
+                className={`crcle-nc-overlay-frost pointer-events-auto absolute inset-0 z-0 ${
+                  isLightMode ? "crcle-nc-overlay-frost--light" : ""
+                }`}
+                onClick={closeNotifyCenter}
+              />
+              <InTheAreaDropdown
+                phase={areaPhase === "screen" ? "screen" : "drawer"}
+                isLight={isLightMode}
+                onExpand={() => setAreaPhase("drawer")}
+                onCollapse={() => setAreaPhase("screen")}
+                onConnect={openNearbyPrompt}
+                onMarkRead={() => {
+                  closeNotifyCenter();
+                }}
+              />
+            </div>
+          ) : null}
+        </AnimatePresence>
+        <AnimatePresence>
+          {nearbyStep ? (
+            <NearbyConnectionModal
+              key="nearby"
+              step={nearbyStep}
+              isLight={isLightMode}
+              onDismiss={closeNearbySheet}
+              onAccept={() => setNearbyStep("request_sent")}
+              onAdvance={() => setNearbyStep("connected")}
+              onDone={() => {
+                closeNearbySheet();
+                setAreaPhase("screen");
+              }}
+            />
+          ) : null}
+        </AnimatePresence>
+
       </CrclePhoneFrame>
     </div>
   );
@@ -790,7 +742,7 @@ function MessagesHeader({
   onToggleMenu: () => void;
 }) {
   return (
-    <div className="relative z-20 flex h-10 shrink-0 items-center justify-between px-3">
+    <div className="relative z-20 mt-[4px] flex h-10 shrink-0 items-center justify-between px-3">
       <CrcleBackButton onClick={onBack} disabled={!onBack} />
 
       <h1
@@ -829,8 +781,6 @@ function ChatHeader({
           alt=""
           src={chatHeaderPattern}
           className="absolute inset-0 size-full max-w-none object-cover object-center"
-          loading="lazy"
-          decoding="async"
         />
       </div>
 
@@ -845,8 +795,6 @@ function ChatHeader({
             alt=""
             src={chatHeaderBlobA}
             className="h-[89px] w-[84px] max-w-none rotate-[120deg] opacity-70 blur-[8px]"
-            loading="lazy"
-            decoding="async"
           />
         </div>
         <div className="absolute left-[110.42px] top-[107.58px] flex h-[75.513px] w-[76.759px] items-center justify-center">
@@ -854,8 +802,6 @@ function ChatHeader({
             alt=""
             src={chatHeaderBlobB}
             className="h-[57.438px] w-[54.033px] max-w-none rotate-[120deg] opacity-65 blur-[7px]"
-            loading="lazy"
-            decoding="async"
           />
         </div>
         <div className="absolute left-[14px] top-[-36px] flex h-[134.936px] w-[137.163px] items-center justify-center">
@@ -863,16 +809,12 @@ function ChatHeader({
             alt=""
             src={chatHeaderBlobC}
             className="h-[102.638px] w-[96.553px] max-w-none rotate-[120deg] opacity-70 blur-[8px]"
-            loading="lazy"
-            decoding="async"
           />
         </div>
         <img
           alt=""
           src={chatHeaderBlobD}
           className="absolute left-[-10px] top-[52px] h-[89px] w-[84px] max-w-none opacity-65 blur-[7px]"
-          loading="lazy"
-          decoding="async"
         />
 
         {/* Ellipse rings → soft bokeh */}
@@ -880,22 +822,16 @@ function ChatHeader({
           alt=""
           src={chatHeaderOrbSm}
           className="absolute left-[206px] top-[83px] size-[50px] max-w-none opacity-70 blur-[6px]"
-          loading="lazy"
-          decoding="async"
         />
         <img
           alt=""
           src={chatHeaderOrbSm}
           className="absolute left-[115px] top-[-18px] size-[50px] max-w-none opacity-70 blur-[6px]"
-          loading="lazy"
-          decoding="async"
         />
         <img
           alt=""
           src={chatHeaderOrbLg}
           className="absolute left-[303px] top-[-19px] size-[132px] max-w-none opacity-75 blur-[8px]"
-          loading="lazy"
-          decoding="async"
         />
 
         {/* Cyan wash + top-right highlight */}
@@ -903,8 +839,6 @@ function ChatHeader({
           alt=""
           src={chatHeaderGlowDark}
           className="absolute left-[-8px] top-[-7px] h-[201px] w-[486px] max-w-none opacity-85 blur-[4px]"
-          loading="lazy"
-          decoding="async"
         />
         <div className="absolute right-[-12px] top-[-8px] size-[120px] rounded-full bg-[radial-gradient(circle,rgba(254,254,254,0.22)_0%,transparent_70%)] blur-[8px]" />
       </div>
@@ -915,13 +849,7 @@ function ChatHeader({
           {/* Centered avatar + name (overlaps action row) — Figma 769:205669 */}
           <div className="pointer-events-none relative z-[1] mb-[-40px] flex h-[42px] w-[141px] items-center gap-3">
             <div className="relative size-[42px] shrink-0 overflow-hidden rounded-full border border-[rgba(2,3,29,0.2)] [.crcle-phone:not(.crcle-phone--light)_&]:border-[#f7f6f2]">
-              <img
-                alt=""
-                src={avatar}
-                className="absolute inset-0 size-full object-cover object-center"
-                loading="lazy"
-                decoding="async"
-              />
+              <img alt="" src={avatar} className="absolute inset-0 size-full object-cover object-center" />
             </div>
             <div className="flex min-w-0 flex-1 flex-col items-start">
               <p
@@ -949,63 +877,7 @@ function ChatHeader({
   );
 }
 
-/* ——— Messaging Onboarding (Figma 322:117724) ——— */
-
-function OnboardingInboxBackdrop() {
-  return (
-    <div className="absolute inset-x-3 top-0 flex flex-col gap-8 pt-4">
-      <div className="relative h-[132px] overflow-hidden rounded-2xl bg-[#c5e4e2]">
-        <div className="absolute -left-4 top-6 size-24 rounded-full bg-[#8fd0c4]/80 blur-md" />
-        <div className="absolute left-24 -top-6 size-16 rounded-full bg-[#d7f3ef]/90 blur-sm" />
-        <div className="absolute right-2 -top-8 size-32 rounded-full bg-[#6eb8b4]/80 blur-md" />
-        <div className="absolute bottom-2 left-16 size-14 rounded-full bg-[#9ad4dc]/70 blur-sm" />
-        <div className="relative flex items-start justify-between px-3 pb-4 pt-3">
-          <div className="font-normal" style={{ fontFamily: FONT }}>
-            <p className="text-[15px] leading-[21px] text-[#030426]">New Requests</p>
-            <p className="text-[13px] leading-[1.4] text-[#fefefe]">2 Requests • 1 Pending</p>
-          </div>
-          <span
-            className="flex size-6 items-center justify-center rounded-full bg-[#030426] text-[13px] leading-none text-white"
-            style={{ fontFamily: FONT }}
-          >
-            3
-          </span>
-        </div>
-      </div>
-
-      <p
-        className="text-center text-[15px] font-normal leading-[21px] text-[rgba(3,4,38,0.3)]"
-        style={{ fontFamily: FONT }}
-      >
-        You have no active chats
-      </p>
-
-      <div className="relative">
-        {Array.from({ length: 4 }, (_, index) => (
-          <div
-            key={index}
-            className="mb-2 flex items-center justify-between rounded-2xl bg-[rgba(2,3,29,0.02)] p-3"
-          >
-            <div className="size-[42px] rounded-full bg-black/[0.02]" />
-            <div className="size-5 rounded-full bg-[rgba(2,3,29,0.03)]" />
-          </div>
-        ))}
-        <div className="absolute inset-x-4 top-6 flex flex-col items-center gap-4 text-center text-[rgba(2,3,29,0.4)]">
-          <div className="rounded-[60px] border border-black/25 bg-[rgba(247,246,242,0.4)] p-4 backdrop-blur-[4px]">
-            <IconImg src={message2Icon} className="size-9 brightness-0" />
-          </div>
-          <p className="text-[24px] font-medium leading-[1.2]" style={{ fontFamily: FONT }}>
-            No Messages Yet
-          </p>
-          <p className="text-[11px] font-normal leading-normal" style={{ fontFamily: FONT }}>
-            Your signal is currently broadcasting. Once another frequency responds to your
-            transmission, your active matches and direct conversations will appear right here.
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-}
+/* ——— Messaging Onboarding (Figma 385:135261) ——— */
 
 function MessagingOnboarding({
   onClose,
@@ -1015,21 +887,26 @@ function MessagingOnboarding({
   onContinue: () => void;
 }) {
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.28, ease: EASE }}
-      className="absolute inset-0 z-[55] flex flex-col overflow-hidden rounded-[53px] bg-[rgba(2,3,29,0.6)] backdrop-blur-[8px]"
-      role="dialog"
+    <CrclePhoneOverlay
+      zClass="z-[55]"
+      scrim="heavy"
       aria-modal="true"
       aria-labelledby="messaging-onboarding-title"
     >
-      <div className="flex min-h-0 flex-1 flex-col px-3.5 pb-8 pt-[112px]">
+      {/* Figma 385:135317 — clipped to screen curve; dense scrim so dock/list don’t bleed through */}
+      <div className="flex min-h-0 flex-1 flex-col px-3.5 pb-11 pt-[112px]">
         <div className="flex min-h-0 flex-1 flex-col items-center gap-[39px]">
           <div className="flex w-full shrink-0 flex-col items-center gap-9">
             <div className="flex w-full flex-col items-end">
-              <CrcleOnboardingCloseButton onClick={onClose} />
+              <button
+                type="button"
+                onClick={onClose}
+                aria-label="Close onboarding"
+                className="crcle-glass-btn relative flex h-10 shrink-0 items-center justify-center overflow-hidden rounded-[24px] px-2 py-0.5"
+              >
+                <div className="dock-glass-lens opacity-40" aria-hidden />
+                <IconImg src={closeAddIcon} className="relative z-[1] size-6" />
+              </button>
             </div>
 
             <IconImg src={message2Icon} className="size-9 shrink-0" />
@@ -1046,8 +923,8 @@ function MessagingOnboarding({
                 className="w-full text-[13px] font-light leading-[1.4] text-[rgba(247,246,242,0.6)]"
                 style={{ fontFamily: FONT }}
               >
-                One simple list for everything. Your ongoing chats and your new invites live
-                together here, so you never miss a connection.
+                One simple list for everything. Your ongoing chats and your new invites live together here, so you
+                never miss a connection.
               </p>
             </div>
           </div>
@@ -1067,11 +944,12 @@ function MessagingOnboarding({
               icon={<IconImg src={chatDotsIcon} className="size-4" />}
               title="Seamless Transition"
               body="Hitting Accept unlocks the profile and instantly opens your live chat thread."
+              showDivider={false}
             />
           </div>
         </div>
 
-        <div className="mt-auto flex shrink-0 flex-col items-center gap-8 pt-4">
+        <div className="mt-auto flex shrink-0 flex-col items-center gap-[18px] pt-6">
           <p
             className="w-full text-center text-[14px] font-medium leading-[21px] text-[#f7f6f2]"
             style={{ fontFamily: FONT }}
@@ -1081,7 +959,7 @@ function MessagingOnboarding({
           <button
             type="button"
             onClick={onContinue}
-            className="flex w-[91px] flex-col items-center gap-[5px]"
+            className="flex w-[91px] flex-col items-center gap-[5px] rounded-xl transition hover:bg-white/5"
           >
             <IconImg src={crcleLogo} className="h-[17px] w-[49px]" />
             <span
@@ -1093,7 +971,7 @@ function MessagingOnboarding({
           </button>
         </div>
       </div>
-    </motion.div>
+    </CrclePhoneOverlay>
   );
 }
 
@@ -1120,14 +998,12 @@ function OnboardingFeature({
         </p>
       </div>
       <p
-        className="text-[13px] font-light leading-[1.4] text-[rgba(247,246,242,0.6)]"
+        className="text-[13px] font-light leading-[1.35] text-[rgba(247,246,242,0.6)]"
         style={{ fontFamily: FONT }}
       >
         {body}
       </p>
-      {showDivider ? (
-        <div className="h-px w-[168px] bg-[rgba(247,246,242,0.35)]" />
-      ) : null}
+      {showDivider ? <div className="h-px w-[168px] bg-[rgba(247,246,242,0.18)]" /> : null}
     </div>
   );
 }
@@ -1196,14 +1072,12 @@ function NotificationCenter({
       {/* Property 1=Closed: header only · Property 1=Opened: header + body */}
       <div
         className={`pointer-events-auto relative flex w-full flex-col items-start ${
-          expanded
-            ? ""
-            : "overflow-hidden rounded-[16px] shadow-[0_12px_40px_rgba(0,0,0,0.35)] [.crcle-phone--light_&]:shadow-[0_12px_32px_rgba(0,0,0,0.12)]"
+          expanded ? "" : "overflow-hidden rounded-[16px] shadow-[0_12px_40px_rgba(0,0,0,0.35)]"
         }`}
       >
         {/* Header — Figma 257:63418 (Default / Variant2) */}
         <div
-          className={`relative flex w-full flex-col items-center overflow-hidden bg-[var(--crcle-nc-header-bg)] transition-colors duration-300 [.crcle-phone--light_&]:bg-transparent ${
+          className={`relative flex w-full flex-col items-center overflow-hidden bg-[var(--crcle-nc-header-bg)] transition-colors duration-300 ${
             expanded ? "rounded-tl-[16px] rounded-tr-[16px]" : "rounded-[16px]"
           }`}
         >
@@ -1211,9 +1085,7 @@ function NotificationCenter({
             <img
               alt=""
               src={notificationBg}
-              className="absolute left-[-8px] top-[-7px] h-[201px] w-[486px] max-w-none object-cover transition-opacity duration-300"
-              loading="lazy"
-              decoding="async"
+              className="absolute left-[-8px] top-[-7px] h-[201px] w-[486px] max-w-none object-contain"
             />
           </div>
 
@@ -1253,50 +1125,47 @@ function NotificationCenter({
               </div>
             </div>
             <div className="flex size-6 shrink-0 items-center justify-center rounded-full bg-[var(--crcle-nc-badge)] transition-colors duration-300">
-              <span
-                className="text-[13px] leading-[18.2px] text-white"
-                style={{ fontFamily: FONT }}
-              >
+              <span className="text-[13px] leading-[18.2px] text-white" style={{ fontFamily: FONT }}>
                 {profiles.length}
               </span>
             </div>
           </div>
         </div>
 
-        {/* Opened body — Figma 257:63476 */}
-        <motion.div
-          initial={false}
-          animate={{
-            height: expanded ? "auto" : 0,
-            opacity: expanded ? 1 : 0,
-          }}
-          transition={{ duration: 0.32, ease: EASE }}
-          className="w-full overflow-hidden"
+        {/* Opened body — Figma 257:63476. CSS grid expand (no Framer) + static
+            frost plate so overlay blur can sample the inbox. */}
+        <div
+          className={`crcle-nc-expand w-full ${expanded ? "is-open" : ""}`}
           aria-hidden={!expanded}
           style={{ pointerEvents: expanded ? "auto" : "none" }}
         >
-          <div className="relative flex w-full flex-col items-start gap-4 rounded-bl-[28px] rounded-br-[28px] border-x border-b border-t border-[var(--crcle-panel-border)] bg-[var(--crcle-panel)] px-[9px] pb-[10px] pt-[11px] shadow-[0_12px_40px_rgba(0,0,0,0.18)] backdrop-blur-[14px] transition-all duration-300 hover:bg-[rgba(247,246,242,0.1)] [.crcle-phone--light_&]:border-[#f7f6f2] [.crcle-phone--light_&]:bg-[rgba(255,255,255,0.8)] [.crcle-phone--light_&]:shadow-none [.crcle-phone--light_&]:backdrop-blur-[4px] [.crcle-phone--light_&]:hover:bg-[rgba(255,255,255,0.92)]">
-            {tab === "received" ? <DailyDropBanner onView={onViewDailyDrop} /> : null}
-            <div className="flex items-start gap-4">
-              {profiles.map((profile) => (
-                <ConnectionAvatar
-                  key={profile.id}
-                  badge="laptop"
-                  photoUrl={profile.photoUrl}
-                  name={profile.name}
-                  onClick={() => onViewSignal(profile)}
+          <div className="crcle-nc-expand-clip">
+            <div className="crcle-nc-body relative flex w-full flex-col items-start rounded-bl-[28px] rounded-br-[28px] border-x border-b border-[var(--crcle-panel-border)] px-[9px] pb-[11px] pt-[10px] shadow-[0_12px_40px_rgba(0,0,0,0.18)]">
+              <div aria-hidden className="crcle-nc-body-frost absolute inset-0 rounded-[inherit]" />
+              <div className="relative z-[1] flex w-full flex-col items-start gap-4">
+                <DailyDropBanner onView={onViewDailyDrop} />
+                <div className="flex items-start gap-4">
+                  {profiles.map((profile) => (
+                    <ConnectionAvatar
+                      key={profile.id}
+                      badge="laptop"
+                      photoUrl={profile.photoUrl}
+                      name={profile.name}
+                      onClick={() => onViewSignal(profile)}
+                    />
+                  ))}
+                </div>
+                <SwipeHandle
+                  label="Collapse notifications"
+                  onToggle={() => onExpandedChange(false)}
+                  onPointerDown={onHandlePointerDown}
+                  onPointerMove={onHandlePointerMove}
+                  onPointerUp={onHandlePointerUp}
                 />
-              ))}
+              </div>
             </div>
-            <SwipeHandle
-              label="Collapse notifications"
-              onToggle={() => onExpandedChange(false)}
-              onPointerDown={onHandlePointerDown}
-              onPointerMove={onHandlePointerMove}
-              onPointerUp={onHandlePointerUp}
-            />
           </div>
-        </motion.div>
+        </div>
       </div>
     </div>
   );
@@ -1344,48 +1213,36 @@ function SentReceivedToggle({
   onChange: (tab: "sent" | "received") => void;
 }) {
   return (
-    <div
-      role="tablist"
-      aria-label="Notification direction"
-      className="crcle-glass-btn flex w-[178px] items-center gap-1 rounded-[24px] bg-transparent p-1 opacity-70 shadow-[0px_4px_4px_0px_rgba(0,0,0,0.05)] backdrop-blur-[8px]"
-    >
-      {(["sent", "received"] as const).map((key) => {
-        const active = tab === key;
-        const label = key === "sent" ? "Sent" : "Received";
-        return (
-          <button
-            key={key}
-            type="button"
-            role="tab"
-            aria-selected={active}
-            onClick={() => onChange(key)}
-            className={`relative z-[1] flex flex-1 items-center justify-center whitespace-nowrap rounded-[20px] px-2.5 py-1 text-[13px] leading-[1.4] transition-colors duration-300 ${
-              active
-                ? "text-white [.crcle-phone--light_&]:bg-[rgba(2,3,29,0.2)] [.crcle-phone:not(.crcle-phone--light)_&]:bg-[rgba(247,246,242,0.2)]"
-                : "bg-transparent text-[var(--crcle-toggle-idle)]"
-            }`}
-            style={{ fontFamily: FONT }}
-          >
-            {label}
-          </button>
-        );
-      })}
+    <div className="crcle-glass-btn flex w-[178px] items-center gap-1 rounded-[24px] bg-transparent p-1 shadow-[0px_4px_4px_0px_rgba(0,0,0,0.05)] backdrop-blur-[8px]">
+      {(["sent", "received"] as const).map((key) => (
+        <button
+          key={key}
+          type="button"
+          onClick={() => onChange(key)}
+          className={`relative z-[1] flex flex-1 items-center justify-center px-2.5 py-1 text-[13px] capitalize transition-colors duration-300 ${
+            tab === key
+              ? "rounded-[20px] bg-[rgba(2,3,29,0.2)] text-white"
+              : "text-[var(--crcle-toggle-idle)]"
+          }`}
+          style={{ fontFamily: FONT }}
+        >
+          {key}
+        </button>
+      ))}
     </div>
   );
 }
 
 function DailyDropBanner({ onView }: { onView: () => void }) {
   return (
-    <div className="w-full rounded-[64px] bg-[rgba(222,221,218,0.6)] py-1.5 pl-4 pr-2 backdrop-blur-[13px] transition-colors duration-300 [.crcle-phone--light_&]:bg-[rgba(2,3,29,0.08)]">
-      <div className="flex items-center justify-center gap-2">
+    <div className="relative w-full overflow-hidden rounded-[64px] py-1.5 pl-4 pr-2">
+      <div aria-hidden className="crcle-nc-drop-frost absolute inset-0 rounded-[inherit]" />
+      <div className="relative z-[1] flex items-center justify-center gap-2">
         <div className="min-w-0 flex-1">
           <p className="text-[13px] leading-[1.4] text-[#030426]" style={{ fontFamily: FONT }}>
             Daily Drop is ready
           </p>
-          <p
-            className="truncate text-[13px] font-light leading-[1.4] text-[#6b7280]"
-            style={{ fontFamily: FONT }}
-          >
+          <p className="truncate text-[13px] font-light leading-[1.4] text-[#6b7280]" style={{ fontFamily: FONT }}>
             3 new people to discover.
           </p>
         </div>
@@ -1394,10 +1251,7 @@ function DailyDropBanner({ onView }: { onView: () => void }) {
           onClick={onView}
           className="flex h-full shrink-0 items-center justify-center overflow-hidden rounded-[36px] bg-[#02031d] px-4 py-2"
         >
-          <span
-            className="text-[11px] leading-[1.4] whitespace-nowrap text-[#fefefe]"
-            style={{ fontFamily: FONT }}
-          >
+          <span className="text-[11px] leading-[1.4] whitespace-nowrap text-[#fefefe]" style={{ fontFamily: FONT }}>
             View
           </span>
         </button>
@@ -1444,20 +1298,11 @@ function ActiveChatList({
 
 /* ——— State 3: Context menu ——— */
 
-function ContextMenu({
-  onClose,
-  onMoodSwitch,
-  top,
-}: {
-  onClose: () => void;
-  onMoodSwitch: () => void;
-  top: number;
-}) {
-  const items: { label: string; danger?: boolean; action?: () => void }[] = [
+function ContextMenu({ onClose, top }: { onClose: () => void; top: number }) {
+  const items: { label: string; danger?: boolean }[] = [
     { label: "Report User", danger: true },
     { label: "Block User", danger: true },
     { label: "Edit profile" },
-    { label: "Mood Switch", action: onMoodSwitch },
     { label: "Verification" },
     { label: "Settings" },
     { label: "User Sharecode" },
@@ -1465,15 +1310,14 @@ function ContextMenu({
 
   return (
     <>
-      <motion.button
+      <button
         type="button"
         aria-label="Close menu"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="absolute inset-0 z-40 bg-black/40 backdrop-blur-[2px]"
+        className="absolute inset-0 z-40 overflow-hidden rounded-[53px]"
         onClick={onClose}
-      />
+      >
+        <span className="crcle-phone-scrim crcle-phone-scrim--menu" aria-hidden />
+      </button>
       <motion.div
         initial={{ opacity: 0, y: -8, scale: 0.96 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -1484,17 +1328,11 @@ function ContextMenu({
       >
         {items.map((item, i) => (
           <div key={item.label}>
-            {i === 2 || i === 4 ? (
-              <div className="mb-2 h-px bg-[var(--crcle-border)] transition-colors duration-300" />
-            ) : null}
+            {i === 2 || i === 4 ? <div className="mb-2 h-px bg-[rgba(247,246,242,0.15)]" /> : null}
             <button
               type="button"
-              onClick={() => {
-                if (item.action) item.action();
-                else onClose();
-              }}
-              className={`w-full text-left text-[11px] font-medium transition-colors duration-300 ${
-                item.danger ? "text-[#ff6b6b]" : "text-[var(--crcle-fg)]"
+              className={`w-full text-left text-[11px] font-medium ${
+                item.danger ? "text-[#ff6b6b]" : "text-[#f7f6f2]"
               }`}
               style={{ fontFamily: FONT }}
             >
@@ -1529,15 +1367,13 @@ function ChatThread({
   onEditSignal: () => void;
 }) {
   const messages = conversation?.messages ?? [];
+  const counterpartyName = conversation?.userName.split(" ")[0] ?? "Jane";
 
   return (
     <div className="relative flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto bg-[var(--crcle-bg-deep)] px-4 pb-24 pt-6 transition-colors duration-300 [.crcle-phone--light_&]:bg-[#fdfcfb]">
       <div className="flex items-center justify-center gap-3">
         <span className="h-px w-12 bg-[#d9d9de]" />
-        <p
-          className="shrink-0 text-[11px] leading-[1.4] text-[#d9d9de]"
-          style={{ fontFamily: FONT }}
-        >
+        <p className="shrink-0 text-[11px] leading-[1.4] text-[#d9d9de]" style={{ fontFamily: FONT }}>
           Connected via Purpose
         </p>
         <span className="h-px w-12 bg-[#d9d9de]" />
@@ -1550,10 +1386,7 @@ function ChatThread({
               <p className="text-[13px] leading-[1.4] text-[#02031d]" style={{ fontFamily: FONT }}>
                 {message.text}
               </p>
-              <p
-                className="text-[11px] leading-[1.4] text-[rgba(3,4,38,0.3)]"
-                style={{ fontFamily: FONT }}
-              >
+              <p className="text-[11px] leading-[1.4] text-[rgba(3,4,38,0.3)]" style={{ fontFamily: FONT }}>
                 {message.sentAt}
               </p>
             </div>
@@ -1561,16 +1394,10 @@ function ChatThread({
         ) : (
           <div key={message.id} className="flex w-full justify-start">
             <div className="flex max-w-[278px] flex-col gap-1 rounded-tl-[4px] rounded-tr-[20px] rounded-bl-[20px] rounded-br-[20px] border-[0.5px] border-[var(--crcle-border)] bg-[rgba(255,255,255,0.1)] px-4 pb-3 pt-3 transition-colors duration-300 [.crcle-phone--light_&]:bg-white [.crcle-phone--light_&]:shadow-sm">
-              <p
-                className="text-[13px] leading-[1.4] text-[var(--crcle-fg)] transition-colors duration-300"
-                style={{ fontFamily: FONT }}
-              >
+              <p className="text-[13px] leading-[1.4] text-[var(--crcle-fg)] transition-colors duration-300" style={{ fontFamily: FONT }}>
                 {message.text}
               </p>
-              <p
-                className="text-[11px] leading-[1.4] text-[var(--crcle-fg-ghost)] transition-colors duration-300"
-                style={{ fontFamily: FONT }}
-              >
+              <p className="text-[11px] leading-[1.4] text-[var(--crcle-fg-ghost)] transition-colors duration-300" style={{ fontFamily: FONT }}>
                 {message.sentAt}
               </p>
             </div>
@@ -1591,7 +1418,7 @@ function ChatThread({
             <SignalCard
               signal={signal}
               isLight={isLight}
-              counterpartyName={conversation?.userName.split(" ")[0] ?? "Jane"}
+              counterpartyName={counterpartyName}
               onAccept={onAcceptSignal}
               onRaincheck={onRaincheckSignal}
               onCounterPropose={onCounterPropose}
@@ -1602,10 +1429,7 @@ function ChatThread({
         ) : null}
       </AnimatePresence>
 
-      <p
-        className="text-center text-[11px] leading-[1.4] text-[#b1b1bc]"
-        style={{ fontFamily: FONT }}
-      >
+      <p className="text-center text-[11px] leading-[1.4] text-[#b1b1bc]" style={{ fontFamily: FONT }}>
         End-to-end encrypted
       </p>
     </div>
@@ -1712,11 +1536,7 @@ function ChatComposer({
               style={{ fontFamily: FONT }}
             />
           </div>
-          <button
-            type="button"
-            aria-label="Voice message"
-            className="flex size-9 shrink-0 items-center justify-center"
-          >
+          <button type="button" aria-label="Voice message" className="flex size-9 shrink-0 items-center justify-center">
             <IconImg src={chatMicIcon} className="crcle-theme-icon size-5" />
           </button>
         </div>
@@ -1738,13 +1558,7 @@ function IconImg({
 }) {
   return (
     <div className={`relative shrink-0 overflow-hidden ${className}`}>
-      <img
-        alt=""
-        src={src}
-        className="absolute inset-0 size-full max-w-none object-contain"
-        loading="lazy"
-        decoding="async"
-      />
+      <img alt="" src={src} className="absolute inset-0 size-full max-w-none object-contain" />
       {children}
     </div>
   );
@@ -1770,33 +1584,23 @@ function ConnectionAvatar({
       type="button"
       onClick={onClick}
       aria-label={`Open signal for ${name}`}
-      className="group relative flex size-[53px] shrink-0 items-center justify-center rounded-[26.5px] border border-[#11df59] bg-[rgba(253,252,251,0.3)] p-0.5 aspect-square transition-transform duration-200 hover:scale-[1.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#11df59]/40 [.crcle-phone--light_&]:border-[#11df59] [.crcle-phone--light_&]:bg-[#fdfcfb]"
+      className="group relative flex size-[53px] shrink-0 items-center justify-center rounded-[26.5px] border border-[#11df59] bg-[rgba(253,252,251,0.3)] p-0.5 aspect-square transition-transform duration-200 hover:scale-[1.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#11df59]/40"
     >
       <div className="relative size-[46px] overflow-hidden rounded-full aspect-square">
-        <img
-          alt=""
-          src={photoUrl}
-          className="absolute inset-0 size-full object-cover object-center"
-          loading="lazy"
-          decoding="async"
-        />
+        <img alt="" src={photoUrl} className="absolute inset-0 size-full object-cover object-center" />
         <div
           className={`absolute inset-0 bg-black/60 transition-opacity duration-200 ease-out ${
-            showWaveform
-              ? "opacity-100"
-              : "opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100"
+            showWaveform ? "opacity-100" : "opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100"
           }`}
         />
       </div>
       {/* Purpose badge — Figma 350:22979 stroke laptop */}
-      <div className="absolute -left-[3px] -top-[4px] z-[1] flex w-5 flex-col items-center justify-center rounded-[64px] border-[0.5px] border-[#f7f6f2] bg-[rgba(253,252,251,0.8)] p-1 backdrop-blur-[0.5px] [.crcle-phone--light_&]:border-[#f7f6f2]">
-        <IconImg src={badgeSrc} className="crcle-theme-icon h-3 w-3.5" />
+      <div className="absolute -left-[3px] -top-[4px] z-[1] flex w-5 flex-col items-center justify-center rounded-[64px] border-[0.5px] border-[#f7f6f2] bg-[rgba(253,252,251,0.8)] p-1 backdrop-blur-[0.5px]">
+        <IconImg src={badgeSrc} className="h-3 w-3.5" />
       </div>
       <div
         className={`pointer-events-none absolute inset-0 z-[1] flex items-center justify-center gap-[2.3px] transition-opacity duration-200 ease-out ${
-          showWaveform
-            ? "opacity-100"
-            : "opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100"
+          showWaveform ? "opacity-100" : "opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100"
         }`}
       >
         <span className="h-[9px] w-[4.5px] rounded-full bg-[#f7f6f2]" />

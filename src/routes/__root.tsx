@@ -76,7 +76,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   head: () => ({
     meta: [
       { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
+      {
+        name: "viewport",
+        content: "width=device-width, initial-scale=1, viewport-fit=cover",
+      },
       { title: "Selected Work — Portfolio" },
       {
         name: "description",
@@ -90,32 +93,27 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "A single, fluidly scrolling portfolio of deliberate case studies in engineering and design.",
       },
       { property: "og:type", content: "website" },
-      { property: "og:image", content: "/logo.png" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:image", content: "/logo.png" },
     ],
     links: [
       {
         rel: "stylesheet",
         href: appCss,
       },
-      {
-        rel: "preload",
-        href: "/fonts/inter-latin.woff2",
-        as: "font",
-        type: "font/woff2",
-        crossOrigin: "anonymous",
-      },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      { rel: "icon", href: "/favicon.ico?v=5", sizes: "any" },
-      { rel: "icon", type: "image/png", sizes: "32x32", href: "/favicon-32x32.png?v=5" },
-      { rel: "icon", type: "image/png", sizes: "16x16", href: "/favicon-16x16.png?v=5" },
-      { rel: "icon", type: "image/png", href: "/favicon.png?v=5" },
-      { rel: "icon", type: "image/svg+xml", href: "/favicon.svg?v=5" },
-      { rel: "apple-touch-icon", sizes: "180x180", href: "/apple-touch-icon.png?v=5" },
-      { rel: "apple-touch-icon-precomposed", href: "/apple-touch-icon.png?v=5" },
-      { rel: "mask-icon", href: "/favicon.svg?v=5", color: "#000000" },
+      {
+        rel: "stylesheet",
+        href: "https://fonts.googleapis.com/css2?family=Arimo:wght@400;700&family=Inter:wght@400;500;600;700&family=M+PLUS+Rounded+1c:wght@500;700&family=Montserrat:wght@300;400;500;600&family=Poppins:wght@400;500;600;700&display=swap",
+      },
+      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+    ],
+    scripts: [
+      {
+        // Sizes the interactive hero's fallback grid before hydration so it doesn't flash 12 rows.
+        children:
+          '(function(){var pad=2,gap=2,w=document.documentElement.clientWidth,h=window.innerHeight,innerW=Math.max(0,w-pad*2),innerH=Math.max(0,h-pad*2),cols=w<640?Math.max(4,Math.round((innerW+gap)/66)):14,cellW=(innerW-gap*(cols-1))/cols,rows=Math.max(1,Math.round((innerH+gap)/(cellW+gap))),cellH=(innerH-gap*(rows-1))/rows,root=document.documentElement;root.style.setProperty("--hero-cols",String(cols));root.style.setProperty("--hero-rows",String(rows));root.style.setProperty("--hero-cell-w",cellW+"px");root.style.setProperty("--hero-cell-h",cellH+"px");})();',
+      },
     ],
   }),
   shellComponent: RootShell,
@@ -124,35 +122,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   errorComponent: ErrorComponent,
 });
 
-const GOOGLE_FONTS =
-  "https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&family=Poppins:wght@400;500;600;700&display=swap";
-
 function RootShell({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <head>
-        <style
-          dangerouslySetInnerHTML={{
-            __html:
-              "html,body{margin:0;background:#090e15;color:#fff}body{font-family:Inter,'Inter Fallback',ui-sans-serif,system-ui,sans-serif}.interactive-hero{background:#090e15;color:#fff;min-height:100vh;min-height:100dvh}.interactive-hero__grid{background:#090e15}",
-          }}
-        />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `(function(){var pad=2,gap=2,cols=14,w=document.documentElement.clientWidth,h=window.innerHeight,innerW=Math.max(0,w-pad*2),innerH=Math.max(0,h-pad*2),cellW=(innerW-gap*(cols-1))/cols,rows=Math.max(1,Math.round((innerH+gap)/(cellW+gap))),cellH=(innerH-gap*(rows-1))/rows,root=document.documentElement;root.style.setProperty("--hero-rows",String(rows));root.style.setProperty("--hero-cell-w",cellW+"px");root.style.setProperty("--hero-cell-h",cellH+"px");})();`,
-          }}
-        />
         <HeadContent />
-        <link id="portfolio-google-fonts" rel="stylesheet" href={GOOGLE_FONTS} media="print" />
-        <script
-          dangerouslySetInnerHTML={{
-            __html:
-              "(function(){var l=document.getElementById('portfolio-google-fonts');if(!l)return;function apply(){l.media='all'}if(l.sheet)apply();else l.onload=apply;})();",
-          }}
-        />
-        <noscript>
-          <link rel="stylesheet" href={GOOGLE_FONTS} />
-        </noscript>
       </head>
       <body>
         {children}

@@ -1,56 +1,39 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { motion, useAnimationControls, useReducedMotion } from "framer-motion";
-import { lazy, useCallback, useEffect, useRef, useState } from "react";
-import { useWorkScrollGate } from "@/hooks/use-work-scroll-gate";
+import { useCallback, useEffect, useRef, useState } from "react";
 import girlPleaseLogo from "@/assets/girl-please.svg";
 import designToggleKnob from "@/assets/portfolio/design-toggle-knob.svg";
-import { InteractiveHero } from "@/components/portfolio/InteractiveHero";
 import { ProjectBentoStack, type Project } from "@/components/portfolio/ProjectAccordion";
 import { Dock } from "@/components/portfolio/Dock";
 import { ProjectDock } from "@/components/portfolio/ProjectDock";
 import { Marquee } from "@/components/portfolio/Marquee";
 import { Footer } from "@/components/portfolio/Footer";
+import { OdicciWorkspacePicker } from "@/components/portfolio/OdicciWorkspacePicker";
+import { OdicciColourPalette } from "@/components/portfolio/OdicciColourPalette";
+import { OdicciSignUp } from "@/components/portfolio/OdicciSignUp";
+import { OdicciTemplateLibrary } from "@/components/portfolio/OdicciTemplateLibrary";
 import { Sidebar, SIDEBAR_PANEL_ID } from "@/components/portfolio/Sidebar";
-import { requestOpenMessaging } from "@/components/portfolio/crcleBroadcast";
+import { CrcleMessaging } from "@/components/portfolio/CrcleMessaging";
+import { CrcleProfile } from "@/components/portfolio/CrcleProfile";
+import { CrcleRadar } from "@/components/portfolio/CrcleRadar";
+import { CrcleSignalHome } from "@/components/portfolio/CrcleSignalHome";
+import { FoodForThought } from "@/components/portfolio/FoodForThought";
 import { WireframeStage } from "@/components/portfolio/SiteWireframe";
-import { PortfolioCalculatorCard } from "@/components/portfolio/PortfolioCalculatorCard";
-import { PortfolioPeekMouse } from "@/components/portfolio/PortfolioPeekMouse";
+import { FirstDesignInspector } from "@/components/portfolio/firstDesign/FirstDesignInspector";
+import { InteractiveHero } from "@/components/portfolio/InteractiveHero";
+import { SpatialDotBadge } from "@/components/portfolio/SpatialDotBadge";
+import { CalculatorCard, PeekMouse } from "@/components/portfolio/WorkDecorations";
+import { useWorkCommit } from "@/hooks/useWorkCommit";
+import { spatialChromeVisible } from "@/lib/spatialStyles";
+import { isPhoneViewport } from "@/lib/viewport";
+import crcleHoverStill from "@/assets/portfolio/hover/crcle-in-the-area.jpg";
+import crcleHoverVideo from "@/assets/portfolio/hover/crcle-world-hover.mp4";
+import crcleHoverPoster from "@/assets/portfolio/hover/crcle-world-poster.jpg";
+import crcleHoverMark from "@/assets/portfolio/hover/crcle-mark.svg";
+import bendingSpoonsHoverStill from "@/assets/portfolio/hover/bending-spoons-desk.jpg";
+import odicciHoverStill from "@/assets/portfolio/hover/odicci-laptop.jpg";
+import odicciHoverMark from "@/assets/portfolio/hover/odicci-mark.svg";
 
-const OdicciWorkspacePicker = lazy(() =>
-  import("@/components/portfolio/OdicciWorkspacePicker").then((m) => ({
-    default: m.OdicciWorkspacePicker,
-  })),
-);
-const OdicciColourPalette = lazy(() =>
-  import("@/components/portfolio/OdicciColourPalette").then((m) => ({
-    default: m.OdicciColourPalette,
-  })),
-);
-const OdicciSignUp = lazy(() =>
-  import("@/components/portfolio/OdicciSignUp").then((m) => ({ default: m.OdicciSignUp })),
-);
-const OdicciTemplateLibrary = lazy(() =>
-  import("@/components/portfolio/OdicciTemplateLibrary").then((m) => ({
-    default: m.OdicciTemplateLibrary,
-  })),
-);
-const CrcleMessaging = lazy(() =>
-  import("@/components/portfolio/CrcleMessaging").then((m) => ({ default: m.CrcleMessaging })),
-);
-const CrcleProfile = lazy(() =>
-  import("@/components/portfolio/CrcleProfile").then((m) => ({ default: m.CrcleProfile })),
-);
-const CrcleRadar = lazy(() =>
-  import("@/components/portfolio/CrcleRadar").then((m) => ({ default: m.CrcleRadar })),
-);
-const CrcleSignalHome = lazy(() =>
-  import("@/components/portfolio/CrcleSignalHome").then((m) => ({ default: m.CrcleSignalHome })),
-);
-const FirstDesignComingSoon = lazy(() =>
-  import("@/components/portfolio/FirstDesignComingSoon").then((m) => ({
-    default: m.FirstDesignComingSoon,
-  })),
-);
 export const Route = createFileRoute("/")({
   component: Index,
 });
@@ -61,9 +44,27 @@ const PROJECTS: Project[] = [
     id: "01",
     slug: "crcle",
     title: "CRCLE",
+    url: "https://www.crcle.world",
     role: "Lead Product Designer/Owner",
     year: "2025-26",
-    defaultTab: "Create Workspace\u00a0",
+    hoverPreview: {
+      src: crcleHoverStill,
+      alt: "CRCLE In The Area on iPhone",
+      width: 1400,
+      height: 1050,
+      glassLogo: true,
+      logo: { src: crcleHoverMark, width: 248, height: 255 },
+    },
+    linkHoverPreview: {
+      type: "video",
+      src: crcleHoverVideo,
+      poster: crcleHoverPoster,
+      alt: "CRCLE website — intent-based connection",
+      width: 1280,
+      height: 720,
+      playbackRate: 1.5,
+      chrome: false,
+    },
     content: {
       "Create Workspace\u00a0": {
         tabLabel: "Signal Home",
@@ -79,10 +80,7 @@ const PROJECTS: Project[] = [
           "A living Signal Home wireframe judges (and clients) can feel before they read a paragraph.",
         customBody: ({ goToTab }) => (
           <CrcleSignalHome
-            onGoToMessages={() => {
-              requestOpenMessaging();
-              goToTab("Sign Up");
-            }}
+            onGoToMessages={() => goToTab("Sign Up")}
             onGoToProfile={() => goToTab("Template Library")}
             onGoToRadar={() => goToTab("Brand Personality")}
           />
@@ -116,7 +114,7 @@ const PROJECTS: Project[] = [
           "The messaging hub is the daily loop — notifications, threads, and presence without noisy social chrome.",
         challenge: "Build intimacy at small scale without borrowing patterns from mass messengers.",
         approach:
-          "Prioritize readable threads, the Sent/Received switch, and a dock that feels like a private tool.",
+          "Prioritize readable threads, soft glass controls, and a dock that feels like a private tool.",
         outcome: "An interactive hub that demonstrates the product’s rhythm end-to-end.",
         customBody: ({ goToTab }) => (
           <CrcleMessaging
@@ -125,18 +123,6 @@ const PROJECTS: Project[] = [
             onGoToRadar={() => goToTab("Brand Personality")}
           />
         ),
-        featureCopy: {
-          label: "CRCLE — In The Area",
-          subtitle: "Nearby connections without sacrificing location privacy",
-          overview:
-            "An ambient social radar designed to surface nearby connections without sacrificing user location privacy. By leveraging venue-based proximity detection instead of raw GPS coordinates, the feature highlights shared context and mutual intent through dense, low-friction profile cards.",
-          challenge:
-            "People want to know who is actually around them, but live GPS sharing feels like surveillance — so most proximity products never get turned on.",
-          approach:
-            "Detect shared venues instead of coordinates. Cards carry intent and context — same place, privacy protected — so proximity reads as social, not a map pin on a stranger.",
-          outcome:
-            "In The Area turns ambient presence into a conversation: venue-based detection, protected location, and dense profile cards that surface mutual intent without asking for a live fix.",
-        },
       },
       "Template Library": {
         tabLabel: "Profile",
@@ -147,28 +133,13 @@ const PROJECTS: Project[] = [
         challenge:
           "Pack education, work, dating, and location into one glance without feeling like a form dump.",
         approach:
-          "Lead with portrait + strength, then a 2×2 bento. Edit sheets keep depth off the main surface.",
+          "Lead with portrait + strength, then a 2×2 bento. Mood Switch and edit sheets keep depth off the main surface.",
         outcome:
-          "Signal Live and the mood chip jump back to Messaging Hub, where Mood Switch and the Sent/Received control live.",
-        featureCopy: {
-          label: "CRCLE — Know Your Customer",
-          subtitle: "Identity checks so the crcle stays real people",
-          overview:
-            "CRCLE is a small, high-trust graph — dating, work, and location shared with people you might actually meet. Know Your Customer (KYC) is the gate that keeps every profile a person, not a borrowed photo or a bot, before that intimacy is on the table.",
-          challenge:
-            "Exclusive networks collapse the moment fake accounts sit next to real ones. Members will not share a live venue, a dating status, or a work ask if they cannot tell who has proven they are who they say they are.",
-          approach:
-            "Partner with Fourthline for an encrypted identity check, not a social scrape. Verification lives as a quiet Profile chip, then a short drawer that explains the why — data is used only to confirm the person, then discarded from the product surface.",
-          outcome:
-            "A verified raindrop replaces Verify. Trust is earned before Radar, In The Area, or messaging deepen, so the product can stay intimate at small scale without turning into another unmoderated feed.",
-        },
+          "An interactive profile flow: Signal Live → Mood Switch, bento taps → edit sheets, social chips → links.",
         customBody: ({ goToTab }) => (
           <CrcleProfile
             onGoToSignalHome={() => goToTab("Create Workspace\u00a0")}
-            onGoToMessages={() => {
-              requestOpenMessaging();
-              goToTab("Sign Up");
-            }}
+            onGoToMessages={() => goToTab("Sign Up")}
             onGoToRadar={() => goToTab("Brand Personality")}
           />
         ),
@@ -178,24 +149,32 @@ const PROJECTS: Project[] = [
   {
     id: "02",
     slug: "first-design",
-    title: "first design",
-    role: "Bending Spoons Hackathon",
+    title: "Bending Spoons",
+    role: "First Design Hackathon",
     year: "2026",
-    tabs: ["Productive"],
+    tabs: ["Template Library"],
+    hoverPreview: {
+      src: bendingSpoonsHoverStill,
+      alt: "Productive on iPhone, on a wooden desk in sunlight",
+      width: 1400,
+      height: 1050,
+      glassLogo: true,
+      playColor: "#e29929",
+    },
     content: {
-      Productive: {
+      "Template Library": {
         tabLabel: "Productive",
-        label: "First Design — Productive",
-        subtitle: "Where the product actually lives",
+        label: "First Design — Design system inspector",
+        subtitle: "A 24-hour sprint with Bending Spoons mentors",
         overview:
-          "Productive is the hackathon build — a task list that should feel like a product, not a spreadsheet. The interactive loop is coming soon; this frame holds the mark until that prototype lands.",
+          "First Design paired me with nineteen other contestants and mentors from Bending Spoons for a single day on Productive—an existing focus app—not a blank brief. We inherited real flows, constraints, and research, then had to show how the product could feel sharper and more enjoyable without breaking what already worked.",
         challenge:
-          "Show depth without burying the demo in edge cases, and without shipping a hollow placeholder.",
+          "Productive already had users and telemetry. The sprint brief came with data on where people dropped off, which session types stuck, and where the experience felt dutiful instead of motivating. The job was to respect that evidence while pushing the loop—onboarding, session pick, active timer—toward something people would actually want to reopen.",
         approach:
-          "One primary loop, one memorable detail. Until the flow is locked, the phone carries the list mark and ghost frames instead of a fake UI.",
+          "I treated the file like a living design system: wireframe the core loop in context, spec the hero onboarding CTA and session picker, and use the in-canvas inspector so judges could read intent without leaving the canvas. Ideas skewed toward delight—clearer hierarchy, warmer onboarding, less friction into deep work—always checked against the metrics and notes we were given.",
         outcome:
-          "A coming-soon wireframe that still reads as the product: same device language as CRCLE, with the First Design identity already on screen.",
-        customBody: <FirstDesignComingSoon />,
+          "A pannable four-frame file with one shippable onboarding path and coming-soon slots for the rest of the loop, plus an interactive preview drawer for dev-style annotations. The sprint output is a direction for a more fun, data-informed Productive—not a full rebuild in twenty-four hours.",
+        customBody: <FirstDesignInspector />,
       },
     },
   },
@@ -205,7 +184,14 @@ const PROJECTS: Project[] = [
     title: "Odicci",
     role: "Product Team / Core UX",
     year: "2025-26",
-    defaultTab: "Create Workspace\u00a0",
+    hoverPreview: {
+      src: odicciHoverStill,
+      alt: "Odicci on a laptop",
+      width: 1600,
+      height: 1066,
+      playColor: "#E9582C",
+      logo: { src: odicciHoverMark, width: 248, height: 259 },
+    },
     content: {
       "Create Workspace\u00a0": {
         label: "Odicci — Workspace",
@@ -274,8 +260,11 @@ function Index() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [designOn, setDesignOn] = useState(false);
   const rowRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const [nudgeSignal, setNudgeSignal] = useState(0);
   const isExpanded = openSlug !== null;
-  const { workCommitted, commitToWork } = useWorkScrollGate();
+  const { workCommitted, commitToWork, chromeVisible } = useWorkCommit();
+  const showChrome = workCommitted && chromeVisible;
+  const chromeClass = spatialChromeVisible(workCommitted, chromeVisible);
 
   const toggle = useCallback((slug: string) => {
     setOpenSlug((cur) => (cur === slug ? null : slug));
@@ -283,6 +272,11 @@ function Index() {
 
   // Dock click: open the row (if closed) and smoothly scroll to it.
   const handleDockSelect = useCallback((slug: string) => {
+    if (isPhoneViewport()) {
+      rowRefs.current[slug]?.scrollIntoView({ behavior: "smooth", block: "center" });
+      window.setTimeout(() => setNudgeSignal((n) => n + 1), 600);
+      return;
+    }
     setOpenSlug(slug);
     // Wait a frame so the accordion begins expanding before we measure.
     requestAnimationFrame(() => {
@@ -292,126 +286,168 @@ function Index() {
   }, []);
 
   return (
-    <div className="portfolio-hero-grid relative text-zinc-900 font-sans antialiased overflow-x-hidden">
-      <InteractiveHero onEnterWork={() => commitToWork()} />
+    <div className="portfolio-hero-grid relative min-h-[100dvh] w-full text-zinc-900 font-sans antialiased overflow-x-hidden max-md:m-0 max-md:p-0 max-md:isolate max-sm:font-[family-name:system-ui,sans-serif]">
+      <div className="portfolio-interactive-hero-shell max-md:relative max-md:z-10 max-md:shrink-0 max-md:overflow-hidden">
+        <InteractiveHero onEnterWork={() => commitToWork()} />
+      </div>
 
-      {/* Fixed top chrome — same pattern as bottom dock; hidden until work is committed */}
+      {/* App-icon project dock — pinned top-left once the hero hands off to #work */}
       <div
-        className={`pointer-events-none fixed inset-x-0 top-6 z-[110] flex items-start justify-between px-6 transition-opacity duration-300 sm:px-8 ${
-          workCommitted ? "opacity-100" : "pointer-events-none opacity-0"
-        }`}
+        className={`fixed top-6 left-6 z-50 max-sm:hidden sm:left-8 ${chromeClass}`}
+        aria-hidden={!showChrome}
       >
-        <div className="pointer-events-auto">
-          <ProjectDock onPlus={() => setSidebarOpen(true)} />
-        </div>
-        <div className="pointer-events-auto flex items-center gap-[4px] rounded-[16px] border border-zinc-200/40 bg-black/[0.08] p-[4px] shadow-lg shadow-black/5 backdrop-blur-md">
+        <ProjectDock onPlus={() => setSidebarOpen(true)} />
+      </div>
+
+      {/* Top-right pill — logo opens profile sidebar. Food For Thought scrolls with #work. */}
+      <div
+        className={`fixed top-6 right-8 z-[110] flex origin-top-right flex-col items-end max-md:left-1/2 max-md:right-auto max-md:top-4 max-md:w-[min(350px,calc(100%-32px))] max-md:-translate-x-1/2 max-md:items-end max-md:scale-100 ${chromeClass}`}
+        aria-hidden={!showChrome}
+      >
+        <div className="spatial-glass spatial-glass-hairline spatial-layer flex items-center gap-[4px] rounded-[16px] bg-black/[0.08] p-[4px] shadow-lg shadow-black/5 max-md:w-[60%] max-md:min-w-[200px] max-md:gap-1 max-md:rounded-[16px] max-md:p-1">
           <button
             type="button"
             onClick={() => setSidebarOpen((v) => !v)}
             aria-expanded={sidebarOpen}
             aria-controls={SIDEBAR_PANEL_ID}
             aria-label={sidebarOpen ? "Close profile menu" : "Open profile menu"}
-            className="group flex size-9 shrink-0 items-center justify-center rounded-[12px] bg-zinc-950 transition-all duration-200 hover:bg-white/50 hover:backdrop-blur-md active:scale-[0.97]"
+            className="group spatial-spring-interactive flex size-9 shrink-0 items-center justify-center rounded-[12px] bg-zinc-950 hover:bg-white/50 hover:backdrop-blur-md active:scale-[0.97] max-md:size-10 max-md:rounded-[12px]"
           >
             <img
               src={girlPleaseLogo}
               alt=""
               aria-hidden
               className="h-[70%] w-[70%] object-contain invert transition-[filter] duration-200 group-hover:invert-0"
-              loading="lazy"
-              decoding="async"
             />
           </button>
           <a
             href="mailto:A.rafaela.aguiar@outlook.com"
-            className="flex h-9 cursor-pointer items-center justify-center rounded-[12px] bg-[#E9582C] px-5 text-xs font-semibold tracking-tight text-zinc-950 transition-all duration-200 hover:scale-[1.02] hover:opacity-95 active:scale-[0.98]"
+            className="spatial-spring-interactive flex h-9 cursor-pointer items-center justify-center rounded-[12px] bg-[#E9582C] px-5 text-xs font-semibold tracking-tight text-zinc-950 hover:opacity-95 active:scale-[0.98] max-md:h-10 max-md:min-w-0 max-md:flex-1 max-md:rounded-[12px] max-md:px-4 max-md:text-xs"
           >
             Contact Me
           </a>
         </div>
       </div>
 
-      <section id="work" className="relative z-10 scroll-mt-0">
-        <div id="work-body" className="relative">
-          {/*
-            Exact Figma auto-layout (530:151045 / 552:158232):
-            cells → browser plate UNDER pattern → overlay on top.
-            Closed 1262×847 · Open 1262×1522 · overlay scrolls when open.
-            Content column is ~26.5% wider than the original 1336px cap (→ 1690)
-            so the accordion reads larger without changing the stage frame aspect.
-          */}
-          <WireframeStage expanded={isExpanded}>
-            <div
-              className={
-                isExpanded
-                  ? "mx-auto flex w-full max-w-[1690px] flex-col items-center gap-[78px] overflow-visible px-6 pb-0 pt-10 sm:px-10"
-                  : "absolute left-1/2 top-[calc(50%+18.5px)] flex h-[min(704px,83.1%)] w-[min(1690px,94%)] -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-[78px] overflow-visible"
-              }
-            >
-              <header className="flex w-full max-w-[720px] shrink-0 flex-col items-center gap-5 text-center">
-                <p className="text-[11px] font-bold uppercase tracking-[2px] text-[#76767a]">
-                  Selected Work • Portfolio
-                </p>
+      {/*
+        Exact Figma auto-layout (530:151045 / 552:158232):
+        cells → browser plate UNDER pattern → overlay on top.
+        Closed 1262×847 · Open 1262×1522 · overlay scrolls when open.
+        Content column is ~45% wider than the original 1336px cap (→ 1944)
+        so the closed accordion reads 15% larger on desktop at the same aspect.
+      */}
+      <section
+        id="work"
+        className="relative z-10 scroll-mt-0 overflow-x-hidden max-md:relative max-md:z-[1] max-md:w-full max-md:max-w-[100vw] max-md:isolate max-md:bg-[#f3f4f6]"
+      >
+        <WireframeStage
+          expanded={isExpanded}
+          corner={
+            workCommitted ? (
+              <FoodForThought className="max-md:origin-top-right max-md:scale-80" />
+            ) : null
+          }
+        >
+          <div
+            className={
+              isExpanded
+                ? "pointer-events-auto mx-auto flex w-full max-w-[1690px] flex-col items-center gap-[78px] overflow-visible px-6 pb-0 pt-10 sm:px-10"
+                : "pointer-events-auto absolute left-1/2 top-[calc(50%+18.5px)] flex h-[min(760px,86%)] w-[min(1944px,calc(100%-32px))] -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-[78px] overflow-visible max-md:relative max-md:left-auto max-md:top-auto max-md:mx-auto max-md:h-auto max-md:min-h-[100dvh] max-md:w-[min(350px,calc(100%-32px))] max-md:translate-x-0 max-md:translate-y-0 max-md:gap-8 max-md:px-1 max-md:pb-28 max-md:pt-14 max-sm:gap-[37px] max-sm:pb-32 max-sm:pt-[68px]"
+            }
+          >
+            <header className="flex w-full max-w-[720px] shrink-0 flex-col items-center gap-5 text-center max-md:mt-3 max-md:gap-4 max-sm:mt-3 max-sm:gap-4">
+              <p className="text-[11px] font-bold uppercase tracking-[2px] text-[#76767a] max-md:text-[9px] max-md:tracking-[1.5px] max-sm:tracking-normal">
+                Selected Work • Portfolio
+              </p>
 
-                <div className="flex items-end justify-center gap-[15px]">
-                  <div className="hidden w-[87px] shrink-0 pb-2.5 sm:block" aria-hidden />
+              <div className="flex items-end justify-center gap-[15px] max-md:gap-2.5 max-sm:gap-2.5">
+                <div className="hidden w-[87px] shrink-0 pb-2.5 sm:block" aria-hidden />
 
-                  <h1 className="text-center text-[40px] font-medium leading-[48px] tracking-[-1.5px] text-[#111] sm:text-[48px] sm:leading-[56px]">
-                    <span className="block">Hi..</span>
-                    <span className="block">I do Design.</span>
-                  </h1>
+                <h1 className="text-center text-[40px] font-medium leading-[48px] tracking-[-1.5px] text-[#111] max-md:text-[34px] max-md:leading-[41px] max-sm:font-normal max-sm:tracking-normal sm:text-[48px] sm:leading-[56px]">
+                  {/* Mobile centres "Hi.." on the screen, not on the headline + toggle row. */}
+                  <span className="block max-md:relative max-md:left-[42px] max-sm:relative max-sm:left-[42px]">
+                    Hi..
+                  </span>
+                  <span className="block max-md:mt-0.5 max-md:text-[32px] max-md:leading-[38px] max-sm:mt-0.5">
+                    I do Design.
+                  </span>
+                </h1>
 
-                  <div className="w-[72px] shrink-0 pb-2.5 sm:w-[87px]">
-                    <DesignToggle on={designOn} onToggle={() => setDesignOn((v) => !v)} />
-                  </div>
+                <div
+                  className={`w-[87px] shrink-0 origin-center pb-2.5 max-md:scale-[0.77] max-sm:pb-[3px] ${chromeClass}`}
+                  aria-hidden={!showChrome}
+                >
+                  <DesignToggle on={designOn} onToggle={() => setDesignOn((v) => !v)} />
                 </div>
+              </div>
 
-                <p className="max-w-[580px] text-[14px] leading-[22px] text-[#76767a]">
+              <p className="max-w-[580px] text-[14px] leading-[22px] text-[#76767a] max-md:max-w-[277px] max-md:text-[12px] max-md:leading-[19px] max-sm:max-w-[277px]">
+                <span className="sm:hidden">
+                  Small screen? Big FOMO. This portfolio is best on desktop—where the interactive
+                  prototypes come out to play.
+                </span>
+                <span className="hidden sm:inline">
                   Multidisciplinary, self-sufficient designer. I build complex B2B platforms, design
                   systems, and code-backed prototypes from zero to one.
-                </p>
-              </header>
+                </span>
+              </p>
+            </header>
 
-              <div className="relative w-full shrink-0 overflow-visible">
-                {/* Decorative layer — beneath the accordion, peeking from the corners */}
-                <div
-                  aria-hidden
-                  className="pointer-events-none absolute inset-0 z-[5] overflow-visible"
-                >
-                  <div className="absolute left-0 top-0 hidden -translate-x-1/2 -translate-y-1/2 md:block">
-                    <PortfolioCalculatorCard />
-                  </div>
-                  <div className="absolute top-4 right-4 hidden -translate-y-[70px] md:block">
-                    <PortfolioPeekMouse />
-                  </div>
+            <div className="relative w-full shrink-0 overflow-visible max-md:pt-14 max-md:pb-10">
+              <div
+                aria-hidden
+                className="pointer-events-none absolute inset-0 z-[5] overflow-visible max-md:-top-14 max-md:bottom-0"
+              >
+                <div className="portfolio-mobile-deco-calculator absolute left-0 top-0 hidden -translate-x-1/2 -translate-y-1/2 max-md:-bottom-4 max-md:-left-3 max-md:top-auto max-md:block max-md:origin-bottom-left max-md:scale-[0.715] max-md:translate-x-0 max-md:translate-y-0 max-md:[--deco-scale:0.72] md:block">
+                  <CalculatorCard />
                 </div>
-                <ProjectBentoStack
-                  projects={PROJECTS}
-                  openSlug={openSlug}
-                  onToggle={toggle}
-                  rowRefs={rowRefs}
-                />
+                <div className="absolute right-4 top-4 hidden -translate-y-[70px] max-md:-right-1 max-md:top-[6px] max-md:bottom-auto max-md:block max-md:origin-top-right max-md:scale-80 max-md:translate-y-0 max-md:[--deco-scale:0.85] md:block">
+                  <PeekMouse />
+                </div>
+              </div>
+              <ProjectBentoStack
+                projects={PROJECTS}
+                openSlug={openSlug}
+                onToggle={toggle}
+                rowRefs={rowRefs}
+                nudgeSignal={nudgeSignal}
+              />
+              {/* Figma 2305:66727 — 24px under the accordion, painted behind it */}
+              <div className="pointer-events-auto relative z-0 -mt-6 flex justify-center max-md:-mt-6">
+                <div className="-translate-x-6 scale-[1.15]">
+                  <SpatialDotBadge />
+                </div>
               </div>
             </div>
-          </WireframeStage>
-
-          {/* Exactly 2px of #f3f4f6 between wireframe frame and marquee */}
-          <div className="relative z-20 h-[2px] w-full shrink-0 bg-[#f3f4f6]" aria-hidden />
-
-          {/* Marquee + footer — continuous black plane under the bento strip */}
-          <div id="site-dark-band" className="relative z-20 bg-black" data-dark-band>
-            <Marquee />
-            <Footer onSelectProject={handleDockSelect} onOpenSidebar={() => setSidebarOpen(true)} />
+            {/* Phones: 15% smaller than the 1.25 dock, pinned to the stage bottom. */}
+            <div
+              className={`project-dock-mobile pointer-events-auto absolute left-1 bottom-6 z-20 md:hidden ${chromeClass}`}
+              aria-hidden={!showChrome}
+            >
+              <ProjectDock onPlus={() => setSidebarOpen(true)} />
+            </div>
           </div>
+        </WireframeStage>
+
+        {/* Exactly 2px of #f3f4f6 between wireframe frame and marquee */}
+        <div className="relative z-20 h-[2px] w-full shrink-0 bg-[#f3f4f6]" aria-hidden />
+
+        {/* Marquee + footer — continuous black plane under the bento strip */}
+        <div className="relative z-20 bg-black max-sm:bg-[var(--portfolio-bottom-surface,#0a0d11)]">
+          <Marquee />
+          <Footer onSelectProject={handleDockSelect} onOpenSidebar={() => setSidebarOpen(true)} />
         </div>
       </section>
 
-      <div
-        className={`fixed bottom-8 left-1/2 z-[60] -translate-x-1/2 transition-opacity duration-300 ${
-          workCommitted ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
-        }`}
-      >
-        <Dock items={DOCK_ITEMS} onSelect={handleDockSelect} activeSlug={openSlug} />
+      <div className="max-sm:hidden" aria-hidden={!showChrome}>
+        {showChrome ? (
+          <Dock
+            className={chromeClass}
+            items={DOCK_ITEMS}
+            onSelect={handleDockSelect}
+            activeSlug={openSlug}
+          />
+        ) : null}
       </div>
       <Sidebar open={sidebarOpen} onOpenChange={setSidebarOpen} />
     </div>

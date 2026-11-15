@@ -3,21 +3,10 @@ import { useSyncExternalStore } from "react";
 export type BroadcastState = "open_day" | "night_owl" | "in_the_area";
 
 /**
- * Shared CRCLE broadcast mood across Profile ↔ Radar ↔ Messaging (tabs remount).
+ * Shared CRCLE broadcast mood across Profile ↔ Radar (tabs remount).
  * Night Owl activates the NOC Signal Radar layout.
  */
 let broadcastState: BroadcastState = "open_day";
-let incognitoState = false;
-/** Signal Home — fully off: no broadcast and no incoming recommendations. */
-let signalOffState = false;
-let pendingMoodSwitch = false;
-let pendingAreaInbox = false;
-let pendingOpenMessaging = false;
-let pendingAreaNotification = false;
-let areaNearbyBadgeActive = false;
-let areaNearbyFlowComplete = false;
-let areaInboxOpen = false;
-let verifyOpen = false;
 const listeners = new Set<() => void>();
 
 function emit() {
@@ -30,159 +19,8 @@ export function getCrcleBroadcast(): BroadcastState {
 
 export function setCrcleBroadcast(next: BroadcastState) {
   if (next === broadcastState) return;
-  if (next !== "in_the_area") {
-    areaNearbyFlowComplete = false;
-  }
   broadcastState = next;
   emit();
-}
-
-export function getCrcleIncognito(): boolean {
-  return incognitoState;
-}
-
-export function setCrcleIncognito(next: boolean) {
-  if (next === incognitoState) return;
-  incognitoState = next;
-  emit();
-}
-
-export function getCrcleSignalOff(): boolean {
-  return signalOffState;
-}
-
-export function setCrcleSignalOff(next: boolean) {
-  if (next === signalOffState) return;
-  signalOffState = next;
-  if (next) incognitoState = false;
-  emit();
-}
-
-export function useCrcleSignalOff(): [boolean, (next: boolean) => void] {
-  const state = useSyncExternalStore(
-    subscribeCrcleBroadcast,
-    getCrcleSignalOff,
-    getCrcleSignalOff,
-  );
-  return [state, setCrcleSignalOff];
-}
-
-/** Explicit navigation to Messaging Hub — skips first-run onboarding on mount. */
-export function requestOpenMessaging() {
-  pendingOpenMessaging = true;
-  emit();
-}
-
-export function consumeOpenMessaging() {
-  const pending = pendingOpenMessaging;
-  pendingOpenMessaging = false;
-  return pending;
-}
-
-/** Profile mood control: jump to Messaging Hub with Mood Switch open. */
-export function requestMoodSwitchOnMessaging() {
-  pendingMoodSwitch = true;
-  pendingOpenMessaging = true;
-  emit();
-}
-
-export function consumeMoodSwitchOnMessaging() {
-  const pending = pendingMoodSwitch;
-  pendingMoodSwitch = false;
-  return pending;
-}
-
-/** Dock radar+pin control: jump to Messaging Hub with In The Area inbox. */
-export function requestAreaInboxOnMessaging() {
-  pendingAreaInbox = true;
-  pendingOpenMessaging = true;
-  emit();
-}
-
-export function consumeAreaInboxOnMessaging() {
-  const pending = pendingAreaInbox;
-  pendingAreaInbox = false;
-  return pending;
-}
-
-/** Mood Switch → In The Area: show nearby notification sheet on Messaging Hub. */
-export function requestAreaNearbyNotification() {
-  pendingAreaNotification = true;
-  emit();
-}
-
-export function consumeAreaNearbyNotification() {
-  const pending = pendingAreaNotification;
-  pendingAreaNotification = false;
-  return pending;
-}
-
-/** Green heart badge on the dock radar control while a nearby alert is unread. */
-export function getAreaNearbyBadgeActive(): boolean {
-  return areaNearbyBadgeActive;
-}
-
-export function setAreaNearbyBadgeActive(next: boolean) {
-  if (next === areaNearbyBadgeActive) return;
-  areaNearbyBadgeActive = next;
-  emit();
-}
-
-/** Nearby Connect flow finished — suppress re-scheduling until mood leaves In The Area. */
-export function markAreaNearbyFlowComplete() {
-  areaNearbyFlowComplete = true;
-  areaNearbyBadgeActive = false;
-  emit();
-}
-
-export function isAreaNearbyFlowComplete() {
-  return areaNearbyFlowComplete;
-}
-
-export function useAreaNearbyBadgeActive(): boolean {
-  return useSyncExternalStore(
-    subscribeCrcleBroadcast,
-    getAreaNearbyBadgeActive,
-    getAreaNearbyBadgeActive,
-  );
-}
-
-/** True while the In The Area overlay is on the Messaging Hub prototype. */
-export function getCrcleAreaInboxOpen(): boolean {
-  return areaInboxOpen;
-}
-
-export function setCrcleAreaInboxOpen(next: boolean) {
-  if (next === areaInboxOpen) return;
-  areaInboxOpen = next;
-  emit();
-}
-
-export function useCrcleAreaInboxOpen(): boolean {
-  return useSyncExternalStore(
-    subscribeCrcleBroadcast,
-    getCrcleAreaInboxOpen,
-    getCrcleAreaInboxOpen,
-  );
-}
-
-/** True while the Profile KYC / verification drawer is open. */
-export function getCrcleVerifyOpen(): boolean {
-  return verifyOpen;
-}
-
-export function setCrcleVerifyOpen(next: boolean) {
-  if (next === verifyOpen) return;
-  verifyOpen = next;
-  emit();
-}
-
-export function useCrcleVerifyOpen(): boolean {
-  return useSyncExternalStore(
-    subscribeCrcleBroadcast,
-    getCrcleVerifyOpen,
-    getCrcleVerifyOpen,
-  );
 }
 
 export function subscribeCrcleBroadcast(listener: () => void) {
@@ -202,13 +40,4 @@ export function useCrcleBroadcast(): [
     getCrcleBroadcast,
   );
   return [state, setCrcleBroadcast];
-}
-
-export function useCrcleIncognito(): [boolean, (next: boolean) => void] {
-  const state = useSyncExternalStore(
-    subscribeCrcleBroadcast,
-    getCrcleIncognito,
-    getCrcleIncognito,
-  );
-  return [state, setCrcleIncognito];
 }

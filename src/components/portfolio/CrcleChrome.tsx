@@ -1,9 +1,4 @@
-import { AnimatePresence, motion } from "framer-motion";
-import { Moon, Sun } from "lucide-react";
-import type { ReactNode } from "react";
-import { useState } from "react";
-import areaPinIcon from "@/assets/crcle/mood/area-pin.svg";
-import radarTwoIcon from "@/assets/crcle/mood/radar-two.svg";
+import { useState, type ReactNode } from "react";
 import navHomeIcon from "@/assets/crcle/nav-home.svg";
 import navMessageIcon from "@/assets/crcle/nav-message-figma.svg";
 import navRadarIcon from "@/assets/crcle/nav-radar.svg";
@@ -11,35 +6,10 @@ import navUserIcon from "@/assets/crcle/nav-user-figma.svg";
 import arrowLeftIcon from "@/assets/crcle/arrow-left.svg";
 import moreHorizIcon from "@/assets/crcle/more-horiz.svg";
 import moreDotsIcon from "@/assets/crcle/more-dots.svg";
-import closeAddIcon from "@/assets/crcle/onboarding/close-add.svg";
-import { useCrcleBroadcast, useCrcleIncognito } from "@/components/portfolio/crcleBroadcast";
 
 export type CrcleDockTab = "profile" | "signal" | "messages";
 
-const EASE = [0.22, 1, 0.36, 1] as const;
 const FONT = "Montserrat, ui-sans-serif, system-ui, sans-serif";
-
-type CrcleChromeTone = "default" | "light" | "dark";
-
-/** Light = black icons · dark = white icons · default follows phone theme class. */
-function crcleChromeIconClass(tone: CrcleChromeTone) {
-  if (tone === "light") return "brightness-0";
-  if (tone === "dark") return "brightness-0 invert";
-  return "brightness-0 [.crcle-phone:not(.crcle-phone--light)_&]:invert";
-}
-
-/** Frosted glass stack — matches portfolio Dock.tsx capsule refraction. */
-function CrcleCompactGlassLayers() {
-  return (
-    <>
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 rounded-[inherit] bg-gradient-to-b from-white/12 via-transparent to-transparent"
-      />
-      <div aria-hidden className="dock-glass-lens rounded-[inherit] opacity-25" />
-    </>
-  );
-}
 
 /**
  * Shared CRCLE dock — white frosted glass + Signal Panel (hover / tap waveform).
@@ -54,7 +24,6 @@ export function CrclePrimaryDock({
   onMessages,
   onRadar,
   onSignalHome,
-  onAreaRadar,
 }: {
   active: CrcleDockTab;
   /** When set, controls pinned-open state from the parent */
@@ -66,14 +35,10 @@ export function CrclePrimaryDock({
   onMessages?: () => void;
   onRadar?: () => void;
   onSignalHome?: () => void;
-  onAreaRadar?: () => void;
 }) {
   const [hovered, setHovered] = useState(false);
   const [pinnedOpen, setPinnedOpen] = useState(false);
   const [forceClosed, setForceClosed] = useState(false);
-  const [broadcastMood] = useCrcleBroadcast();
-  const [isIncognito] = useCrcleIncognito();
-  const showAreaRadar = broadcastMood === "in_the_area" && !isIncognito;
   const controlled = signalOpenProp !== undefined;
   const signalOpen = controlled ? signalOpenProp : pinnedOpen;
   const panelVisible = !forceClosed && (hovered || Boolean(signalOpen));
@@ -96,8 +61,8 @@ export function CrclePrimaryDock({
     <div
       className={
         embedded
-          ? "pointer-events-none relative mx-auto flex w-[134.4px] flex-col items-center gap-3 overflow-visible"
-          : "pointer-events-none absolute bottom-5 left-0 right-0 z-20 mx-auto flex w-[134.4px] flex-col items-center gap-3 overflow-visible"
+          ? "pointer-events-none relative mx-auto flex w-[134.4px] flex-col items-center gap-3"
+          : "pointer-events-none absolute bottom-5 left-0 right-0 z-20 mx-auto flex w-[134.4px] flex-col items-center gap-3"
       }
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => {
@@ -105,74 +70,20 @@ export function CrclePrimaryDock({
         setForceClosed(false);
       }}
     >
-      <AnimatePresence>
-        {showAreaRadar ? (
-          <motion.button
-            key="area-radar"
-            type="button"
-            aria-label="In The Area notifications"
-            initial={{ opacity: 0, scale: 0.86, x: 10 }}
-            animate={{ opacity: 1, scale: 1, x: 0 }}
-            exit={{ opacity: 0, scale: 0.9, x: 8 }}
-            transition={{ duration: 0.22, ease: EASE }}
-            onClick={onAreaRadar}
-            className="pointer-events-auto absolute bottom-0 right-full mr-1 flex items-start overflow-visible"
-          >
-            <span className="relative mr-[-12px] flex w-11 shrink-0 items-center justify-center rounded-[46px] bg-[rgba(247,246,242,0.4)] p-2.5">
-              <span className="relative size-6 shrink-0 overflow-hidden">
-                <img
-                  alt=""
-                  src={radarTwoIcon}
-                  className="absolute inset-0 size-full max-w-none object-contain"
-                  draggable={false}
-                  loading="lazy"
-                  decoding="async"
-                />
-              </span>
-            </span>
-            <span className="relative z-[1] flex size-5 shrink-0 flex-col items-center justify-center rounded-[64px] bg-[rgba(17,223,89,0.8)] p-1">
-              <span className="relative h-3 w-[7px] shrink-0 overflow-hidden">
-                <img
-                  alt=""
-                  src={areaPinIcon}
-                  className="absolute inset-0 size-full max-w-none object-contain"
-                  draggable={false}
-                  loading="lazy"
-                  decoding="async"
-                />
-              </span>
-            </span>
-          </motion.button>
-        ) : null}
-      </AnimatePresence>
-
-      <AnimatePresence>
-        {panelVisible ? (
-          <motion.div
-            initial={{ opacity: 0, y: 10, scale: 0.96 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 10, scale: 0.96 }}
-            transition={{ duration: 0.22, ease: EASE }}
-            transformTemplate={() => ""}
-            className="crcle-signal-panel pointer-events-auto relative flex w-full flex-col gap-2 overflow-hidden rounded-[24px] p-2"
-          >
-            <div aria-hidden className="crcle-signal-panel-glass rounded-[inherit]" />
-            <div aria-hidden className="crcle-signal-panel-plate rounded-[inherit]" />
-            <div aria-hidden className="crcle-signal-panel-frost rounded-[inherit]" />
-            <div aria-hidden className="crcle-signal-panel-lens rounded-[inherit]" />
-            <div aria-hidden className="crcle-signal-panel-dispersion rounded-[inherit]" />
-            <div className="relative z-[1] flex items-center justify-center gap-0.5">
+      {panelVisible ? (
+          <div className="crcle-signal-panel pointer-events-auto flex w-full flex-col gap-2 rounded-[24px] p-2">
+            <div className="flex items-center justify-center gap-0.5">
               <div className="flex size-6 items-center justify-center">
                 <SoundWaveIcon size={16} active />
               </div>
               <p
-                className="whitespace-nowrap text-[11px] leading-[1.4] text-[#f7f6f2] [.crcle-phone--light_&]:text-[#02031d]"
+                className="whitespace-nowrap text-[11px] leading-[1.4] text-[#02031d]"
                 style={{ fontFamily: FONT }}
               >
                 Signal Panel
               </p>
             </div>
-            <div className="relative z-[1] flex items-start justify-between">
+            <div className="flex items-start justify-between">
               <button
                 type="button"
                 aria-label="Open radar"
@@ -184,8 +95,6 @@ export function CrclePrimaryDock({
                   src={navRadarIcon}
                   className="crcle-dock-icon size-5 max-w-none object-contain"
                   draggable={false}
-                  loading="lazy"
-                  decoding="async"
                 />
               </button>
               <button
@@ -199,25 +108,22 @@ export function CrclePrimaryDock({
                   src={navHomeIcon}
                   className="crcle-dock-icon size-6 max-w-none object-contain"
                   draggable={false}
-                  loading="lazy"
-                  decoding="async"
                 />
               </button>
             </div>
-          </motion.div>
+          </div>
         ) : null}
-      </AnimatePresence>
 
       <nav
-        className="crcle-primary-dock pointer-events-auto relative box-border flex h-[44px] w-[134.4px] shrink-0 items-center gap-4 overflow-hidden rounded-[36px] px-4"
+        className="dock-glass crcle-primary-dock pointer-events-auto relative box-border flex h-[44px] w-[134.4px] shrink-0 items-center gap-4 overflow-hidden rounded-[36px] border border-white/12 px-4 shadow-2xl backdrop-blur-sm"
         role="navigation"
         aria-label="Primary"
       >
-        <div aria-hidden className="crcle-primary-dock-glass rounded-[inherit]" />
-        <div aria-hidden className="crcle-primary-dock-plate rounded-[inherit]" />
-        <div aria-hidden className="crcle-primary-dock-frost rounded-[inherit]" />
-        <div aria-hidden className="crcle-primary-dock-lens rounded-[inherit]" />
-        <div aria-hidden className="crcle-primary-dock-dispersion rounded-[inherit]" />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 z-0 rounded-[36px] bg-gradient-to-b from-white/[0.096] via-transparent to-transparent"
+        />
+        <div className="dock-glass-lens z-0 opacity-20" aria-hidden />
         <DockIconButton
           label="Profile"
           active={active === "profile"}
@@ -229,8 +135,6 @@ export function CrclePrimaryDock({
             src={navUserIcon}
             className="crcle-dock-icon block size-6 max-w-none object-contain"
             draggable={false}
-            loading="lazy"
-            decoding="async"
           />
         </DockIconButton>
 
@@ -255,8 +159,6 @@ export function CrclePrimaryDock({
             src={navMessageIcon}
             className="crcle-dock-icon block size-6 max-w-none object-contain"
             draggable={false}
-            loading="lazy"
-            decoding="async"
           />
         </DockIconButton>
       </nav>
@@ -314,12 +216,9 @@ function DockIconButton({
 export function CrcleBackButton({
   onClick,
   disabled,
-  tone = "default",
 }: {
   onClick?: () => void;
   disabled?: boolean;
-  /** Figma 257:67478 light · 257:86835 dark Signal Home glass */
-  tone?: CrcleChromeTone;
 }) {
   return (
     <button
@@ -327,195 +226,21 @@ export function CrcleBackButton({
       onClick={onClick}
       disabled={disabled || !onClick}
       aria-label="Back"
-      className={`crcle-compact-glass dock-glass relative flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-[40px] p-1 shadow-2xl transition hover:brightness-110 ${
-        onClick && !disabled ? "" : "opacity-40"
-      }`}
+      className="crcle-glass-btn relative flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-[40px] p-1"
     >
-      <CrcleCompactGlassLayers />
-      <span className="relative z-[1] flex size-8 items-center justify-center">
+      <div className="dock-glass-lens opacity-40" aria-hidden />
+      <span
+        className={`relative z-[1] flex size-8 items-center justify-center ${
+          onClick && !disabled ? "" : "opacity-40"
+        }`}
+      >
         <img
           alt=""
           src={arrowLeftIcon}
-          className={`h-[13px] w-[8px] max-w-none object-contain ${crcleChromeIconClass(tone)}`}
+          className="h-[13px] w-[8px] max-w-none object-contain brightness-0 [.crcle-phone:not(.crcle-phone--light)_&]:invert"
           draggable={false}
-          loading="lazy"
-          decoding="async"
         />
       </span>
-    </button>
-  );
-}
-
-/** Compact radar + messages (+ optional more) pill — Figma 257:67481 Signal Home header. */
-export function CrcleHeaderNavPill({
-  onRadar,
-  onMessages,
-  onMore,
-  className = "",
-  tone = "default",
-}: {
-  onRadar?: () => void;
-  onMessages?: () => void;
-  onMore?: () => void;
-  className?: string;
-  tone?: CrcleChromeTone;
-}) {
-  const spread = onMore != null;
-  const groupedDark = spread && tone === "dark";
-  const iconClass = crcleChromeIconClass(tone);
-
-  return (
-    <div
-      className={`crcle-header-nav-pill crcle-compact-glass dock-glass relative flex shrink-0 items-center overflow-hidden rounded-[24px] shadow-2xl ${
-        spread
-          ? groupedDark
-            ? "h-10 w-[128px] justify-between px-2 py-0.5"
-            : "h-[42px] min-w-[132px] justify-between px-2 py-0.5"
-          : "h-10 gap-1 px-2 py-0.5"
-      } ${className}`}
-    >
-      <CrcleCompactGlassLayers />
-      {groupedDark ? (
-        <>
-          <div className="relative z-[1] flex items-center gap-2">
-            <button
-              type="button"
-              aria-label="Open radar"
-              onClick={onRadar}
-              disabled={!onRadar}
-              className={`flex size-8 shrink-0 items-center justify-center rounded-full transition hover:brightness-110 ${
-                onRadar ? "" : "opacity-40"
-              }`}
-            >
-              <img
-                alt=""
-                src={navRadarIcon}
-                className={`crcle-dock-icon size-5 max-w-none object-contain ${iconClass}`}
-                draggable={false}
-                loading="lazy"
-                decoding="async"
-              />
-            </button>
-            <button
-              type="button"
-              aria-label="Open messages"
-              onClick={onMessages}
-              disabled={!onMessages}
-              className={`flex size-8 shrink-0 items-center justify-center rounded-full transition hover:brightness-110 ${
-                onMessages ? "" : "opacity-40"
-              }`}
-            >
-              <img
-                alt=""
-                src={navMessageIcon}
-                className={`crcle-dock-icon size-6 max-w-none object-contain ${iconClass}`}
-                draggable={false}
-                loading="lazy"
-                decoding="async"
-              />
-            </button>
-          </div>
-          <button
-            type="button"
-            aria-label="More options"
-            onClick={(e) => {
-              e.stopPropagation();
-              onMore?.();
-            }}
-            className="relative z-[1] flex size-8 shrink-0 items-center justify-center rounded-full transition hover:brightness-110"
-          >
-            <img
-              alt=""
-              src={moreHorizIcon}
-              className={`size-6 max-w-none object-contain ${iconClass}`}
-              width={24}
-              height={24}
-              draggable={false}
-              loading="lazy"
-              decoding="async"
-            />
-          </button>
-        </>
-      ) : (
-        <>
-          <button
-            type="button"
-            aria-label="Open radar"
-            onClick={onRadar}
-            disabled={!onRadar}
-            className={`relative z-[1] flex size-8 shrink-0 items-center justify-center rounded-full transition hover:brightness-110 ${
-              onRadar ? "" : "opacity-40"
-            }`}
-          >
-            <img
-              alt=""
-              src={navRadarIcon}
-              className={`crcle-dock-icon size-5 max-w-none object-contain ${iconClass}`}
-              draggable={false}
-              loading="lazy"
-              decoding="async"
-            />
-          </button>
-          <button
-            type="button"
-            aria-label="Open messages"
-            onClick={onMessages}
-            disabled={!onMessages}
-            className={`relative z-[1] flex size-8 shrink-0 items-center justify-center rounded-full transition hover:brightness-110 ${
-              onMessages ? "" : "opacity-40"
-            }`}
-          >
-            <img
-              alt=""
-              src={navMessageIcon}
-              className={`crcle-dock-icon size-6 max-w-none object-contain ${iconClass}`}
-              draggable={false}
-              loading="lazy"
-              decoding="async"
-            />
-          </button>
-          {onMore ? (
-            <button
-              type="button"
-              aria-label="More options"
-              onClick={(e) => {
-                e.stopPropagation();
-                onMore();
-              }}
-              className="relative z-[1] flex size-8 shrink-0 items-center justify-center rounded-full transition hover:brightness-110"
-            >
-              <img
-                alt=""
-                src={moreHorizIcon}
-                className={`size-6 max-w-none object-contain ${iconClass}`}
-                width={24}
-                height={24}
-                draggable={false}
-                loading="lazy"
-                decoding="async"
-              />
-            </button>
-          ) : null}
-        </>
-      )}
-    </div>
-  );
-}
-
-/**
- * Onboarding dismiss control — Figma 322:117840.
- * 48×40 cream glass pill, shared by every CRCLE onboarding sheet.
- * The wireframe stroke reads as a hard ring on the dark overlay, so the pill stays borderless.
- */
-export function CrcleOnboardingCloseButton({ onClick }: { onClick: () => void }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-label="Close onboarding"
-      className="box-border flex h-10 w-12 shrink-0 items-center justify-center overflow-hidden rounded-[24px] border-0 bg-[rgba(253,252,251,0.2)] shadow-none outline-none backdrop-blur-[6px]"
-    >
-      <img alt="" src={closeAddIcon} className="size-6 max-w-none" draggable={false} />
     </button>
   );
 }
@@ -537,7 +262,7 @@ export function CrcleMoreButton({
       }}
       aria-expanded={expanded}
       aria-label="More options"
-      className="crcle-glass-btn relative flex h-10 w-12 shrink-0 items-center justify-center overflow-hidden rounded-[24px] px-2 py-0.5 backdrop-blur-[12px] transition hover:brightness-110"
+      className="crcle-glass-btn relative flex h-10 w-12 shrink-0 items-center justify-center overflow-hidden rounded-[24px] px-2 py-0.5"
     >
       <div className="dock-glass-lens opacity-40" aria-hidden />
       <span className="relative z-[1] flex size-8 items-center justify-center">
@@ -547,8 +272,6 @@ export function CrcleMoreButton({
             src={moreHorizIcon}
             className="absolute inset-0 size-full max-w-none object-contain brightness-0 [.crcle-phone:not(.crcle-phone--light)_&]:invert"
             draggable={false}
-            loading="lazy"
-            decoding="async"
           />
           <span className="absolute inset-[41.67%_16.67%]">
             <img
@@ -556,8 +279,6 @@ export function CrcleMoreButton({
               src={moreDotsIcon}
               className="size-full max-w-none object-contain brightness-0 [.crcle-phone:not(.crcle-phone--light)_&]:invert"
               draggable={false}
-              loading="lazy"
-              decoding="async"
             />
           </span>
         </span>
@@ -566,81 +287,51 @@ export function CrcleMoreButton({
   );
 }
 
-/** Pins the more control to the top-right — aligned with Profile / Messaging headers. */
-export function CrcleStickyMoreButton({
-  onClick,
-  expanded,
+const PHONE_SCRIM: Record<string, string> = {
+  onboarding: "crcle-phone-scrim",
+  dense: "crcle-phone-scrim crcle-phone-scrim--dense",
+  heavy: "crcle-phone-scrim crcle-phone-scrim--heavy",
+  sheet: "crcle-phone-scrim crcle-phone-scrim--sheet",
+  "sheet-dark": "crcle-phone-scrim crcle-phone-scrim--sheet-dark",
+  mist: "crcle-phone-scrim crcle-phone-scrim--mist",
+  menu: "crcle-phone-scrim crcle-phone-scrim--menu",
+};
+
+/** Full-phone overlay whose frost plate is static — production-safe glass. */
+export function CrclePhoneOverlay({
+  children,
   className = "",
+  contentClassName = "",
+  zClass = "z-40",
+  scrim = "onboarding",
+  onClick,
+  role = "dialog",
+  "aria-label": ariaLabel,
+  "aria-labelledby": ariaLabelledBy,
+  "aria-modal": ariaModal,
 }: {
-  onClick?: () => void;
-  expanded?: boolean;
+  children: ReactNode;
   className?: string;
+  contentClassName?: string;
+  zClass?: string;
+  scrim?: keyof typeof PHONE_SCRIM;
+  onClick?: () => void;
+  role?: string;
+  "aria-label"?: string;
+  "aria-labelledby"?: string;
+  "aria-modal"?: boolean | "true" | "false";
 }) {
   return (
     <div
-      className={`pointer-events-none absolute inset-x-2 top-0 z-30 pt-[86px] ${className}`}
-      aria-hidden={false}
+      className={`absolute inset-0 flex flex-col overflow-hidden rounded-[53px] ${zClass} ${className}`}
+      role={role}
+      aria-label={ariaLabel}
+      aria-labelledby={ariaLabelledBy}
+      aria-modal={ariaModal}
+      onClick={onClick}
     >
-      <div className="pointer-events-auto flex justify-end">
-        <CrcleMoreButton onClick={onClick} expanded={expanded} />
-      </div>
+      <div className={PHONE_SCRIM[scrim]} aria-hidden />
+      <div className={`relative z-[1] flex h-full min-h-0 w-full flex-col ${contentClassName}`}>{children}</div>
     </div>
-  );
-}
-
-/** Keeps scroll content aligned when the more button is pinned outside the scroller. */
-export function CrcleMoreButtonSpacer() {
-  return <span className="h-10 w-12 shrink-0" aria-hidden />;
-}
-
-/** Positions the theme toggle centered 8px above a CRCLE phone frame. */
-export const crcleThemeToggleAboveClass =
-  "absolute bottom-full left-1/2 z-30 mb-2 -translate-x-1/2";
-
-/** Sun / moon pill toggle for CRCLE phone light mode. */
-export function CrcleThemeToggle({
-  light,
-  onToggle,
-  className = "",
-  disabled = false,
-}: {
-  light: boolean;
-  onToggle: () => void;
-  className?: string;
-  disabled?: boolean;
-}) {
-  return (
-    <motion.button
-      type="button"
-      role="switch"
-      aria-checked={light}
-      aria-label={light ? "Switch to dark mode" : "Switch to light mode"}
-      disabled={disabled}
-      onClick={onToggle}
-      className={`relative flex h-8 w-[52px] shrink-0 items-center rounded-full border border-zinc-200/80 bg-white/75 p-0.5 shadow-[0_2px_8px_rgba(0,0,0,0.08)] backdrop-blur-sm disabled:pointer-events-none disabled:opacity-40 ${className}`}
-      whileHover={disabled ? undefined : { scale: 1.05 }}
-      whileTap={disabled ? undefined : { scale: 0.95 }}
-    >
-      <motion.span
-        layout
-        transition={{ type: "spring", stiffness: 520, damping: 32 }}
-        className="absolute inset-y-0.5 w-[calc(50%-2px)] rounded-full bg-zinc-100 shadow-sm"
-        style={{ left: light ? 2 : "calc(50% + 0px)" }}
-      />
-      <span
-        className={`relative z-[1] flex flex-1 items-center justify-center transition-colors duration-300 ${
-          light ? "text-amber-400" : "text-zinc-400"
-        }`}
-      >
-        <Sun className="size-3.5" strokeWidth={2} fill={light ? "currentColor" : "none"} />
-      </span>
-      <span
-        className={`relative z-[1] flex flex-1 items-center justify-center transition-colors duration-300 ${
-          light ? "text-zinc-400" : "text-zinc-800"
-        }`}
-      >
-        <Moon className="size-3.5" strokeWidth={2} fill={light ? "none" : "currentColor"} />
-      </span>
-    </motion.button>
   );
 }

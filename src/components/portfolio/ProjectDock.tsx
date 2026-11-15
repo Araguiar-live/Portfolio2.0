@@ -1,125 +1,35 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useRef, useState, type MouseEvent } from "react";
-import {
-  GRADUATE_PROJECTS,
-  type GraduateProject,
-  type GraduateProjectId,
-} from "@/components/portfolio/graduateProjects";
-import { GraduateWorkComingSoonOverlay } from "@/components/portfolio/GraduateWorkComingSoonOverlay";
+import { useCallback, useState, type MouseEvent } from "react";
+import { GraduateWorkOverlay } from "@/components/portfolio/GraduateWorkOverlay";
+import { isPhoneViewport } from "@/lib/viewport";
+import { GRADUATE_PROJECTS, type GraduateProject } from "@/components/portfolio/graduateProjects";
 
-/** Uniform icon cell — every sphere + plus shares this footprint. */
-const ICON = 24;
+/** Base icon cell at --deco-scale: 1 (scales with dock via CSS). */
+const ICON_BASE = 24;
 
 const EASE = [0.22, 1, 0.36, 1] as const;
-
-/** Native CSS spheres stay sharp at 24px — scaled SVG filters looked pixelated live. */
-const SPHERE_GRADIENTS: Record<
-  GraduateProjectId,
-  { from: string; to: string; shadow: string }
-> = {
-  artaeka: { from: "#FFA6A6", to: "#E57575", shadow: "rgba(229, 117, 117, 0.35)" },
-  poqy: { from: "#007764", to: "#01D081", shadow: "rgba(1, 208, 129, 0.32)" },
-  strolla: { from: "#5D8197", to: "#87BAB7", shadow: "rgba(93, 129, 151, 0.35)" },
-  roamer: { from: "#FF6238", to: "#FF5126", shadow: "rgba(255, 98, 56, 0.35)" },
-  beese: { from: "#7070DF", to: "#556695", shadow: "rgba(112, 112, 223, 0.35)" },
-};
-
-function DockColorDot({
-  projectId,
-  size = ICON,
-}: {
-  projectId: GraduateProjectId;
-  size?: number;
-}) {
-  const gradient = SPHERE_GRADIENTS[projectId];
-  return (
-    <span
-      className="relative block shrink-0 rounded-full ring-1 ring-inset ring-white/35"
-      style={{
-        width: size,
-        height: size,
-        background: `linear-gradient(180deg, ${gradient.from} 0%, ${gradient.to} 100%)`,
-        boxShadow: `0 3px 6px ${gradient.shadow}`,
-      }}
-      aria-hidden
-    >
-      <span className="pointer-events-none absolute inset-x-[14%] top-[11%] h-[36%] rounded-full bg-white/25" />
-    </span>
-  );
-}
 
 interface Props {
   /** Optional — plus control opens the profile inspector. */
   onPlus?: () => void;
 }
 
-/**
- * Top-left floating folder launcher (Figma 615:1406).
- * Opens full-screen graduate work coming-soon overlay (Figma 1391:214737).
- */
+/** Top-left floating folder launcher (Figma 615:1406) — opens the graduate work overlay. */
 export function ProjectDock({ onPlus }: Props) {
-  const [overlayOpen, setOverlayOpen] = useState(false);
+  const [folderOpen, setFolderOpen] = useState(false);
   const [hovered, setHovered] = useState(false);
-  const [onDark, setOnDark] = useState(false);
-  const rootRef = useRef<HTMLDivElement>(null);
-
-  const openOverlay = () => setOverlayOpen(true);
-  const closeOverlay = () => setOverlayOpen(false);
-
-  // Invert the plus when the fixed dock overlaps the black marquee/footer.
-  useEffect(() => {
-    let io: IntersectionObserver | null = null;
-    let raf = 0;
-
-    const update = () => {
-      const dark = document.getElementById("site-dark-band");
-      const dock = rootRef.current;
-      if (!dark || !dock) {
-        setOnDark(false);
-        return;
-      }
-      const b = dark.getBoundingClientRect();
-      const d = dock.getBoundingClientRect();
-      setOnDark(b.top < d.bottom && b.bottom > d.top);
-    };
-
-    const observe = () => {
-      const el = document.getElementById("site-dark-band");
-      if (!el || io) return;
-      io = new IntersectionObserver(update, {
-        root: null,
-        threshold: [0, 0.01, 0.1, 0.5, 1],
-      });
-      io.observe(el);
-      update();
-    };
-
-    update();
-    observe();
-    raf = window.requestAnimationFrame(observe);
-
-    window.addEventListener("scroll", update, { passive: true, capture: true });
-    document.addEventListener("scroll", update, { passive: true, capture: true });
-    window.addEventListener("resize", update);
-    return () => {
-      window.cancelAnimationFrame(raf);
-      io?.disconnect();
-      window.removeEventListener("scroll", update, true);
-      document.removeEventListener("scroll", update, true);
-      window.removeEventListener("resize", update);
-    };
-  }, []);
+  const closeFolder = useCallback(() => setFolderOpen(false), []);
+  const openFolder = () => setFolderOpen(true);
 
   return (
     <>
       <div
-        ref={rootRef}
         className="relative z-50"
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
       >
         <AnimatePresence>
-          {hovered && !overlayOpen ? (
+          {hovered && !folderOpen && !isPhoneViewport() ? (
             <motion.div
               key="dock-tooltip"
               role="tooltip"
@@ -134,124 +44,107 @@ export function ProjectDock({ onPlus }: Props) {
           ) : null}
         </AnimatePresence>
 
-        <motion.nav
+        <nav
           aria-label="Industrial Design Graduate Work"
           title="Industrial Design Graduate Work"
           data-name="app-icon"
-          initial={{ y: 0, scale: 1, rotate: 0 }}
-          animate={
-            overlayOpen
-              ? { y: 0, scale: 1, rotate: 0 }
-              : {
-                  y: [0, -7, 0, -3, 0],
-                  scale: [1, 1.02, 1, 1.01, 1],
-                  rotate: [0, -1.4, 0.8, -0.6, 0],
-                }
-          }
-          whileHover={{
-            scale: 1.08,
-            y: -4,
-            rotate: 0,
-            transition: { type: "spring", stiffness: 420, damping: 16 },
+          className="project-dock-app-icon pointer-events-auto relative flex flex-col items-center justify-center overflow-hidden border border-zinc-400/45 shadow-[0px_16px_24px_rgba(11,14,20,0.12),inset_0px_1px_0_rgba(255,255,255,0.55)]"
+          onClick={(e) => {
+            if ((e.target as HTMLElement).closest('[data-dock-action="profile"]')) return;
+            openFolder();
           }}
-          whileTap={{ scale: 0.94, rotate: -2 }}
-          transition={
-            overlayOpen
-              ? { duration: 0.2 }
-              : {
-                  y: { duration: 2.4, repeat: Infinity, ease: "easeInOut", repeatDelay: 0.35 },
-                  scale: { duration: 2.4, repeat: Infinity, ease: "easeInOut", repeatDelay: 0.35 },
-                  rotate: { duration: 2.4, repeat: Infinity, ease: "easeInOut", repeatDelay: 0.35 },
-                }
-          }
-          className="pointer-events-auto relative flex size-[120px] cursor-pointer flex-col items-center justify-center rounded-[30px] border border-zinc-400/45 bg-white/30 p-[15px] shadow-[0px_16px_24px_rgba(11,14,20,0.12),inset_0px_1px_0_rgba(255,255,255,0.55)] backdrop-blur-[14px] supports-[backdrop-filter]:bg-white/25 motion-reduce:animate-none"
         >
           <button
             type="button"
-            aria-expanded={overlayOpen}
+            aria-expanded={folderOpen}
             aria-haspopup="dialog"
-            aria-label={
-              overlayOpen
-                ? "Close Industrial Design Graduate Work"
-                : "Open Industrial Design Graduate Work"
-            }
-            onClick={openOverlay}
-            className="absolute inset-0 z-0 rounded-[30px]"
+            aria-label="Open Industrial Design Graduate Work"
+            onClick={openFolder}
+            className="project-dock-app-icon__hit absolute inset-0 z-0"
           />
 
-          <div className="pointer-events-none relative z-[1] grid w-full grid-cols-3 gap-x-[9px] gap-y-[8px]">
+          <motion.div
+            initial={{ y: 0, rotate: 0 }}
+            animate={
+              folderOpen
+                ? { y: 0, rotate: 0 }
+                : {
+                    y: [0, -7, 0, -3, 0],
+                    rotate: [0, -1.4, 0.8, -0.6, 0],
+                  }
+            }
+            whileHover={{
+              y: -4,
+              rotate: 0,
+              transition: { type: "spring", stiffness: 420, damping: 16 },
+            }}
+            whileTap={{ y: 0, rotate: -2 }}
+            transition={
+              folderOpen
+                ? { duration: 0.2 }
+                : {
+                    y: { duration: 2.4, repeat: Infinity, ease: "easeInOut", repeatDelay: 0.35 },
+                    rotate: { duration: 2.4, repeat: Infinity, ease: "easeInOut", repeatDelay: 0.35 },
+                  }
+            }
+            className="project-dock-app-icon__grid pointer-events-none relative z-[1] grid w-full grid-cols-3 motion-reduce:animate-none"
+          >
             <PlusButton
-              onDark={onDark}
               onClick={(e) => {
                 e.stopPropagation();
                 onPlus?.();
               }}
             />
-            <span style={{ width: ICON, height: ICON }} aria-hidden />
-            <span style={{ width: ICON, height: ICON }} aria-hidden />
+            <span className="project-dock-icon-cell pointer-events-none" aria-hidden />
+            <span className="project-dock-icon-cell pointer-events-none" aria-hidden />
 
             {GRADUATE_PROJECTS.slice(0, 2).map((project, i) => (
               <DockSphere
                 key={project.id}
                 project={project}
                 bounceDelay={0.08 + i * 0.07}
-                onOpen={openOverlay}
+                onOpen={openFolder}
               />
             ))}
-            <span style={{ width: ICON, height: ICON }} aria-hidden />
+            <span className="project-dock-icon-cell pointer-events-none" aria-hidden />
 
             {GRADUATE_PROJECTS.slice(2).map((project, i) => (
               <DockSphere
                 key={project.id}
                 project={project}
                 bounceDelay={0.22 + i * 0.07}
-                onOpen={openOverlay}
+                onOpen={openFolder}
               />
             ))}
-          </div>
-        </motion.nav>
+          </motion.div>
+        </nav>
       </div>
 
-      <AnimatePresence>
-        {overlayOpen ? <GraduateWorkComingSoonOverlay onClose={closeOverlay} /> : null}
-      </AnimatePresence>
+      <GraduateWorkOverlay open={folderOpen} onClose={closeFolder} />
     </>
   );
 }
 
-const PlusButton = ({
+function PlusButton({
   onClick,
-  onDark,
 }: {
   onClick?: (e: MouseEvent<HTMLButtonElement>) => void;
-  onDark?: boolean;
-}) => {
-  const bar = onDark
-    ? "bg-white shadow-[0px_2px_6px_rgba(0,0,0,0.35)]"
-    : "bg-[#2c313a] shadow-[0px_2px_3px_rgba(0,0,0,0.25)]";
-
+}) {
   return (
     <button
       type="button"
       onClick={onClick}
       aria-label="Open profile"
-      data-on-dark={onDark ? "true" : "false"}
-      className="pointer-events-auto relative z-[2] flex shrink-0 items-center justify-center rounded-md transition-transform hover:scale-110 active:scale-95"
-      style={{ width: ICON, height: ICON }}
+      data-dock-action="profile"
+      className="project-dock-icon-cell pointer-events-auto relative z-[2] flex shrink-0 items-center justify-center rounded-md transition-transform hover:scale-110 active:scale-95"
     >
-      <span className="relative inline-grid size-[15px] place-items-start leading-none">
-        <span
-          className={`col-start-1 row-start-1 mt-[5.5px] h-[4px] w-[15px] rounded-[2px] transition-colors duration-300 ${bar}`}
-        />
-        <span
-          className={`col-start-1 row-start-1 ml-[5.5px] h-[15px] w-[4px] rounded-[2px] border transition-colors duration-300 ${
-            onDark ? "border-white/80" : "border-white/40"
-          } ${bar}`}
-        />
+      <span className="project-dock-plus relative inline-grid place-items-start leading-none">
+        <span className="project-dock-plus__bar-h col-start-1 row-start-1 rounded-[2px] bg-[#2c313a] shadow-[0px_2px_3px_rgba(0,0,0,0.25)]" />
+        <span className="project-dock-plus__bar-v col-start-1 row-start-1 rounded-[2px] border border-white/40 bg-[#2c313a] shadow-[0px_2px_4px_rgba(0,0,0,0.3)]" />
       </span>
     </button>
   );
-};
+}
 
 function DockSphere({
   project,
@@ -281,17 +174,23 @@ function DockSphere({
       }}
       whileHover={{ scale: 1.18, y: -1 }}
       whileTap={{ scale: 0.9 }}
-      className="group pointer-events-auto relative z-[2] flex shrink-0 items-center justify-center overflow-visible rounded-full motion-reduce:animate-none"
-      style={{ width: ICON, height: ICON, ["--glow" as string]: project.glow }}
+      className="project-dock-icon-cell pointer-events-auto group relative z-[2] flex shrink-0 items-center justify-center overflow-visible rounded-full motion-reduce:animate-none"
+      style={{ ["--glow" as string]: project.glow }}
     >
       <span
         aria-hidden
         className="pointer-events-none absolute inset-[-4px] rounded-full opacity-0 blur-[6px] transition-opacity duration-200 group-hover:opacity-100"
         style={{ background: project.glow }}
       />
-      <span className="relative transition-[filter] duration-200 group-hover:drop-shadow-[0_0_10px_var(--glow)]">
-        <DockColorDot projectId={project.id} />
-      </span>
+      <img
+        src={project.dot}
+        alt=""
+        width={ICON_BASE}
+        height={ICON_BASE}
+        className="project-dock-sphere relative size-full object-contain transition-[filter] duration-200 group-hover:drop-shadow-[0_0_10px_var(--glow)]"
+        draggable={false}
+        decoding="async"
+      />
     </motion.button>
   );
 }
