@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { InspectorFrameId } from "./inspectorTypes";
 import { ProductiveWireframePhone } from "./ProductiveWireframePhone";
@@ -41,15 +41,14 @@ export function FirstDesignInspector() {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const previewPhoneRef = useRef<HTMLDivElement>(null);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (modalOpen) return;
     const id = window.setTimeout(() => {
-      const phones = wrapperRef.current?.querySelectorAll(
-        "button[aria-label*='design system inspector']",
-      );
-      const phone = phones?.[Math.min(2, (phones?.length ?? 1) - 1)];
-      phone?.scrollIntoView({ block: "center", inline: "nearest" });
-    }, 520);
+      const el = wrapperRef.current?.querySelector("[data-productive-design-viewport]");
+      if (!el) return;
+      const top = el.getBoundingClientRect().top + window.scrollY - 36;
+      window.scrollTo({ top: Math.max(0, top) });
+    }, 480);
     return () => window.clearTimeout(id);
   }, [modalOpen]);
 
@@ -110,6 +109,7 @@ export function FirstDesignInspector() {
         : null}
       <ProductiveDesignFileFrame
         key={modalOpen ? `inspector-open-${inspectorCamX}` : "inspector-closed"}
+        frameHeight={modalOpen ? 874 : 500}
         initialCamera={
           modalOpen
             ? { x: inspectorCamX, y: 0, z: INSPECTOR_ARTBOARD_ZOOM }

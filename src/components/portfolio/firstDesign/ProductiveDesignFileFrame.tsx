@@ -36,6 +36,7 @@ export function ProductiveDesignFileFrame({
   immersive = false,
   strip = false,
   initialCamera,
+  frameHeight,
 }: {
   children: ReactNode;
   overlay?: ReactNode;
@@ -54,6 +55,8 @@ export function ProductiveDesignFileFrame({
    */
   strip?: boolean;
   initialCamera?: Camera;
+  /** Canvas height. The closed file uses a shorter stage so the phones sit on screen. */
+  frameHeight?: number;
 }) {
   const viewportRef = useRef<HTMLDivElement>(null);
   const cameraRef = useRef<Camera>(initialCamera ?? { x: 0, y: 0, z: DEFAULT_ZOOM });
@@ -246,10 +249,11 @@ export function ProductiveDesignFileFrame({
         className={
           strip
             ? "relative z-0 h-[620px] w-full overflow-x-auto overflow-y-hidden p-6 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
-            : `relative z-0 h-[874px] w-full touch-none ${
+            : `relative z-0 w-full touch-none ${
                 immersive ? "overflow-x-auto overflow-y-visible" : "overflow-hidden"
               } ${grabbing || spaceHeld ? "cursor-grabbing" : "cursor-grab"}`
         }
+        style={strip ? undefined : { height: frameHeight ?? 874 }}
         onPointerDown={strip ? undefined : onPointerDown}
         onPointerMove={strip ? undefined : onPointerMove}
         onPointerUp={strip ? undefined : endPointer}
