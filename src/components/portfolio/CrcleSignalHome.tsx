@@ -40,6 +40,7 @@ import {
   CrclePhoneOverlay,
   CrclePrimaryDock,
 } from "@/components/portfolio/CrcleChrome";
+import { CrcleScreenToolbar } from "@/components/portfolio/CrcleDemoToolbar";
 import { SignalTuneDrawer } from "@/components/portfolio/SignalTuneDrawer";
 
 /**
@@ -481,6 +482,7 @@ export function CrcleSignalHome({
           </AnimatePresence>
         </div>
       </CrclePhoneFrame>
+      <CrcleScreenToolbar />
     </div>
   );
 }

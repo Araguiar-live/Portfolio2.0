@@ -47,6 +47,7 @@ import laptopStrokeIcon from "@/assets/crcle/signal/laptop-stroke.svg";
 import lightbulbIcon from "@/assets/crcle/signal/lightbulb.svg";
 import unlockIcon from "@/assets/crcle/unlock.svg";
 import wifiIcon from "@/assets/crcle/wifi.svg";
+import { CrcleScreenToolbar } from "@/components/portfolio/CrcleDemoToolbar";
 import { CrclePhoneFrame, CrcleThemeToggle } from "@/components/portfolio/CrclePhoneFrame";
 import { useCrclePhoneLight } from "@/lib/crcle-phone-theme";
 import { CrclePhoneOverlay, CrclePrimaryDock } from "@/components/portfolio/CrcleChrome";
@@ -735,6 +736,7 @@ export function CrcleRadar({
           </AnimatePresence>
         </div>
       </CrclePhoneFrame>
+      <CrcleScreenToolbar />
     </div>
   );
 }

@@ -34,6 +34,7 @@ import userFilledIcon from "@/assets/crcle/onboarding/user-filled.svg";
 import serenaPortrait from "@/assets/crcle/serena-portrait.png";
 import wifiIcon from "@/assets/crcle/wifi.svg";
 import { ChatListItem, type ChatConversation } from "@/components/portfolio/ChatListItem";
+import { CrcleScreenToolbar } from "@/components/portfolio/CrcleDemoToolbar";
 import { CrclePhoneFrame, CrcleThemeToggle } from "@/components/portfolio/CrclePhoneFrame";
 import { useCrcleBroadcast } from "@/components/portfolio/crcleBroadcast";
 import {
@@ -704,6 +705,7 @@ export function CrcleMessaging({
         </AnimatePresence>
 
       </CrclePhoneFrame>
+      <CrcleScreenToolbar />
     </div>
   );
 }
