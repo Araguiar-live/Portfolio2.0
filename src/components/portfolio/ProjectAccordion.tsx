@@ -37,6 +37,8 @@ type Tab = ProjectTab;
 
 /** Shared open-panel body height — tabs + Figma 402×874 phone + padding */
 const EXPANDED_BODY_H = 1060;
+/** Odicci's desktop frame is 50% wider than the 1.7fr column, so the row grows with it. */
+const ODICCI_EXPANDED_BODY_H = 1400;
 
 export interface Project {
   id: string; // e.g. "01"
@@ -201,14 +203,14 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
           <motion.div
             key="body"
             initial={{ height: 0 }}
-            animate={{ height: EXPANDED_BODY_H }}
+            animate={{ height: project.slug === "odicci" ? ODICCI_EXPANDED_BODY_H : EXPANDED_BODY_H }}
             exit={{ height: 0 }}
             transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
             className="overflow-hidden"
           >
             <div
               className="relative flex h-full flex-col px-6 py-6"
-              style={{ height: EXPANDED_BODY_H }}
+              style={{ height: project.slug === "odicci" ? ODICCI_EXPANDED_BODY_H : EXPANDED_BODY_H }}
             >
               {/* Tab switcher (capsule pills) */}
               <div className="mb-6 flex shrink-0 justify-center">
@@ -262,7 +264,7 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
                   className={
                     "grid w-full min-w-0 grid-cols-1 items-start overflow-x-hidden " +
                     (project.slug === "odicci"
-                      ? "gap-[46px] lg:grid-cols-[minmax(0,1fr)_minmax(0,1.7fr)]"
+                      ? "gap-[46px] grid-cols-1"
                       : "gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] lg:gap-8")
                   }
                 >
@@ -274,7 +276,10 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
                 {/* RIGHT — prototype fills the grid column and hugs the right edge */}
                 <div className="relative flex w-full min-w-0 shrink-0 items-start justify-end">
                   <div
-                    className="flex w-full min-w-0 items-start justify-end overflow-visible"
+                    className={
+                      "flex min-w-0 items-start justify-end overflow-visible " +
+                      (project.slug === "odicci" ? "ml-auto w-full lg:w-[94.5%]" : "w-full")
+                    }
                   >
                     {tabContent.customBody ? (
                       <Suspense
