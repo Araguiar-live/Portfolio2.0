@@ -7,6 +7,12 @@ import crcleLogo from "@/assets/crcle/crcle-logo.svg";
 import locusCloseIcon from "@/assets/crcle/locus/close-x.svg";
 import locusPlusIcon from "@/assets/crcle/locus/plus.svg";
 import closeAddIcon from "@/assets/crcle/onboarding/close-add.svg";
+import codeActiveIcon from "@/assets/crcle/demo-toolbar/code-active.svg";
+import codeIdleIcon from "@/assets/crcle/demo-toolbar/code-idle.svg";
+import penActiveIcon from "@/assets/crcle/demo-toolbar/pen-active.svg";
+import penIdleIcon from "@/assets/crcle/demo-toolbar/pen-idle.svg";
+import playActiveIcon from "@/assets/crcle/demo-toolbar/play-active.svg";
+import playIdleIcon from "@/assets/crcle/demo-toolbar/play-idle.svg";
 import cameraIcon from "@/assets/crcle/profile/camera.svg";
 import datingCoffeeIcon from "@/assets/crcle/profile/dating-coffee.svg";
 import datingGroupWhiteIcon from "@/assets/crcle/profile/dating-group-white.svg";
@@ -237,6 +243,75 @@ const INITIAL: ProfileState = {
   },
 };
 
+function DemoToolbarButton({
+  active,
+  label,
+  onClick,
+  children,
+  activeClassName,
+}: {
+  active: boolean;
+  label: string;
+  onClick: () => void;
+  children: ReactNode;
+  activeClassName: string;
+}) {
+  return (
+    <button
+      type="button"
+      aria-label={label}
+      aria-pressed={active}
+      onClick={onClick}
+      className={`flex min-w-0 flex-1 items-center justify-center rounded-full px-4 py-2 backdrop-blur-[4px] ${
+        active ? activeClassName : ""
+      }`}
+    >
+      {children}
+    </button>
+  );
+}
+
+/** Figma Rfaea toolbar — 2774:208563. Play runs the profile demo. */
+function DemoToolbar({
+  playing,
+  onPlay,
+}: {
+  playing: boolean;
+  onPlay: () => void;
+}) {
+  const [designOn, setDesignOn] = useState(false);
+  const [codeOn, setCodeOn] = useState(false);
+
+  return (
+    <div className="flex w-[224px] items-center gap-1 rounded-full bg-white p-1">
+      <DemoToolbarButton
+        active={playing}
+        label={playing ? "Demo playing" : "Replay demo"}
+        onClick={onPlay}
+        activeClassName="border border-[rgba(250,131,46,0.2)] bg-[rgba(255,81,38,0.4)]"
+      >
+        <img src={playing ? playActiveIcon : playIdleIcon} alt="" className="h-[26px] w-6" />
+      </DemoToolbarButton>
+      <DemoToolbarButton
+        active={designOn}
+        label="Design"
+        onClick={() => setDesignOn((on) => !on)}
+        activeClassName="border border-[rgba(250,131,46,0.2)] bg-[linear-gradient(126deg,rgba(139,92,247,0.4)_19.75%,rgba(3,86,229,0.284)_86.39%)]"
+      >
+        <img src={designOn ? penActiveIcon : penIdleIcon} alt="" className="size-6 object-contain" />
+      </DemoToolbarButton>
+      <DemoToolbarButton
+        active={codeOn}
+        label="Code"
+        onClick={() => setCodeOn((on) => !on)}
+        activeClassName="border border-[rgba(1,208,180,0.13)] bg-[linear-gradient(126deg,rgba(1,208,129,0.104)_19.75%,rgba(1,208,129,0.48)_86.39%)]"
+      >
+        <img src={codeOn ? codeActiveIcon : codeIdleIcon} alt="" className="h-6 w-6" />
+      </DemoToolbarButton>
+    </div>
+  );
+}
+
 export function CrcleProfile({
   onGoToSignalHome,
   onGoToMessages,
@@ -259,7 +334,6 @@ export function CrcleProfile({
   const screenRef = useRef<HTMLDivElement>(null);
   const [demoPaused, setDemoPaused] = useState(false);
   const [demoRun, setDemoRun] = useState(0);
-  const [demoLabel, setDemoLabel] = useState("Demo: Completing onboarding");
   const [touch, setTouch] = useState<{ x: number; y: number; pressing: boolean } | null>(null);
   const demoGen = useRef(0);
   const demoPausedRef = useRef(false);
@@ -274,7 +348,6 @@ export function CrcleProfile({
   const replayDemo = () => {
     setOnboardingOpen(true);
     setOverlay(null);
-    setDemoLabel("Demo: Completing onboarding");
     setDemoPaused(false);
     setDemoRun((n) => n + 1);
   };
@@ -324,7 +397,6 @@ export function CrcleProfile({
       setOverlay(null);
       await wait(520);
       while (alive()) {
-        setDemoLabel("Demo: Completing onboarding");
         const start = find('[data-demo-target="onboarding-done"]');
         if (start && (await pointAt(start)) && alive()) {
           setOnboardingOpen(false);
@@ -332,7 +404,6 @@ export function CrcleProfile({
         }
         if (!alive()) return;
 
-        setDemoLabel("Demo: Switching live mood");
         const moodBtn = find('[data-demo-target="mood-toggle"]');
         if (moodBtn && (await pointAt(moodBtn)) && alive()) {
           setOverlay("mood");
@@ -359,7 +430,6 @@ export function CrcleProfile({
         }
         if (!alive()) return;
 
-        setDemoLabel("Demo: Opening a profile widget");
         const work = find('[data-demo-target="bento-work"]');
         if (work && (await pointAt(work)) && alive()) {
           setOverlay("work");
@@ -367,7 +437,6 @@ export function CrcleProfile({
         }
         if (!alive()) return;
 
-        setDemoLabel("Demo: Closing the edit sheet");
         const close = find('[data-demo-target="sheet-close"]');
         if (close && (await pointAt(close)) && alive()) {
           setOverlay(null);
@@ -574,19 +643,8 @@ export function CrcleProfile({
           ) : null}
         </div>
       </CrclePhoneFrame>
-      <div className="mt-3 flex items-center justify-center gap-2">
-        {!demoPaused ? (
-          <p className="rounded-full border border-zinc-200/80 bg-white/75 px-3 py-1.5 text-[11px] font-medium tracking-tight text-zinc-600 shadow-[0_8px_24px_rgba(15,23,42,0.08)] backdrop-blur-md">
-            {demoLabel}
-          </p>
-        ) : null}
-        <button
-          type="button"
-          onClick={replayDemo}
-          className="rounded-full border border-zinc-200/80 bg-white/75 px-3 py-1.5 text-[11px] font-medium tracking-tight text-zinc-700 shadow-[0_8px_24px_rgba(15,23,42,0.08)] backdrop-blur-md transition hover:bg-white"
-        >
-          Replay Demo
-        </button>
+      <div className="mt-3 flex items-center justify-center">
+        <DemoToolbar playing={!demoPaused} onPlay={replayDemo} />
       </div>
     </div>
   );
