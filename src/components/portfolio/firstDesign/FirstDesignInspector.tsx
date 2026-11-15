@@ -1,7 +1,11 @@
-import { useRef, useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { InspectorFrameId } from "./inspectorTypes";
-import { ProductiveWireframePhone } from "./ProductiveWireframePhone";
+import {
+  PRODUCTIVE_WIREFRAME_PHONE_H,
+  PRODUCTIVE_WIREFRAME_PHONE_W,
+  ProductiveWireframePhone,
+} from "./ProductiveWireframePhone";
 import { cn } from "@/lib/utils";
 import {
   DesignSystemInspectorModal,
@@ -37,8 +41,45 @@ export function FirstDesignInspector() {
   const [activeAnnotationId, setActiveAnnotationId] = useState<string | null>(null);
 
   const [inspectorCamX, setInspectorCamX] = useState(0);
+  const [browseCamera, setBrowseCamera] = useState({ x: 0, y: 0, z: DEFAULT_ZOOM });
 
   const wrapperRef = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    if (modalOpen) return;
+    const root = wrapperRef.current;
+    if (!root) return;
+
+    const measure = () => {
+      const el = root.querySelector<HTMLElement>("[data-productive-design-viewport]");
+      if (!el) return;
+      const w = el.clientWidth;
+      const h = el.clientHeight;
+      if (w < 32 || h < 32) return;
+      const stripW =
+        HORIZONTAL_ORDER.length * PRODUCTIVE_WIREFRAME_PHONE_W +
+        (HORIZONTAL_ORDER.length - 1) * CANVAS_STRIP_GAP;
+      const stripH = PRODUCTIVE_WIREFRAME_PHONE_H;
+      const insetX = 28;
+      const insetY = 24;
+      const z = Math.min(
+        DEFAULT_ZOOM,
+        (w - insetX * 2) / stripW,
+        (h - insetY * 2) / stripH,
+      );
+      // Pin the strip to the top of the canvas so all six phones are on screen.
+      const y = insetY - h / 2 + (stripH * z) / 2;
+      setBrowseCamera((prev) =>
+        Math.abs(prev.z - z) < 0.004 && Math.abs(prev.y - y) < 1 ? prev : { x: 0, y, z },
+      );
+    };
+
+    measure();
+    const el = root.querySelector("[data-productive-design-viewport]");
+    const ro = new ResizeObserver(measure);
+    if (el) ro.observe(el);
+    return () => ro.disconnect();
+  }, [modalOpen]);
   const previewPhoneRef = useRef<HTMLDivElement>(null);
 
   const frame = INSPECTOR_FRAMES[modalFrameIndex];
@@ -97,11 +138,15 @@ export function FirstDesignInspector() {
           )
         : null}
       <ProductiveDesignFileFrame
-        key={modalOpen ? `inspector-open-${inspectorCamX}` : "inspector-closed"}
+        key={
+          modalOpen
+            ? `inspector-open-${inspectorCamX}`
+            : `inspector-closed-${browseCamera.z.toFixed(3)}-${Math.round(browseCamera.y)}`
+        }
         initialCamera={
           modalOpen
             ? { x: inspectorCamX, y: 0, z: INSPECTOR_ARTBOARD_ZOOM }
-            : { x: 0, y: 0, z: DEFAULT_ZOOM }
+            : browseCamera
         }
         overlayAboveDocument={modalOpen}
         overlayUnclipped={modalOpen}
