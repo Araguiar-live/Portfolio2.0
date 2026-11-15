@@ -44,10 +44,16 @@ export function useWorkCommit() {
     [reduceMotion],
   );
 
-  /** Always land on the dark hero. Hash / scroll restoration must not skip it. */
+  /** `#work` stays on the work section. A bare `/` still opens on the hero. */
   useLayoutEffect(() => {
     if (window.location.hash === "#work") {
-      history.replaceState(null, "", `${window.location.pathname}${window.location.search}`);
+      const work = getWorkSection();
+      if (work) {
+        committedRef.current = true;
+        setWorkCommitted(true);
+        window.scrollTo(0, work.offsetTop);
+        return;
+      }
     }
     window.scrollTo(0, 0);
   }, []);

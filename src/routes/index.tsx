@@ -270,6 +270,16 @@ function Index() {
     setOpenSlug((cur) => (cur === slug ? null : slug));
   }, []);
 
+  // `#work` should show the CRCLE profile, where the auto-demo plays.
+  useEffect(() => {
+    if (window.location.hash !== "#work") return;
+    setOpenSlug("crcle");
+    const frame = requestAnimationFrame(() => {
+      rowRefs.current.crcle?.scrollIntoView({ block: "start" });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, []);
+
   // Dock click: open the row (if closed) and smoothly scroll to it.
   const handleDockSelect = useCallback((slug: string) => {
     if (isPhoneViewport()) {

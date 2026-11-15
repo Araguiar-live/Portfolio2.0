@@ -128,9 +128,10 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
   ref,
 ) {
   const tabs = project.tabs?.length ? project.tabs : TABS;
-  const [activeTab, setActiveTab] = useState<Tab>(
-    () => (project.tabs?.[0] as Tab | undefined) ?? "Template Library",
-  );
+  const [activeTab, setActiveTab] = useState<Tab>(() => {
+    if (project.slug === "crcle") return "Template Library";
+    return (project.tabs?.[0] as Tab | undefined) ?? "Template Library";
+  });
   const tabContent = project.content?.[activeTab] ?? {};
   const showTabChrome = tabs.length > 1;
   const rowHover = useRowHoverPreview(project.hoverPreview, !isOpen);
