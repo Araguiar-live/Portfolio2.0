@@ -4,6 +4,12 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 /** Figma Odicci onboarding viewport (65:94009 and siblings). */
 export const ODICCI_FRAME_W = 1512;
 export const ODICCI_FRAME_H = 982;
+/**
+ * Whole browser, chrome included, as measured on https://araguiar.design/#work.
+ * The shell scales uniformly so this ratio holds at every width.
+ */
+const LIVE_SHELL_W = 741;
+const LIVE_SHELL_H = 566;
 
 const FONT = "Poppins, ui-sans-serif, system-ui, sans-serif";
 const ACCENT = "#FF5126";
@@ -37,29 +43,45 @@ export function OdicciBrowserFrame({
   toolbarExtra,
   children,
 }: OdicciBrowserFrameProps) {
+  const shellRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
+  const [fit, setFit] = useState(1);
   const [scale, setScale] = useState(1);
   const isDark = theme === "dark";
 
   useEffect(() => {
-    const el = stageRef.current;
-    if (!el) return;
+    const shell = shellRef.current;
+    const stage = stageRef.current;
+    if (!shell || !stage) return;
 
     const update = () => {
-      const { width, height } = el.getBoundingClientRect();
-      setScale(Math.min(width / ODICCI_FRAME_W, height / ODICCI_FRAME_H));
+      const { width } = shell.getBoundingClientRect();
+      setFit(width / LIVE_SHELL_W);
+      // offset size ignores the shell's transform, so the artboard scale stays exact.
+      setScale(Math.min(stage.offsetWidth / ODICCI_FRAME_W, stage.offsetHeight / ODICCI_FRAME_H));
     };
 
     update();
     const ro = new ResizeObserver(update);
-    ro.observe(el);
+    ro.observe(shell);
     return () => ro.disconnect();
   }, []);
 
   return (
     <div
-      className="relative w-full min-w-0 max-w-[980px] overflow-hidden rounded-2xl border border-white/10 bg-white shadow-2xl shadow-black/40"
-      style={{ fontFamily: FONT }}
+      ref={shellRef}
+      className="relative w-full min-w-0 max-w-[980px]"
+      style={{ aspectRatio: `${LIVE_SHELL_W} / ${LIVE_SHELL_H}` }}
+    >
+    <div
+      className="absolute left-0 top-0 overflow-hidden rounded-2xl border border-white/10 bg-white shadow-2xl shadow-black/40"
+      style={{
+        fontFamily: FONT,
+        width: LIVE_SHELL_W,
+        height: LIVE_SHELL_H,
+        transform: `scale(${fit})`,
+        transformOrigin: "top left",
+      }}
     >
       {/* Title bar */}
       <div className="flex h-10 items-center border-b border-zinc-200 bg-white px-4">
@@ -116,6 +138,7 @@ export function OdicciBrowserFrame({
           {children}
         </div>
       </div>
+    </div>
     </div>
   );
 }
