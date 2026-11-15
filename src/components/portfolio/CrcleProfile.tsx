@@ -2729,9 +2729,10 @@ function SheetShell({
         animate={{ y: 0 }}
         exit={{ y: 28 }}
         transition={{ duration: 0.28, ease: EASE }}
-        className="relative flex max-h-[78%] flex-col overflow-hidden rounded-t-[28px] border border-[rgba(247,246,242,0.12)] border-b-0 bg-[rgba(2,2,23,0.94)] px-4 pb-8 pt-4"
+        className="relative flex max-h-[78%] flex-col overflow-hidden rounded-t-[28px] border border-[rgba(255,255,255,0.3)] border-b-0 px-4 pb-8 pt-4"
       >
-        <div className="mb-4 flex items-start justify-between gap-3">
+        <div aria-hidden className="crcle-sheet-frost--dark pointer-events-none absolute inset-0 rounded-t-[28px]" />
+        <div className="relative z-[1] mb-4 flex items-start justify-between gap-3">
           <div>
             <p className="text-[18px] font-medium text-[#f7f6f2]" style={{ fontFamily: FONT }}>
               {title}
@@ -2757,7 +2758,7 @@ function SheetShell({
             </button>
           )}
         </div>
-        <div className="min-h-0 overflow-y-auto">{children}</div>
+        <div className="relative z-[1] min-h-0 overflow-y-auto">{children}</div>
       </motion.div>
     </CrclePhoneOverlay>
   );
