@@ -17,6 +17,7 @@ type InspectHotspotOverlayProps = {
   annotations: SpecAnnotation[];
   highlightHotspotId?: string | null;
   onHotspotHover?: (id: string | null) => void;
+  className?: string;
 };
 
 function roundPx(n: number) {
@@ -79,6 +80,7 @@ export function InspectHotspotOverlay({
   annotations,
   highlightHotspotId,
   onHotspotHover,
+  className,
 }: InspectHotspotOverlayProps) {
   const rootRef = useRef<HTMLDivElement>(null);
   const [boxes, setBoxes] = useState<Record<string, Box>>({});
@@ -118,7 +120,7 @@ export function InspectHotspotOverlay({
   if (!annotations.length) return null;
 
   return (
-    <div ref={rootRef} className="pointer-events-none absolute inset-0 z-30 overflow-visible">
+    <div ref={rootRef} className={cn("pointer-events-none absolute inset-0 z-30 overflow-visible", className)}>
       {annotations.map((a) => {
         const box = boxes[a.id];
         if (!box) return null;
