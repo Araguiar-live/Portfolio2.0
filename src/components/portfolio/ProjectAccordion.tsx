@@ -365,6 +365,7 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
               tabCenterX(outline.w, tabShift) -
               (FOLDER_MARKS[project.slug].width * FOLDER_MARK_SCALE) / 2,
             top: FOLDER_MARK_TOP,
+            opacity: 0.6,
           }}
         />
       ) : null}
