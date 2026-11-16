@@ -353,6 +353,7 @@ export function SignalTuneDrawer({
             <div className="relative z-[1] shrink-0 border-t border-[rgba(2,3,29,0.08)] bg-[rgba(247,246,242,0.55)] px-3 pb-8 pt-3 backdrop-blur-[14px] [-webkit-backdrop-filter:blur(14px)]">
               <button
                 type="button"
+                aria-label="Save profile"
                 onClick={handleSave}
                 className="flex w-full items-center justify-center rounded-full bg-[#02031d] px-9 py-2"
               >

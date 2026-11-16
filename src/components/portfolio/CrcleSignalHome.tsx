@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { useCallback, useEffect, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import type { RadarIntent } from "@/components/portfolio/CrcleRadar";
 import batteryIcon from "@/assets/crcle/battery.svg";
 import cellularIcon from "@/assets/crcle/cellular.svg";
@@ -40,7 +40,8 @@ import {
   CrclePhoneOverlay,
   CrclePrimaryDock,
 } from "@/components/portfolio/CrcleChrome";
-import { CrcleScreenToolbar } from "@/components/portfolio/CrcleDemoToolbar";
+import { DemoToolbar } from "@/components/portfolio/CrcleDemoToolbar";
+import { PhoneDevInspection } from "@/components/portfolio/inspect/PhoneDevInspection";
 import { SignalTuneDrawer } from "@/components/portfolio/SignalTuneDrawer";
 
 /**
@@ -77,6 +78,14 @@ export function CrcleSignalHome({
   /** Pulse master ignition — profile live in the network */
   const [pulseOpen, setPulseOpen] = useState(false);
   const [pulseLive, setPulseLive] = useState(false);
+  const [demoPaused, setDemoPaused] = useState(false);
+  const [codeOn, setCodeOn] = useState(false);
+  const [demoRun, setDemoRun] = useState(0);
+  const [touch, setTouch] = useState<{ x: number; y: number; pressing: boolean } | null>(null);
+  const screenRef = useRef<HTMLDivElement>(null);
+  const demoGen = useRef(0);
+  const demoPausedRef = useRef(false);
+  demoPausedRef.current = demoPaused;
   const intentDone = selectedIntent !== null;
   const filledCount = Number(homeDone) + Number(locationDone) + Number(intentDone);
   const remaining = 3 - filledCount;
@@ -95,12 +104,197 @@ export function CrcleSignalHome({
     if (tuned) setIntentOpen(false);
   }, [tuned]);
 
+  const resetSignal = useCallback(() => {
+    setScreen("empty");
+    setHomeDone(false);
+    setLocationDone(false);
+    setLocationOpen(false);
+    setTuneOpen(false);
+    setIntentOpen(false);
+    setSelectedIntent(null);
+    setPulseOpen(false);
+    setPulseLive(false);
+  }, []);
+
+  const pauseDemo = () => {
+    demoGen.current += 1;
+    setDemoPaused(true);
+    setTouch(null);
+  };
+
+  const replayDemo = () => {
+    demoGen.current += 1;
+    setCodeOn(false);
+    setOnboardingOpen(false);
+    resetSignal();
+    setDemoPaused(false);
+    setDemoRun((n) => n + 1);
+  };
+
+  useEffect(() => {
+    if (demoPaused || codeOn) return;
+    const gen = ++demoGen.current;
+    let cancelled = false;
+    const alive = () => !cancelled && gen === demoGen.current;
+    const wait = (ms: number) => new Promise((resolve) => window.setTimeout(resolve, ms));
+    const rootOf = () => screenRef.current;
+    const find = (selector: string) => rootOf()?.querySelector<HTMLElement>(selector) ?? null;
+
+    const place = (el: HTMLElement) => {
+      const root = rootOf();
+      if (!root) return null;
+      const box = el.getBoundingClientRect();
+      const frame = root.getBoundingClientRect();
+      return {
+        x: box.left - frame.left + box.width / 2,
+        y: box.top - frame.top + box.height / 2,
+      };
+    };
+
+    const reveal = async (el: HTMLElement) => {
+      const scroller = el.closest(".overflow-y-auto");
+      if (!(scroller instanceof HTMLElement)) return;
+      const box = el.getBoundingClientRect();
+      const frame = scroller.getBoundingClientRect();
+      const delta = box.top - frame.top - (frame.height - box.height) / 2;
+      if (Math.abs(delta) > 16) {
+        scroller.scrollTop += delta;
+        await wait(260);
+      }
+    };
+
+    const press = async (el: HTMLElement) => {
+      await reveal(el);
+      if (!alive()) return false;
+      const point = place(el);
+      if (!point) return false;
+      setTouch({ ...point, pressing: false });
+      await wait(420);
+      if (!alive()) return false;
+      setTouch({ ...point, pressing: true });
+      await wait(160);
+      if (!alive()) return false;
+      setTouch({ ...point, pressing: false });
+      el.click();
+      return true;
+    };
+
+    const waitFor = async (selector: string) => {
+      const start = performance.now();
+      while (alive() && performance.now() - start < 2800) {
+        const el = find(selector);
+        if (el) return el;
+        await wait(80);
+      }
+      return null;
+    };
+
+    const waitForText = async (text: string, scope?: ParentNode | null) => {
+      const start = performance.now();
+      while (alive() && performance.now() - start < 2800) {
+        const root = scope ?? rootOf();
+        const el = root
+          ? [...root.querySelectorAll("button")].find(
+              (button) => (button.textContent || "").replace(/\s+/g, " ").trim() === text,
+            )
+          : null;
+        if (el) return el;
+        await wait(80);
+      }
+      return null;
+    };
+
+    const run = async () => {
+      await wait(480);
+      if (!alive()) return;
+      const onboard = find('[data-demo-target="signal-continue"]');
+      if (onboard) await press(onboard);
+      await wait(560);
+      if (!alive()) return;
+
+      const upload = await waitFor('[aria-label="Tap to upload photo"]');
+      if (upload) await press(upload);
+      await wait(620);
+      if (!alive()) return;
+
+      const location = await waitFor('[aria-label="Location"]');
+      if (location) await press(location);
+      await wait(480);
+      if (!alive()) return;
+      const current = await waitForText("Use current location");
+      if (current) await press(current);
+      await wait(360);
+      if (!alive()) return;
+      const locationSave = await waitFor('[aria-label="Save location"]');
+      if (locationSave) await press(locationSave);
+      await wait(620);
+      if (!alive()) return;
+
+      const intent = await waitFor('[aria-label="Intent"]');
+      if (intent) await press(intent);
+      await wait(480);
+      if (!alive()) return;
+      const romantic = await waitFor('[aria-label="The Romantic"]');
+      if (romantic) await press(romantic);
+      await wait(420);
+      if (!alive()) return;
+      const intentSave = await waitForText("Save Intent");
+      if (intentSave) await press(intentSave);
+      await wait(620);
+      if (!alive()) return;
+
+      const home = await waitFor('[aria-label="Home"]');
+      if (home) await press(home);
+      await wait(520);
+      if (!alive()) return;
+      const profile = find('[aria-label="Fine-tune your signal"]');
+      const creative = await waitForText("Creative", profile);
+      if (creative) await press(creative);
+      await wait(280);
+      if (!alive()) return;
+      const both = await waitForText("Both", profile);
+      if (both) await press(both);
+      await wait(280);
+      if (!alive()) return;
+      const gender = profile?.querySelector<HTMLElement>('[aria-label^="Gender:"]') ?? null;
+      if (gender) await press(gender);
+      await wait(360);
+      if (!alive()) return;
+      const profileSave = await waitFor('[aria-label="Save profile"]');
+      if (profileSave) await press(profileSave);
+      await wait(720);
+      if (!alive()) return;
+
+      const pulse = await waitFor('[aria-label="Pulse"][aria-pressed="true"]');
+      if (pulse) await press(pulse);
+      await wait(1700);
+      if (!alive()) return;
+
+      resetSignal();
+      await wait(640);
+      if (alive()) void run();
+    };
+
+    void run();
+    return () => {
+      cancelled = true;
+      setTouch(null);
+    };
+  }, [codeOn, demoPaused, demoRun, resetSignal]);
+
   return (
     <div className="relative ml-auto flex w-fit flex-col items-center">
       <CrcleThemeToggle light={isLightMode} onToggle={toggleLight} />
 
       <CrclePhoneFrame light={isLightMode}>
-        <div className="relative flex h-full min-h-0 w-full flex-col overflow-hidden bg-[#010211] transition-colors duration-300 [.crcle-phone--light_&]:bg-[var(--crcle-bg)]">
+        <div
+          ref={screenRef}
+          onPointerDownCapture={() => {
+            if (demoPausedRef.current || codeOn) return;
+            pauseDemo();
+          }}
+          className="relative flex h-full min-h-0 w-full flex-col overflow-hidden bg-[#010211] transition-colors duration-300 [.crcle-phone--light_&]:bg-[var(--crcle-bg)]"
+        >
           <SignalTuneDrawer
             open={tuneOpen}
             onClose={() => setTuneOpen(false)}
@@ -480,9 +674,43 @@ export function CrcleSignalHome({
               <SignalOnboarding onClose={dismissOnboarding} onContinue={dismissOnboarding} />
             ) : null}
           </AnimatePresence>
+          {touch && !demoPaused && !codeOn ? (
+            <>
+              <span
+                aria-hidden
+                className="pointer-events-none absolute z-[79] size-11 -translate-x-1/2 -translate-y-1/2 rounded-full border border-[rgba(120,120,120,0.35)] animate-ping"
+                style={{ left: touch.x, top: touch.y }}
+              />
+              <motion.div
+                aria-hidden
+                className="crcle-touch-glass pointer-events-none absolute z-[80] rounded-full"
+                initial={false}
+                animate={{
+                  left: touch.x - (touch.pressing ? 11 : 14),
+                  top: touch.y - (touch.pressing ? 11 : 14),
+                  width: touch.pressing ? 22 : 28,
+                  height: touch.pressing ? 22 : 28,
+                }}
+                transition={{ type: "spring", stiffness: 280, damping: 24, mass: 0.6 }}
+              />
+            </>
+          ) : null}
+          <PhoneDevInspection active={codeOn && !onboardingOpen} screenRef={screenRef} />
         </div>
       </CrclePhoneFrame>
-      <CrcleScreenToolbar />
+      <DemoToolbar
+        playing={!demoPaused && !codeOn}
+        codeOn={codeOn}
+        onPlay={replayDemo}
+        onDesign={() => {
+          setCodeOn(false);
+          pauseDemo();
+        }}
+        onCode={() => {
+          setCodeOn(true);
+          pauseDemo();
+        }}
+      />
     </div>
   );
 }
@@ -553,6 +781,7 @@ function SignalOnboarding({
           </p>
           <button
             type="button"
+            data-demo-target="signal-continue"
             onClick={onContinue}
             className="flex w-[91px] flex-col items-center gap-[5px] rounded-xl transition hover:bg-white/5"
           >
@@ -1154,6 +1383,7 @@ function LocationRequiredModal({
               <div className="flex w-full flex-col items-center">
                 <button
                   type="button"
+                  aria-label="Save location"
                   onClick={onSave}
                   className="rounded-full bg-[#020426] px-[52px] py-2"
                 >
