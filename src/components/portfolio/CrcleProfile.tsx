@@ -1959,7 +1959,7 @@ function RelationshipStatusSheet({
       onClick={onClose}
     >
       <div
-        className="crcle-edit-sheet relative w-full max-w-[374px] overflow-hidden rounded-[24px] border border-transparent shadow-[0_16px_48px_rgba(0,0,0,0.35)]"
+        className="crcle-edit-sheet crcle-edit-sheet--body-glass relative w-full max-w-[374px] overflow-hidden rounded-[24px] border border-transparent shadow-[0_16px_48px_rgba(0,0,0,0.35)]"
         onClick={(e) => e.stopPropagation()}
       >
         <div aria-hidden className="crcle-sheet-frost--dark absolute inset-0 rounded-[24px]" />
@@ -1988,7 +1988,7 @@ function RelationshipStatusSheet({
         </div>
 
         {/* Body — Figma 862:242958 */}
-        <div className="flex flex-col gap-4 bg-[rgba(247,246,242,0.2)] p-3">
+        <div className="crcle-sheet-panel flex flex-col gap-4 bg-[rgba(247,246,242,0.2)] p-3">
           <div className="flex flex-col gap-3">
             <p
               className="text-[11px] leading-[1.4] text-[#9ca3af]"
