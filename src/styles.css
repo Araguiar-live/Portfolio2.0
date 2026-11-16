@@ -532,25 +532,19 @@ html.dark .spatial-glass-hairline {
   border-color: rgba(255, 255, 255, 0.18);
 }
 
-/* Food For Thought — specular hairline + state tokens */
+/* Food For Thought — the frost plate is the only surface, so the circle and the note are one object. */
 .thought-glass {
   --thought-accent: #eb3b00;
   --thought-body: #b03512;
-  border: 1px solid rgba(255, 255, 255, 0.5);
+  border: 1px solid transparent;
+  background: transparent;
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
 }
 
-/* Figma 2313:66747 — collapsed badge (vibrant lilac glass + orange avocado tile) */
-.thought-glass.thought-glass--collapsed,
 .thought-glass[data-thought-state="collapsed"] {
   aspect-ratio: 1 / 1;
-  border: 1px solid #b0afd7;
-  border-radius: 9999px;
-  background-image: linear-gradient(
-    147.33deg,
-    rgba(240, 239, 248, 0.4) 19.535%,
-    rgba(59, 41, 216, 0.4) 92.75%
-  );
-  box-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.15);
 }
 
 @media (min-width: 640px) {
@@ -593,22 +587,34 @@ html.dark .thought-glass {
 }
 
 /* Frost plate is a static sibling — never a Framer motion target.
-   20% less opaque fill + backdrop blur so the work canvas shows through. */
+   Radius and fill ease with the open state so the badge morphs into the note. */
 .thought-glass-frost {
   position: absolute;
   inset: 0;
   z-index: 0;
   pointer-events: none;
   overflow: hidden;
-  border-radius: 16px;
+  border-radius: 9999px;
   border: 1px solid #b0afd7;
-  box-shadow: 0 4px 10px 0 rgba(0, 0, 0, 0.15);
-  background: rgba(240, 239, 248, 0.8);
+  box-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.15);
+  background-color: transparent;
+  background-image: linear-gradient(
+    147.33deg,
+    rgba(240, 239, 248, 0.72) 19.535%,
+    rgba(59, 41, 216, 0.46) 92.75%
+  );
   -webkit-backdrop-filter: blur(20px) saturate(180%);
   backdrop-filter: blur(20px) saturate(180%);
+  transition:
+    border-radius 320ms cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 320ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 320ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .thought-glass-host[data-thought-state="expanded"] .thought-glass-frost {
+  border-radius: 16px;
+  box-shadow: 0 4px 10px 0 rgba(0, 0, 0, 0.15);
+  background-color: rgba(240, 239, 248, 0.8);
   background-image: linear-gradient(
     176.52deg,
     rgba(240, 239, 248, 0.8) 3.29%,
@@ -631,22 +637,6 @@ html.dark .thought-glass-host[data-thought-state="expanded"] .thought-glass-fros
   );
 }
 
-/* Figma 2305:66702 — preview (fill lives on the frost plate) */
-.thought-glass[data-thought-state="preview"] {
-  width: 236px;
-  border: 1px solid transparent;
-  background: transparent;
-  box-shadow: none;
-  -webkit-backdrop-filter: none;
-  backdrop-filter: none;
-}
-
-.dark .thought-glass[data-thought-state="preview"],
-html.dark .thought-glass[data-thought-state="preview"] {
-  background: transparent;
-  border-color: transparent;
-}
-
 .thought-title {
   font-size: 15px;
 }
@@ -658,14 +648,7 @@ html.dark .thought-glass[data-thought-state="preview"] {
 /* Figma 2305:66699 — expanded: type +20%, fill on frost plate */
 .thought-glass[data-thought-state="expanded"] {
   width: 236px;
-  min-height: 204px;
-  border: 1px solid transparent;
   --thought-accent: #eb3b00;
-  background: transparent;
-  background-image: none;
-  box-shadow: none;
-  -webkit-backdrop-filter: none;
-  backdrop-filter: none;
 }
 
 .thought-glass[data-thought-state="expanded"] .thought-title {

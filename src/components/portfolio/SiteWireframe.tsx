@@ -366,15 +366,7 @@ function BrowserPlate() {
  * Open: height follows accordion content; bottom seam to marquee is a sibling
  * 2px spacer in index (not padding here — padding was visually collapsing).
  */
-export function WireframeStage({
-  expanded,
-  children,
-  corner,
-}: {
-  expanded: boolean;
-  children: ReactNode;
-  corner?: ReactNode;
-}) {
+export function WireframeStage({ expanded, children }: { expanded: boolean; children: ReactNode }) {
   return (
     <div
       className={
@@ -387,7 +379,10 @@ export function WireframeStage({
         Background fills the full stage (including expanded top padding).
         Cell band + browser plate stay top-aligned; solid #f3f4f6 covers the rest.
       */}
-      <div aria-hidden className="pointer-events-none absolute inset-0 z-0 overflow-hidden bg-[#f3f4f6]">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 z-0 overflow-hidden bg-[#f3f4f6]"
+      >
         {/* Phones keep the desktop tile size (Figma 2250:24937) and crop the band instead. */}
         <div className="absolute inset-x-0 top-0 flex w-full flex-col gap-[2px] p-[2px] max-sm:w-[1113px]">
           <JengaCellBand />
@@ -399,12 +394,6 @@ export function WireframeStage({
           </div>
         </div>
       </div>
-
-      {corner ? (
-        <div className="pointer-events-auto absolute right-8 top-[78px] z-[20] max-md:hidden max-sm:right-4">
-          {corner}
-        </div>
-      ) : null}
 
       {/* Content overlay — Figma 530:151856 */}
       {expanded ? (

@@ -356,9 +356,9 @@ function Index() {
         <ProjectDock onPlus={() => setSidebarOpen(true)} />
       </div>
 
-      {/* Top-right pill — logo opens profile sidebar. Food For Thought scrolls with #work. */}
+      {/* Top-right cluster. The note hangs under Contact Me so the two never overlap. */}
       <div
-        className={`fixed top-6 right-8 z-[110] flex origin-top-right flex-col items-end max-md:left-1/2 max-md:right-auto max-md:top-4 max-md:w-[min(350px,calc(100%-32px))] max-md:-translate-x-1/2 max-md:items-end max-md:scale-100 ${chromeClass}`}
+        className={`fixed top-6 right-8 z-[110] flex origin-top-right flex-col items-end gap-3 max-md:left-1/2 max-md:right-auto max-md:top-4 max-md:w-[min(350px,calc(100%-32px))] max-md:-translate-x-1/2 max-md:items-end max-md:gap-0 max-md:scale-100 ${chromeClass}`}
         aria-hidden={!showChrome}
       >
         <div className="spatial-glass spatial-glass-hairline spatial-layer flex items-center gap-[4px] rounded-[16px] bg-black/[0.08] p-[4px] shadow-lg shadow-black/5 max-md:w-[60%] max-md:min-w-[200px] max-md:gap-1 max-md:rounded-[16px] max-md:p-1">
@@ -384,6 +384,7 @@ function Index() {
             Contact Me
           </a>
         </div>
+        {showChrome ? <FoodForThought className="hidden md:block" /> : null}
       </div>
 
       {/*
@@ -397,14 +398,7 @@ function Index() {
         id="work"
         className="relative z-10 scroll-mt-0 overflow-x-hidden max-md:relative max-md:z-[1] max-md:w-full max-md:max-w-[100vw] max-md:isolate max-md:bg-[#f3f4f6]"
       >
-        <WireframeStage
-          expanded={isExpanded}
-          corner={
-            workCommitted ? (
-              <FoodForThought className="max-md:origin-top-right max-md:scale-80" />
-            ) : null
-          }
-        >
+        <WireframeStage expanded={isExpanded}>
           <div
             className={
               isExpanded
