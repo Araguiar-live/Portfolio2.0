@@ -1,5 +1,5 @@
 import { AnimatePresence, motion, type MotionValue } from "framer-motion";
-import { ArrowUpRight, Briefcase, ChevronLeft, ChevronRight, Layers, Target, TrendingUp } from "lucide-react";
+import { ArrowUpRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { forwardRef, useEffect, useLayoutEffect, useRef, useState, type MutableRefObject } from "react";
 import { createPortal } from "react-dom";
 import bendingSpoonsMark from "@/assets/bending-spoons-mark.svg";
@@ -515,9 +515,9 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
               ) : null}
 
               {/* CRCLE uses a three-cell bento. Other projects keep the 1:2 write-up. */}
-              <div className={`mx-auto flex min-h-0 w-full flex-1 overflow-visible px-4 pt-2 sm:px-8 lg:px-6 ${project.slug === "crcle" ? "items-stretch" : "items-start"}`}>
+              <div className="mx-auto flex min-h-0 w-full flex-1 items-start overflow-visible px-4 pt-2 sm:px-8 lg:px-6">
                   <div className={project.slug === "crcle"
-                    ? "grid h-full min-h-0 w-full min-w-0 grid-cols-1 items-stretch gap-3 overflow-x-clip lg:grid-cols-[1.1fr_0.9fr_1.1fr]"
+                    ? "grid h-full min-h-0 w-full min-w-0 grid-cols-1 items-start gap-3 overflow-x-clip lg:grid-cols-[1.1fr_0.9fr_1.1fr]"
                     : "grid w-full min-w-0 grid-cols-1 items-start gap-8 overflow-x-clip lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] lg:gap-8"}>
                     {project.slug === "crcle" ? (
                       <CrcleNarrative tab={activeTab} />
@@ -529,7 +529,7 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
                     {project.slug === "crcle" ? <CrcleMicroCards tab={activeTab} /> : null}
 
                     <div className={project.slug === "crcle"
-                      ? "relative flex h-full min-h-0 min-w-0 items-start justify-center overflow-auto rounded-[16px] border border-[rgba(0,0,0,0.036)] bg-[#F5F5F5]/60 p-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                      ? "relative flex min-h-0 min-w-0 items-start justify-center overflow-auto rounded-[16px] border border-[rgba(0,0,0,0.06)] bg-[#F4F4F5] p-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
                       : "relative flex w-full min-w-0 items-start justify-end overflow-visible"}>
                       <div className={project.slug === "crcle"
                         ? "mx-auto flex w-full min-w-0 max-w-full items-start justify-center"
@@ -655,8 +655,6 @@ const CRCLE_BENTO: Partial<Record<Tab, CrcleBentoCopy>> = {
   },
 };
 
-const BENTO_CARD = "border border-[rgba(0,0,0,0.06)] bg-[#F5F5F5] opacity-60";
-
 function crcleCopy(tab: Tab): CrcleBentoCopy {
   return CRCLE_BENTO[tab] ?? CRCLE_BENTO["Template Library"]!;
 }
@@ -664,9 +662,9 @@ function crcleCopy(tab: Tab): CrcleBentoCopy {
 function CrcleNarrative({ tab }: { tab: Tab }) {
   const copy = crcleCopy(tab);
   return (
-    <article className={`${BENTO_CARD} flex min-h-0 flex-col gap-4 rounded-[16px] p-6`}>
+    <article className="flex min-h-0 flex-col gap-4">
       <span className="text-[11px] font-medium uppercase tracking-[0.18em] text-zinc-400">{copy.eyebrow}</span>
-      <h3 className="text-[28px] font-medium leading-[1.15] tracking-tight text-zinc-900">{copy.headline}</h3>
+      <h3 className="text-[34px] font-medium leading-[1.15] tracking-[-0.03em] text-[#111111]">{copy.headline}</h3>
       <p className="text-[15px] leading-7 text-zinc-600">{copy.narrative}</p>
     </article>
   );
@@ -674,27 +672,25 @@ function CrcleNarrative({ tab }: { tab: Tab }) {
 
 function CrcleMicroCards({ tab }: { tab: Tab }) {
   const copy = crcleCopy(tab);
-  const cards: Array<{ icon: typeof Briefcase; label: string; lines: string[] }> = [
-    { icon: Briefcase, label: "Role & Scope", lines: [copy.role] },
-    { icon: Target, label: "Problems Solved", lines: copy.problems },
-    { icon: Layers, label: "What I Shipped", lines: copy.shipped },
-    { icon: TrendingUp, label: "Impact & Outcome", lines: [copy.impact] },
+  const rows: Array<{ label: string; lines: string[] }> = [
+    { label: "Role & Scope", lines: [copy.role] },
+    { label: "Problems Solved", lines: copy.problems },
+    { label: "What I Shipped", lines: copy.shipped },
+    { label: "Impact & Outcome", lines: [copy.impact] },
   ];
   return (
-    <div className="flex min-h-0 flex-col gap-2.5">
-      {cards.map((card) => (
-        <article key={card.label} className={`${BENTO_CARD} flex min-h-0 flex-1 flex-col gap-2 rounded-[12px] p-4`}>
-          <div className="flex items-center gap-2">
-            <card.icon className="size-4 shrink-0 text-zinc-900" strokeWidth={1.75} aria-hidden />
-            <span className="text-[11px] font-medium uppercase tracking-[0.16em] text-zinc-500">{card.label}</span>
-          </div>
-          <div className="flex flex-col gap-1">
-            {card.lines.map((line) => (
-              <p key={line} className="text-[13px] leading-5 text-zinc-700">
-                {line}
-              </p>
-            ))}
-          </div>
+    <div className="flex min-h-0 flex-col">
+      {rows.map((row, index) => (
+        <article
+          key={row.label}
+          className={`flex flex-col gap-1 py-[15px] ${index > 0 ? "border-t border-[rgba(0,0,0,0.08)]" : "pt-0"}`}
+        >
+          <span className="text-[11px] font-medium uppercase tracking-[0.16em] text-zinc-500">{row.label}</span>
+          {row.lines.map((line) => (
+            <p key={line} className="text-[13px] leading-5 text-zinc-700">
+              {line}
+            </p>
+          ))}
         </article>
       ))}
     </div>
