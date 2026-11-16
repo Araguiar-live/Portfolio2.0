@@ -529,7 +529,7 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
                     {project.slug === "crcle" ? <CrcleMicroCards tab={activeTab} /> : null}
 
                     <div className={project.slug === "crcle"
-                      ? "relative flex min-h-0 min-w-0 items-start justify-center overflow-auto rounded-[16px] border border-[rgba(0,0,0,0.06)] bg-[#F4F4F5] p-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                      ? "relative flex min-h-0 min-w-0 items-start justify-center overflow-auto rounded-[24px] border border-[rgba(0,0,0,0.06)] bg-[#F4F4F5] p-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
                       : "relative flex w-full min-w-0 items-start justify-end overflow-visible"}>
                       <div className={project.slug === "crcle"
                         ? "mx-auto flex w-full min-w-0 max-w-full items-start justify-center"
