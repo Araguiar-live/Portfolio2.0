@@ -1,6 +1,6 @@
 import { AnimatePresence, motion, type MotionValue } from "framer-motion";
 import { ArrowUpRight, ChevronLeft, ChevronRight } from "lucide-react";
-import { forwardRef, useEffect, useState, type MutableRefObject } from "react";
+import { forwardRef, useEffect, useLayoutEffect, useRef, useState, type MutableRefObject } from "react";
 import { createPortal } from "react-dom";
 import { CrcleVideoCard } from "@/components/portfolio/CrcleVideoCard";
 import { DesktopOnlyPill, useDesktopOnlyNudge } from "@/components/portfolio/DesktopOnlyNudge";
@@ -69,6 +69,30 @@ interface Props {
   project: Project;
   isOpen: boolean;
   onToggle: () => void;
+  index: number;
+}
+
+/** Trapezoid file-tab that stays a fixed size while the row body grows. */
+function folderPoints(width: number, height: number, index: number): Array<[number, number]> {
+  const narrow = width < 768;
+  const tabH = narrow ? 14 : 22;
+  const tabW = narrow ? 96 : 176;
+  const slope = narrow ? 16 : 26;
+  const stagger = narrow ? 22 : 64;
+  const minX = narrow ? 14 : 36;
+  const x = Math.min(minX + index * stagger, Math.max(minX, width - tabW - slope * 2 - 16));
+  const top = 0.5;
+  const lip = tabH;
+  return [
+    [0, lip],
+    [x, lip],
+    [x + slope, top],
+    [x + slope + tabW, top],
+    [x + slope + tabW + slope, lip],
+    [width, lip],
+    [width, height],
+    [0, height],
+  ];
 }
 
 /** White project accordion card — mockup / bento treatment TBD. */
@@ -101,14 +125,15 @@ export function ProjectBentoStack({
   return (
     <motion.div
       animate={shake}
-      className="portfolio-mobile-shake-root spatial-glass spatial-glass-hairline spatial-layer relative z-10 flex w-full max-w-full shrink-0 flex-col overflow-hidden rounded-[32px] border-[#f3f4f6]/80 bg-white/70 shadow-[0px_16px_48px_0px_rgba(0,0,0,0.05)] max-md:overflow-x-clip max-md:rounded-[26px] max-sm:rounded-[24px] sm:rounded-[37px]"
+      className="portfolio-mobile-shake-root relative z-10 flex w-full max-w-full shrink-0 flex-col"
     >
-      {projects.map((p) => (
+      {projects.map((p, index) => (
         <ProjectAccordion
           key={p.slug}
           ref={(el) => {
             rowRefs.current[p.slug] = el;
           }}
+          index={index}
           project={p}
           isOpen={!isMobile && openSlug === p.slug}
           onToggle={() => handleToggle(p.slug)}
@@ -124,7 +149,7 @@ export function ProjectBentoStack({
 }
 
 export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function ProjectAccordion(
-  { project, isOpen, onToggle },
+  { project, isOpen, onToggle, index },
   ref,
 ) {
   const tabs = project.tabs?.length ? project.tabs : TABS;
@@ -137,8 +162,42 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
   const rowHover = useRowHoverPreview(project.hoverPreview, !isOpen);
   const linkHover = useRowHoverPreview(project.linkHoverPreview, Boolean(project.url) && isOpen);
 
+  const shapeRef = useRef<HTMLDivElement>(null);
+  const [clipPath, setClipPath] = useState("none");
+  const [outline, setOutline] = useState("");
+
+  useLayoutEffect(() => {
+    const el = shapeRef.current;
+    if (!el) return;
+    const measure = () => {
+      const width = el.clientWidth;
+      const height = el.clientHeight;
+      if (width < 1 || height < 1) return;
+      const points = folderPoints(width, height, index);
+      el.parentElement?.style.setProperty("--folder-tab", `${points[0][1]}px`);
+      setClipPath(`polygon(${points.map(([x, y]) => `${x}px ${y}px`).join(",")})`);
+      setOutline(`M ${points.map(([x, y]) => `${x} ${y}`).join(" L ")} Z`);
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [index, isOpen]);
+
   return (
-    <div ref={ref} className="border-b border-[#d1d5db] last:border-b-0 max-sm:border-[#ececec]">
+    <div
+      ref={ref}
+      className="pointer-events-none relative"
+      style={{
+        zIndex: index + 1,
+        marginTop: index === 0 ? 0 : "calc(-1 * var(--folder-tab, 22px))",
+      }}
+    >
+      <div ref={shapeRef} className="pointer-events-auto relative" style={{ clipPath }}>
+        <div
+          aria-hidden
+          className="portfolio-mobile-shake-root spatial-glass pointer-events-none absolute inset-0 bg-white/70 shadow-[0px_16px_48px_0px_rgba(0,0,0,0.05)]"
+        />
       {/* Row header — Figma 530:151817 */}
       <div
         className="group relative flex w-full items-center justify-between gap-7 px-[37px] py-8 text-left transition-[background] duration-300 max-md:flex-col max-md:items-stretch max-md:gap-[15px] max-md:px-5 max-md:py-5 max-sm:gap-[15px] max-sm:p-5"
@@ -329,6 +388,22 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
           </motion.div>
         )}
       </AnimatePresence>
+      </div>
+      {outline ? (
+        <svg
+          aria-hidden
+          className="pointer-events-none absolute inset-0 z-[2] h-full w-full overflow-visible"
+        >
+          <path
+            d={outline}
+            fill="none"
+            stroke="#d1d5db"
+            strokeWidth="1"
+            strokeLinejoin="miter"
+            vectorEffect="non-scaling-stroke"
+          />
+        </svg>
+      ) : null}
     </div>
   );
 });
