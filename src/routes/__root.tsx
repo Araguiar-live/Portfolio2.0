@@ -106,9 +106,16 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=Arimo:wght@400;700&family=Inter:wght@400;500;600;700&family=M+PLUS+Rounded+1c:wght@500;700&family=Montserrat:wght@300;400;500;600&family=Poppins:wght@400;500;600;700&display=swap",
       },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
+      { rel: "icon", href: "/favicon-32.png", type: "image/png", sizes: "32x32" },
+      { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
     ],
     scripts: [
+      {
+        // Puts the personal mark back if a sync swaps the tab icon for Lovable's heart.
+        children:
+          '(function(){var SVG="/favicon.svg",PNG="/favicon-32.png",APPLE="/apple-touch-icon.png";function lock(){var links=document.querySelectorAll(\'link[rel*="icon"]\'),saw=false;for(var i=0;i<links.length;i++){var link=links[i],rel=(link.getAttribute("rel")||"").toLowerCase(),href=link.getAttribute("href")||"";if(rel.indexOf("apple")!==-1){if(href!==APPLE)link.setAttribute("href",APPLE);continue}if(href===SVG){saw=true;continue}if(href===PNG)continue;link.setAttribute("rel","icon");link.setAttribute("type","image/svg+xml");if(link.getAttribute("href")!==SVG)link.setAttribute("href",SVG);saw=true}if(!saw){var icon=document.createElement("link");icon.rel="icon";icon.type="image/svg+xml";icon.href=SVG;document.head.appendChild(icon)}}lock();new MutationObserver(lock).observe(document.head,{childList:true,subtree:true,attributes:true,attributeFilter:["href","rel"]})})();',
+      },
       {
         // Sizes the interactive hero's fallback grid before hydration so it doesn't flash 12 rows.
         children:
