@@ -73,60 +73,43 @@ interface Props {
   count: number;
 }
 
-/** Fixed tab. The slope stays this size; only the body width grows. */
-const TAB_H = 50.72;
-const TAB_SLOPE_TOP = 181;
-const TAB_SLOPE_FOOT = 213;
-const TAB_SHIFT = [0, 64, 128] as const;
-const FOLDER_CORNER = 8;
+/** Tab sits 18px above the body. Both shoulders run 20px over that drop. */
+const TAB_H = 18;
+const TAB_FLAT = 160;
+const TAB_SLOPE = 20;
+const TAB_SHIFT = [24, 160, 296] as const;
+const CORNER = 8;
 /** Outer corners of the whole stack, not each file. */
 const STACK_CORNER = 24;
 
-function roundedPath(points: Array<[number, number]>, radii: number[]): string {
+/**
+ * Quadratic fillet. The control point is the sharp vertex, and the curve
+ * starts and ends `radius` px along the two edges, so it cannot bulge outside them.
+ */
+function quadraticOutline(points: Array<[number, number]>, radii: number[]): string {
   const n = points.length;
-  const corners = points.map((curr, i) => {
+  const cuts = points.map((curr, i) => {
     const prev = points[(i - 1 + n) % n];
     const next = points[(i + 1) % n];
-    let v1x = curr[0] - prev[0];
-    let v1y = curr[1] - prev[1];
-    let v2x = next[0] - curr[0];
-    let v2y = next[1] - curr[1];
-    const len1 = Math.hypot(v1x, v1y) || 1;
-    const len2 = Math.hypot(v2x, v2y) || 1;
-    v1x /= len1;
-    v1y /= len1;
-    v2x /= len2;
-    v2y /= len2;
-    const cross = v1x * v2y - v1y * v2x;
-    const dot = Math.min(1, Math.max(-1, v1x * v2x + v1y * v2y));
-    const turn = Math.abs(Math.atan2(cross, dot));
-    const tanHalf = Math.tan(turn / 2);
-    const offset = tanHalf > 0.001 ? radii[i] * tanHalf : 0;
-    return { v1x, v1y, v2x, v2y, len1, tanHalf, offset, curr, sweep: cross > 0 ? 1 : 0 };
+    const inLen = Math.hypot(curr[0] - prev[0], curr[1] - prev[1]) || 1;
+    const outLen = Math.hypot(next[0] - curr[0], next[1] - curr[1]) || 1;
+    const radius = Math.min(radii[i], inLen / 2, outLen / 2);
+    const ix = (curr[0] - prev[0]) / inLen;
+    const iy = (curr[1] - prev[1]) / inLen;
+    const ox = (next[0] - curr[0]) / outLen;
+    const oy = (next[1] - curr[1]) / outLen;
+    return {
+      start: [curr[0] - ix * radius, curr[1] - iy * radius] as [number, number],
+      end: [curr[0] + ox * radius, curr[1] + oy * radius] as [number, number],
+      corner: curr,
+    };
   });
-  for (let pass = 0; pass < 4; pass++) {
-    for (let i = 0; i < n; i++) {
-      const edge = corners[(i + 1) % n].len1;
-      const used = corners[i].offset + corners[(i + 1) % n].offset;
-      if (used > edge - 0.5 && used > 0) {
-        const scale = (edge - 0.5) / used;
-        corners[i].offset *= scale;
-        corners[(i + 1) % n].offset *= scale;
-      }
-    }
-  }
-  let d = "";
+  let d = `M ${cuts[0].start[0]} ${cuts[0].start[1]}`;
   for (let i = 0; i < n; i++) {
-    const { v1x, v1y, v2x, v2y, tanHalf, offset, curr, sweep } = corners[i];
-    const arc = tanHalf > 0.001 ? offset / tanHalf : 0;
-    const x1 = curr[0] - v1x * offset;
-    const y1 = curr[1] - v1y * offset;
-    const x2 = curr[0] + v2x * offset;
-    const y2 = curr[1] + v2y * offset;
-    d += i === 0 ? `M ${x1} ${y1}` : ` L ${x1} ${y1}`;
-    if (arc > 0.2) {
-      d += ` A ${arc} ${arc} 0 0 ${sweep} ${x2} ${y2}`;
-    }
+    const cut = cuts[i];
+    const next = cuts[(i + 1) % n];
+    d += ` Q ${cut.corner[0]} ${cut.corner[1]} ${cut.end[0]} ${cut.end[1]}`;
+    d += ` L ${next.start[0]} ${next.start[1]}`;
   }
   return `${d} Z`;
 }
@@ -140,27 +123,36 @@ function folderOutline(
   count: number,
 ): string {
   const lip = Math.min(TAB_H, height * 0.45);
-  const tr = index === 0 ? STACK_CORNER : FOLDER_CORNER;
-  const edge = index === count - 1 ? STACK_CORNER : FOLDER_CORNER;
-  const foot = Math.min(width - tr - 8, Math.max(shift + 48, shift + TAB_SLOPE_FOOT));
-  const slopeTop = Math.min(foot - 24, shift + TAB_SLOPE_TOP);
-  const tabLeft = Math.max(0, Math.min(shift, slopeTop - 36));
+  const margin = CORNER;
+  let slope = TAB_SLOPE;
+  let flat = TAB_FLAT;
+  let left = Math.max(margin, shift);
+  const room = width - margin - left - slope * 2;
+  if (flat > room) {
+    left = margin;
+    flat = Math.max(48, width - margin * 2 - slope * 2);
+  }
+  const leftTop = left + slope;
+  const rightTop = leftTop + flat;
+  const rightFoot = rightTop + slope;
+  const tr = index === 0 ? STACK_CORNER : CORNER;
+  const edge = index === count - 1 ? STACK_CORNER : CORNER;
   const points: Array<[number, number]> = [
     [0, height],
     [width, height],
     [width, lip],
-    [foot, lip],
-    [slopeTop, 0.5],
-    [tabLeft, 0.5],
+    [rightFoot, lip],
+    [rightTop, 0],
+    [leftTop, 0],
+    [left, lip],
+    [0, lip],
   ];
-  if (tabLeft > 1) points.push([tabLeft, lip], [0, lip]);
   const radii = points.map((_, i) => {
-    if (i === 0) return edge;
-    if (i === 1) return edge;
+    if (i === 0 || i === 1) return edge;
     if (i === 2) return tr;
-    return FOLDER_CORNER;
+    return CORNER;
   });
-  return roundedPath(points, radii);
+  return quadraticOutline(points, radii);
 }
 
 /** White project accordion card — mockup / bento treatment TBD. */
@@ -235,7 +227,7 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
   const raised = hovered || isOpen;
   const tabShift = TAB_SHIFT[index] ?? TAB_SHIFT[TAB_SHIFT.length - 1];
   const faceRef = useRef<HTMLDivElement>(null);
-  const [outline, setOutline] = useState("");
+  const [outline, setOutline] = useState<{ d: string; w: number; h: number } | null>(null);
 
   useLayoutEffect(() => {
     const el = faceRef.current;
@@ -244,7 +236,7 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
       const width = el.clientWidth;
       const height = el.clientHeight;
       if (width < 2 || height < 2) return;
-      setOutline(folderOutline(width, height, tabShift, index, count));
+      setOutline({ d: folderOutline(width, height, tabShift, index, count), w: width, h: height });
     };
     measure();
     const observer = new ResizeObserver(measure);
@@ -466,16 +458,19 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
       </AnimatePresence>
       </div>
       {outline ? (
-        <svg aria-hidden className="pointer-events-none absolute inset-0 h-full w-full overflow-visible">
+        <svg
+          aria-hidden
+          className="pointer-events-none absolute inset-0 h-full w-full overflow-visible"
+          viewBox={`0 0 ${outline.w} ${outline.h}`}
+        >
           <clipPath id={`folder-clip-${project.slug}`} clipPathUnits="userSpaceOnUse">
-            <path d={outline} />
+            <path d={outline.d} />
           </clipPath>
           <path
-            d={outline}
+            d={outline.d}
             fill="none"
             stroke="rgba(0,0,0,0.08)"
             strokeWidth="1"
-            strokeLinejoin="round"
             vectorEffect="non-scaling-stroke"
           />
         </svg>
