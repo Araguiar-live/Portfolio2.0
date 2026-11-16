@@ -272,7 +272,9 @@ export function CrcleProfile({
   const [touch, setTouch] = useState<{ x: number; y: number; pressing: boolean } | null>(null);
   const demoGen = useRef(0);
   const demoPausedRef = useRef(false);
+  const isLightModeRef = useRef(isLightMode);
   demoPausedRef.current = demoPaused;
+  isLightModeRef.current = isLightMode;
 
   const pauseDemo = () => {
     demoGen.current += 1;
@@ -349,6 +351,21 @@ export function CrcleProfile({
           await wait(760);
         }
         if (!alive()) return;
+
+        if (isLightModeRef.current) {
+          const verify = find('[data-demo-target="verify"]');
+          if (verify && verify.offsetWidth > 0 && (await pointAt(verify)) && alive()) {
+            setOverlay("kyc");
+            await wait(980);
+          }
+          if (!alive()) return;
+          const closeKyc = find('[data-demo-target="kyc-close"]');
+          if (closeKyc && (await pointAt(closeKyc)) && alive()) {
+            setOverlay(null);
+            await wait(640);
+          }
+          if (!alive()) return;
+        }
 
         const moodBtn = find('[data-demo-target="mood-toggle"]');
         if (moodBtn && (await pointAt(moodBtn)) && alive()) {
@@ -797,6 +814,7 @@ function KycVerifySheet({
           <button
             type="button"
             aria-label="Close"
+            data-demo-target="kyc-close"
             onClick={onClose}
             className="flex shrink-0 items-center justify-center rounded-full bg-[rgba(2,3,29,0.05)] p-1"
           >
@@ -1002,6 +1020,7 @@ function ProfileMainView({
             ) : (
               <button
                 type="button"
+                data-demo-target="verify"
                 onClick={onOpenKyc}
                 className="hidden h-[22px] shrink-0 items-center rounded-[36px] border border-[rgba(2,4,38,0.28)] px-2.5 text-[11px] leading-[1.4] text-[#030426] transition hover:bg-[rgba(2,4,38,0.06)] [.crcle-phone--light_&]:flex"
                 style={{ fontFamily: FONT }}
