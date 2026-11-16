@@ -1,5 +1,5 @@
 import { AnimatePresence, motion, type MotionValue } from "framer-motion";
-import { ArrowUpRight, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowUpRight, Briefcase, ChevronLeft, ChevronRight, Layers, Target, TrendingUp } from "lucide-react";
 import { forwardRef, useEffect, useLayoutEffect, useRef, useState, type MutableRefObject } from "react";
 import { createPortal } from "react-dom";
 import { CrcleVideoCard } from "@/components/portfolio/CrcleVideoCard";
@@ -416,15 +416,26 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
                 </>
               ) : null}
 
-              {/* Copy and prototype sit side by side at 1:2 */}
-              <div className="mx-auto flex min-h-0 w-full flex-1 items-start overflow-visible px-4 pt-2 sm:px-8 lg:px-12 xl:px-[68px]">
-                  <div className="grid w-full min-w-0 grid-cols-1 items-start gap-8 overflow-x-clip lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] lg:gap-8">
+              {/* CRCLE uses a three-cell bento. Other projects keep the 1:2 write-up. */}
+              <div className={`mx-auto flex min-h-0 w-full flex-1 overflow-visible px-4 pt-2 sm:px-8 lg:px-6 ${project.slug === "crcle" ? "items-stretch" : "items-start"}`}>
+                  <div className={project.slug === "crcle"
+                    ? "grid h-full min-h-0 w-full min-w-0 grid-cols-1 items-stretch gap-3 overflow-x-clip lg:grid-cols-[1.1fr_0.9fr_1.1fr]"
+                    : "grid w-full min-w-0 grid-cols-1 items-start gap-8 overflow-x-clip lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] lg:gap-8"}>
+                    {project.slug === "crcle" ? (
+                      <CrcleNarrative tab={activeTab} />
+                    ) : (
                     <div className="flex max-h-[874px] min-h-0 min-w-0 flex-col overflow-x-hidden overflow-y-auto overscroll-contain">
                       <CaseStudyCopy project={project} tab={activeTab} content={tabContent} />
                     </div>
+                    )}
+                    {project.slug === "crcle" ? <CrcleMicroCards tab={activeTab} /> : null}
 
-                    <div className="relative flex w-full min-w-0 items-start justify-end overflow-visible">
-                      <div className="ml-auto flex w-full min-w-0 max-w-full items-start justify-end overflow-visible">
+                    <div className={project.slug === "crcle"
+                      ? "relative flex h-full min-h-0 min-w-0 items-start justify-center overflow-auto rounded-[16px] border border-[rgba(0,0,0,0.06)] bg-[#F5F5F5] p-3"
+                      : "relative flex w-full min-w-0 items-start justify-end overflow-visible"}>
+                      <div className={project.slug === "crcle"
+                        ? "mx-auto flex w-full min-w-0 max-w-full items-start justify-center"
+                        : "ml-auto flex w-full min-w-0 max-w-full items-start justify-end overflow-visible"}>
                         {tabContent.customBody ? (
                           typeof tabContent.customBody === "function"
                             ? tabContent.customBody({
@@ -483,6 +494,109 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
     </div>
   );
 });
+
+type CrcleBentoCopy = {
+  eyebrow: string;
+  headline: string;
+  narrative: string;
+  role: string;
+  problems: string[];
+  shipped: string[];
+  impact: string;
+};
+
+const CRCLE_BENTO: Partial<Record<Tab, CrcleBentoCopy>> = {
+  "Create Workspace\u00a0": {
+    eyebrow: "CRCLE · SIGNAL HOME",
+    headline: "Real-time presence and social broadcasting",
+    narrative:
+      "Designed from 0→1 to let members broadcast what they are open to right now across work, social, and dating.",
+    role: "Founding Designer — 0→1 product & design system",
+    problems: ["Fragmented multi-context networking", "Outdated, static profile statuses"],
+    shipped: ["Live Signal status broadcast controls", "Core navigation & cross-app design system"],
+    impact: "Shipped a cohesive 0→1 system for high-intent social discovery.",
+  },
+  "Brand Personality": {
+    eyebrow: "CRCLE · RADAR",
+    headline: "From filtered search to intent-led discovery",
+    narrative:
+      "Evolved Radar from a manual Work/Social/Love search bar into a daily recommendation engine where tapping + signals clear intent to match.",
+    role: "Founding Designer — Discovery & matching UX",
+    problems: ["Search friction & empty-state fatigue", "Ambiguous, low-intent connection requests"],
+    shipped: ["Curated daily recommendation feed", "One-tap + intent-based matching"],
+    impact: "Built a daily discovery habit anchored in clear mutual intent.",
+  },
+  "Sign Up": {
+    eyebrow: "CRCLE · MESSAGING HUB",
+    headline: "Unified inbox and context-rich icebreakers",
+    narrative:
+      "Combined notifications and messages into one stream with an intercepted match drawer and Locus prompts so users never get cold feet.",
+    role: "Founding Designer — Inbox & conversation UX",
+    problems: ["Split match alerts and chat threads", "First-message drop-off ('cold feet')"],
+    shipped: [
+      "Unified notification & messaging stream",
+      "Intercepted profile & match-context drawer",
+      "Locus conversation prompts",
+    ],
+    impact: "Lowered first-message friction by keeping shared intent visible.",
+  },
+  "Template Library": {
+    eyebrow: "CRCLE · PROFILE",
+    headline: "Identity, live mood, and editable widgets",
+    narrative:
+      "Replaced static, form-heavy profiles with an iOS-inspired widget grid so members can broadcast live intent and edit tiles directly in place.",
+    role: "Founding Designer — End-to-end UX/UI & prototype",
+    problems: ["Static, form-like profile templates", "Cluttered work, social & dating metadata"],
+    shipped: ["Modular 2×2 iOS-style bento widgets", "Inline edit drawers & live Mood toggle"],
+    impact: "Turned passive bios into scannable, customizable identity cards.",
+  },
+};
+
+const BENTO_CARD = "border border-[rgba(0,0,0,0.06)] bg-[#F5F5F5]";
+
+function crcleCopy(tab: Tab): CrcleBentoCopy {
+  return CRCLE_BENTO[tab] ?? CRCLE_BENTO["Template Library"]!;
+}
+
+function CrcleNarrative({ tab }: { tab: Tab }) {
+  const copy = crcleCopy(tab);
+  return (
+    <article className={`${BENTO_CARD} flex min-h-0 flex-col gap-4 rounded-[16px] p-6`}>
+      <span className="text-[11px] font-medium uppercase tracking-[0.18em] text-zinc-400">{copy.eyebrow}</span>
+      <h3 className="text-[28px] font-medium leading-[1.15] tracking-tight text-zinc-900">{copy.headline}</h3>
+      <p className="text-[15px] leading-7 text-zinc-600">{copy.narrative}</p>
+    </article>
+  );
+}
+
+function CrcleMicroCards({ tab }: { tab: Tab }) {
+  const copy = crcleCopy(tab);
+  const cards: Array<{ icon: typeof Briefcase; label: string; lines: string[] }> = [
+    { icon: Briefcase, label: "Role & Scope", lines: [copy.role] },
+    { icon: Target, label: "Problems Solved", lines: copy.problems },
+    { icon: Layers, label: "What I Shipped", lines: copy.shipped },
+    { icon: TrendingUp, label: "Impact & Outcome", lines: [copy.impact] },
+  ];
+  return (
+    <div className="flex min-h-0 flex-col gap-2.5">
+      {cards.map((card) => (
+        <article key={card.label} className={`${BENTO_CARD} flex min-h-0 flex-1 flex-col gap-2 rounded-[12px] p-4`}>
+          <div className="flex items-center gap-2">
+            <card.icon className="size-4 shrink-0 text-zinc-900" strokeWidth={1.75} aria-hidden />
+            <span className="text-[11px] font-medium uppercase tracking-[0.16em] text-zinc-500">{card.label}</span>
+          </div>
+          <div className="flex flex-col gap-1">
+            {card.lines.map((line) => (
+              <p key={line} className="text-[13px] leading-5 text-zinc-700">
+                {line}
+              </p>
+            ))}
+          </div>
+        </article>
+      ))}
+    </div>
+  );
+}
 
 /**
  * Editable case-study copy mockup.
