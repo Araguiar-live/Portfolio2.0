@@ -455,6 +455,29 @@
   backface-visibility: visible;
 }
 
+.folder-shell {
+  transition: transform 0.35s ease, filter 0.35s ease;
+}
+
+.folder-face {
+  background-color: #1e1e1e;
+  color: rgba(255, 255, 255, 0.88);
+  transition: background-color 0.35s ease, color 0.35s ease;
+}
+
+.folder-shell[data-raised="true"] .folder-face {
+  background-color: #ffffff;
+  color: #111111;
+}
+
+.folder-face .folder-title {
+  color: inherit;
+}
+
+.folder-face .folder-muted {
+  color: color-mix(in srgb, currentColor 72%, transparent);
+}
+
 .spatial-glass-hairline {
   border: 1px solid rgba(255, 255, 255, 0.6);
 }

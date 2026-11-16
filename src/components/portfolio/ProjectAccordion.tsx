@@ -79,9 +79,9 @@ function folderPoints(width: number, height: number, index: number): Array<[numb
   const tabH = narrow ? 24 : 40;
   const tabW = narrow ? 78 : 148;
   const slope = narrow ? 14 : 18;
-  const stagger = narrow ? 28 : 108;
-  const minX = narrow ? 18 : 48;
-  const x = Math.min(minX + index * stagger, Math.max(minX, width - tabW - slope * 2 - 24));
+  const stagger = narrow ? 36 : 120;
+  const fromRight = (narrow ? 16 : 36) + index * stagger;
+  const x = Math.max(narrow ? 12 : 24, width - fromRight - tabW - slope * 2);
   const lip = tabH;
   return [
     [0, lip],
@@ -257,6 +257,8 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
   const shapeRef = useRef<HTMLDivElement>(null);
   const [clipPath, setClipPath] = useState("none");
   const [outline, setOutline] = useState("");
+  const [hovered, setHovered] = useState(false);
+  const raised = hovered || isOpen;
 
   useLayoutEffect(() => {
     const el = shapeRef.current;
@@ -280,20 +282,24 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
   return (
     <div
       ref={ref}
-      className="pointer-events-none relative"
-        style={{
-          zIndex: index + 1,
-          marginTop: index === 0 ? 0 : "calc(-1 * var(--folder-tab, 40px))",
-          filter: "drop-shadow(0px 16px 48px rgba(0, 0, 0, 0.05))",
-        }}
+      data-raised={raised ? "true" : "false"}
+      className="folder-shell pointer-events-none relative"
+      style={{
+        zIndex: raised ? 40 : index + 1,
+        marginTop: index === 0 ? 0 : "calc(-1 * var(--folder-tab, 40px))",
+        transform: raised ? "translateY(-4px)" : "none",
+        filter: raised ? "drop-shadow(0 12px 28px rgba(0,0,0,0.22))" : "none",
+      }}
     >
       <div
         ref={shapeRef}
-        className="spatial-glass spatial-layer pointer-events-auto relative border-0 bg-white/70 shadow-none"
+        className="folder-face pointer-events-auto relative border-0"
         style={{
           clipPath,
           paddingTop: "var(--folder-tab, 40px)",
         }}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
       >
       {/* Row header — Figma 530:151817 */}
       <div
@@ -310,11 +316,11 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
           className="absolute inset-0 z-0 cursor-pointer"
         />
         <div className="relative z-10 flex min-w-0 flex-1 items-center gap-[37px] pointer-events-none max-md:gap-3 max-sm:gap-3">
-          <span className="shrink-0 text-[16px] font-medium tracking-[1px] text-[#111]/70 tabular-nums max-md:text-[10px] max-md:font-normal max-md:tracking-normal max-md:text-[#a3a3a6] max-sm:text-[10px]">
+          <span className="folder-muted shrink-0 text-[16px] font-medium tracking-[1px] tabular-nums max-md:text-[10px] max-md:font-normal max-md:tracking-normal max-sm:text-[10px]">
             {project.id}
           </span>
           <span className="flex min-w-0 items-center gap-2 max-md:gap-1.5">
-            <span className="truncate text-[24px] font-normal tracking-[-0.5px] text-[#111] max-md:text-[24px] max-md:leading-[29px] max-md:tracking-normal max-sm:text-[24px] max-sm:leading-[29px] sm:text-[37px]">
+            <span className="folder-title truncate text-[24px] font-normal tracking-[-0.5px] max-md:text-[24px] max-md:leading-[29px] max-md:tracking-normal max-sm:text-[24px] max-sm:leading-[29px] sm:text-[37px]">
               {project.title}
             </span>
             {project.url && isOpen ? (
@@ -343,11 +349,11 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
             ) : null}
           </span>
         </div>
-        <div className="relative z-10 flex shrink-0 items-center justify-end gap-[18px] text-[16px] text-[#111]/70 pointer-events-none max-md:gap-2 max-md:text-[10px] max-md:text-[#76767a] max-sm:gap-2 max-sm:text-[10px]">
+        <div className="folder-muted relative z-10 flex shrink-0 items-center justify-end gap-[18px] text-[16px] pointer-events-none max-md:gap-2 max-md:text-[10px] max-sm:gap-2 max-sm:text-[10px]">
           <span className="text-right max-md:flex-1 max-md:text-left max-md:leading-4 max-sm:flex-1 max-sm:text-left max-sm:leading-4">
             {project.role}
           </span>
-          <span className="font-light text-[#111]/70 max-sm:font-normal max-sm:text-[#999]">|</span>
+          <span className="font-light max-sm:font-normal">|</span>
           <span className="tabular-nums">{project.year}</span>
         </div>
       </div>
@@ -497,7 +503,7 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
           <path
             d={outline}
             fill="none"
-            stroke="#d1d5db"
+            stroke={raised ? "rgba(17,17,17,0.16)" : "rgba(255,255,255,0.2)"}
             strokeWidth="1"
             strokeLinejoin="round"
             vectorEffect="non-scaling-stroke"
