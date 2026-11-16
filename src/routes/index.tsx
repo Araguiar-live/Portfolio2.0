@@ -157,16 +157,16 @@ const PROJECTS: Project[] = [
     content: {
       "Template Library": {
         tabLabel: "Productive",
-        label: "First Design — Design system inspector",
-        subtitle: "A 24-hour sprint with Bending Spoons mentors",
+        label: "First Design — Productive",
+        subtitle: "Expanding Productive's value proposition",
         overview:
-          "First Design paired me with nineteen other contestants and mentors from Bending Spoons for a single day on Productive—an existing focus app—not a blank brief. We inherited real flows, constraints, and research, then had to show how the product could feel sharper and more enjoyable without breaking what already worked.",
+          "During a 24-hour First Design sprint with Bending Spoons mentors, I explored how Productive could evolve beyond a standalone focus timer into a stickier daily habit and self-growth companion—drawing inspiration from how Flo pairs daily logging with content and community.",
         challenge:
-          "Productive already had users and telemetry. The sprint brief came with data on where people dropped off, which session types stuck, and where the experience felt dutiful instead of motivating. The job was to respect that evidence while pushing the loop—onboarding, session pick, active timer—toward something people would actually want to reopen.",
+          "Productive functioned as a single-purpose timer with limited emotional hooks or reasons to return between focus sessions.",
         approach:
-          "I treated the file like a living design system: wireframe the core loop in context, spec the hero onboarding CTA and session picker, and use the in-canvas inspector so judges could read intent without leaving the canvas. Ideas skewed toward delight—clearer hierarchy, warmer onboarding, less friction into deep work—always checked against the metrics and notes we were given.",
+          "Value-proposition concepts: Flo-style mood logging, curated self-help articles, accountability partners, and anonymous secret chats.",
         outcome:
-          "A pannable four-frame file with one shippable onboarding path and coming-soon slots for the rest of the loop, plus an interactive preview drawer for dev-style annotations. The sprint output is a direction for a more fun, data-informed Productive—not a full rebuild in twenty-four hours.",
+          "Delivered a multi-feature product direction showing how emotional check-ins, content, and peer support drive daily retention.",
         customBody: <FirstDesignInspector />,
       },
     },

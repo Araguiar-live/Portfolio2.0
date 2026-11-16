@@ -668,7 +668,7 @@ const EDITORIAL_META: Record<string, Partial<Record<Tab, { eyebrow: string; role
   "first-design": {
     "Template Library": {
       eyebrow: "FIRST DESIGN · PRODUCTIVE",
-      role: "First Design Hackathon — one day on Productive",
+      role: "Product Designer — 24-hour First Design Hackathon sprint",
     },
   },
   odicci: {
