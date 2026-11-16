@@ -28,6 +28,7 @@ import eyeWeekIcon from "@/assets/crcle/profile/eye-week.svg";
 import graduationIcon from "@/assets/crcle/profile/graduation.svg";
 import heartDatingIcon from "@/assets/crcle/profile/heart-dating.svg";
 import workLaptopIcon from "@/assets/crcle/profile/work-laptop-figma.svg";
+import workLaptopDarkIcon from "@/assets/crcle/profile/work-laptop-dark.svg";
 import locationMapImg from "@/assets/crcle/profile/location-map.png";
 import kycArrowRightIcon from "@/assets/crcle/kyc/arrow-right.svg";
 import kycArrowRight24Icon from "@/assets/crcle/kyc/arrow-right-24.svg";
@@ -1325,20 +1326,28 @@ function ProfileMainView({
                   data-demo-target="bento-work"
                   data-inspect-id="bento-work"
                   onClick={onOpenWork}
-                  className="flex min-w-0 flex-col items-center gap-2 rounded-[20px] border border-[rgba(0,0,0,0.25)] bg-[rgba(77,78,88,0.2)] p-[9px] text-left shadow-[0px_4px_4px_0px_rgba(0,0,0,0.05)]"
+                  className="flex min-w-0 flex-col items-center gap-2 rounded-[20px] border border-[rgba(0,0,0,0.25)] bg-[rgba(254,254,254,0.3)] p-[9px] text-left shadow-[0px_4px_4px_0px_rgba(0,0,0,0.05)] [.crcle-phone--light_&]:bg-[rgba(77,78,88,0.2)]"
                 >
-                  <div className="flex w-full flex-col items-center justify-center gap-2 py-2">
+                  <div className="flex min-h-0 w-full flex-1 flex-col items-center justify-between">
                     <div className="flex h-[18px] w-full items-center gap-1">
+                      <img
+                        alt=""
+                        src={workLaptopDarkIcon}
+                        width={16}
+                        height={16}
+                        className="block shrink-0 [.crcle-phone--light_&]:hidden"
+                        draggable={false}
+                      />
                       <img
                         alt=""
                         src={workLaptopIcon}
                         width={16}
                         height={16}
-                        className="block shrink-0"
+                        className="hidden shrink-0 [.crcle-phone--light_&]:block"
                         draggable={false}
                       />
                       <span
-                        className="text-[12px] font-normal leading-[18px] text-[#86868e]"
+                        className="text-[12px] font-normal leading-[18px] text-[rgba(247,246,242,0.6)] [.crcle-phone--light_&]:text-[#86868e]"
                         style={{ fontFamily: FONT }}
                       >
                         Work
@@ -1354,20 +1363,20 @@ function ProfileMainView({
                     />
                     <div className="text-center">
                       <p
-                        className="text-[14px] font-normal leading-[21px] text-[#020426]"
+                        className="text-[14px] font-normal leading-[21px] text-[#f7f6f2] [.crcle-phone--light_&]:text-[#020426]"
                         style={{ fontFamily: FONT }}
                       >
                         {widgets.work?.role ?? "Add role"}
                       </p>
                       <p
-                        className="text-[12px] font-light leading-[18px] text-[#6b7280]"
+                        className="text-[12px] font-light leading-[18px] text-[rgba(222,221,218,0.6)] [.crcle-phone--light_&]:text-[#6b7280]"
                         style={{ fontFamily: FONT }}
                       >
                         {widgets.work?.company ?? "Company"}
                       </p>
                     </div>
                   </div>
-                  <div className="flex w-full items-center justify-between rounded-[24px] bg-[#f7f6f2] py-1 pl-2 pr-1.5">
+                  <div className="flex w-full items-center justify-between rounded-[24px] bg-[#deddda] py-1 pl-2 pr-1.5 [.crcle-phone--light_&]:bg-[#f7f6f2]">
                     <span
                       className="text-[11px] font-normal leading-[1.4] text-[#02031d]"
                       style={{ fontFamily: FONT }}
