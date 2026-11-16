@@ -467,7 +467,7 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
               style={{ height: EXPANDED_BODY_H }}
             >
               {showTabChrome ? (
-                <div className={project.slug === "crcle" ? "mb-6 flex shrink-0 justify-start px-4 sm:px-8 lg:px-6" : "mb-6 flex shrink-0 justify-center"}>
+                <div className={isEditorial(project.slug) ? "mb-6 flex shrink-0 justify-start px-4 sm:px-8 lg:px-6" : "mb-6 flex shrink-0 justify-center"}>
                   <div className="inline-flex items-center gap-1 rounded-full border border-white bg-white/70 p-1 shadow-2xl shadow-slate-200/50 backdrop-blur-xl">
                     {tabs.map((tab) => {
                       const active = tab === activeTab;
@@ -490,7 +490,7 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
                   </div>
                 </div>
               ) : (
-                <div className={project.slug === "crcle" ? "mb-6 flex shrink-0 justify-start px-4 sm:px-8 lg:px-6" : "mb-6 flex shrink-0 justify-center"}>
+                <div className={isEditorial(project.slug) ? "mb-6 flex shrink-0 justify-start px-4 sm:px-8 lg:px-6" : "mb-6 flex shrink-0 justify-center"}>
                   <div className="inline-flex items-center rounded-full border border-white bg-white/70 p-1 shadow-2xl shadow-slate-200/50 backdrop-blur-xl">
                     <span className="rounded-full border border-black bg-black px-4 py-1.5 text-xs font-medium tracking-tight text-white">
                       {project.content?.[activeTab]?.tabLabel ?? activeTab}
@@ -518,24 +518,24 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
                 </>
               ) : null}
 
-              {/* CRCLE uses a three-cell bento. Other projects keep the 1:2 write-up. */}
-              <div className={`mx-auto flex min-h-0 w-full flex-1 items-start overflow-visible px-4 sm:px-8 lg:px-6 ${project.slug === "crcle" ? "" : "pt-2"}`}>
-                  <div className={project.slug === "crcle"
+              {/* Editorial rows: story, spec list, prototype stage. */}
+              <div className={`mx-auto flex min-h-0 w-full flex-1 items-start overflow-visible px-4 sm:px-8 lg:px-6 ${isEditorial(project.slug) ? "" : "pt-2"}`}>
+                  <div className={isEditorial(project.slug)
                     ? "grid h-full min-h-0 w-full min-w-0 grid-cols-1 items-start gap-3 overflow-x-clip lg:grid-cols-[1.1fr_0.9fr_1.1fr]"
                     : "grid w-full min-w-0 grid-cols-1 items-start gap-8 overflow-x-clip lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] lg:gap-8"}>
-                    {project.slug === "crcle" ? (
-                      <CrcleNarrative tab={activeTab} />
+                    {isEditorial(project.slug) ? (
+                      <EditorialNarrative copy={editorialCopy(project, activeTab, tabContent)} />
                     ) : (
                     <div className="flex max-h-[874px] min-h-0 min-w-0 flex-col overflow-x-hidden overflow-y-auto overscroll-contain">
                       <CaseStudyCopy project={project} tab={activeTab} content={tabContent} />
                     </div>
                     )}
-                    {project.slug === "crcle" ? <CrcleMicroCards tab={activeTab} /> : null}
+                    {isEditorial(project.slug) ? <EditorialSpecs copy={editorialCopy(project, activeTab, tabContent)} /> : null}
 
-                    <div className={project.slug === "crcle"
+                    <div className={isEditorial(project.slug)
                       ? "relative flex min-h-0 min-w-0 items-start justify-center overflow-auto rounded-[32px] border border-[rgba(0,0,0,0.06)] bg-[#F4F4F5]/80 p-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
                       : "relative flex w-full min-w-0 items-start justify-end overflow-visible"}>
-                      <div className={project.slug === "crcle"
+                      <div className={isEditorial(project.slug)
                         ? "mx-auto flex w-full min-w-0 max-w-full items-start justify-center"
                         : "ml-auto flex w-full min-w-0 max-w-full items-start justify-end overflow-visible"}>
                         {tabContent.customBody ? (
@@ -663,8 +663,53 @@ function crcleCopy(tab: Tab): CrcleBentoCopy {
   return CRCLE_BENTO[tab] ?? CRCLE_BENTO["Template Library"]!;
 }
 
-function CrcleNarrative({ tab }: { tab: Tab }) {
-  const copy = crcleCopy(tab);
+function isEditorial(slug: string) {
+  return slug === "crcle" || slug === "first-design" || slug === "odicci";
+}
+
+const EDITORIAL_META: Record<string, Partial<Record<Tab, { eyebrow: string; role: string }>>> = {
+  "first-design": {
+    "Template Library": {
+      eyebrow: "FIRST DESIGN · PRODUCTIVE",
+      role: "First Design Hackathon — one day on Productive",
+    },
+  },
+  odicci: {
+    "Create Workspace\u00a0": {
+      eyebrow: "ODICCI · WORKSPACE",
+      role: "Product Team — Workspace & integrations",
+    },
+    "Brand Personality": {
+      eyebrow: "ODICCI · BRAND",
+      role: "Product Team — Brand system",
+    },
+    "Sign Up": {
+      eyebrow: "ODICCI · SIGN UP",
+      role: "Product Team — Sign-up",
+    },
+    "Template Library": {
+      eyebrow: "ODICCI · TEMPLATES",
+      role: "Product Team — Template library",
+    },
+  },
+};
+
+function editorialCopy(project: Project, tab: Tab, content: ProjectTabContent): CrcleBentoCopy {
+  if (project.slug === "crcle") return crcleCopy(tab);
+  const meta = EDITORIAL_META[project.slug]?.[tab];
+  const lines = (value?: string) => (value?.trim() ? [value.trim()] : []);
+  return {
+    eyebrow: meta?.eyebrow ?? `${project.title.toUpperCase()} · ${tab.toUpperCase()}`,
+    headline: content.subtitle?.trim() || "Case study",
+    narrative: content.overview?.trim() || "",
+    role: meta?.role ?? project.role,
+    problems: lines(content.challenge),
+    shipped: lines(content.approach ?? content.hypothesis),
+    impact: (content.outcome ?? content.notes)?.trim() || "",
+  };
+}
+
+function EditorialNarrative({ copy }: { copy: CrcleBentoCopy }) {
   return (
     <article className="flex min-h-0 flex-col gap-4">
       <span className="text-[12.65px] font-medium uppercase tracking-[0.18em] text-zinc-400">{copy.eyebrow}</span>
@@ -674,8 +719,7 @@ function CrcleNarrative({ tab }: { tab: Tab }) {
   );
 }
 
-function CrcleMicroCards({ tab }: { tab: Tab }) {
-  const copy = crcleCopy(tab);
+function EditorialSpecs({ copy }: { copy: CrcleBentoCopy }) {
   const rows: Array<{ label: string; icon: string; lines: string[] }> = [
     { label: "Role & Scope", icon: specPen, lines: [copy.role] },
     { label: "Problems Solved", icon: specTarget, lines: copy.problems },
