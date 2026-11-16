@@ -675,7 +675,7 @@ export function CrcleMessaging({
   }, []);
 
   return (
-    <div ref={rootRef} className="relative ml-auto flex w-fit flex-col items-center">
+    <div ref={rootRef} className="relative mx-auto flex w-fit flex-col items-center">
       <CrcleThemeToggle light={isLightMode} onToggle={toggleLight} />
 
       <div

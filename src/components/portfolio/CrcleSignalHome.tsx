@@ -283,7 +283,7 @@ export function CrcleSignalHome({
   }, [codeOn, demoPaused, demoRun, resetSignal]);
 
   return (
-    <div className="relative ml-auto flex w-fit flex-col items-center">
+    <div className="relative mx-auto flex w-fit flex-col items-center">
       <CrcleThemeToggle light={isLightMode} onToggle={toggleLight} />
 
       <CrclePhoneFrame light={isLightMode}>

@@ -498,7 +498,7 @@ export function CrcleRadar({
   };
 
   return (
-    <div className="relative ml-auto flex w-fit flex-col items-center">
+    <div className="relative mx-auto flex w-fit flex-col items-center">
       <CrcleThemeToggle light={light} onToggle={toggleLight} disabled={isNoc} />
 
       <CrclePhoneFrame light={light}>

@@ -458,7 +458,7 @@ export function CrcleProfile({
   const socialCount = Object.values(profile.socials).filter(Boolean).length;
 
   return (
-    <div className="relative ml-auto flex w-fit flex-col items-center">
+    <div className="relative mx-auto flex w-fit flex-col items-center">
       <CrcleThemeToggle light={isLightMode} onToggle={toggleLight} />
       <CrclePhoneFrame light={isLightMode}>
         <div
