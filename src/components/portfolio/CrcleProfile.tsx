@@ -28,7 +28,7 @@ import emptyWorkIcon from "@/assets/crcle/profile/empty-work.svg";
 import eyeWeekIcon from "@/assets/crcle/profile/eye-week.svg";
 import graduationIcon from "@/assets/crcle/profile/graduation.svg";
 import heartDatingIcon from "@/assets/crcle/profile/heart-dating.svg";
-import laptopWorkIcon from "@/assets/crcle/profile/laptop-work.svg";
+import workLaptopIcon from "@/assets/crcle/profile/work-laptop-figma.svg";
 import locationMapImg from "@/assets/crcle/profile/location-map.png";
 import kycArrowRightIcon from "@/assets/crcle/kyc/arrow-right.svg";
 import kycArrowRight24Icon from "@/assets/crcle/kyc/arrow-right-24.svg";
@@ -1354,18 +1354,20 @@ function ProfileMainView({
                   data-demo-target="bento-work"
                   data-inspect-id="bento-work"
                   onClick={onOpenWork}
-                  className="crcle-glass-btn flex min-w-0 flex-col gap-2 rounded-[20px] p-2 text-left"
+                  className="flex min-w-0 flex-col items-center gap-2 rounded-[20px] border border-[rgba(0,0,0,0.25)] bg-[rgba(77,78,88,0.2)] p-[9px] text-left shadow-[0px_4px_4px_0px_rgba(0,0,0,0.05)]"
                 >
-                  <div className="flex w-full flex-col items-center gap-2 rounded-2xl bg-[#f7f6f2] p-2">
-                    <div className="flex w-full items-center gap-1">
+                  <div className="flex w-full flex-col items-center justify-center gap-2 py-2">
+                    <div className="flex h-[18px] w-full items-center gap-1">
                       <img
                         alt=""
-                        src={laptopWorkIcon}
-                        className="size-4 object-contain"
+                        src={workLaptopIcon}
+                        width={16}
+                        height={16}
+                        className="block shrink-0"
                         draggable={false}
                       />
                       <span
-                        className="text-[12px] leading-[18px] text-[#6b7280]"
+                        className="text-[12px] font-normal leading-[18px] text-[#86868e]"
                         style={{ fontFamily: FONT }}
                       >
                         Work
@@ -1374,12 +1376,14 @@ function ProfileMainView({
                     <img
                       alt=""
                       src={workMarkIcon}
-                      className="size-12 object-contain"
+                      width={48}
+                      height={48}
+                      className="block shrink-0"
                       draggable={false}
                     />
                     <div className="text-center">
                       <p
-                        className="text-[14px] leading-[21px] text-[#020426]"
+                        className="text-[14px] font-normal leading-[21px] text-[#020426]"
                         style={{ fontFamily: FONT }}
                       >
                         {widgets.work?.role ?? "Add role"}
@@ -1392,21 +1396,19 @@ function ProfileMainView({
                       </p>
                     </div>
                   </div>
-                  <div className="flex w-full items-center justify-between rounded-[24px] border border-[rgba(247,246,242,0.1)] py-1 pl-2 pr-1.5 [.crcle-phone--light_&]:border-[rgba(2,4,38,0.28)]">
+                  <div className="flex w-full items-center justify-between rounded-[24px] bg-[#f7f6f2] py-1 pl-2 pr-1.5">
                     <span
-                      className="text-[11px] leading-[1.4] text-[#f7f6f2] [.crcle-phone--light_&]:text-[#949491]"
+                      className="text-[11px] font-normal leading-[1.4] text-[#02031d]"
                       style={{ fontFamily: FONT }}
                     >
                       Looking for work
                     </span>
                     <span
-                      className={`flex w-6 items-center rounded-[24px] p-0.5 ${
-                        lookingForWork
-                          ? "justify-end bg-[#0fc950]/40"
-                          : "justify-end bg-[rgba(247,246,242,0.4)]"
+                      className={`flex w-6 items-center rounded-[24px] bg-[rgba(2,3,29,0.4)] p-0.5 ${
+                        lookingForWork ? "justify-end" : "justify-start"
                       }`}
                     >
-                      <span className="size-2 rounded bg-[#fdfcfb]" />
+                      <span className="size-2 rounded-[4px] bg-[#fdfcfb]" />
                     </span>
                   </div>
                 </button>
