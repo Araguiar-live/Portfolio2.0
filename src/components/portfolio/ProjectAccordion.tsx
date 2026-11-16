@@ -196,8 +196,8 @@ function folderOutline(
   const leftTop = left + slope;
   const rightTop = leftTop + flat;
   const rightFoot = rightTop + slope;
-  const tr = index === 0 ? STACK_CORNER : CORNER;
-  const edge = index === count - 1 ? STACK_CORNER : CORNER;
+  const tr = (index === 0 ? STACK_CORNER : CORNER) + 8;
+  const edge = (index === count - 1 ? STACK_CORNER : CORNER) + 8;
   const points: Array<[number, number]> = [
     [0, height],
     [width, height],
