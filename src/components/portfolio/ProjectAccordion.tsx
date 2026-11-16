@@ -80,8 +80,9 @@ interface Props {
   count: number;
 }
 
-/** Tab rise, 18% taller than the 18px step so the slope reads clearly. */
-const TAB_H = 22;
+/** Tab rise above the folder body. The next folder covers this same distance. */
+const TAB_H = 24;
+const FOLDER_OVERLAP = 24;
 const TAB_FLAT = 160;
 const TAB_SLOPE = 20;
 const TAB_SHIFT = [24, 160, 296] as const;
@@ -147,22 +148,6 @@ function quadraticOutline(points: Pt[], radii: number[]): string {
     d += ` L ${next.start[0]} ${next.start[1]}`;
   }
   return `${d} Z`;
-}
-
-/** Same fillet, without the bottom edge, so a covered seam is not drawn twice. */
-function quadraticOpenStroke(points: Pt[], radii: number[]): string {
-  const cuts = cornerCuts(points, radii);
-  const n = cuts.length;
-  let d = `M ${cuts[1].start[0]} ${cuts[1].start[1]}`;
-  for (let i = 1; i < n; i++) {
-    const cut = cuts[i];
-    const next = cuts[(i + 1) % n];
-    d += ` Q ${cut.corner[0]} ${cut.corner[1]} ${cut.end[0]} ${cut.end[1]}`;
-    d += ` L ${next.start[0]} ${next.start[1]}`;
-  }
-  const last = cuts[0];
-  d += ` Q ${last.corner[0]} ${last.corner[1]} ${last.end[0]} ${last.end[1]}`;
-  return d;
 }
 
 /** Move each edge inward so a 1px stroke sits fully inside the card. */
@@ -312,12 +297,9 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
       const shape = folderOutline(width, height, tabShift, index, count);
       const strokeRadii = shape.radii.map((radius) => Math.max(0, radius - 0.5));
       const strokePoints = insetPoints(shape.points, 0.5);
-      const closeBottom = index === count - 1;
       setOutline({
         d: quadraticOutline(shape.points, shape.radii),
-        stroke: closeBottom
-          ? quadraticOutline(strokePoints, strokeRadii)
-          : quadraticOpenStroke(strokePoints, strokeRadii),
+        stroke: quadraticOutline(strokePoints, strokeRadii),
         w: width,
         h: height,
       });
@@ -335,7 +317,7 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
       className="folder-shell pointer-events-none relative border-0 outline-none"
       style={{
         zIndex: index + 1,
-        marginTop: index === 0 ? 0 : -TAB_H,
+        marginTop: index === 0 ? 0 : -FOLDER_OVERLAP,
         border: 0,
         outline: "none",
         boxShadow: "none",
