@@ -75,9 +75,10 @@ interface Props {
 /** Trapezoid file-tab that stays a fixed size while the row body grows. */
 function folderPoints(width: number, height: number, index: number): Array<[number, number]> {
   const narrow = width < 768;
-  const tabH = narrow ? 14 : 22;
+  // Slope is long enough for an 8px fillet at both ends of the tab.
+  const tabH = narrow ? 26 : 30;
   const tabW = narrow ? 96 : 176;
-  const slope = narrow ? 16 : 26;
+  const slope = narrow ? 16 : 36;
   const stagger = narrow ? 22 : 64;
   const minX = narrow ? 14 : 36;
   const x = Math.min(minX + index * stagger, Math.max(minX, width - tabW - slope * 2 - 16));
@@ -123,9 +124,19 @@ function filletSweep(
   return closer(1) < closer(0) ? 1 : 0;
 }
 
-/** 4px circular fillet on every corner of the folder outline. */
-function roundedFolderPath(points: Array<[number, number]>, radius = 4): string {
+/** 8px circular fillet on every corner of the folder outline. */
+function roundedFolderPath(points: Array<[number, number]>, radius = 8): string {
   const n = points.length;
+  const corners: Array<{
+    v1x: number;
+    v1y: number;
+    v2x: number;
+    v2y: number;
+    len1: number;
+    tangent: number;
+    offset: number;
+    curr: [number, number];
+  }> = [];
   let d = "";
   for (let i = 0; i < n; i++) {
     const prev = points[(i - 1 + n) % n];
@@ -145,7 +156,22 @@ function roundedFolderPath(points: Array<[number, number]>, radius = 4): string 
     const dot = Math.min(1, Math.max(-1, v1x * v2x + v1y * v2y));
     const turn = Math.abs(Math.atan2(cross, dot));
     const tangent = Math.tan(turn / 2);
-    const offset = tangent > 0.001 ? Math.min(radius / tangent, len1 / 2.2, len2 / 2.2) : 0;
+    const offset = tangent > 0.001 ? radius / tangent : 0;
+    corners.push({ v1x, v1y, v2x, v2y, len1, tangent, offset, curr });
+  }
+  for (let pass = 0; pass < 4; pass++) {
+    for (let i = 0; i < n; i++) {
+      const edge = corners[(i + 1) % n].len1;
+      const used = corners[i].offset + corners[(i + 1) % n].offset;
+      if (used > edge - 0.5) {
+        const scale = (edge - 0.5) / used;
+        corners[i].offset *= scale;
+        corners[(i + 1) % n].offset *= scale;
+      }
+    }
+  }
+  for (let i = 0; i < n; i++) {
+    const { v1x, v1y, v2x, v2y, tangent, offset, curr } = corners[i];
     const arc = tangent > 0.001 ? offset * tangent : 0;
     const x1 = curr[0] - v1x * offset;
     const y1 = curr[1] - v1y * offset;
