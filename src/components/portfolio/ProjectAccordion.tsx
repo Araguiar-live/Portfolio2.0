@@ -87,7 +87,7 @@ const TAB_SLOPE = 20;
 const TAB_SHIFT = [24, 160, 296] as const;
 const CORNER = 8;
 const FOLDER_MARKS: Record<string, { src: string; width: number; height: number }> = {
-  crcle: { src: crcleMark, width: 46, height: 49 },
+  crcle: { src: crcleMark, width: 47.4902, height: 49.0909 },
   "first-design": { src: bendingSpoonsMark, width: 58.843, height: 31.7802 },
   odicci: { src: odicciMark, width: 45, height: 49.0909 },
 };
