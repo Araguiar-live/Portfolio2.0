@@ -457,14 +457,14 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
           <motion.div
             key="body"
             initial={{ height: 0 }}
-            animate={{ height: EXPANDED_BODY_H }}
+            animate={{ height: project.slug === "odicci" ? "auto" : EXPANDED_BODY_H }}
             exit={{ height: 0 }}
             transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
             className="overflow-hidden"
           >
             <div
-              className="relative flex h-full flex-col px-6 py-6"
-              style={{ height: EXPANDED_BODY_H }}
+              className={`relative flex flex-col px-6 py-6 ${project.slug === "odicci" ? "h-auto" : "h-full"}`}
+              style={project.slug === "odicci" ? undefined : { height: EXPANDED_BODY_H }}
             >
               {showTabChrome ? (
                 <div className={isEditorial(project.slug) ? "mb-6 flex shrink-0 justify-start px-4 sm:px-8 lg:px-6" : "mb-6 flex shrink-0 justify-center"}>
@@ -520,7 +520,9 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
 
               {/* Editorial rows: story, spec list, prototype stage. */}
               <div className={`mx-auto flex min-h-0 w-full flex-1 items-start overflow-visible px-4 sm:px-8 lg:px-6 ${isEditorial(project.slug) ? "" : "pt-2"}`}>
-                  <div className={project.slug === "first-design"
+                  <div className={project.slug === "odicci"
+                    ? "grid w-full min-w-0 grid-cols-1 items-start gap-8 lg:grid-cols-2"
+                    : project.slug === "first-design"
                     ? "grid h-full min-h-0 w-full min-w-0 grid-cols-1 items-start gap-3 overflow-x-clip lg:grid-cols-[0.98fr_0.8fr_1.32fr]"
                     : isEditorial(project.slug)
                     ? "grid h-full min-h-0 w-full min-w-0 grid-cols-1 items-start gap-3 overflow-x-clip lg:grid-cols-[1.1fr_0.9fr_1.1fr]"
@@ -534,12 +536,16 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
                     )}
                     {isEditorial(project.slug) ? <EditorialSpecs copy={editorialCopy(project, activeTab, tabContent)} dense={project.slug === "first-design"} /> : null}
 
-                    <div className={project.slug === "first-design"
+                    <div className={project.slug === "odicci"
+                      ? "flex w-full justify-center lg:col-span-2"
+                      : project.slug === "first-design"
                       ? "relative flex min-h-0 min-w-0 w-full items-start justify-center overflow-visible"
                       : isEditorial(project.slug)
                       ? "relative ml-0 flex min-h-0 min-w-0 items-start justify-center overflow-auto rounded-[32px] border border-[rgba(0,0,0,0.06)] bg-[#F4F4F5]/80 p-3 lg:ml-12 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
                       : "relative flex w-full min-w-0 items-start justify-end overflow-visible"}>
-                      <div className={project.slug === "first-design"
+                      <div className={project.slug === "odicci"
+                        ? "flex w-full max-w-[980px] justify-center"
+                        : project.slug === "first-design"
                         ? "flex w-full min-w-0 max-w-full items-start justify-center"
                         : isEditorial(project.slug)
                         ? "mx-auto flex w-full min-w-0 max-w-full items-start justify-center"
