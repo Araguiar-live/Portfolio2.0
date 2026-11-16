@@ -358,9 +358,9 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
           }}
         />
       ) : null}
-      {/* Row header — Figma 530:151817. Vertical padding is +15% of the closed sheet; overlap stays 48px. */}
+      {/* Row header — Figma 530:151817. Closed sheet is 20% taller than the 162px desktop / 130px phone rows; overlap stays 48px. */}
       <div
-        className="group relative flex w-full items-center justify-between gap-7 border-0 px-[37px] py-[53.15px] text-left outline-none transition-[background] duration-300 max-md:flex-col max-md:items-stretch max-md:gap-[15px] max-md:px-5 max-md:py-[32.75px] max-sm:gap-[15px] max-sm:px-5 max-sm:py-[32.75px]"
+        className="group relative flex w-full items-center justify-between gap-7 border-0 px-[37px] py-[57.2px] text-left outline-none transition-[background] duration-300 max-md:flex-col max-md:items-stretch max-md:gap-[15px] max-md:px-5 max-md:py-[36px] max-sm:gap-[15px] max-sm:px-5 max-sm:py-[36px]"
         onMouseEnter={rowHover.onMouseEnter}
         onMouseMove={rowHover.onMouseMove}
         onMouseLeave={rowHover.onMouseLeave}
