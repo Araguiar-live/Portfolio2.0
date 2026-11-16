@@ -75,21 +75,20 @@ interface Props {
 /** Trapezoid file-tab that stays a fixed size while the row body grows. */
 function folderPoints(width: number, height: number, index: number): Array<[number, number]> {
   const narrow = width < 768;
-  // Slope is long enough for an 8px fillet at both ends of the tab.
-  const tabH = narrow ? 26 : 30;
-  const tabW = narrow ? 96 : 176;
-  const slope = narrow ? 16 : 36;
-  const stagger = narrow ? 22 : 64;
-  const minX = narrow ? 14 : 36;
-  const x = Math.min(minX + index * stagger, Math.max(minX, width - tabW - slope * 2 - 16));
-  const top = 0.5;
+  // Rise/run leave a straight shoulder between the 8px fillets, so the tab reads as a trapezoid.
+  const tabH = narrow ? 24 : 40;
+  const tabW = narrow ? 78 : 148;
+  const slope = narrow ? 14 : 18;
+  const stagger = narrow ? 28 : 108;
+  const minX = narrow ? 18 : 48;
+  const x = Math.min(minX + index * stagger, Math.max(minX, width - tabW - slope * 2 - 24));
   const lip = tabH;
   return [
     [0, lip],
     [x, lip],
-    [x + slope, top],
-    [x + slope + tabW, top],
-    [x + slope + tabW + slope, lip],
+    [x + slope, 0.5],
+    [x + slope + tabW, 0.5],
+    [x + slope * 2 + tabW, lip],
     [width, lip],
     [width, height],
     [0, height],
@@ -124,8 +123,9 @@ function filletSweep(
   return closer(1) < closer(0) ? 1 : 0;
 }
 
-/** 8px circular fillet on every corner of the folder outline. */
-function roundedFolderPath(points: Array<[number, number]>, radius = 8): string {
+/** 8px fillets on the body, 5px on the tab so the shoulders stay straight. */
+function roundedFolderPath(points: Array<[number, number]>): string {
+  const radii = points.map((_, i) => (i >= 1 && i <= 4 ? 5 : 8));
   const n = points.length;
   const corners: Array<{
     v1x: number;
@@ -156,6 +156,7 @@ function roundedFolderPath(points: Array<[number, number]>, radius = 8): string 
     const dot = Math.min(1, Math.max(-1, v1x * v2x + v1y * v2y));
     const turn = Math.abs(Math.atan2(cross, dot));
     const tangent = Math.tan(turn / 2);
+    const radius = radii[i];
     const offset = tangent > 0.001 ? radius / tangent : 0;
     corners.push({ v1x, v1y, v2x, v2y, len1, tangent, offset, curr });
   }
@@ -280,19 +281,18 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
     <div
       ref={ref}
       className="pointer-events-none relative"
-      style={{
-        zIndex: index + 1,
-        marginTop: index === 0 ? 0 : "calc(-1 * var(--folder-tab, 22px))",
-      }}
+        style={{
+          zIndex: index + 1,
+          marginTop: index === 0 ? 0 : "calc(-1 * var(--folder-tab, 40px))",
+          filter: "drop-shadow(0px 16px 48px rgba(0, 0, 0, 0.05))",
+        }}
     >
       <div
         ref={shapeRef}
-        className="portfolio-mobile-shake-root spatial-glass pointer-events-auto relative py-[9px] max-md:py-[7px]"
+        className="spatial-glass spatial-layer pointer-events-auto relative border-0 bg-white/70 shadow-none"
         style={{
           clipPath,
-          backgroundColor: "rgba(255,255,255,0.805)",
-          WebkitBackdropFilter: "blur(23px) saturate(180%)",
-          backdropFilter: "blur(23px) saturate(180%)",
+          paddingTop: "var(--folder-tab, 40px)",
         }}
       >
       {/* Row header — Figma 530:151817 */}
