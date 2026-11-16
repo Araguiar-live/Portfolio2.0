@@ -1,5 +1,6 @@
 import { ChevronDown, Moon, Sun } from "lucide-react";
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { CrcleScreenToolbar } from "@/components/portfolio/CrcleDemoToolbar";
 
 /** Figma Odicci onboarding viewport (65:94009 and siblings). */
 export const ODICCI_FRAME_W = 1512;
@@ -57,8 +58,9 @@ export function OdicciBrowserFrame({
   }, []);
 
   return (
+    <div className="flex w-full min-w-0 max-w-[980px] flex-col items-center">
     <div
-      className="relative w-full min-w-0 max-w-[980px] overflow-hidden rounded-2xl border border-white/10 bg-white shadow-2xl shadow-black/40"
+      className="relative w-full min-w-0 overflow-hidden rounded-2xl border border-white/10 bg-white shadow-2xl shadow-black/40"
       style={{ fontFamily: FONT }}
     >
       {/* Title bar */}
@@ -116,6 +118,8 @@ export function OdicciBrowserFrame({
           {children}
         </div>
       </div>
+    </div>
+    <CrcleScreenToolbar />
     </div>
   );
 }
