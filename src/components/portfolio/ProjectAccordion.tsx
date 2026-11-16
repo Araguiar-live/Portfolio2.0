@@ -3,6 +3,7 @@ import { ArrowUpRight, Briefcase, ChevronLeft, ChevronRight, Layers, Target, Tre
 import { forwardRef, useEffect, useLayoutEffect, useRef, useState, type MutableRefObject } from "react";
 import { createPortal } from "react-dom";
 import bendingSpoonsMark from "@/assets/bending-spoons-mark.svg";
+import crcleMark from "@/assets/crcle-mark.svg";
 import odicciMark from "@/assets/odicci-mark.svg";
 import { CrcleVideoCard } from "@/components/portfolio/CrcleVideoCard";
 import { DesktopOnlyPill, useDesktopOnlyNudge } from "@/components/portfolio/DesktopOnlyNudge";
@@ -82,6 +83,7 @@ const TAB_SLOPE = 20;
 const TAB_SHIFT = [24, 160, 296] as const;
 const CORNER = 8;
 const FOLDER_MARKS: Record<string, { src: string; width: number; height: number }> = {
+  crcle: { src: crcleMark, width: 46, height: 49 },
   "first-design": { src: bendingSpoonsMark, width: 58.843, height: 31.7802 },
   odicci: { src: odicciMark, width: 45, height: 49.0909 },
 };
