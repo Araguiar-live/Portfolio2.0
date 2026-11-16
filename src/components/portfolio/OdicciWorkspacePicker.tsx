@@ -1,8 +1,10 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { Plus, Search, ChevronDown, Check, X, Upload, HelpCircle, AlertTriangle, Info } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { OdicciSignUp } from "@/components/portfolio/OdicciSignUp";
 import { OdicciBrowserFrame } from "@/components/portfolio/OdicciBrowserFrame";
+import { OdicciDemoChrome } from "@/components/portfolio/OdicciDemoChrome";
+import { useOdicciDemo } from "@/components/portfolio/useOdicciDemo";
 import odicciLogo from "@/assets/odicci/odicci-logo-wordmark.png";
 import workspaceGradientPattern from "@/assets/odicci/workspace-gradient-pattern.svg";
 import workspaceGradient2 from "@/assets/odicci/workspace-gradient-2.svg";
@@ -69,6 +71,56 @@ export function OdicciWorkspacePicker({ onNext }: { onNext?: () => void }) {
   const [theme, setTheme] = useState<"dark" | "light">("dark");
   const [step, setStep] = useState<"picker" | "create" | "login">("picker");
   const [companyName, setCompanyName] = useState("");
+  const demo = useOdicciDemo();
+
+  useEffect(() => {
+    if (demo.paused) return;
+    const ctx = demo.arm();
+    let cancelled = false;
+    const alive = () => !cancelled && ctx.alive();
+
+    const reset = () => {
+      setStep("picker");
+      setModalOpen(false);
+      setDraftSelected([]);
+      setSavedSelected([]);
+      setQuery("");
+      setCompanyName("");
+    };
+
+    const run = async () => {
+      await ctx.wait(420);
+      while (alive()) {
+        reset();
+        await ctx.wait(560);
+        if (!alive()) return;
+        if (await ctx.press('[data-demo-target="add-integration"]')) await ctx.wait(640);
+        if (!alive()) return;
+        if (await ctx.press('[data-demo-target="integration-shopify"]')) await ctx.wait(260);
+        if (await ctx.press('[data-demo-target="integration-klaviyo"]')) await ctx.wait(260);
+        if (!alive()) return;
+        if (await ctx.press('[data-demo-target="save-integration"]')) await ctx.wait(720);
+        if (!alive()) return;
+        if (await ctx.press('[data-demo-target="create-workspace"]')) await ctx.wait(760);
+        if (!alive()) return;
+        if (await ctx.typeInto('[data-demo-target="company-name"]', "Acme Studio")) await ctx.wait(280);
+        if (!alive()) return;
+        if (await ctx.press('[data-demo-target="company-size"]')) await ctx.wait(360);
+        if (!alive()) return;
+        if (await ctx.typeInto('[data-demo-target="hear-about"]', "Shopify App Store")) await ctx.wait(360);
+        if (!alive()) return;
+        if (await ctx.press('[data-demo-target="create-workspace-submit"]')) await ctx.wait(1100);
+      }
+    };
+
+    void run();
+    return () => {
+      cancelled = true;
+      demo.clearTouch();
+    };
+    // The demo object is stable enough through paused/run; arm() captures the latest refs.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [demo.paused, demo.run]);
 
   const isDark = theme === "dark";
   const toggleTheme = () => setTheme((t) => (t === "dark" ? "light" : "dark"));
@@ -114,6 +166,15 @@ export function OdicciWorkspacePicker({ onNext }: { onNext?: () => void }) {
       theme={theme}
       onToggleTheme={toggleTheme}
       canvasClassName="bg-[#ffe4e4]"
+      stageRef={demo.screenRef}
+      onStagePointerDown={demo.stopFromPointer}
+      demo={{
+        playing: demo.playing,
+        codeOn: demo.codeOn,
+        onPlay: demo.replay,
+        onDesign: demo.design,
+        onCode: demo.code,
+      }}
     >
       {/* Artboard — Figma 65:94009 */}
       <div className="relative size-full overflow-hidden">
@@ -293,6 +354,7 @@ export function OdicciWorkspacePicker({ onNext }: { onNext?: () => void }) {
           {/* Frosted create bar — Figma rounded-bl/br glass foot */}
           <button
             type="button"
+            data-demo-target="create-workspace"
             onClick={() => setStep("create")}
             className="group relative w-full overflow-hidden rounded-b-[50px] border-2 border-t-0 border-white/20 bg-white/15 py-[17px] backdrop-blur-[15px] transition-all duration-300 hover:bg-white/40 focus-visible:bg-white/40 focus-visible:outline-none active:bg-white/40"
           >
@@ -334,6 +396,7 @@ export function OdicciWorkspacePicker({ onNext }: { onNext?: () => void }) {
         >
           <button
             type="button"
+            data-demo-target="add-integration"
             onClick={openModal}
             className="flex h-[77px] w-full items-center justify-center gap-2 rounded-t-[38px] rounded-b-none border border-b-0 border-white/40 bg-white/10 text-[17px] font-medium tracking-tight text-white backdrop-blur-[8px] transition-colors hover:bg-white/14"
           >
@@ -350,7 +413,7 @@ export function OdicciWorkspacePicker({ onNext }: { onNext?: () => void }) {
             companyName={companyName}
             setCompanyName={setCompanyName}
             onBack={() => setStep("picker")}
-            onNext={onNext}
+            onNext={demo.paused ? onNext : undefined}
           />
         )}
 
@@ -445,6 +508,7 @@ export function OdicciWorkspacePicker({ onNext }: { onNext?: () => void }) {
                           <li key={i.id}>
                             <button
                               type="button"
+                              data-demo-target={`integration-${i.id}`}
                               onClick={() => toggle(i.id)}
                               className="group flex w-full items-center gap-2.5 text-left"
                             >
@@ -491,6 +555,7 @@ export function OdicciWorkspacePicker({ onNext }: { onNext?: () => void }) {
 
                 <button
                   type="button"
+                  data-demo-target="save-integration"
                   onClick={save}
                   className="h-11 rounded-[20px] px-6 text-[15px] font-normal text-white shadow-lg shadow-black/30 transition hover:brightness-110"
                   style={{ background: "#FF5126" }}
@@ -502,6 +567,7 @@ export function OdicciWorkspacePicker({ onNext }: { onNext?: () => void }) {
           )}
         </AnimatePresence>
       </div>
+      <OdicciDemoChrome screenRef={demo.screenRef} touch={demo.touch} codeOn={demo.codeOn} />
     </OdicciBrowserFrame>
   );
 }
@@ -641,6 +707,7 @@ function CreateWorkspacePanel({
                   <HelpCircle className={`size-4 shrink-0 ${helpIconClass}`} />
                 </div>
                 <input
+                  data-demo-target="company-name"
                   value={companyName}
                   onChange={(e) => setCompanyName(e.target.value)}
                   onBlur={() => setTouched(true)}
@@ -679,6 +746,7 @@ function CreateWorkspacePanel({
                 </div>
                 <button
                   type="button"
+                  data-demo-target="company-size"
                   onClick={() => setCompanySize((s) => (s ? "" : "11–50 employees"))}
                   className={`flex w-full items-center gap-2.5 rounded-[10px] p-3 text-left ${fieldBgMuted}`}
                 >
@@ -701,6 +769,7 @@ function CreateWorkspacePanel({
                 </div>
                 <div className="flex w-full flex-col gap-4">
                   <input
+                    data-demo-target="hear-about"
                     value={hearAbout}
                     onChange={(e) => setHearAbout(e.target.value)}
                     placeholder="Shopify App Store, Google, an event, a friend…"
@@ -727,6 +796,7 @@ function CreateWorkspacePanel({
               </button>
               <button
                 type="button"
+                data-demo-target="create-workspace-submit"
                 onClick={() => {
                   setTouched(true);
                   if (companyName.trim().length > 0) onNext?.();

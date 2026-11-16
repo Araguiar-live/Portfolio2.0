@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { OdicciDemoChrome } from "@/components/portfolio/OdicciDemoChrome";
+import { useOdicciDemo } from "@/components/portfolio/useOdicciDemo";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronDown, ChevronLeft, ChevronRight, Search, Share2, SlidersHorizontal } from "lucide-react";
 import { OdicciBrowserFrame } from "@/components/portfolio/OdicciBrowserFrame";
@@ -189,6 +191,56 @@ export function OdicciTemplateLibrary() {
   const [selectedId, setSelectedId] = useState(TEMPLATE_CARDS[0].id);
   const [query, setQuery] = useState("");
   const [createOpen, setCreateOpen] = useState(false);
+  const demo = useOdicciDemo();
+
+  useEffect(() => {
+    if (demo.paused) return;
+    const ctx = demo.arm();
+    let cancelled = false;
+    const alive = () => !cancelled && ctx.alive();
+
+    const run = async () => {
+      await ctx.wait(420);
+      while (alive()) {
+        setCategory("For you");
+        setSelectedId(TEMPLATE_CARDS[0].id);
+        setQuery("");
+        setCreateOpen(false);
+        await ctx.wait(360);
+        const feed = ctx.find('[data-demo-scroll="templates"]');
+        if (feed) feed.scrollTop = 0;
+        if (!alive()) return;
+        await ctx.scrub('[data-demo-scroll="filters"]');
+        if (!alive()) return;
+        await ctx.scrub('[data-demo-scroll="categories"]');
+        if (!alive()) return;
+        if (await ctx.press('[data-demo-target="category-Beauty & Personal Care"]')) await ctx.wait(280);
+        if (!alive()) return;
+        if (await ctx.press('[data-demo-target="category-Food"]')) await ctx.wait(280);
+        if (!alive()) return;
+        if (await ctx.press('[data-demo-target="category-For you"]')) await ctx.wait(320);
+        if (!alive()) return;
+        if (await ctx.press('[data-demo-target="template-beauty"]')) await ctx.wait(520);
+        if (!alive()) return;
+        if (await ctx.typeInto('[data-demo-target="preview-name"]', "Ana")) await ctx.wait(160);
+        if (!alive()) return;
+        if (await ctx.typeInto('[data-demo-target="preview-email"]', "ana@odicci.com")) await ctx.wait(220);
+        if (!alive()) return;
+        if (await ctx.press('[data-demo-target="preview-play"]')) await ctx.wait(560);
+        if (!alive()) return;
+        if (await ctx.press('[data-demo-target="preview-quiz-Soft glam"]')) await ctx.wait(280);
+        if (!alive()) return;
+        if (await ctx.press('[data-demo-target="preview-offer"]')) await ctx.wait(1400);
+      }
+    };
+
+    void run();
+    return () => {
+      cancelled = true;
+      demo.clearTouch();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [demo.paused, demo.run]);
 
   const selectedIndex = Math.max(
     0,
@@ -206,6 +258,15 @@ export function OdicciTemplateLibrary() {
       url="odicci.com/templates"
       canvasClassName="bg-[#f7f8fa]"
       showThemeToggle={false}
+      stageRef={demo.screenRef}
+      onStagePointerDown={demo.stopFromPointer}
+      demo={{
+        playing: demo.playing,
+        codeOn: demo.codeOn,
+        onPlay: demo.replay,
+        onDesign: demo.design,
+        onCode: demo.code,
+      }}
     >
       <div className="relative flex size-full flex-col overflow-hidden bg-white text-[#1a1d21]" style={{ fontFamily: FONT }}>
         <TemplateNavbar onCreateNew={() => setCreateOpen(true)} />
@@ -215,7 +276,10 @@ export function OdicciTemplateLibrary() {
 
           <div className="flex min-h-0 min-w-0 flex-1 gap-4 overflow-hidden px-4 pb-4 pt-3">
             {/* Left — scrollable feed; filter sticks while cards scroll */}
-            <div className="relative min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-contain pr-1 [-ms-overflow-style:none] [scrollbar-width:thin]">
+            <div
+              data-demo-scroll="templates"
+              className="relative min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-contain pr-1 [-ms-overflow-style:none] [scrollbar-width:thin]"
+            >
               <WelcomeBanner />
 
               <div className="sticky -top-px z-20 -mx-1 bg-white/95 px-1 pb-3 pt-3 backdrop-blur-md">
@@ -257,6 +321,7 @@ export function OdicciTemplateLibrary() {
         </div>
 
         <OdicciCreateExperiencesModal open={createOpen} onClose={() => setCreateOpen(false)} />
+        <OdicciDemoChrome screenRef={demo.screenRef} touch={demo.touch} codeOn={demo.codeOn} />
       </div>
     </OdicciBrowserFrame>
   );
@@ -432,7 +497,10 @@ function FilterBar({
         <kbd className="rounded-md bg-[#f1f3f5] px-1.5 py-0.5 text-[11px] text-[#838383]">⌘K</kbd>
       </label>
 
-      <div className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto rounded-xl border border-[#e0e0e0] bg-[#f7f8fa] p-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <div
+        data-demo-scroll="filters"
+        className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto rounded-xl border border-[#e0e0e0] bg-[#f7f8fa] p-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      >
         {FILTER_DROPDOWNS.map((label) => (
           <button
             key={label}
@@ -464,13 +532,17 @@ function CategoryTabs({
   onChange: (c: (typeof CATEGORIES)[number]) => void;
 }) {
   return (
-    <div className="mt-3 flex gap-2 overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+    <div
+      data-demo-scroll="categories"
+      className="mt-3 flex gap-2 overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+    >
       {CATEGORIES.map((cat) => {
         const isActive = cat === active;
         return (
           <button
             key={cat}
             type="button"
+            data-demo-target={`category-${cat}`}
             onClick={() => onChange(cat)}
             className={`h-9 shrink-0 rounded-full px-4 text-[13px] transition ${
               isActive
@@ -508,6 +580,7 @@ function TemplateSection({
           <button
             key={`${title}-${card.id}`}
             type="button"
+            data-demo-target={`template-${card.id}`}
             onClick={() => onSelect(card.id)}
             className={`flex flex-col gap-2 rounded-2xl border bg-white p-2 text-left transition ${
               selectedId === card.id

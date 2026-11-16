@@ -80,6 +80,7 @@ export function PlayableTemplatePreview({ theme }: { theme: PlayableTheme }) {
                 <input
                   value={name}
                   onChange={(e) => setName(e.target.value)}
+                  data-demo-target="preview-name"
                   placeholder="Alex"
                   className="h-9 w-full rounded-lg border border-white/20 bg-white/95 px-2.5 text-[12px] text-zinc-900 outline-none placeholder:text-zinc-400 focus:ring-2"
                   style={{ ["--tw-ring-color" as string]: theme.accent }}
@@ -92,6 +93,7 @@ export function PlayableTemplatePreview({ theme }: { theme: PlayableTheme }) {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  data-demo-target="preview-email"
                   placeholder="you@brand.com"
                   className="h-9 w-full rounded-lg border border-white/20 bg-white/95 px-2.5 text-[12px] text-zinc-900 outline-none placeholder:text-zinc-400 focus:ring-2"
                 />
@@ -101,6 +103,7 @@ export function PlayableTemplatePreview({ theme }: { theme: PlayableTheme }) {
               </p>
               <button
                 type="submit"
+                data-demo-target="preview-play"
                 className="mt-auto h-10 w-full rounded-xl text-[13px] font-semibold text-white shadow-lg transition active:scale-[0.98]"
                 style={{ backgroundColor: theme.accent }}
               >
@@ -233,6 +236,7 @@ function QuizGame({ theme, onWin }: { theme: PlayableTheme; onWin: () => void })
             <button
               key={opt}
               type="button"
+              data-demo-target={`preview-quiz-${opt}`}
               onClick={() => setPicked(opt)}
               className={`rounded-xl border px-3 py-2.5 text-left text-[11px] font-medium transition ${
                 active ? "border-transparent text-white" : "border-white/25 bg-white/10 text-white/90"
@@ -246,6 +250,7 @@ function QuizGame({ theme, onWin }: { theme: PlayableTheme; onWin: () => void })
       </div>
       <button
         type="button"
+        data-demo-target="preview-offer"
         disabled={!picked}
         onClick={onWin}
         className="mt-2 h-10 w-full rounded-xl text-[12px] font-semibold text-white disabled:opacity-40"

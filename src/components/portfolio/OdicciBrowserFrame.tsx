@@ -1,6 +1,6 @@
 import { ChevronDown, Moon, Sun } from "lucide-react";
-import { useEffect, useRef, useState, type ReactNode } from "react";
-import { CrcleScreenToolbar } from "@/components/portfolio/CrcleDemoToolbar";
+import { useEffect, useRef, useState, type ReactNode, type RefObject } from "react";
+import { CrcleScreenToolbar, DemoToolbar } from "@/components/portfolio/CrcleDemoToolbar";
 
 /** Figma Odicci onboarding viewport (65:94009 and siblings). */
 export const ODICCI_FRAME_W = 1512;
@@ -20,6 +20,15 @@ interface OdicciBrowserFrameProps {
   onToggleTheme?: () => void;
   showThemeToggle?: boolean;
   toolbarExtra?: ReactNode;
+  stageRef?: RefObject<HTMLDivElement | null>;
+  onStagePointerDown?: () => void;
+  demo?: {
+    playing: boolean;
+    codeOn: boolean;
+    onPlay: () => void;
+    onDesign: () => void;
+    onCode: () => void;
+  };
   children: ReactNode;
 }
 
@@ -36,9 +45,13 @@ export function OdicciBrowserFrame({
   onToggleTheme,
   showThemeToggle = true,
   toolbarExtra,
+  stageRef: stageRefProp,
+  onStagePointerDown,
+  demo,
   children,
 }: OdicciBrowserFrameProps) {
-  const stageRef = useRef<HTMLDivElement>(null);
+  const fallbackStageRef = useRef<HTMLDivElement>(null);
+  const stageRef = stageRefProp ?? fallbackStageRef;
   const [scale, setScale] = useState(1);
   const isDark = theme === "dark";
 
@@ -105,6 +118,7 @@ export function OdicciBrowserFrame({
       {/* Viewport — aspect locked to Figma; children designed at 1512×982 */}
       <div
         ref={stageRef}
+        onPointerDownCapture={onStagePointerDown}
         className={`relative aspect-[1512/982] w-full overflow-hidden ${canvasClassName}`}
       >
         <div
@@ -119,7 +133,17 @@ export function OdicciBrowserFrame({
         </div>
       </div>
     </div>
-    <CrcleScreenToolbar />
+    {demo ? (
+      <DemoToolbar
+        playing={demo.playing}
+        codeOn={demo.codeOn}
+        onPlay={demo.onPlay}
+        onDesign={demo.onDesign}
+        onCode={demo.onCode}
+      />
+    ) : (
+      <CrcleScreenToolbar />
+    )}
     </div>
   );
 }

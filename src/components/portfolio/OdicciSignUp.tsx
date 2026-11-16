@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { OdicciDemoChrome } from "@/components/portfolio/OdicciDemoChrome";
+import { useOdicciDemo } from "@/components/portfolio/useOdicciDemo";
 import { X } from "lucide-react";
 import { OdicciBrowserFrame } from "@/components/portfolio/OdicciBrowserFrame";
 import odicciLogo from "@/assets/odicci/odicci-logo-wordmark.png";
@@ -34,8 +36,45 @@ export function OdicciSignUp({
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
+  const [signedUp, setSignedUp] = useState(false);
+  const demo = useOdicciDemo();
   const isLogin = variant === "login";
+
+  useEffect(() => {
+    if (demo.paused || isLogin) return;
+    const ctx = demo.arm();
+    let cancelled = false;
+    const alive = () => !cancelled && ctx.alive();
+
+    const run = async () => {
+      await ctx.wait(420);
+      while (alive()) {
+        setSignedUp(false);
+        setFirstName("");
+        setLastName("");
+        setEmail("");
+        setPassword("");
+        await ctx.wait(480);
+        if (!alive()) return;
+        if (await ctx.typeInto('[data-demo-target="signup-first"]', "Ana")) await ctx.wait(180);
+        if (!alive()) return;
+        if (await ctx.typeInto('[data-demo-target="signup-last"]', "Aguiar")) await ctx.wait(180);
+        if (!alive()) return;
+        if (await ctx.typeInto('[data-demo-target="signup-email"]', "ana@odicci.com")) await ctx.wait(180);
+        if (!alive()) return;
+        if (await ctx.typeInto('[data-demo-target="signup-password"]', "studio-2026")) await ctx.wait(280);
+        if (!alive()) return;
+        if (await ctx.press('[data-demo-target="signup-submit"]')) await ctx.wait(1200);
+      }
+    };
+
+    void run();
+    return () => {
+      cancelled = true;
+      demo.clearTouch();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [demo.paused, demo.run, isLogin]);
 
   useEffect(() => {
     setVariant(initialVariant);
@@ -48,6 +87,15 @@ export function OdicciSignUp({
       theme={theme}
       onToggleTheme={toggleTheme}
       canvasClassName="bg-[#E6F4FE]"
+      stageRef={demo.screenRef}
+      onStagePointerDown={demo.stopFromPointer}
+      demo={{
+        playing: demo.playing,
+        codeOn: demo.codeOn,
+        onPlay: demo.replay,
+        onDesign: demo.design,
+        onCode: demo.code,
+      }}
     >
       <AuthArtboard
         variant={variant}
@@ -56,13 +104,18 @@ export function OdicciSignUp({
         lastName={lastName}
         email={email}
         password={password}
+        signedUp={signedUp}
         setFirstName={setFirstName}
         setLastName={setLastName}
         setEmail={setEmail}
         setPassword={setPassword}
+        onSubmit={() => {
+          if (firstName && lastName && email && password) setSignedUp(true);
+        }}
         onClose={onBack}
         onSwitchVariant={(v) => setVariant(v)}
       />
+      <OdicciDemoChrome screenRef={demo.screenRef} touch={demo.touch} codeOn={demo.codeOn} />
     </OdicciBrowserFrame>
   );
 }
@@ -74,10 +127,12 @@ function AuthArtboard({
   lastName,
   email,
   password,
+  signedUp,
   setFirstName,
   setLastName,
   setEmail,
   setPassword,
+  onSubmit,
   onClose,
   onSwitchVariant,
 }: {
@@ -87,10 +142,12 @@ function AuthArtboard({
   lastName: string;
   email: string;
   password: string;
+  signedUp: boolean;
   setFirstName: (v: string) => void;
   setLastName: (v: string) => void;
   setEmail: (v: string) => void;
   setPassword: (v: string) => void;
+  onSubmit: () => void;
   onClose?: () => void;
   onSwitchVariant: (v: AuthVariant) => void;
 }) {
@@ -206,10 +263,12 @@ function AuthArtboard({
               lastName={lastName}
               email={email}
               password={password}
+              signedUp={signedUp}
               setFirstName={setFirstName}
               setLastName={setLastName}
               setEmail={setEmail}
               setPassword={setPassword}
+              onSubmit={onSubmit}
               onLogin={() => onSwitchVariant("login")}
             />
           )}
@@ -330,10 +389,12 @@ function SignupModalBody({
   lastName,
   email,
   password,
+  signedUp,
   setFirstName,
   setLastName,
   setEmail,
   setPassword,
+  onSubmit,
   onLogin,
 }: {
   isDark: boolean;
@@ -344,10 +405,12 @@ function SignupModalBody({
   lastName: string;
   email: string;
   password: string;
+  signedUp: boolean;
   setFirstName: (v: string) => void;
   setLastName: (v: string) => void;
   setEmail: (v: string) => void;
   setPassword: (v: string) => void;
+  onSubmit: () => void;
   onLogin: () => void;
 }) {
   return (
@@ -391,6 +454,7 @@ function SignupModalBody({
                 onChange={setFirstName}
                 inputClass={inputClass}
                 labelClass={labelClass}
+                demoTarget="signup-first"
               />
               <Field
                 label="Last Name"
@@ -399,6 +463,7 @@ function SignupModalBody({
                 onChange={setLastName}
                 inputClass={inputClass}
                 labelClass={labelClass}
+                demoTarget="signup-last"
               />
             </div>
             <Field
@@ -409,6 +474,7 @@ function SignupModalBody({
               type="email"
               inputClass={inputClass}
               labelClass={labelClass}
+              demoTarget="signup-email"
               full
             />
             <Field
@@ -419,16 +485,19 @@ function SignupModalBody({
               type="password"
               inputClass={inputClass}
               labelClass={labelClass}
+              demoTarget="signup-password"
               full
             />
           </div>
 
           <button
             type="button"
+            data-demo-target="signup-submit"
+            onClick={onSubmit}
             className="inline-flex w-[266px] items-center justify-center rounded-[24px] px-[86px] py-2 text-[12px] font-normal text-white"
             style={{ background: ACCENT }}
           >
-            Sign Up
+            {signedUp ? "Account created" : "Sign Up"}
           </button>
         </div>
       </div>
@@ -459,6 +528,7 @@ function Field({
   labelClass,
   labelSize = "text-[12px]",
   full,
+  demoTarget,
 }: {
   label: string;
   placeholder: string;
@@ -469,12 +539,14 @@ function Field({
   labelClass: string;
   labelSize?: string;
   full?: boolean;
+  demoTarget?: string;
 }) {
   return (
     <label className={`flex min-w-0 flex-col gap-2 ${full ? "w-full" : "flex-1"}`}>
       <span className={`${labelSize} font-normal leading-[1.2] ${labelClass}`}>{label}</span>
       <input
         type={type}
+        data-demo-target={demoTarget}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
