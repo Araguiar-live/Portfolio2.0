@@ -533,7 +533,7 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
                     {isEditorial(project.slug) ? <EditorialSpecs copy={editorialCopy(project, activeTab, tabContent)} /> : null}
 
                     <div className={isEditorial(project.slug)
-                      ? "relative flex min-h-0 min-w-0 items-start justify-center overflow-auto rounded-[32px] border border-[rgba(0,0,0,0.06)] bg-[#F4F4F5]/80 p-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                      ? "relative ml-0 flex min-h-0 min-w-0 items-start justify-center overflow-auto rounded-[32px] border border-[rgba(0,0,0,0.06)] bg-[#F4F4F5]/80 p-3 lg:ml-12 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
                       : "relative flex w-full min-w-0 items-start justify-end overflow-visible"}>
                       <div className={isEditorial(project.slug)
                         ? "mx-auto flex w-full min-w-0 max-w-full items-start justify-center"
