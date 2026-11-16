@@ -93,25 +93,76 @@ function isFrame(el: HTMLElement, root: HTMLElement, rootRect: DOMRect) {
   const rect = el.getBoundingClientRect();
   if (rect.width < 16 || rect.height < 12) return false;
   if (rect.bottom < rootRect.top || rect.top > rootRect.bottom) return false;
+  if (rect.right < rootRect.left || rect.left > rootRect.right) return false;
   if (rect.width > rootRect.width * 0.96 && rect.height > rootRect.height * 0.42) return false;
   const style = getComputedStyle(el);
-  if (style.display === "none" || style.visibility === "hidden" || Number(style.opacity) === 0) return false;
+  if (style.display === "none" || style.visibility === "hidden" || Number(style.opacity) < 0.2) return false;
   const tag = el.tagName;
-  if (tag === "BUTTON" || tag === "A" || tag === "IMG" || tag === "INPUT" || tag === "SVG") return true;
+  if ((tag === "SPAN" || tag === "SVG" || tag === "IMG") && el.closest("button, a")) return false;
+  if (tag === "BUTTON" || tag === "A" || tag === "INPUT" || tag === "TEXTAREA") return true;
+  if ((tag === "IMG" || tag === "SVG") && Math.max(rect.width, rect.height) >= 28) return true;
   const role = el.getAttribute("role");
   if (role === "button" || role === "switch") return true;
-  if (tag === "P" || /^H[1-6]$/.test(tag)) return true;
-  if (tag === "SPAN" && style.display !== "inline" && rect.height <= 48) return true;
-  if (hasPaint(style) && rect.height <= 280) return true;
-  if (
-    (style.display === "flex" || style.display === "grid") &&
-    rect.height <= 64 &&
-    rect.width <= rootRect.width * 0.92 &&
-    (el.innerText || "").trim().length > 0
-  ) {
-    return true;
-  }
+  if ((tag === "P" || /^H[1-6]$/.test(tag)) && !el.closest("button, a")) return true;
+  if (tag === "SPAN" && style.display !== "inline" && rect.height <= 48 && (el.innerText || "").trim()) return true;
+  if (hasPaint(style) && rect.height <= 220 && tag !== "SPAN") return true;
   return false;
+}
+
+/** Keep the control, not every label and icon nested inside it. */
+function keepFrame(el: HTMLElement, frames: HTMLElement[]) {
+  const ancestor = frames.find((other) => other !== el && other.contains(el) && hasPaint(getComputedStyle(other)));
+  if (!ancestor) return true;
+  const tag = el.tagName;
+  if (tag === "SPAN" || tag === "IMG" || tag === "SVG") return false;
+  const outer = ancestor.getBoundingClientRect();
+  const inner = el.getBoundingClientRect();
+  if (tag === "INPUT" || tag === "TEXTAREA") {
+    return outer.height >= inner.height * 2.4 || outer.width >= inner.width * 1.25;
+  }
+  if ((tag === "BUTTON" || tag === "A") && inner.width < 36 && inner.height < 36) return false;
+  if (tag !== "BUTTON" && tag !== "A" && tag !== "INPUT" && tag !== "TEXTAREA" && tag !== "P" && !/^H[1-6]$/.test(tag)) {
+    return false;
+  }
+  if (tag === "P" || /^H[1-6]$/.test(tag)) {
+    return Math.abs(outer.width - inner.width) > 12 || Math.abs(outer.height - inner.height) > 12;
+  }
+  return true;
+}
+
+/** The part of a frame that is not clipped by a scrolling or overflow-hidden ancestor. */
+function visibleBounds(el: HTMLElement, root: HTMLElement, rect: DOMRect) {
+  let left = rect.left;
+  let top = rect.top;
+  let right = rect.right;
+  let bottom = rect.bottom;
+  let node = el.parentElement;
+  while (node) {
+    const style = getComputedStyle(node);
+    if (Number(style.opacity) < 0.2 || style.visibility === "hidden" || style.display === "none") return null;
+    if (style.overflowX !== "visible" || style.overflowY !== "visible") {
+      const clip = node.getBoundingClientRect();
+      left = Math.max(left, clip.left);
+      top = Math.max(top, clip.top);
+      right = Math.min(right, clip.right);
+      bottom = Math.min(bottom, clip.bottom);
+      if (right - left < 12 || bottom - top < 10) return null;
+    }
+    if (node === root) break;
+    node = node.parentElement;
+  }
+  const width = right - left;
+  const height = bottom - top;
+  if (width * height < rect.width * rect.height * 0.62) return null;
+  return { left, top, width, height };
+}
+
+/** Covered frames stay quiet. A frame counts only when its center is the thing under the pointer. */
+function isOnTop(el: HTMLElement, box: { left: number; top: number; width: number; height: number }) {
+  const hit = document.elementFromPoint(box.left + box.width / 2, box.top + box.height / 2);
+  if (!(hit instanceof Element)) return false;
+  if (hit.closest("[data-inspect-ui]")) return false;
+  return hit === el || el.contains(hit);
 }
 
 function readFrame(el: HTMLElement): Omit<Reading, "card"> {
@@ -146,7 +197,7 @@ function placeCard(el: HTMLElement, root: HTMLElement) {
   return { left, top };
 }
 
-/** Blueprint inspection for the phone tab: every frame outlined, frosted readout on hover. */
+/** Blueprint inspection for the phone tab: visible frames only, frosted readout on hover. */
 export function PhoneDevInspection({
   active,
   screenRef,
@@ -178,18 +229,22 @@ export function PhoneDevInspection({
       for (const node of root.querySelectorAll<HTMLElement>("*")) {
         if (!isFrame(node, root, rootRect)) continue;
         const rect = node.getBoundingClientRect();
+        const shown = visibleBounds(node, root, rect);
+        if (!shown || !isOnTop(node, shown)) continue;
         const style = getComputedStyle(node);
         next.push(node);
         nextBoxes.push({
-          top: rect.top - rootRect.top,
-          left: rect.left - rootRect.left,
-          width: rect.width,
-          height: rect.height,
+          top: shown.top - rootRect.top,
+          left: shown.left - rootRect.left,
+          width: shown.width,
+          height: shown.height,
           radius: style.borderRadius || "0px",
         });
       }
-      framesRef.current = next;
-      setBoxes(nextBoxes);
+      const kept = next.filter((node) => keepFrame(node, next));
+      const keptBoxes = nextBoxes.filter((_, index) => kept.includes(next[index]));
+      framesRef.current = kept;
+      setBoxes(keptBoxes);
       const hovered = hoverRef.current;
       const el = hovered == null ? null : next[hovered];
       if (el) setReading({ ...readFrame(el), card: placeCard(el, root) });
@@ -231,6 +286,8 @@ export function PhoneDevInspection({
     measure();
     const observer = new ResizeObserver(schedule);
     observer.observe(root);
+    const mutations = new MutationObserver(schedule);
+    mutations.observe(root, { subtree: true, childList: true });
     root.addEventListener("pointermove", onMove);
     root.addEventListener("pointerleave", onLeave);
     root.addEventListener("scroll", schedule, true);
@@ -238,6 +295,7 @@ export function PhoneDevInspection({
     return () => {
       cancelAnimationFrame(frame);
       observer.disconnect();
+      mutations.disconnect();
       root.removeEventListener("pointermove", onMove);
       root.removeEventListener("pointerleave", onLeave);
       root.removeEventListener("scroll", schedule, true);
@@ -257,8 +315,8 @@ export function PhoneDevInspection({
             className="absolute inset-0"
             style={{
               backgroundImage:
-                "linear-gradient(rgba(120, 176, 214, 0.38) 1px, transparent 1px), linear-gradient(90deg, rgba(120, 176, 214, 0.38) 1px, transparent 1px)",
-              backgroundSize: "12px 12px",
+                "linear-gradient(rgba(148, 176, 204, 0.12) 1px, transparent 1px), linear-gradient(90deg, rgba(148, 176, 204, 0.12) 1px, transparent 1px)",
+              backgroundSize: "20px 20px",
             }}
           />
           {boxes.map((box, index) => (
@@ -273,8 +331,8 @@ export function PhoneDevInspection({
                 borderRadius: box.radius,
                 boxShadow:
                   hover === index
-                    ? "0 0 0 1.5px rgba(37, 99, 235, 0.95)"
-                    : "0 0 0 1px rgba(96, 165, 250, 0.72)",
+                    ? "0 0 0 1px rgba(37, 99, 235, 0.72)"
+                    : "0 0 0 1px rgba(125, 168, 206, 0.34)",
               }}
             />
           ))}
