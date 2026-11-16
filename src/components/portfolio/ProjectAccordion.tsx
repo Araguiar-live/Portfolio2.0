@@ -184,7 +184,7 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
         </svg>
       </div>
       <div
-        className="folder-face pointer-events-auto relative border border-[rgba(0,0,0,0.08)]"
+        className="folder-face pointer-events-auto relative overflow-hidden rounded-[12px] border border-[rgba(0,0,0,0.08)]"
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
       >
