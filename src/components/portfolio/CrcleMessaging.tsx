@@ -34,7 +34,7 @@ import userFilledIcon from "@/assets/crcle/onboarding/user-filled.svg";
 import serenaPortrait from "@/assets/crcle/serena-portrait.png";
 import wifiIcon from "@/assets/crcle/wifi.svg";
 import { ChatListItem, type ChatConversation } from "@/components/portfolio/ChatListItem";
-import { CrcleScreenToolbar } from "@/components/portfolio/CrcleDemoToolbar";
+import { DemoToolbar } from "@/components/portfolio/CrcleDemoToolbar";
 import { CrclePhoneFrame, CrcleThemeToggle } from "@/components/portfolio/CrclePhoneFrame";
 import { useCrcleBroadcast } from "@/components/portfolio/crcleBroadcast";
 import {
@@ -274,6 +274,26 @@ export function CrcleMessaging({
   const [signalCard, setSignalCard] = useState<SignalCardModel | null>(null);
   const receivedSignalTimer = useRef<number | null>(null);
   const areaConnectedTimer = useRef<number | null>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const [demoPaused, setDemoPaused] = useState(false);
+  const [demoRun, setDemoRun] = useState(0);
+  const [codeOn, setCodeOn] = useState(false);
+  const [touch, setTouch] = useState<{ x: number; y: number; pressing: boolean } | null>(null);
+  const demoGen = useRef(0);
+  const demoPausedRef = useRef(false);
+  demoPausedRef.current = demoPaused;
+
+  const pauseDemo = () => {
+    demoGen.current += 1;
+    setDemoPaused(true);
+    setTouch(null);
+  };
+
+  const replayDemo = () => {
+    setCodeOn(false);
+    setDemoPaused(false);
+    setDemoRun((n) => n + 1);
+  };
 
   const clearReceivedSignalTimer = useCallback(() => {
     if (receivedSignalTimer.current != null) {
@@ -484,6 +504,167 @@ export function CrcleMessaging({
     setNotificationsOpen(true);
   }, []);
 
+  useEffect(() => {
+    if (demoPaused) return;
+    const gen = ++demoGen.current;
+    let cancelled = false;
+    const alive = () => !cancelled && demoGen.current === gen && !demoPausedRef.current;
+    const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+    const find = (selector: string) =>
+      rootRef.current?.querySelector<HTMLElement>(selector) ?? null;
+    const findButton = (label: string) =>
+      [...(rootRef.current?.querySelectorAll<HTMLElement>("button") ?? [])].find(
+        (button) => button.textContent?.trim() === label,
+      ) ?? null;
+
+    const pointAt = async (el: HTMLElement) => {
+      await wait(280);
+      if (!alive()) return false;
+      const rect = el.getBoundingClientRect();
+      setTouch({
+        x: rect.left + rect.width / 2,
+        y: rect.top + rect.height / 2,
+        pressing: false,
+      });
+      await wait(420);
+      if (!alive()) return false;
+      setTouch((current) => (current ? { ...current, pressing: true } : current));
+      await wait(160);
+      if (!alive()) return false;
+      setTouch((current) => (current ? { ...current, pressing: false } : current));
+      return true;
+    };
+
+    const until = async (selector: string, timeout = 5000) => {
+      const start = Date.now();
+      while (alive() && Date.now() - start < timeout) {
+        const el = find(selector);
+        if (el) return el;
+        await wait(120);
+      }
+      return null;
+    };
+
+    const run = async () => {
+      while (alive()) {
+        setPhase("inbox");
+        setOnboardingOpen(true);
+        setNotificationsOpen(true);
+        setActiveMatch(null);
+        setActiveConversation(null);
+        setMenuOpen(false);
+        setLocusOpen(false);
+        setAttachOpen(false);
+        setLocusDraft(null);
+        setSignalCard(null);
+        await wait(560);
+        if (!alive()) return;
+
+        const close = await until('[aria-label="Close onboarding"]');
+        if (close && (await pointAt(close)) && alive()) {
+          setOnboardingOpen(false);
+          setNotificationsOpen(true);
+          await wait(700);
+        }
+        if (!alive()) return;
+
+        const person = find('[aria-label^="Open signal for"]');
+        if (person && (await pointAt(person)) && alive()) {
+          openSignal(CONNECTION_PROFILES[0]);
+          await wait(820);
+        }
+        if (!alive()) return;
+
+        for (let swipe = 0; swipe < 2; swipe += 1) {
+          const next = find('[aria-label="Next category"]');
+          if (next && (await pointAt(next)) && alive()) {
+            next.click();
+            await wait(520);
+          }
+        }
+        if (!alive()) return;
+
+        const accept = findButton("Accept");
+        if (accept && (await pointAt(accept)) && alive()) {
+          acceptSignal(CONNECTION_PROFILES[0].id);
+          await wait(700);
+        }
+        if (!alive()) return;
+
+        const respond = await until('[aria-label="Show response options"]', 4500);
+        if (respond && (await pointAt(respond)) && alive()) {
+          respond.click();
+          await wait(420);
+        }
+        if (!alive()) return;
+        const down = await until('[aria-label="I\'m down"]', 1200);
+        if (down && (await pointAt(down)) && alive()) {
+          down.click();
+          await wait(900);
+        }
+        if (!alive()) return;
+
+        const plus = find('[aria-label="Open attach menu"]');
+        if (plus && (await pointAt(plus)) && alive()) {
+          setAttachOpen(true);
+          setLocusOpen(false);
+          await wait(420);
+        }
+        if (!alive()) return;
+        const locus = await until('[aria-label="Signal an activity"]');
+        if (locus && (await pointAt(locus)) && alive()) {
+          setLocusOpen(true);
+          await wait(520);
+        }
+        if (!alive()) return;
+
+        const activity = await until('[aria-label="Coffee"]');
+        if (activity && (await pointAt(activity)) && alive()) {
+          activity.click();
+          await wait(420);
+        }
+        const venue = findButton("Venue");
+        if (venue && (await pointAt(venue)) && alive()) {
+          venue.click();
+          await wait(420);
+        }
+        const tomorrow = findButton("Tomorrow");
+        if (tomorrow && (await pointAt(tomorrow)) && alive()) {
+          tomorrow.click();
+          await wait(320);
+        }
+        const morning = find('[aria-label="Morning"]');
+        if (morning && (await pointAt(morning)) && alive()) {
+          morning.click();
+          await wait(320);
+        }
+        const send = find('[aria-label="Send Signal"]');
+        if (send && (await pointAt(send)) && alive()) {
+          send.click();
+          await wait(800);
+        }
+        if (!alive()) return;
+
+        const edit = await until('[aria-label="Edit signal"]');
+        if (edit && (await pointAt(edit)) && alive()) {
+          edit.click();
+          await wait(420);
+        }
+        const trash = await until('[aria-label="Delete signal"]', 1200);
+        if (trash && (await pointAt(trash)) && alive()) {
+          trash.click();
+          await wait(900);
+        }
+      }
+    };
+
+    void run();
+    return () => {
+      cancelled = true;
+      setTouch(null);
+    };
+  }, [acceptSignal, demoPaused, demoRun, openSignal]);
+
   const areaDropdownOpen =
     nearbyStep === null && (notifyOverlayOpen || areaPhase === "screen" || areaPhase === "drawer");
 
@@ -492,9 +673,15 @@ export function CrcleMessaging({
   }, []);
 
   return (
-    <div className="relative ml-auto flex w-fit flex-col items-center">
+    <div ref={rootRef} className="relative ml-auto flex w-fit flex-col items-center">
       <CrcleThemeToggle light={isLightMode} onToggle={toggleLight} />
 
+      <div
+        onPointerDownCapture={() => {
+          if (demoPausedRef.current) return;
+          pauseDemo();
+        }}
+      >
       <CrclePhoneFrame
         light={isLightMode}
         overlay={
@@ -705,7 +892,33 @@ export function CrcleMessaging({
         </AnimatePresence>
 
       </CrclePhoneFrame>
-      <CrcleScreenToolbar />
+      </div>
+      <DemoToolbar
+        playing={!demoPaused && !codeOn}
+        codeOn={codeOn}
+        onPlay={replayDemo}
+        onDesign={() => {
+          setCodeOn(false);
+          pauseDemo();
+        }}
+        onCode={() => {
+          setCodeOn(true);
+          pauseDemo();
+        }}
+      />
+      {touch && !demoPaused ? (
+        <motion.div
+          aria-hidden
+          className="pointer-events-none fixed z-[90]"
+          initial={false}
+          animate={{ left: touch.x, top: touch.y, scale: touch.pressing ? 0.78 : 1 }}
+          transition={{ type: "spring", stiffness: 280, damping: 24, mass: 0.6 }}
+          style={{ x: "-50%", y: "-50%" }}
+        >
+          <span className="absolute left-1/2 top-1/2 size-11 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/35 animate-ping" />
+          <span className="relative block size-7 rounded-full border border-white/80 bg-white/90 shadow-[0_8px_24px_rgba(0,0,0,0.28)]" />
+        </motion.div>
+      ) : null}
     </div>
   );
 }
