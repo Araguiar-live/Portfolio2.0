@@ -80,9 +80,13 @@ interface Props {
   count: number;
 }
 
-/** Tab rise above the folder body. The next folder covers this same distance. */
+/** Tab rise above the folder body. */
 const TAB_H = 24;
-const FOLDER_OVERLAP = 24;
+/**
+ * Pull the next folder up by the tab plus 24px, so its body — not only its tab —
+ * covers 24px of the folder behind it. A 6px hover lift then leaves 18px tucked.
+ */
+const FOLDER_OVERLAP = TAB_H + 24;
 const TAB_FLAT = 160;
 const TAB_SLOPE = 20;
 const TAB_SHIFT = [24, 160, 296] as const;
