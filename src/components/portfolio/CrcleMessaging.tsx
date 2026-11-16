@@ -1,6 +1,5 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { createPortal } from "react-dom";
-import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import alexPortrait from "@/assets/crcle/alex-portrait.png";
 import avatarImg from "@/assets/crcle/avatar.png";
 import emmaPortrait from "@/assets/crcle/emma-rodriguez-portrait.jpg";
@@ -36,9 +35,7 @@ import serenaPortrait from "@/assets/crcle/serena-portrait.png";
 import wifiIcon from "@/assets/crcle/wifi.svg";
 import { ChatListItem, type ChatConversation } from "@/components/portfolio/ChatListItem";
 import { DemoToolbar } from "@/components/portfolio/CrcleDemoToolbar";
-import { crcleMessagingInspect, crcleMessagingInspectFocus } from "@/components/portfolio/crcleInspect";
-import { InspectHotspotOverlay } from "@/components/portfolio/firstDesign/InspectHotspotOverlay";
-import { InspectorTetheredSpecs } from "@/components/portfolio/firstDesign/InspectorTetheredSpecs";
+import { PhoneDevInspection } from "@/components/portfolio/inspect/PhoneDevInspection";
 import { CrclePhoneFrame, CrcleThemeToggle } from "@/components/portfolio/CrclePhoneFrame";
 import { useCrcleBroadcast } from "@/components/portfolio/crcleBroadcast";
 import {
@@ -279,11 +276,10 @@ export function CrcleMessaging({
   const receivedSignalTimer = useRef<number | null>(null);
   const areaConnectedTimer = useRef<number | null>(null);
   const rootRef = useRef<HTMLDivElement>(null);
+  const screenRef = useRef<HTMLDivElement>(null);
   const [demoPaused, setDemoPaused] = useState(false);
   const [demoRun, setDemoRun] = useState(0);
   const [codeOn, setCodeOn] = useState(false);
-  const [inspectId, setInspectId] = useState<string | null>(null);
-  const messagingInspect = useMemo(() => crcleMessagingInspect(MOCK_CONVERSATIONS), []);
   const [touch, setTouch] = useState<{ x: number; y: number; pressing: boolean } | null>(null);
   const demoGen = useRef(0);
   const demoPausedRef = useRef(false);
@@ -704,6 +700,7 @@ export function CrcleMessaging({
           </AnimatePresence>
         }
       >
+        <div ref={screenRef} className="relative h-full min-h-0 w-full">
         <AnimatePresence mode="wait">
           {phase === "chat" ? (
             <motion.div
@@ -896,17 +893,10 @@ export function CrcleMessaging({
             />
           ) : null}
         </AnimatePresence>
-        {codeOn && !onboardingOpen && phase === "inbox" ? (
-          <InspectHotspotOverlay
-            className="z-[70]"
-            annotations={messagingInspect}
-            highlightHotspotId={inspectId}
-            onHotspotHover={setInspectId}
-          />
-        ) : null}
-
+        </div>
       </CrclePhoneFrame>
       </div>
+      <PhoneDevInspection active={codeOn && !onboardingOpen} screenRef={screenRef} />
       <DemoToolbar
         playing={!demoPaused && !codeOn}
         codeOn={codeOn}
@@ -917,7 +907,6 @@ export function CrcleMessaging({
         }}
         onCode={() => {
           setCodeOn(true);
-          setInspectId(null);
           pauseDemo();
           setOnboardingOpen(false);
           setPhase("inbox");
@@ -926,20 +915,6 @@ export function CrcleMessaging({
           setAttachOpen(false);
         }}
       />
-      {codeOn && !onboardingOpen && phase === "inbox" && typeof document !== "undefined"
-        ? createPortal(
-            <div className="pointer-events-none fixed inset-0 z-[45]">
-              <InspectorTetheredSpecs
-                annotations={crcleMessagingInspectFocus(messagingInspect, inspectId)}
-                frameRole="Messaging inbox — each row is a person you can open."
-                artboardRef={rootRef}
-                activeId={inspectId}
-                onActiveChange={setInspectId}
-              />
-            </div>,
-            document.body,
-          )
-        : null}
       {touch && !demoPaused ? (
         <>
           <span

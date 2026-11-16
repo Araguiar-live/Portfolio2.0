@@ -1,7 +1,6 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronDown } from "lucide-react";
-import { useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
-import { createPortal } from "react-dom";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import batteryIcon from "@/assets/crcle/battery.svg";
 import cellularIcon from "@/assets/crcle/cellular.svg";
 import crcleLogo from "@/assets/crcle/crcle-logo.svg";
@@ -76,10 +75,7 @@ import shareIcon from "@/assets/crcle/share.svg";
 import shareInnerIcon from "@/assets/crcle/share-inner.svg";
 import wifiIcon from "@/assets/crcle/wifi.svg";
 import { DemoToolbar } from "@/components/portfolio/CrcleDemoToolbar";
-import { crcleInspectForScreen } from "@/components/portfolio/crcleInspect";
-import { getDevInspection, setDevInspection, subscribeDevInspection } from "@/components/portfolio/devInspection";
-import { InspectHotspotOverlay } from "@/components/portfolio/firstDesign/InspectHotspotOverlay";
-import { InspectorTetheredSpecs } from "@/components/portfolio/firstDesign/InspectorTetheredSpecs";
+import { PhoneDevInspection } from "@/components/portfolio/inspect/PhoneDevInspection";
 import { CrclePhoneFrame, CrcleThemeToggle } from "@/components/portfolio/CrclePhoneFrame";
 import { useCrclePhoneLight } from "@/lib/crcle-phone-theme";
 import { CrcleMoreButton, CrclePhoneOverlay, CrclePrimaryDock } from "@/components/portfolio/CrcleChrome";
@@ -270,8 +266,7 @@ export function CrcleProfile({
   const dismissOnboarding = () => setOnboardingOpen(false);
   const screenRef = useRef<HTMLDivElement>(null);
   const [demoPaused, setDemoPaused] = useState(false);
-  const [inspectId, setInspectId] = useState<string | null>(null);
-  const devInspection = useSyncExternalStore(subscribeDevInspection, getDevInspection, () => false);
+  const [devInspection, setDevInspection] = useState(false);
   const [demoRun, setDemoRun] = useState(0);
   const [touch, setTouch] = useState<{ x: number; y: number; pressing: boolean } | null>(null);
   const demoGen = useRef(0);
@@ -286,19 +281,16 @@ export function CrcleProfile({
 
   const selectDesign = () => {
     setDevInspection(false);
-    setInspectId(null);
     pauseDemo();
   };
 
   const selectCode = () => {
-    setInspectId(null);
     setDevInspection(true);
     pauseDemo();
   };
 
   const replayDemo = () => {
     setDevInspection(false);
-    setInspectId(null);
     setOnboardingOpen(true);
     setOverlay(null);
     setDemoPaused(false);
@@ -615,14 +607,6 @@ export function CrcleProfile({
               />
             ) : null}
           </AnimatePresence>
-          {devInspection ? (
-            <InspectHotspotOverlay
-              className="z-[70]"
-              annotations={crcleInspectForScreen(onboardingOpen, overlay)}
-              highlightHotspotId={inspectId}
-              onHotspotHover={setInspectId}
-            />
-          ) : null}
           {touch && !demoPaused ? (
             <>
               <span
@@ -646,6 +630,7 @@ export function CrcleProfile({
           ) : null}
         </div>
       </CrclePhoneFrame>
+      <PhoneDevInspection active={devInspection} screenRef={screenRef} />
       <DemoToolbar
         playing={!demoPaused}
         codeOn={devInspection}
@@ -653,20 +638,6 @@ export function CrcleProfile({
         onDesign={selectDesign}
         onCode={selectCode}
       />
-      {devInspection && typeof document !== "undefined"
-        ? createPortal(
-            <div className="pointer-events-none fixed inset-0 z-[45]">
-              <InspectorTetheredSpecs
-                annotations={crcleInspectForScreen(onboardingOpen, overlay)}
-                frameRole="CRCLE profile — live prototype under the work toolbar."
-                artboardRef={screenRef}
-                activeId={inspectId}
-                onActiveChange={setInspectId}
-              />
-            </div>,
-            document.body,
-          )
-        : null}
     </div>
   );
 }
