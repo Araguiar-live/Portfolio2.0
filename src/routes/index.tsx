@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { motion, useAnimationControls, useReducedMotion } from "framer-motion";
+import { motion, useAnimationControls, useInView, useReducedMotion } from "framer-motion";
 import { useCallback, useEffect, useRef, useState } from "react";
 import girlPleaseLogo from "@/assets/girl-please.svg";
 import designToggleKnob from "@/assets/portfolio/design-toggle-knob.svg";
@@ -255,6 +255,72 @@ const DOCK_ITEMS = [
   { label: "Od", slug: "odicci" },
 ];
 
+const HEADLINE_LINES = [
+  {
+    words: ["Hi.."],
+    className:
+      "block max-md:relative max-md:left-[42px] max-sm:relative max-sm:left-[42px]",
+  },
+  {
+    words: ["I", "do", "Design."],
+    className: "block max-md:mt-0.5 max-md:text-[32px] max-md:leading-[38px] max-sm:mt-0.5",
+  },
+] as const;
+
+/** Words land one after another with a spring, then replay the next time the headline appears. */
+function BouncyHeadline() {
+  const reduceMotion = useReducedMotion();
+  const ref = useRef<HTMLHeadingElement>(null);
+  const inView = useInView(ref, { amount: 0.6 });
+  let order = 0;
+
+  return (
+    <h1
+      ref={ref}
+      aria-label="Hi.. I do Design."
+      className="text-center text-[40px] font-medium leading-[48px] tracking-[-1.5px] text-[#111] max-md:text-[34px] max-md:leading-[41px] max-sm:font-normal max-sm:tracking-normal sm:text-[48px] sm:leading-[56px]"
+    >
+      {HEADLINE_LINES.map((line) => (
+        <span key={line.words[0]} className={line.className}>
+          {line.words.map((word, index) => {
+            const delay = order * 0.32;
+            order += 1;
+            return (
+              <motion.span
+                key={word}
+                className={
+                  index === line.words.length - 1
+                    ? "inline-block origin-bottom"
+                    : "mr-[0.28em] inline-block origin-bottom"
+                }
+                initial={false}
+                animate={
+                  reduceMotion || inView
+                    ? { opacity: 1, y: 0, scale: 1, rotate: 0 }
+                    : { opacity: 0, y: 28, scale: 0.45, rotate: -8 }
+                }
+                transition={
+                  reduceMotion
+                    ? { duration: 0 }
+                    : {
+                        type: "spring",
+                        stiffness: 640,
+                        damping: 11,
+                        mass: 0.48,
+                        delay: inView ? delay : 0,
+                      }
+                }
+              >
+                {word}
+              </motion.span>
+            );
+          })}
+        </span>
+      ))}
+    </h1>
+  );
+}
+
 function Index() {
   const [openSlug, setOpenSlug] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -363,15 +429,7 @@ function Index() {
               <div className="flex items-end justify-center gap-[15px] max-md:gap-2.5 max-sm:gap-2.5">
                 <div className="hidden w-[87px] shrink-0 pb-2.5 sm:block" aria-hidden />
 
-                <h1 className="text-center text-[40px] font-medium leading-[48px] tracking-[-1.5px] text-[#111] max-md:text-[34px] max-md:leading-[41px] max-sm:font-normal max-sm:tracking-normal sm:text-[48px] sm:leading-[56px]">
-                  {/* Mobile centres "Hi.." on the screen, not on the headline + toggle row. */}
-                  <span className="block max-md:relative max-md:left-[42px] max-sm:relative max-sm:left-[42px]">
-                    Hi..
-                  </span>
-                  <span className="block max-md:mt-0.5 max-md:text-[32px] max-md:leading-[38px] max-sm:mt-0.5">
-                    I do Design.
-                  </span>
-                </h1>
+                <BouncyHeadline />
 
                 <div
                   className={`w-[87px] shrink-0 origin-center pb-2.5 max-md:scale-[0.77] max-sm:pb-[3px] ${chromeClass}`}
