@@ -455,6 +455,12 @@
   backface-visibility: visible;
 }
 
+/* 15% more blur than the 20px spatial glass. No transform on this node — it would flatten the frost. */
+.spatial-dot-frost {
+  -webkit-backdrop-filter: blur(23px) saturate(180%);
+  backdrop-filter: blur(23px) saturate(180%);
+}
+
 .folder-shell {
   border: none;
   outline: none;

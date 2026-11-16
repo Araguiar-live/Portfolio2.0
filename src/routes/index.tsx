@@ -472,7 +472,7 @@ function Index() {
               />
               {/* Figma 2305:66727 — 24px under the accordion, painted behind it */}
               <div className="pointer-events-auto relative z-0 -mt-6 flex justify-center max-md:-mt-6">
-                <div className="-translate-x-6 scale-[1.15]">
+                <div className="-ml-6">
                   <SpatialDotBadge />
                 </div>
               </div>

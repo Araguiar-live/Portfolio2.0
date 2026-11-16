@@ -101,20 +101,14 @@ export function SpatialDotBadge({ className }: Props) {
   };
 
   return (
-    <motion.div
+    <div
       ref={rootRef}
       data-node-id="2305:66727"
       data-name="spatial-dot-badge"
       className={cn(
-        "spatial-layer relative flex size-[88px] cursor-grab flex-col items-start gap-4 rounded-[64px] border border-solid border-[rgba(24,116,170,0.2)] bg-gradient-to-l from-[rgba(3,104,199,0.4)] to-[rgba(19,136,129,0.24)] p-5 active:cursor-grabbing",
+        "spatial-dot-frost relative size-[101.2px] cursor-grab rounded-[64px] border border-solid border-[rgba(24,116,170,0.2)] bg-gradient-to-l from-[rgba(3,104,199,0.4)] to-[rgba(19,136,129,0.24)] active:cursor-grabbing",
         className,
       )}
-      style={{
-        rotate: rotateSpring,
-        rotateX: tiltX,
-        rotateY: tiltY,
-        transformStyle: "preserve-3d",
-      }}
       onPointerEnter={() => setHovering(true)}
       onPointerLeave={() => {
         setHovering(false);
@@ -128,6 +122,18 @@ export function SpatialDotBadge({ className }: Props) {
       role="img"
       aria-label="Interactive spatial dot badge"
     >
+      <motion.div
+        className="absolute left-1/2 top-1/2 flex size-[88px] flex-col items-start gap-4 p-5"
+        style={{
+          x: "-50%",
+          y: "-50%",
+          scale: 1.15,
+          rotate: rotateSpring,
+          rotateX: tiltX,
+          rotateY: tiltY,
+          transformStyle: "preserve-3d",
+        }}
+      >
       <div className="flex w-full shrink-0 flex-col gap-4" style={{ transformStyle: "preserve-3d" }}>
         {[
           DOTS.slice(0, 2),
@@ -159,6 +165,7 @@ export function SpatialDotBadge({ className }: Props) {
           </div>
         ))}
       </div>
-    </motion.div>
+      </motion.div>
+    </div>
   );
 }
