@@ -3,6 +3,7 @@ import { ArrowUpRight, Briefcase, ChevronLeft, ChevronRight, Layers, Target, Tre
 import { forwardRef, useEffect, useLayoutEffect, useRef, useState, type MutableRefObject } from "react";
 import { createPortal } from "react-dom";
 import bendingSpoonsMark from "@/assets/bending-spoons-mark.svg";
+import odicciMark from "@/assets/odicci-mark.svg";
 import { CrcleVideoCard } from "@/components/portfolio/CrcleVideoCard";
 import { DesktopOnlyPill, useDesktopOnlyNudge } from "@/components/portfolio/DesktopOnlyNudge";
 import { MockupGradientRing } from "@/components/portfolio/MockupGradientRing";
@@ -80,7 +81,10 @@ const TAB_FLAT = 160;
 const TAB_SLOPE = 20;
 const TAB_SHIFT = [24, 160, 296] as const;
 const CORNER = 8;
-const BENDING_SPOONS_MARK = { width: 58.843, height: 31.7802 };
+const FOLDER_MARKS: Record<string, { src: string; width: number; height: number }> = {
+  "first-design": { src: bendingSpoonsMark, width: 58.843, height: 31.7802 },
+  odicci: { src: odicciMark, width: 45, height: 49.0909 },
+};
 
 /** Horizontal center of the sloped tab, matching the outline's clamp on narrow rows. */
 function tabCenterX(width: number, shift: number) {
@@ -342,17 +346,17 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
       >
-      {project.slug === "first-design" && outline ? (
+      {outline && FOLDER_MARKS[project.slug] ? (
         <img
-          src={bendingSpoonsMark}
+          src={FOLDER_MARKS[project.slug].src}
           alt=""
-          width={BENDING_SPOONS_MARK.width}
-          height={BENDING_SPOONS_MARK.height}
+          width={FOLDER_MARKS[project.slug].width}
+          height={FOLDER_MARKS[project.slug].height}
           className="pointer-events-none absolute z-20 max-w-none"
           style={{
-            width: BENDING_SPOONS_MARK.width,
-            height: BENDING_SPOONS_MARK.height,
-            left: tabCenterX(outline.w, tabShift) - BENDING_SPOONS_MARK.width / 2,
+            width: FOLDER_MARKS[project.slug].width,
+            height: FOLDER_MARKS[project.slug].height,
+            left: tabCenterX(outline.w, tabShift) - FOLDER_MARKS[project.slug].width / 2,
             top: TAB_H + 6,
           }}
         />
