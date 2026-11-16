@@ -41,7 +41,7 @@ export function Dock({ items, onSelect, activeSlug, className }: Props) {
         layout
         transition={spring}
         onMouseLeave={() => setHovered(null)}
-        className="dock-glass dock-glass-work pointer-events-auto relative flex items-center justify-center overflow-hidden rounded-full p-3"
+        className="dock-glass pointer-events-auto relative flex items-center justify-center overflow-hidden rounded-full p-3"
         style={{ gap: GAP }}
       >
         <div

@@ -95,6 +95,34 @@ function folderPoints(width: number, height: number, index: number): Array<[numb
   ];
 }
 
+/** Pick the arc that cuts the sharp corner off, rather than bowing out past it. */
+function filletSweep(
+  from: [number, number],
+  to: [number, number],
+  corner: [number, number],
+  radius: number,
+): 0 | 1 {
+  const dx = to[0] - from[0];
+  const dy = to[1] - from[1];
+  const chord = Math.hypot(dx, dy) || 1;
+  const height = Math.sqrt(Math.max(0, radius * radius - (chord / 2) ** 2));
+  const midX = (from[0] + to[0]) / 2;
+  const midY = (from[1] + to[1]) / 2;
+  const px = -dy / chord;
+  const py = dx / chord;
+  const closer = (sweep: 0 | 1) => {
+    const cx = midX + (sweep ? 1 : -1) * height * px;
+    const cy = midY + (sweep ? 1 : -1) * height * py;
+    const vx = midX - cx;
+    const vy = midY - cy;
+    const vl = Math.hypot(vx, vy) || 1;
+    const ax = cx + (vx / vl) * radius;
+    const ay = cy + (vy / vl) * radius;
+    return (ax - corner[0]) ** 2 + (ay - corner[1]) ** 2;
+  };
+  return closer(1) < closer(0) ? 1 : 0;
+}
+
 /** 4px circular fillet on every corner of the folder outline. */
 function roundedFolderPath(points: Array<[number, number]>, radius = 4): string {
   const n = points.length;
@@ -124,8 +152,10 @@ function roundedFolderPath(points: Array<[number, number]>, radius = 4): string 
     const x2 = curr[0] + v2x * offset;
     const y2 = curr[1] + v2y * offset;
     d += i === 0 ? `M ${x1} ${y1}` : ` L ${x1} ${y1}`;
-    if (arc > 0.2) d += ` A ${arc} ${arc} 0 0 ${cross > 0 ? 1 : 0} ${x2} ${y2}`;
-    else d += ` L ${x2} ${y2}`;
+    if (arc > 0.2) {
+      const sweep = filletSweep([x1, y1], [x2, y2], curr, arc);
+      d += ` A ${arc} ${arc} 0 0 ${sweep} ${x2} ${y2}`;
+    } else d += ` L ${x2} ${y2}`;
   }
   return `${d} Z`;
 }
@@ -211,14 +241,14 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
       const points = folderPoints(width, height, index);
       const path = roundedFolderPath(points);
       el.parentElement?.style.setProperty("--folder-tab", `${points[0][1]}px`);
-      setClipPath(`path("${path}")`);
+      setClipPath(`url(#folder-clip-${project.slug})`);
       setOutline(path);
     };
     measure();
     const observer = new ResizeObserver(measure);
     observer.observe(el);
     return () => observer.disconnect();
-  }, [index, isOpen]);
+  }, [index, isOpen, project.slug]);
 
   return (
     <div
@@ -231,11 +261,12 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
     >
       <div
         ref={shapeRef}
-        className="portfolio-mobile-shake-root spatial-glass pointer-events-auto relative bg-white/70 py-[9px] max-md:py-[7px]"
+        className="portfolio-mobile-shake-root spatial-glass pointer-events-auto relative py-[9px] max-md:py-[7px]"
         style={{
           clipPath,
-          WebkitBackdropFilter: "blur(20px) saturate(180%)",
-          backdropFilter: "blur(20px) saturate(180%)",
+          backgroundColor: "rgba(255,255,255,0.805)",
+          WebkitBackdropFilter: "blur(23px) saturate(180%)",
+          backdropFilter: "blur(23px) saturate(180%)",
         }}
       >
       {/* Row header — Figma 530:151817 */}
@@ -434,12 +465,15 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
           aria-hidden
           className="pointer-events-none absolute inset-0 z-[2] h-full w-full overflow-visible"
         >
+          <clipPath id={`folder-clip-${project.slug}`} clipPathUnits="userSpaceOnUse">
+            <path d={outline} />
+          </clipPath>
           <path
             d={outline}
             fill="none"
             stroke="#d1d5db"
             strokeWidth="1"
-            strokeLinejoin="miter"
+            strokeLinejoin="round"
             vectorEffect="non-scaling-stroke"
           />
         </svg>
