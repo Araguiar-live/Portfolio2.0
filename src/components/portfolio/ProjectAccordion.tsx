@@ -96,23 +96,8 @@ const FOLDER_MARKS: Record<string, { src: string; width: number; height: number 
   "first-design": { src: bendingSpoonsMark, width: 58.843, height: 31.7802 },
   odicci: { src: odicciMark, width: 45, height: 49.0909 },
 };
-/** 60% smaller than the Figma mark, sitting 4px higher than the original 6px gap. */
+/** 60% smaller than the Figma mark. */
 const FOLDER_MARK_SCALE = 0.4;
-const FOLDER_MARK_TOP = TAB_H + 2;
-
-/** Horizontal center of the sloped tab, matching the outline's clamp on narrow rows. */
-function tabCenterX(width: number, shift: number) {
-  const margin = CORNER;
-  let slope = TAB_SLOPE;
-  let flat = TAB_FLAT;
-  let left = Math.max(margin, shift);
-  const room = width - margin - left - slope * 2;
-  if (flat > room) {
-    left = margin;
-    flat = Math.max(48, width - margin * 2 - slope * 2);
-  }
-  return left + slope + flat / 2;
-}
 /** Outer corners of the whole stack, not each file. */
 const STACK_CORNER = 24;
 
@@ -340,24 +325,6 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
       >
-      {outline && FOLDER_MARKS[project.slug] ? (
-        <img
-          src={FOLDER_MARKS[project.slug].src}
-          alt=""
-          width={FOLDER_MARKS[project.slug].width * FOLDER_MARK_SCALE}
-          height={FOLDER_MARKS[project.slug].height * FOLDER_MARK_SCALE}
-          className="pointer-events-none absolute z-20 max-w-none"
-          style={{
-            width: FOLDER_MARKS[project.slug].width * FOLDER_MARK_SCALE,
-            height: FOLDER_MARKS[project.slug].height * FOLDER_MARK_SCALE,
-            left:
-              tabCenterX(outline.w, tabShift) -
-              (FOLDER_MARKS[project.slug].width * FOLDER_MARK_SCALE) / 2,
-            top: FOLDER_MARK_TOP,
-            opacity: 0.6,
-          }}
-        />
-      ) : null}
       {/* Row header — Figma 530:151817. Closed sheet is 20% taller than the 162px desktop / 130px phone rows; overlap stays 48px. */}
       <div
         className="group relative flex w-full items-center justify-between gap-7 border-0 px-[37px] py-[57.2px] text-left outline-none transition-[background] duration-300 max-md:flex-col max-md:items-stretch max-md:gap-[15px] max-md:px-5 max-md:py-[36px] max-sm:gap-[15px] max-sm:px-5 max-sm:py-[36px]"
@@ -373,7 +340,20 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
           className="absolute inset-0 z-0 cursor-pointer"
         />
         <div className="relative z-10 flex min-w-0 flex-1 items-center gap-[37px] pointer-events-none max-md:gap-3 max-sm:gap-3">
-          <span className="folder-muted shrink-0 text-[16px] font-medium tracking-[1px] tabular-nums max-md:text-[10px] max-md:font-normal max-md:tracking-normal max-sm:text-[10px]">
+          <span className="folder-muted relative shrink-0 text-[16px] font-medium tracking-[1px] tabular-nums max-md:text-[10px] max-md:font-normal max-md:tracking-normal max-sm:text-[10px]">
+            {FOLDER_MARKS[project.slug] ? (
+              <img
+                src={FOLDER_MARKS[project.slug].src}
+                alt=""
+                width={FOLDER_MARKS[project.slug].width * FOLDER_MARK_SCALE}
+                height={FOLDER_MARKS[project.slug].height * FOLDER_MARK_SCALE}
+                className="pointer-events-none absolute bottom-full left-1/2 z-20 mb-1.5 max-w-none -translate-x-1/2 opacity-60"
+                style={{
+                  width: FOLDER_MARKS[project.slug].width * FOLDER_MARK_SCALE,
+                  height: FOLDER_MARKS[project.slug].height * FOLDER_MARK_SCALE,
+                }}
+              />
+            ) : null}
             {project.id}
           </span>
           <span className="flex min-w-0 items-center gap-2 max-md:gap-1.5">
