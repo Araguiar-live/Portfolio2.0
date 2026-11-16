@@ -460,22 +460,24 @@
 }
 
 .folder-face {
-  background-color: #1e1e1e;
-  color: rgba(255, 255, 255, 0.88);
-  transition: background-color 0.35s ease, color 0.35s ease;
+  background-color: rgba(255, 255, 255, 0.78);
+  color: #111111;
+  -webkit-backdrop-filter: blur(22px);
+  backdrop-filter: blur(22px);
+  transition: background-color 0.35s ease;
 }
 
 .folder-shell[data-raised="true"] .folder-face {
-  background-color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.94);
   color: #111111;
 }
 
 .folder-face .folder-title {
-  color: inherit;
+  color: #111111;
 }
 
 .folder-face .folder-muted {
-  color: color-mix(in srgb, currentColor 72%, transparent);
+  color: #666666;
 }
 
 .spatial-glass-hairline {

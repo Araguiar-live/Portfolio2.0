@@ -503,7 +503,7 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
           <path
             d={outline}
             fill="none"
-            stroke={raised ? "rgba(17,17,17,0.16)" : "rgba(255,255,255,0.2)"}
+            stroke="rgba(0,0,0,0.08)"
             strokeWidth="1"
             strokeLinejoin="round"
             vectorEffect="non-scaling-stroke"
