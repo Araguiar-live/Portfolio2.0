@@ -941,17 +941,25 @@ export function CrcleMessaging({
           )
         : null}
       {touch && !demoPaused ? (
-        <motion.div
-          aria-hidden
-          className="pointer-events-none fixed z-[90]"
-          initial={false}
-          animate={{ left: touch.x, top: touch.y, scale: touch.pressing ? 0.78 : 1 }}
-          transition={{ type: "spring", stiffness: 280, damping: 24, mass: 0.6 }}
-          style={{ x: "-50%", y: "-50%" }}
-        >
-          <span className="absolute left-1/2 top-1/2 size-11 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/35 animate-ping" />
-          <span className="relative block size-7 rounded-full border border-white/80 bg-white/90 shadow-[0_8px_24px_rgba(0,0,0,0.28)]" />
-        </motion.div>
+        <>
+          <span
+            aria-hidden
+            className="pointer-events-none fixed z-[89] size-11 -translate-x-1/2 -translate-y-1/2 rounded-full border border-[rgba(120,120,120,0.35)] animate-ping"
+            style={{ left: touch.x, top: touch.y }}
+          />
+          <motion.div
+            aria-hidden
+            className="crcle-touch-glass pointer-events-none fixed z-[90] rounded-full"
+            initial={false}
+            animate={{
+              left: touch.x - (touch.pressing ? 11 : 14),
+              top: touch.y - (touch.pressing ? 11 : 14),
+              width: touch.pressing ? 22 : 28,
+              height: touch.pressing ? 22 : 28,
+            }}
+            transition={{ type: "spring", stiffness: 280, damping: 24, mass: 0.6 }}
+          />
+        </>
       ) : null}
     </div>
   );

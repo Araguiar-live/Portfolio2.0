@@ -2948,6 +2948,14 @@ html.dark .thought-body-gradient {
   backdrop-filter: blur(14px) saturate(160%);
   transition: background 0.3s ease;
 }
+.crcle-touch-glass {
+  transform: none !important;
+  background: rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(120, 120, 120, 0.45);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  box-shadow: none;
+}
 .crcle-nc-body:hover .crcle-nc-body-frost {
   background: rgba(247, 246, 242, 0.1);
 }
