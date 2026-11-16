@@ -725,6 +725,12 @@ html.dark .thought-body-gradient {
   box-shadow: 0px 16px 48px 0px rgba(0, 0, 0, 0.05);
 }
 
+/* Work dock (Cr / Fd / Od) — 15% more frost than the shared 20px glass. */
+.dock-glass-work {
+  -webkit-backdrop-filter: blur(23px) saturate(180%);
+  backdrop-filter: blur(23px) saturate(180%);
+}
+
 .dock-glass::before {
   content: "";
   position: absolute;
