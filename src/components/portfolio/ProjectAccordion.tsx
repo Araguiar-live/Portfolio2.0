@@ -4,6 +4,10 @@ import { forwardRef, useEffect, useLayoutEffect, useRef, useState, type MutableR
 import { createPortal } from "react-dom";
 import bendingSpoonsMark from "@/assets/bending-spoons-mark.svg";
 import crcleMark from "@/assets/crcle-mark.svg";
+import specPen from "@/assets/crcle/spec/pen.svg";
+import specPuzzle from "@/assets/crcle/spec/puzzle.svg";
+import specSun from "@/assets/crcle/spec/sun.svg";
+import specTarget from "@/assets/crcle/spec/target.svg";
 import odicciMark from "@/assets/odicci-mark.svg";
 import { CrcleVideoCard } from "@/components/portfolio/CrcleVideoCard";
 import { DesktopOnlyPill, useDesktopOnlyNudge } from "@/components/portfolio/DesktopOnlyNudge";
@@ -463,7 +467,7 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
               style={{ height: EXPANDED_BODY_H }}
             >
               {showTabChrome ? (
-                <div className="mb-6 flex shrink-0 justify-center">
+                <div className={project.slug === "crcle" ? "mb-6 flex shrink-0 justify-start px-4 sm:px-8 lg:px-6" : "mb-6 flex shrink-0 justify-center"}>
                   <div className="inline-flex items-center gap-1 rounded-full border border-white bg-white/70 p-1 shadow-2xl shadow-slate-200/50 backdrop-blur-xl">
                     {tabs.map((tab) => {
                       const active = tab === activeTab;
@@ -486,7 +490,7 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
                   </div>
                 </div>
               ) : (
-                <div className="mb-6 flex shrink-0 justify-center">
+                <div className={project.slug === "crcle" ? "mb-6 flex shrink-0 justify-start px-4 sm:px-8 lg:px-6" : "mb-6 flex shrink-0 justify-center"}>
                   <div className="inline-flex items-center rounded-full border border-white bg-white/70 p-1 shadow-2xl shadow-slate-200/50 backdrop-blur-xl">
                     <span className="rounded-full border border-black bg-black px-4 py-1.5 text-xs font-medium tracking-tight text-white">
                       {project.content?.[activeTab]?.tabLabel ?? activeTab}
@@ -515,7 +519,7 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
               ) : null}
 
               {/* CRCLE uses a three-cell bento. Other projects keep the 1:2 write-up. */}
-              <div className="mx-auto flex min-h-0 w-full flex-1 items-start overflow-visible px-4 pt-2 sm:px-8 lg:px-6">
+              <div className={`mx-auto flex min-h-0 w-full flex-1 items-start overflow-visible px-4 sm:px-8 lg:px-6 ${project.slug === "crcle" ? "" : "pt-2"}`}>
                   <div className={project.slug === "crcle"
                     ? "grid h-full min-h-0 w-full min-w-0 grid-cols-1 items-start gap-3 overflow-x-clip lg:grid-cols-[1.1fr_0.9fr_1.1fr]"
                     : "grid w-full min-w-0 grid-cols-1 items-start gap-8 overflow-x-clip lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] lg:gap-8"}>
@@ -665,32 +669,36 @@ function CrcleNarrative({ tab }: { tab: Tab }) {
     <article className="flex min-h-0 flex-col gap-4">
       <span className="text-[11px] font-medium uppercase tracking-[0.18em] text-zinc-400">{copy.eyebrow}</span>
       <h3 className="text-[34px] font-medium leading-[1.15] tracking-[-0.03em] text-[#111111]">{copy.headline}</h3>
-      <p className="text-[15px] leading-7 text-zinc-600">{copy.narrative}</p>
+      <p className="max-w-[34ch] text-[15px] leading-7 text-zinc-600">{copy.narrative}</p>
     </article>
   );
 }
 
 function CrcleMicroCards({ tab }: { tab: Tab }) {
   const copy = crcleCopy(tab);
-  const rows: Array<{ label: string; lines: string[] }> = [
-    { label: "Role & Scope", lines: [copy.role] },
-    { label: "Problems Solved", lines: copy.problems },
-    { label: "What I Shipped", lines: copy.shipped },
-    { label: "Impact & Outcome", lines: [copy.impact] },
+  const rows: Array<{ label: string; icon: string; lines: string[] }> = [
+    { label: "Role & Scope", icon: specPen, lines: [copy.role] },
+    { label: "Problems Solved", icon: specTarget, lines: copy.problems },
+    { label: "What I Shipped", icon: specPuzzle, lines: copy.shipped },
+    { label: "Impact & Outcome", icon: specSun, lines: [copy.impact] },
   ];
   return (
-    <div className="flex min-h-0 flex-col">
-      {rows.map((row, index) => (
-        <article
-          key={row.label}
-          className={`flex flex-col gap-1 py-[15px] ${index > 0 ? "border-t border-[rgba(0,0,0,0.08)]" : "pt-0"}`}
-        >
-          <span className="text-[11px] font-medium uppercase tracking-[0.16em] text-zinc-500">{row.label}</span>
-          {row.lines.map((line) => (
-            <p key={line} className="text-[13px] leading-5 text-zinc-700">
-              {line}
-            </p>
-          ))}
+    <div className="flex min-h-0 flex-col gap-[22px]">
+      {rows.map((row) => (
+        <article key={row.label} className="flex flex-col gap-1">
+          <div className="flex items-center gap-2">
+            <span className="spec-icon inline-flex size-[14px] shrink-0 opacity-[0.55]">
+              <img src={row.icon} alt="" width={14} height={14} className="size-[14px] max-w-none" />
+            </span>
+            <span className="text-[13px] font-normal tracking-normal text-[#737373]">{row.label}</span>
+          </div>
+          <div className="flex flex-col gap-1 pl-[22px]">
+            {row.lines.map((line) => (
+              <p key={line} className="text-[13px] leading-5 text-[#111111]">
+                {line}
+              </p>
+            ))}
+          </div>
         </article>
       ))}
     </div>
