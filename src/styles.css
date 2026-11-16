@@ -464,30 +464,58 @@
 .folder-shell {
   border: none;
   outline: none;
-  transition: top 0.35s ease;
+  transform: translateY(0);
+  filter: none;
+  transition: all 260ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.folder-shell[data-raised="true"] {
+  transform: translateY(-6px);
+  filter: drop-shadow(0 -4px 14px rgba(0, 0, 0, 0.06));
 }
 
 .folder-face {
   border: none;
   outline: none;
-  background-color: rgba(255, 255, 255, 0.68);
+  background-color: rgba(255, 255, 255, 0.84);
   color: #111111;
   -webkit-backdrop-filter: blur(26.4px);
   backdrop-filter: blur(26.4px);
-  transition: background-color 0.35s ease;
+  transition: background-color 260ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .folder-shell[data-raised="true"] .folder-face {
-  background-color: rgba(255, 255, 255, 0.82);
+  background-color: rgba(255, 255, 255, 0.98);
   color: #111111;
+}
+
+.folder-stroke {
+  stroke: rgba(0, 0, 0, 0.1);
+  transition: stroke 260ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.folder-shell[data-raised="true"] .folder-stroke {
+  stroke: rgba(0, 0, 0, 0.28);
 }
 
 .folder-face .folder-title {
   color: #111111;
+  display: inline-block;
+  transform: translateX(0);
+  transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.folder-shell[data-raised="true"] .folder-title {
+  transform: translateX(6px);
 }
 
 .folder-face .folder-muted {
-  color: #666666;
+  color: #737373;
+  transition: color 260ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.folder-shell[data-raised="true"] .folder-muted {
+  color: #111111;
 }
 
 .spatial-glass-hairline {

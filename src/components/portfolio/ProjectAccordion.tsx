@@ -334,9 +334,8 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
       data-raised={raised ? "true" : "false"}
       className="folder-shell pointer-events-none relative border-0 outline-none"
       style={{
-        zIndex: raised ? 40 : index + 1,
+        zIndex: index + 1,
         marginTop: index === 0 ? 0 : -TAB_H,
-        top: raised ? -4 : 0,
         border: 0,
         outline: "none",
         boxShadow: "none",
@@ -600,9 +599,9 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
             <path d={outline.d} />
           </clipPath>
           <path
+            className="folder-stroke"
             d={outline.stroke}
             fill="none"
-            stroke="#D1D5DB"
             strokeWidth="1"
             strokeLinejoin="round"
             strokeLinecap="butt"
