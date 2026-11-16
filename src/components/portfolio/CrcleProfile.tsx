@@ -387,6 +387,32 @@ export function CrcleProfile({
         const close = find('[data-demo-target="sheet-close"]');
         if (close && (await pointAt(close)) && alive()) {
           setOverlay(null);
+          await wait(640);
+        }
+        if (!alive()) return;
+
+        const relationship = find('[data-demo-target="bento-relationship"]');
+        if (relationship && (await pointAt(relationship)) && alive()) {
+          setOverlay("relationship");
+          await wait(760);
+        }
+        if (!alive()) return;
+        const closeRelationship = find('[data-demo-target="sheet-close"]');
+        if (closeRelationship && (await pointAt(closeRelationship)) && alive()) {
+          setOverlay(null);
+          await wait(640);
+        }
+        if (!alive()) return;
+
+        const education = find('[data-demo-target="bento-education"]');
+        if (education && (await pointAt(education)) && alive()) {
+          setOverlay("education");
+          await wait(760);
+        }
+        if (!alive()) return;
+        const closeEducation = find('[data-demo-target="sheet-close"]');
+        if (closeEducation && (await pointAt(closeEducation)) && alive()) {
+          setOverlay(null);
           await wait(860);
         }
         const scroller = screenRef.current?.querySelector<HTMLElement>("[data-demo-scroll]");
@@ -1029,11 +1055,11 @@ function ProfileMainView({
           data-inspect-id="mood-toggle"
           onClick={onOpenMood}
           aria-label={`Broadcast mood: ${moodChipLabel}`}
-          className="crcle-glass-btn relative flex items-center justify-center gap-1 self-stretch overflow-hidden rounded-[64px] py-1 pl-2 pr-1"
+          className="relative flex items-center justify-center gap-1 self-stretch overflow-hidden rounded-[64px] bg-[rgba(247,246,242,0.2)] py-1 pl-2 pr-1"
         >
           <IconImg
             src={moodChipIcon}
-            className={`relative z-[1] size-6 ${isIncognito ? "" : "crcle-mood-chip-icon"}`}
+            className={`relative z-[1] h-[20.4px] w-[20.4px] ${isIncognito ? "" : "crcle-mood-chip-icon"}`}
           />
           <ChevronDown className="relative z-[1] size-5 text-white/50 [.crcle-phone--light_&]:text-[rgba(2,3,29,0.45)]" strokeWidth={1.5} />
         </button>
@@ -1378,6 +1404,7 @@ function ProfileMainView({
               {hasEducation ? (
                 <button
                   type="button"
+                  data-demo-target="bento-education"
                   onClick={onOpenEducation}
                   className="flex min-w-0 flex-col rounded-[20px] border border-[rgba(247,246,242,0.4)] bg-gradient-to-b from-[rgba(1,2,17,0.6)] to-[rgba(170,194,240,0.6)] p-[9px] text-left shadow-[0_4px_4px_rgba(0,0,0,0.25)] [.crcle-phone--light_&]:border-[#f7f6f2] [.crcle-phone--light_&]:from-[rgba(0,85,255,0.3)] [.crcle-phone--light_&]:to-[rgba(170,194,240,0.3)] [.crcle-phone--light_&]:shadow-none"
                 >
@@ -1735,6 +1762,7 @@ function DatingWidget({
   return (
     <button
       type="button"
+      data-demo-target="bento-relationship"
       onClick={onOpen}
       className="flex w-full min-w-0 flex-col gap-2 rounded-[20px] p-2 text-left"
       style={{ backgroundColor: option.cardBg }}
@@ -1931,6 +1959,7 @@ function RelationshipStatusSheet({
           <button
             type="button"
             onClick={() => onSave(selected)}
+            data-demo-target="sheet-close"
             className="crcle-edit-done flex h-[37px] w-[72px] items-center justify-center rounded-[20px] bg-[rgba(247,246,242,0.2)]"
           >
             <span
@@ -2420,6 +2449,7 @@ function EducationHistorySheet({
           <button
             type="button"
             onClick={handleDone}
+            data-demo-target="sheet-close"
             className="crcle-edit-done flex h-[37px] w-[72px] items-center justify-center rounded-[20px] bg-[rgba(247,246,242,0.2)]"
           >
             <span
