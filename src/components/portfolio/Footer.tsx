@@ -89,7 +89,7 @@ export function Footer({
 
   return (
     <footer
-      className="relative w-full overflow-hidden bg-black px-8 pb-12 pt-16 text-slate-200 max-sm:bg-[var(--portfolio-bottom-surface,#0a0d11)] max-sm:py-8"
+      className="relative w-full overflow-hidden bg-black px-8 pb-3 pt-16 text-slate-200 max-sm:bg-[var(--portfolio-bottom-surface,#0a0d11)] max-sm:px-8 max-sm:pb-3 max-sm:pt-8"
       data-name="portfolio-footer"
     >
       {/* Gradient Pattern — Figma 605:1386 (bottom-right, 664×563) */}
@@ -187,6 +187,12 @@ export function Footer({
           </p>
           <p className="text-[11px]">{clock}</p>
         </div>
+
+        <p className="text-center text-[8px] leading-[1.35] text-white/50">
+          Deuteronomy 28:12 — The LORD shall open unto thee his good treasure, the heaven to give
+          the rain unto thy land in his season, and to bless all the work of thine hand: and thou
+          shalt lend unto many nations, and thou shalt not borrow.
+        </p>
       </div>
     </footer>
   );
