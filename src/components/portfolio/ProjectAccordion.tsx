@@ -95,6 +95,41 @@ function folderPoints(width: number, height: number, index: number): Array<[numb
   ];
 }
 
+/** 4px circular fillet on every corner of the folder outline. */
+function roundedFolderPath(points: Array<[number, number]>, radius = 4): string {
+  const n = points.length;
+  let d = "";
+  for (let i = 0; i < n; i++) {
+    const prev = points[(i - 1 + n) % n];
+    const curr = points[i];
+    const next = points[(i + 1) % n];
+    let v1x = curr[0] - prev[0];
+    let v1y = curr[1] - prev[1];
+    let v2x = next[0] - curr[0];
+    let v2y = next[1] - curr[1];
+    const len1 = Math.hypot(v1x, v1y) || 1;
+    const len2 = Math.hypot(v2x, v2y) || 1;
+    v1x /= len1;
+    v1y /= len1;
+    v2x /= len2;
+    v2y /= len2;
+    const cross = v1x * v2y - v1y * v2x;
+    const dot = Math.min(1, Math.max(-1, v1x * v2x + v1y * v2y));
+    const turn = Math.abs(Math.atan2(cross, dot));
+    const tangent = Math.tan(turn / 2);
+    const offset = tangent > 0.001 ? Math.min(radius / tangent, len1 / 2.2, len2 / 2.2) : 0;
+    const arc = tangent > 0.001 ? offset * tangent : 0;
+    const x1 = curr[0] - v1x * offset;
+    const y1 = curr[1] - v1y * offset;
+    const x2 = curr[0] + v2x * offset;
+    const y2 = curr[1] + v2y * offset;
+    d += i === 0 ? `M ${x1} ${y1}` : ` L ${x1} ${y1}`;
+    if (arc > 0.2) d += ` A ${arc} ${arc} 0 0 ${cross > 0 ? 1 : 0} ${x2} ${y2}`;
+    else d += ` L ${x2} ${y2}`;
+  }
+  return `${d} Z`;
+}
+
 /** White project accordion card — mockup / bento treatment TBD. */
 export function ProjectBentoStack({
   projects,
@@ -174,9 +209,10 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
       const height = el.clientHeight;
       if (width < 1 || height < 1) return;
       const points = folderPoints(width, height, index);
+      const path = roundedFolderPath(points);
       el.parentElement?.style.setProperty("--folder-tab", `${points[0][1]}px`);
-      setClipPath(`polygon(${points.map(([x, y]) => `${x}px ${y}px`).join(",")})`);
-      setOutline(`M ${points.map(([x, y]) => `${x} ${y}`).join(" L ")} Z`);
+      setClipPath(`path("${path}")`);
+      setOutline(path);
     };
     measure();
     const observer = new ResizeObserver(measure);
@@ -193,11 +229,15 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
         marginTop: index === 0 ? 0 : "calc(-1 * var(--folder-tab, 22px))",
       }}
     >
-      <div ref={shapeRef} className="pointer-events-auto relative" style={{ clipPath }}>
-        <div
-          aria-hidden
-          className="portfolio-mobile-shake-root spatial-glass pointer-events-none absolute inset-0 bg-white/70 shadow-[0px_16px_48px_0px_rgba(0,0,0,0.05)]"
-        />
+      <div
+        ref={shapeRef}
+        className="portfolio-mobile-shake-root spatial-glass pointer-events-auto relative bg-white/70 py-[9px] max-md:py-[7px]"
+        style={{
+          clipPath,
+          WebkitBackdropFilter: "blur(20px) saturate(180%)",
+          backdropFilter: "blur(20px) saturate(180%)",
+        }}
+      >
       {/* Row header — Figma 530:151817 */}
       <div
         className="group relative flex w-full items-center justify-between gap-7 px-[37px] py-8 text-left transition-[background] duration-300 max-md:flex-col max-md:items-stretch max-md:gap-[15px] max-md:px-5 max-md:py-5 max-sm:gap-[15px] max-sm:p-5"
