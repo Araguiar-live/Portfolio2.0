@@ -251,7 +251,7 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
       className="folder-shell pointer-events-none relative"
       style={{
         zIndex: raised ? 40 : index + 1,
-        marginTop: index === 0 ? 0 : -16,
+        marginTop: index === 0 ? 0 : -20,
         transform: raised ? "translateY(-4px)" : "none",
       }}
     >
