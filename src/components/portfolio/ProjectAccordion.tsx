@@ -529,7 +529,7 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
                     {project.slug === "crcle" ? <CrcleMicroCards tab={activeTab} /> : null}
 
                     <div className={project.slug === "crcle"
-                      ? "relative flex h-full min-h-0 min-w-0 items-start justify-center overflow-auto rounded-[16px] border border-[rgba(0,0,0,0.06)] bg-[#F5F5F5] p-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                      ? "relative flex h-full min-h-0 min-w-0 items-start justify-center overflow-auto rounded-[16px] border border-[rgba(0,0,0,0.06)] bg-[#F5F5F5] p-3 opacity-60 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
                       : "relative flex w-full min-w-0 items-start justify-end overflow-visible"}>
                       <div className={project.slug === "crcle"
                         ? "mx-auto flex w-full min-w-0 max-w-full items-start justify-center"
@@ -655,7 +655,7 @@ const CRCLE_BENTO: Partial<Record<Tab, CrcleBentoCopy>> = {
   },
 };
 
-const BENTO_CARD = "border border-[rgba(0,0,0,0.06)] bg-[#F5F5F5]";
+const BENTO_CARD = "border border-[rgba(0,0,0,0.06)] bg-[#F5F5F5] opacity-60";
 
 function crcleCopy(tab: Tab): CrcleBentoCopy {
   return CRCLE_BENTO[tab] ?? CRCLE_BENTO["Template Library"]!;
