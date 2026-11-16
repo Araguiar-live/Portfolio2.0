@@ -667,9 +667,9 @@ function CrcleNarrative({ tab }: { tab: Tab }) {
   const copy = crcleCopy(tab);
   return (
     <article className="flex min-h-0 flex-col gap-4">
-      <span className="text-[11px] font-medium uppercase tracking-[0.18em] text-zinc-400">{copy.eyebrow}</span>
-      <h3 className="text-[34px] font-medium leading-[1.15] tracking-[-0.03em] text-[#111111]">{copy.headline}</h3>
-      <p className="max-w-[34ch] text-[15px] leading-7 text-zinc-600">{copy.narrative}</p>
+      <span className="text-[12.65px] font-medium uppercase tracking-[0.18em] text-zinc-400">{copy.eyebrow}</span>
+      <h3 className="text-[39.1px] font-medium leading-[1.15] tracking-[-0.03em] text-[#111111]">{copy.headline}</h3>
+      <p className="max-w-[34ch] text-[17.25px] leading-[32.2px] text-zinc-600">{copy.narrative}</p>
     </article>
   );
 }
@@ -690,11 +690,11 @@ function CrcleMicroCards({ tab }: { tab: Tab }) {
             <span className="spec-icon inline-flex size-[14px] shrink-0 opacity-[0.55]">
               <img src={row.icon} alt="" width={14} height={14} className="size-[14px] max-w-none" />
             </span>
-            <span className="text-[13px] font-normal tracking-normal text-[#737373]">{row.label}</span>
+            <span className="text-[14.95px] font-normal tracking-normal text-[#737373]">{row.label}</span>
           </div>
           <div className="flex flex-col gap-1 pl-[22px]">
             {row.lines.map((line) => (
-              <p key={line} className="text-[13px] leading-5 text-[#111111]">
+              <p key={line} className="text-[14.95px] leading-[23px] text-[#111111]">
                 {line}
               </p>
             ))}
