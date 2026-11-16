@@ -13,7 +13,9 @@ import datingCoffeeIcon from "@/assets/crcle/profile/dating-coffee.svg";
 import datingGroupWhiteIcon from "@/assets/crcle/profile/dating-group-white.svg";
 import datingHeartWhiteIcon from "@/assets/crcle/profile/dating-heart-white.svg";
 import datingLinkIcon from "@/assets/crcle/profile/dating-link.svg";
+import datingHeartOutlineIcon from "@/assets/crcle/profile/dating-heart-figma.svg";
 import datingLoveSeatIcon from "@/assets/crcle/profile/dating-love-seat.svg";
+import datingLoveSeatMarkIcon from "@/assets/crcle/profile/dating-love-seat-figma.svg";
 import datingSendIcon from "@/assets/crcle/profile/dating-send.svg";
 import eduDragHandleIcon from "@/assets/crcle/profile/drag-handle-edu.svg";
 import eduGraduationIcon from "@/assets/crcle/profile/edu-graduation.svg";
@@ -1789,6 +1791,8 @@ function DatingWidget({
   option: (typeof RELATIONSHIP_OPTIONS)[number];
   onOpen: () => void;
 }) {
+  const isRelationship = option.id === "In a relationship";
+  const [shareStatus, setShareStatus] = useState(true);
   const isLinkCta = option.ctaIcon === "link";
 
   return (
@@ -1796,13 +1800,20 @@ function DatingWidget({
       type="button"
       data-demo-target="bento-relationship"
       onClick={onOpen}
-      className="flex w-full min-w-0 flex-col gap-2 rounded-[20px] p-2 text-left"
+      className="flex w-full min-w-0 flex-col items-start gap-2 rounded-[20px] p-2 text-left"
       style={{ backgroundColor: option.cardBg }}
     >
-      <div className="flex items-center gap-1 pl-0.5 pt-0.5">
-        <img alt="" src={heartDatingIcon} className="size-4 object-contain" draggable={false} />
+      <div className="flex items-center gap-1 pl-0.5">
+        <img
+          alt=""
+          src={isRelationship ? datingHeartOutlineIcon : heartDatingIcon}
+          width={16}
+          height={16}
+          className="block shrink-0"
+          draggable={false}
+        />
         <span
-          className={`text-[13px] leading-[1.4] ${option.labelColor}`}
+          className={`text-[13px] font-normal leading-[1.4] ${option.labelColor}`}
           style={{ fontFamily: FONT }}
         >
           Dating
@@ -1814,17 +1825,28 @@ function DatingWidget({
           className="flex size-16 items-center justify-center rounded-[40px] p-2"
           style={{ backgroundColor: option.iconBg }}
         >
-          <DatingWidgetGlyph type={option.icon} />
+          {isRelationship ? (
+            <img
+              alt=""
+              src={datingLoveSeatMarkIcon}
+              width={32}
+              height={32}
+              className="block shrink-0"
+              draggable={false}
+            />
+          ) : (
+            <DatingWidgetGlyph type={option.icon} />
+          )}
         </div>
-        <div className="w-full">
+        <div className="flex w-full flex-col items-start">
           <p
-            className={`${option.titleClass} leading-[1.4] text-[#020426]`}
+            className={`${option.titleClass} mb-[-2px] w-full font-normal leading-[1.4] text-[#020426]`}
             style={{ fontFamily: FONT }}
           >
             {option.id}
           </p>
           <p
-            className="text-[13px] leading-[1.4] text-[rgba(3,4,38,0.6)]"
+            className="w-full text-[13px] font-normal leading-[1.4] text-[rgba(3,4,38,0.6)]"
             style={{ fontFamily: FONT }}
           >
             {option.widgetSubtitle}
@@ -1832,22 +1854,47 @@ function DatingWidget({
         </div>
       </div>
 
-      <div
-        className={`flex w-fit items-center gap-2.5 rounded-[24px] bg-[#030426] ${
-          isLinkCta ? "py-1 pl-2 pr-1" : "py-0.5 pl-2 pr-2.5"
-        }`}
-      >
-        <span className="text-[13px] leading-[1.4] text-[#fefefe]" style={{ fontFamily: FONT }}>
-          {option.ctaLabel}
-        </span>
-        {isLinkCta ? (
-          <span className="flex items-center rounded-[60px] bg-[rgba(247,246,242,0.4)] p-0.5">
-            <img alt="" src={datingLinkIcon} className="size-3 object-contain" draggable={false} />
+      {isRelationship ? (
+        <span
+          className="flex w-full items-center justify-between rounded-[24px] border border-[rgba(204,0,0,0.3)] bg-[rgba(204,0,0,0.2)] py-1 pl-2 pr-1.5"
+          onClick={(event) => event.stopPropagation()}
+        >
+          <span
+            className="text-[11px] font-normal leading-[1.4] text-[#030426]"
+            style={{ fontFamily: FONT }}
+          >
+            Share status
           </span>
-        ) : (
-          <img alt="" src={datingSendIcon} className="size-3 object-contain" draggable={false} />
-        )}
-      </div>
+          <span
+            role="switch"
+            aria-checked={shareStatus}
+            aria-label="Share status"
+            onClick={() => setShareStatus((on) => !on)}
+            className={`flex w-6 items-center rounded-[24px] p-0.5 ${
+              shareStatus ? "justify-end bg-[#030426]" : "justify-start bg-[rgba(3,4,38,0.25)]"
+            }`}
+          >
+            <span className="size-2 rounded-[4px] bg-[#fdfcfb]" />
+          </span>
+        </span>
+      ) : (
+        <div
+          className={`flex w-fit items-center gap-2.5 rounded-[24px] bg-[#030426] ${
+            isLinkCta ? "py-1 pl-2 pr-1" : "py-0.5 pl-2 pr-2.5"
+          }`}
+        >
+          <span className="text-[13px] leading-[1.4] text-[#fefefe]" style={{ fontFamily: FONT }}>
+            {option.ctaLabel}
+          </span>
+          {isLinkCta ? (
+            <span className="flex items-center rounded-[60px] bg-[rgba(247,246,242,0.4)] p-0.5">
+              <img alt="" src={datingLinkIcon} className="size-3 object-contain" draggable={false} />
+            </span>
+          ) : (
+            <img alt="" src={datingSendIcon} className="size-3 object-contain" draggable={false} />
+          )}
+        </div>
+      )}
     </button>
   );
 }
