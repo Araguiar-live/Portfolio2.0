@@ -87,6 +87,9 @@ const FOLDER_MARKS: Record<string, { src: string; width: number; height: number 
   "first-design": { src: bendingSpoonsMark, width: 58.843, height: 31.7802 },
   odicci: { src: odicciMark, width: 45, height: 49.0909 },
 };
+/** 60% smaller than the Figma mark, sitting 4px higher than the original 6px gap. */
+const FOLDER_MARK_SCALE = 0.4;
+const FOLDER_MARK_TOP = TAB_H + 2;
 
 /** Horizontal center of the sloped tab, matching the outline's clamp on narrow rows. */
 function tabCenterX(width: number, shift: number) {
@@ -352,14 +355,16 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
         <img
           src={FOLDER_MARKS[project.slug].src}
           alt=""
-          width={FOLDER_MARKS[project.slug].width}
-          height={FOLDER_MARKS[project.slug].height}
+          width={FOLDER_MARKS[project.slug].width * FOLDER_MARK_SCALE}
+          height={FOLDER_MARKS[project.slug].height * FOLDER_MARK_SCALE}
           className="pointer-events-none absolute z-20 max-w-none"
           style={{
-            width: FOLDER_MARKS[project.slug].width,
-            height: FOLDER_MARKS[project.slug].height,
-            left: tabCenterX(outline.w, tabShift) - FOLDER_MARKS[project.slug].width / 2,
-            top: TAB_H + 6,
+            width: FOLDER_MARKS[project.slug].width * FOLDER_MARK_SCALE,
+            height: FOLDER_MARKS[project.slug].height * FOLDER_MARK_SCALE,
+            left:
+              tabCenterX(outline.w, tabShift) -
+              (FOLDER_MARKS[project.slug].width * FOLDER_MARK_SCALE) / 2,
+            top: FOLDER_MARK_TOP,
           }}
         />
       ) : null}
