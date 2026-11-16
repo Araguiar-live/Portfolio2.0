@@ -520,22 +520,28 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
 
               {/* Editorial rows: story, spec list, prototype stage. */}
               <div className={`mx-auto flex min-h-0 w-full flex-1 items-start overflow-visible px-4 sm:px-8 lg:px-6 ${isEditorial(project.slug) ? "" : "pt-2"}`}>
-                  <div className={isEditorial(project.slug)
+                  <div className={project.slug === "first-design"
+                    ? "grid h-full min-h-0 w-full min-w-0 grid-cols-1 items-start gap-3 overflow-x-clip lg:grid-cols-[0.98fr_0.8fr_1.32fr]"
+                    : isEditorial(project.slug)
                     ? "grid h-full min-h-0 w-full min-w-0 grid-cols-1 items-start gap-3 overflow-x-clip lg:grid-cols-[1.1fr_0.9fr_1.1fr]"
                     : "grid w-full min-w-0 grid-cols-1 items-start gap-8 overflow-x-clip lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] lg:gap-8"}>
                     {isEditorial(project.slug) ? (
-                      <EditorialNarrative copy={editorialCopy(project, activeTab, tabContent)} />
+                      <EditorialNarrative copy={editorialCopy(project, activeTab, tabContent)} dense={project.slug === "first-design"} />
                     ) : (
                     <div className="flex max-h-[874px] min-h-0 min-w-0 flex-col overflow-x-hidden overflow-y-auto overscroll-contain">
                       <CaseStudyCopy project={project} tab={activeTab} content={tabContent} />
                     </div>
                     )}
-                    {isEditorial(project.slug) ? <EditorialSpecs copy={editorialCopy(project, activeTab, tabContent)} /> : null}
+                    {isEditorial(project.slug) ? <EditorialSpecs copy={editorialCopy(project, activeTab, tabContent)} dense={project.slug === "first-design"} /> : null}
 
-                    <div className={isEditorial(project.slug)
+                    <div className={project.slug === "first-design"
+                      ? "relative flex min-h-0 min-w-0 w-full items-start justify-center overflow-visible"
+                      : isEditorial(project.slug)
                       ? "relative ml-0 flex min-h-0 min-w-0 items-start justify-center overflow-auto rounded-[32px] border border-[rgba(0,0,0,0.06)] bg-[#F4F4F5]/80 p-3 lg:ml-12 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
                       : "relative flex w-full min-w-0 items-start justify-end overflow-visible"}>
-                      <div className={isEditorial(project.slug)
+                      <div className={project.slug === "first-design"
+                        ? "flex w-full min-w-0 max-w-full items-start justify-center"
+                        : isEditorial(project.slug)
                         ? "mx-auto flex w-full min-w-0 max-w-full items-start justify-center"
                         : "ml-auto flex w-full min-w-0 max-w-full items-start justify-end overflow-visible"}>
                         {tabContent.customBody ? (
@@ -709,17 +715,17 @@ function editorialCopy(project: Project, tab: Tab, content: ProjectTabContent): 
   };
 }
 
-function EditorialNarrative({ copy }: { copy: CrcleBentoCopy }) {
+function EditorialNarrative({ copy, dense = false }: { copy: CrcleBentoCopy; dense?: boolean }) {
   return (
     <article className="flex min-h-0 flex-col gap-4">
-      <span className="text-[12.65px] font-medium uppercase tracking-[0.18em] text-zinc-400">{copy.eyebrow}</span>
-      <h3 className="text-[39.1px] font-medium leading-[1.15] tracking-[-0.03em] text-[#111111]">{copy.headline}</h3>
-      <p className="max-w-[34ch] text-[17.25px] leading-[32.2px] text-zinc-600">{copy.narrative}</p>
+      <span className={`${dense ? "text-[11px]" : "text-[12.65px]"} font-medium uppercase tracking-[0.18em] text-zinc-400`}>{copy.eyebrow}</span>
+      <h3 className={`${dense ? "text-[32px]" : "text-[39.1px]"} font-medium leading-[1.15] tracking-[-0.03em] text-[#111111]`}>{copy.headline}</h3>
+      <p className={`max-w-[34ch] text-zinc-600 ${dense ? "text-[15px] leading-7" : "text-[17.25px] leading-[32.2px]"}`}>{copy.narrative}</p>
     </article>
   );
 }
 
-function EditorialSpecs({ copy }: { copy: CrcleBentoCopy }) {
+function EditorialSpecs({ copy, dense = false }: { copy: CrcleBentoCopy; dense?: boolean }) {
   const rows: Array<{ label: string; icon: string; lines: string[] }> = [
     { label: "Role & Scope", icon: specPen, lines: [copy.role] },
     { label: "Problems Solved", icon: specTarget, lines: copy.problems },
@@ -734,11 +740,11 @@ function EditorialSpecs({ copy }: { copy: CrcleBentoCopy }) {
             <span className="spec-icon inline-flex size-[14px] shrink-0 opacity-[0.55]">
               <img src={row.icon} alt="" width={14} height={14} className="size-[14px] max-w-none" />
             </span>
-            <span className="text-[14.95px] font-normal tracking-normal text-[#737373]">{row.label}</span>
+            <span className={`${dense ? "text-[13px]" : "text-[14.95px]"} font-normal tracking-normal text-[#737373]`}>{row.label}</span>
           </div>
           <div className="flex flex-col gap-1 pl-[22px]">
             {row.lines.map((line) => (
-              <p key={line} className="text-[14.95px] leading-[23px] text-[#111111]">
+              <p key={line} className={`${dense ? "text-[13px] leading-5" : "text-[14.95px] leading-[23px]"} text-[#111111]`}>
                 {line}
               </p>
             ))}
