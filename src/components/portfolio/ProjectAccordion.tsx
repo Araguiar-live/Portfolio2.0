@@ -73,8 +73,8 @@ interface Props {
   count: number;
 }
 
-/** Tab sits 18px above the body. Both shoulders run 20px over that drop. */
-const TAB_H = 18;
+/** Tab rise, 18% taller than the 18px step so the slope reads clearly. */
+const TAB_H = 22;
 const TAB_FLAT = 160;
 const TAB_SLOPE = 20;
 const TAB_SHIFT = [24, 160, 296] as const;
@@ -121,7 +121,7 @@ function folderOutline(
   shift: number,
   index: number,
   count: number,
-): string {
+): { points: Array<[number, number]>; radii: number[] } {
   const lip = Math.min(TAB_H, height * 0.45);
   const margin = CORNER;
   let slope = TAB_SLOPE;
@@ -152,7 +152,38 @@ function folderOutline(
     if (i === 2) return tr;
     return CORNER;
   });
-  return quadraticOutline(points, radii);
+  return { points, radii };
+}
+
+/** Pull every edge 0.5px into the shape so a 1px stroke sits fully inside the clip. */
+function insetPoints(points: Array<[number, number]>, amount: number): Array<[number, number]> {
+  const n = points.length;
+  return points.map((curr, i) => {
+    const prev = points[(i - 1 + n) % n];
+    const next = points[(i + 1) % n];
+    let e1x = curr[0] - prev[0];
+    let e1y = curr[1] - prev[1];
+    let e2x = next[0] - curr[0];
+    let e2y = next[1] - curr[1];
+    const len1 = Math.hypot(e1x, e1y) || 1;
+    const len2 = Math.hypot(e2x, e2y) || 1;
+    e1x /= len1;
+    e1y /= len1;
+    e2x /= len2;
+    e2y /= len2;
+    const n1x = e1y;
+    const n1y = -e1x;
+    const n2x = e2y;
+    const n2y = -e2x;
+    let mx = n1x + n2x;
+    let my = n1y + n2y;
+    const ml = Math.hypot(mx, my) || 1;
+    mx /= ml;
+    my /= ml;
+    const denom = mx * n1x + my * n1y;
+    const scale = Math.abs(denom) > 0.25 ? amount / denom : amount;
+    return [curr[0] + mx * scale, curr[1] + my * scale];
+  });
 }
 
 /** White project accordion card — mockup / bento treatment TBD. */
@@ -227,7 +258,7 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
   const raised = hovered || isOpen;
   const tabShift = TAB_SHIFT[index] ?? TAB_SHIFT[TAB_SHIFT.length - 1];
   const faceRef = useRef<HTMLDivElement>(null);
-  const [outline, setOutline] = useState<{ d: string; w: number; h: number } | null>(null);
+  const [outline, setOutline] = useState<{ d: string; stroke: string; w: number; h: number } | null>(null);
 
   useLayoutEffect(() => {
     const el = faceRef.current;
@@ -236,7 +267,13 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
       const width = el.clientWidth;
       const height = el.clientHeight;
       if (width < 2 || height < 2) return;
-      setOutline({ d: folderOutline(width, height, tabShift, index, count), w: width, h: height });
+      const shape = folderOutline(width, height, tabShift, index, count);
+      setOutline({
+        d: quadraticOutline(shape.points, shape.radii),
+        stroke: quadraticOutline(insetPoints(shape.points, 0.5), shape.radii),
+        w: width,
+        h: height,
+      });
     };
     measure();
     const observer = new ResizeObserver(measure);
@@ -248,7 +285,7 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
     <div
       ref={ref}
       data-raised={raised ? "true" : "false"}
-      className="folder-shell pointer-events-none relative"
+      className="folder-shell pointer-events-none relative border-0 outline-none"
       style={{
         zIndex: raised ? 40 : index + 1,
         marginTop: index === 0 ? 0 : -20,
@@ -257,18 +294,17 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
     >
       <div
         ref={faceRef}
-        className="folder-face pointer-events-auto relative"
+        className="folder-face pointer-events-auto relative border-0 outline-none"
         style={{
           clipPath: outline ? `url(#folder-clip-${project.slug})` : "none",
           paddingTop: TAB_H,
-          filter: raised ? "drop-shadow(0 12px 28px rgba(0,0,0,0.22))" : "none",
         }}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
       >
       {/* Row header — Figma 530:151817 */}
       <div
-        className="group relative flex w-full items-center justify-between gap-7 px-[37px] py-[41px] text-left transition-[background] duration-300 max-md:flex-col max-md:items-stretch max-md:gap-[15px] max-md:px-5 max-md:py-[23px] max-sm:gap-[15px] max-sm:px-5 max-sm:py-[23px]"
+        className="group relative flex w-full items-center justify-between gap-7 border-0 px-[37px] py-[41px] text-left outline-none transition-[background] duration-300 max-md:flex-col max-md:items-stretch max-md:gap-[15px] max-md:px-5 max-md:py-[23px] max-sm:gap-[15px] max-sm:px-5 max-sm:py-[23px]"
         onMouseEnter={rowHover.onMouseEnter}
         onMouseMove={rowHover.onMouseMove}
         onMouseLeave={rowHover.onMouseLeave}
@@ -467,9 +503,9 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
             <path d={outline.d} />
           </clipPath>
           <path
-            d={outline.d}
+            d={outline.stroke}
             fill="none"
-            stroke="rgba(0,0,0,0.08)"
+            stroke="rgba(0,0,0,0.14)"
             strokeWidth="1"
             vectorEffect="non-scaling-stroke"
           />
