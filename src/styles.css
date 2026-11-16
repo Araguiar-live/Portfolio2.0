@@ -1488,7 +1488,15 @@ html.dark .thought-body-gradient {
 .crcle-tune-sheet {
   position: absolute;
   overflow: hidden;
+  background: rgba(1, 2, 17, 0.62);
+  border-color: rgba(247, 246, 242, 0.16);
+  backdrop-filter: blur(22px) saturate(140%);
+  -webkit-backdrop-filter: blur(22px) saturate(140%);
+}
+
+.crcle-phone--light .crcle-tune-sheet {
   background: rgba(247, 246, 242, 0.45);
+  border-color: rgba(2, 3, 29, 0.1);
   backdrop-filter: blur(18px) saturate(160%);
   -webkit-backdrop-filter: blur(18px) saturate(160%);
 }
@@ -1503,6 +1511,11 @@ html.dark .thought-body-gradient {
 }
 
 .crcle-tune-frost > img {
+  opacity: 0.28;
+  filter: blur(48px) saturate(0.7) brightness(0.35);
+}
+
+.crcle-phone--light .crcle-tune-frost > img {
   opacity: 0.42;
   filter: blur(48px) saturate(0.85);
 }
