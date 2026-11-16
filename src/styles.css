@@ -2016,9 +2016,9 @@ html.dark .thought-body-gradient {
   border: 1px solid rgba(15, 201, 80, 0.45);
   background: linear-gradient(
     180deg,
-    rgba(255, 255, 255, 0.28) 0%,
-    rgba(15, 201, 80, 0.14) 46%,
-    rgba(15, 201, 80, 0.32) 100%
+    rgba(255, 255, 255, 0.224) 0%,
+    rgba(15, 201, 80, 0.112) 46%,
+    rgba(15, 201, 80, 0.256) 100%
   );
   box-shadow:
     0 1px 0 rgba(255, 255, 255, 0.62) inset,
