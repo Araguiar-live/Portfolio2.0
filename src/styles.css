@@ -1941,10 +1941,15 @@ html.dark .thought-body-gradient {
   filter: var(--crcle-icon-filter);
   transition: filter 0.3s ease;
 }
-/* Profile mood chip — cream/white glyphs retinted to Signal Live green. */
-.crcle-phone .crcle-mood-chip-icon img {
-  filter: brightness(0) saturate(100%) invert(64%) sepia(72%) saturate(1412%) hue-rotate(88deg)
-    brightness(96%) contrast(91%);
+/* Profile mood chip — same navy as the work mark (#020426). */
+.crcle-phone .crcle-mood-chip-icon {
+  background-color: #020426;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
 }
 
 /* NOC / Night Owl Radar — Figma 957:31045 (exact wash; mesh is DOM ellipses) */
