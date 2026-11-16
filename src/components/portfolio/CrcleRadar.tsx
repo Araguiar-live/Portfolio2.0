@@ -47,7 +47,8 @@ import laptopStrokeIcon from "@/assets/crcle/signal/laptop-stroke.svg";
 import lightbulbIcon from "@/assets/crcle/signal/lightbulb.svg";
 import unlockIcon from "@/assets/crcle/unlock.svg";
 import wifiIcon from "@/assets/crcle/wifi.svg";
-import { CrcleScreenToolbar } from "@/components/portfolio/CrcleDemoToolbar";
+import { DemoToolbar } from "@/components/portfolio/CrcleDemoToolbar";
+import { PhoneDevInspection } from "@/components/portfolio/inspect/PhoneDevInspection";
 import { CrclePhoneFrame, CrcleThemeToggle } from "@/components/portfolio/CrclePhoneFrame";
 import { useCrclePhoneLight } from "@/lib/crcle-phone-theme";
 import { CrclePhoneOverlay, CrclePrimaryDock } from "@/components/portfolio/CrcleChrome";
@@ -187,6 +188,15 @@ const USERS: RecommendedUser[] = [
   },
 ];
 
+const INITIAL_RADAR: RadarState = {
+  recommendedUsers: USERS,
+  activeCardIndex: 0,
+  activeCategory: "signal",
+  isIntentOverlayOpen: false,
+  selectedIntent: null,
+  pushPhase: "idle",
+};
+
 const CATEGORY_ICON: Record<RadarCategory, string | "waves"> = {
   signal: "waves",
   purpose: fireInnerIcon,
@@ -209,16 +219,17 @@ export function CrcleRadar({
   /* Figma 322:118007 — Radar onboarding over live Radar */
   const [onboardingOpen, setOnboardingOpen] = useState(true);
   const [caughtUp, setCaughtUp] = useState(false);
-  const [state, setState] = useState<RadarState>({
-    recommendedUsers: USERS,
-    activeCardIndex: 0,
-    activeCategory: "signal",
-    isIntentOverlayOpen: false,
-    selectedIntent: null,
-    pushPhase: "idle",
-  });
+  const [state, setState] = useState<RadarState>(INITIAL_RADAR);
   const [direction, setDirection] = useState(0);
+  const [demoPaused, setDemoPaused] = useState(false);
+  const [codeOn, setCodeOn] = useState(false);
+  const [demoRun, setDemoRun] = useState(0);
+  const [touch, setTouch] = useState<{ x: number; y: number; pressing: boolean } | null>(null);
   const pushTimers = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const screenRef = useRef<HTMLDivElement>(null);
+  const demoGen = useRef(0);
+  const demoPausedRef = useRef(false);
+  demoPausedRef.current = demoPaused;
 
   const dismissOnboarding = useCallback(() => {
     setOnboardingOpen(false);
@@ -237,6 +248,155 @@ export function CrcleRadar({
   }, []);
 
   useEffect(() => () => clearPushTimers(), [clearPushTimers]);
+
+  const pauseDemo = () => {
+    demoGen.current += 1;
+    setDemoPaused(true);
+    setTouch(null);
+  };
+
+  const replayDemo = () => {
+    clearPushTimers();
+    demoGen.current += 1;
+    setCodeOn(false);
+    setCaughtUp(false);
+    setOnboardingOpen(false);
+    setState(INITIAL_RADAR);
+    setDirection(0);
+    setDemoPaused(false);
+    setDemoRun((n) => n + 1);
+  };
+
+  useEffect(() => {
+    if (demoPaused || codeOn) return;
+    const gen = ++demoGen.current;
+    let cancelled = false;
+    const alive = () => !cancelled && gen === demoGen.current;
+    const wait = (ms: number) => new Promise((resolve) => window.setTimeout(resolve, ms));
+    const rootOf = () => screenRef.current;
+    const find = (selector: string) => rootOf()?.querySelector<HTMLElement>(selector) ?? null;
+
+    const place = (el: HTMLElement, xBias = 0.5) => {
+      const root = rootOf();
+      if (!root) return null;
+      const box = el.getBoundingClientRect();
+      const frame = root.getBoundingClientRect();
+      return {
+        x: box.left - frame.left + box.width * xBias,
+        y: box.top - frame.top + box.height / 2,
+      };
+    };
+
+    const press = async (el: HTMLElement) => {
+      const point = place(el);
+      if (!point || !alive()) return false;
+      setTouch({ ...point, pressing: false });
+      await wait(420);
+      if (!alive()) return false;
+      setTouch({ ...point, pressing: true });
+      await wait(160);
+      if (!alive()) return false;
+      setTouch({ ...point, pressing: false });
+      return true;
+    };
+
+    const run = async () => {
+      await wait(420);
+      if (!alive()) return;
+      const onboard = find('[data-demo-target="radar-continue"]');
+      if (onboard && (await press(onboard))) setOnboardingOpen(false);
+      await wait(520);
+
+      for (let step = 0; step < 2 && alive(); step += 1) {
+        const pills = find("[data-demo-target='category-pills']");
+        const root = rootOf();
+        if (pills && root) {
+          const box = pills.getBoundingClientRect();
+          const frame = root.getBoundingClientRect();
+          const y = box.top - frame.top + box.height / 2;
+          const start = box.left - frame.left + box.width * 0.82;
+          const end = box.left - frame.left + box.width * 0.18;
+          setTouch({ x: start, y, pressing: false });
+          await wait(320);
+          if (!alive()) return;
+          setTouch({ x: end, y, pressing: true });
+          await wait(260);
+        }
+        if (!alive()) return;
+        setDirection(1);
+        setState((current) => {
+          const index = CATEGORY_ORDER.indexOf(current.activeCategory);
+          return {
+            ...current,
+            activeCategory: CATEGORY_ORDER[(index + 1) % CATEGORY_ORDER.length],
+            isIntentOverlayOpen: false,
+            selectedIntent: null,
+            pushPhase: "idle",
+          };
+        });
+        setTouch((current) => (current ? { ...current, pressing: false } : current));
+        await wait(680);
+      }
+
+      if (!alive()) return;
+      const plus = find('[aria-label="Intercept signal"]');
+      if (plus && (await press(plus))) {
+        setState((current) => ({
+          ...current,
+          isIntentOverlayOpen: true,
+          selectedIntent: null,
+          pushPhase: "idle",
+        }));
+      }
+      await wait(560);
+      if (!alive()) return;
+      const romantic = find('[aria-label="romantic"]');
+      if (romantic && (await press(romantic))) {
+        setState((current) => ({ ...current, selectedIntent: "romantic" }));
+      }
+      await wait(720);
+      if (!alive()) return;
+      setState((current) => ({
+        ...current,
+        isIntentOverlayOpen: false,
+      }));
+      await wait(420);
+
+      for (let step = 0; step < 2 && alive(); step += 1) {
+        const nextUser = find('[aria-label="Next recommendation"]');
+        if (nextUser) await press(nextUser);
+        if (!alive()) return;
+        setState((current) => {
+          const next = current.activeCardIndex + 1;
+          if (next >= current.recommendedUsers.length) return current;
+          return {
+            ...current,
+            activeCardIndex: next,
+            activeCategory: "signal",
+            isIntentOverlayOpen: false,
+            selectedIntent: null,
+            pushPhase: "idle",
+          };
+        });
+        await wait(780);
+      }
+
+      if (!alive()) return;
+      await wait(700);
+      if (!alive()) return;
+      setCaughtUp(false);
+      setDirection(0);
+      setState(INITIAL_RADAR);
+      await wait(480);
+      if (alive()) void run();
+    };
+
+    void run();
+    return () => {
+      cancelled = true;
+      setTouch(null);
+    };
+  }, [codeOn, demoPaused, demoRun]);
 
   const goTo = useCallback(
     (nextIndex: number, dir: number) => {
@@ -345,6 +505,11 @@ export function CrcleRadar({
         {/* Dark Figma 257:87258 / Light cream — toggled via crcle-phone--light.
             NOC Night Owl: Figma 957:31045 teal gradient + embossed dots. */}
         <div
+          ref={screenRef}
+          onPointerDownCapture={() => {
+            if (demoPausedRef.current || codeOn) return;
+            pauseDemo();
+          }}
           className={`relative flex h-full min-h-0 w-full flex-col overflow-hidden rounded-[53px] transition-colors duration-300 ${
             isNoc ? "crcle-noc-radar" : "bg-[var(--crcle-bg-deep)]"
           }`}
@@ -734,9 +899,43 @@ export function CrcleRadar({
               <RadarOnboarding onClose={dismissOnboarding} onContinue={dismissOnboarding} />
             )}
           </AnimatePresence>
+          {touch && !demoPaused && !codeOn ? (
+            <>
+              <span
+                aria-hidden
+                className="pointer-events-none absolute z-[79] size-11 -translate-x-1/2 -translate-y-1/2 rounded-full border border-[rgba(120,120,120,0.35)] animate-ping"
+                style={{ left: touch.x, top: touch.y }}
+              />
+              <motion.div
+                aria-hidden
+                className="crcle-touch-glass pointer-events-none absolute z-[80] rounded-full"
+                initial={false}
+                animate={{
+                  left: touch.x - (touch.pressing ? 11 : 14),
+                  top: touch.y - (touch.pressing ? 11 : 14),
+                  width: touch.pressing ? 22 : 28,
+                  height: touch.pressing ? 22 : 28,
+                }}
+                transition={{ type: "spring", stiffness: 280, damping: 24, mass: 0.6 }}
+              />
+            </>
+          ) : null}
+          <PhoneDevInspection active={codeOn && !onboardingOpen} screenRef={screenRef} />
         </div>
       </CrclePhoneFrame>
-      <CrcleScreenToolbar />
+      <DemoToolbar
+        playing={!demoPaused && !codeOn}
+        codeOn={codeOn}
+        onPlay={replayDemo}
+        onDesign={() => {
+          setCodeOn(false);
+          pauseDemo();
+        }}
+        onCode={() => {
+          setCodeOn(true);
+          pauseDemo();
+        }}
+      />
     </div>
   );
 }
@@ -823,6 +1022,7 @@ function RadarOnboarding({
           </p>
           <button
             type="button"
+            data-demo-target="radar-continue"
             onClick={onContinue}
             className="flex w-[91px] flex-col items-center gap-[5px] rounded-xl transition hover:bg-white/5"
           >
@@ -945,6 +1145,7 @@ function CategoryPills({
   if (category === "signal") {
     return (
       <motion.div
+        data-demo-target="category-pills"
         className="flex items-center gap-2 rounded-[120px] bg-[rgba(247,246,242,0.1)] p-1"
         initial="hidden"
         animate="show"
@@ -974,6 +1175,7 @@ function CategoryPills({
   if (category === "purpose") {
     return (
       <motion.div
+        data-demo-target="category-pills"
         className="flex items-center gap-2 rounded-[120px] bg-[rgba(247,246,242,0.1)] p-1.5"
         initial="hidden"
         animate="show"
@@ -1004,6 +1206,7 @@ function CategoryPills({
   if (category === "love") {
     return (
       <motion.div
+        data-demo-target="category-pills"
         className="flex items-center gap-3 rounded-[120px] bg-[rgba(247,246,242,0.1)] p-1.5"
         initial="hidden"
         animate="show"
@@ -1032,6 +1235,7 @@ function CategoryPills({
 
   return (
     <motion.div
+      data-demo-target="category-pills"
       className="flex items-center rounded-[120px] bg-[rgba(247,246,242,0.4)] py-1.5 pl-4 pr-1.5"
       initial="hidden"
       animate="show"
