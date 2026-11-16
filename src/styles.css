@@ -21,6 +21,11 @@
   overflow-x: hidden;
 }
 
+/* After the wireframe handoff, the hero is no longer part of the page. */
+html[data-work-locked] .portfolio-interactive-hero-shell {
+  display: none;
+}
+
 @media (max-width: 768px) {
   .portfolio-hero-grid {
     width: 100%;
