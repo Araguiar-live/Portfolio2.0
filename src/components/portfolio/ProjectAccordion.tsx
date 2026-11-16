@@ -2,6 +2,7 @@ import { AnimatePresence, motion, type MotionValue } from "framer-motion";
 import { ArrowUpRight, Briefcase, ChevronLeft, ChevronRight, Layers, Target, TrendingUp } from "lucide-react";
 import { forwardRef, useEffect, useLayoutEffect, useRef, useState, type MutableRefObject } from "react";
 import { createPortal } from "react-dom";
+import bendingSpoonsMark from "@/assets/bending-spoons-mark.svg";
 import { CrcleVideoCard } from "@/components/portfolio/CrcleVideoCard";
 import { DesktopOnlyPill, useDesktopOnlyNudge } from "@/components/portfolio/DesktopOnlyNudge";
 import { MockupGradientRing } from "@/components/portfolio/MockupGradientRing";
@@ -79,6 +80,21 @@ const TAB_FLAT = 160;
 const TAB_SLOPE = 20;
 const TAB_SHIFT = [24, 160, 296] as const;
 const CORNER = 8;
+const BENDING_SPOONS_MARK = { width: 58.843, height: 31.7802 };
+
+/** Horizontal center of the sloped tab, matching the outline's clamp on narrow rows. */
+function tabCenterX(width: number, shift: number) {
+  const margin = CORNER;
+  let slope = TAB_SLOPE;
+  let flat = TAB_FLAT;
+  let left = Math.max(margin, shift);
+  const room = width - margin - left - slope * 2;
+  if (flat > room) {
+    left = margin;
+    flat = Math.max(48, width - margin * 2 - slope * 2);
+  }
+  return left + slope + flat / 2;
+}
 /** Outer corners of the whole stack, not each file. */
 const STACK_CORNER = 24;
 
@@ -326,6 +342,21 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
       >
+      {project.slug === "first-design" && outline ? (
+        <img
+          src={bendingSpoonsMark}
+          alt=""
+          width={BENDING_SPOONS_MARK.width}
+          height={BENDING_SPOONS_MARK.height}
+          className="pointer-events-none absolute z-20 max-w-none"
+          style={{
+            width: BENDING_SPOONS_MARK.width,
+            height: BENDING_SPOONS_MARK.height,
+            left: tabCenterX(outline.w, tabShift) - BENDING_SPOONS_MARK.width / 2,
+            top: TAB_H + 6,
+          }}
+        />
+      ) : null}
       {/* Row header — Figma 530:151817 */}
       <div
         className="group relative flex w-full items-center justify-between gap-7 border-0 px-[37px] py-[41px] text-left outline-none transition-[background] duration-300 max-md:flex-col max-md:items-stretch max-md:gap-[15px] max-md:px-5 max-md:py-[23px] max-sm:gap-[15px] max-sm:px-5 max-sm:py-[23px]"
