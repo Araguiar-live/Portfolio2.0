@@ -1022,7 +1022,7 @@ function ProfileMainView({
         <button
           type="button"
           onClick={onOpenMood}
-          className="flex items-center gap-1 self-stretch rounded-[24px] border border-[rgba(15,201,80,0.2)] bg-gradient-to-r from-white/[0.03] to-[rgba(15,201,80,0.12)] px-4 py-2"
+          className="crcle-signal-live-gloss flex items-center gap-1.5 self-stretch rounded-[24px] px-4 py-2"
         >
           <span className="relative flex size-2 items-center justify-center">
             <span

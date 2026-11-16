@@ -1955,9 +1955,46 @@ html.dark .thought-body-gradient {
   filter: var(--crcle-icon-filter);
   transition: filter 0.3s ease;
 }
-/* Profile mood chip — same navy as the work mark (#020426). */
+/* Profile mood chip — white on the dark phone, work-mark navy in light mode. */
 .crcle-phone .crcle-mood-chip-icon {
+  background-color: #ffffff;
+}
+.crcle-phone--light .crcle-mood-chip-icon {
   background-color: #020426;
+}
+.crcle-signal-live-gloss {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(15, 201, 80, 0.45);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.28) 0%,
+    rgba(15, 201, 80, 0.14) 46%,
+    rgba(15, 201, 80, 0.32) 100%
+  );
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.62) inset,
+    0 -10px 14px rgba(15, 201, 80, 0.16) inset,
+    0 6px 14px rgba(0, 0, 0, 0.18);
+  -webkit-backdrop-filter: blur(12px) saturate(160%);
+  backdrop-filter: blur(12px) saturate(160%);
+}
+.crcle-signal-live-gloss::before {
+  content: "";
+  position: absolute;
+  left: 10%;
+  right: 10%;
+  top: 1px;
+  height: 46%;
+  border-radius: 999px;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0));
+}
+.crcle-signal-live-gloss > * {
+  position: relative;
+  z-index: 1;
+}
+.crcle-phone .crcle-mood-chip-icon {
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
   -webkit-mask-position: center;
