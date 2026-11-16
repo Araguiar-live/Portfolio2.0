@@ -40,7 +40,11 @@ import kycPassportIcon from "@/assets/crcle/kyc/passport.svg";
 import kycShieldIcon from "@/assets/crcle/kyc/shield.svg";
 import lockFilledIcon from "@/assets/crcle/profile/lock-filled.svg";
 import loughboroughCrest from "@/assets/crcle/profile/loughborough-crest.png";
-import mapPinPreciseIcon from "@/assets/crcle/profile/map-pin-precise.svg";
+import locationCurrentIcon from "@/assets/crcle/profile/location-current.svg";
+import locationDotIcon from "@/assets/crcle/profile/location-dot.svg";
+import locationInfoIcon from "@/assets/crcle/profile/location-info.svg";
+import locationPinIcon from "@/assets/crcle/profile/location-pin.svg";
+import locationRadiusIcon from "@/assets/crcle/profile/location-radius.svg";
 import profileMaskGreenIcon from "@/assets/crcle/profile/mask-green.svg";
 import profileMaskIcon from "@/assets/crcle/profile/mask.svg";
 import masksTheaterIcon from "@/assets/crcle/profile/masks-theater.svg";
@@ -991,7 +995,7 @@ function ProfileMainView({
     MOODS.find((m) => m.id === profile.broadcast.activeState) ?? MOODS[0];
   const moodChipIcon = isIncognito ? profileMaskGreenIcon : activeMood.icon;
   const moodChipLabel = isIncognito ? "Incognito Mode" : activeMood.label;
-  const [locationEnabled, setLocationEnabled] = useState(false);
+  const [locationEnabled, setLocationEnabled] = useState(true);
   const lookingForWork = widgets.work?.location?.toLowerCase().includes("looking") ?? false;
   const relationshipMeta =
     RELATIONSHIP_OPTIONS.find((o) => o.id === widgets.relationship) ?? RELATIONSHIP_OPTIONS[1];
@@ -1219,35 +1223,105 @@ function ProfileMainView({
               <button
                 type="button"
                 onClick={onOpenLocation}
-                className="relative h-[181px] min-w-0 overflow-hidden rounded-2xl text-left"
+                className="relative flex h-[181px] min-w-0 flex-col items-center justify-center overflow-hidden rounded-2xl p-2 text-left"
               >
-                <img
-                  alt=""
-                  src={locationMapImg}
-                  className="absolute inset-0 size-full object-cover"
-                  draggable={false}
-                />
-                <div className="absolute inset-0 rounded-2xl bg-[rgba(2,4,38,0.1)]" />
-                {showLocationDetails ? (
-                  <>
-                    <span className="absolute left-[72px] top-[84px] flex items-center gap-1 rounded-bl-[4px] rounded-br-[24px] rounded-tl-xl rounded-tr-[24px] bg-[#05f] py-0.5 pl-1.5 pr-2">
-                      <span className="size-0.5 rounded-full bg-white" />
-                      <span
-                        className="text-[11px] leading-[1.4] text-[#fefefe]"
-                        style={{ fontFamily: FONT }}
-                      >
-                        {widgets.location ?? "Holland Park"}
-                      </span>
+                <span aria-hidden className="pointer-events-none absolute inset-0 rounded-2xl">
+                  <img
+                    alt=""
+                    src={locationMapImg}
+                    className="absolute inset-0 size-full rounded-2xl object-cover"
+                    draggable={false}
+                  />
+                  <span className="absolute inset-0 rounded-2xl bg-[rgba(2,4,38,0.1)]" />
+                </span>
+                <span className="relative flex min-h-0 w-full flex-1 flex-col items-center justify-between">
+                  <span className="flex w-full items-center justify-between rounded-[24px] bg-[rgba(255,255,255,0.05)] py-1 pl-2 pr-1 backdrop-blur-[4px]">
+                    <img
+                      alt=""
+                      src={locationCurrentIcon}
+                      width={16}
+                      height={16}
+                      className="block shrink-0"
+                      draggable={false}
+                    />
+                    <span
+                      className="text-[13px] font-normal leading-[1.1] text-[#030426]"
+                      style={{ fontFamily: FONT }}
+                    >
+                      Location
                     </span>
                     <img
                       alt=""
-                      src={mapPinPreciseIcon}
-                      className="absolute left-[72px] top-[107px] size-2.5"
+                      src={locationInfoIcon}
+                      width={15}
+                      height={15}
+                      className="block shrink-0"
                       draggable={false}
                     />
-                  </>
-                ) : null}
-                {/* Figma 866:243439 — incognito frost */}
+                  </span>
+                  {showLocationDetails ? (
+                    <img
+                      alt=""
+                      src={locationRadiusIcon}
+                      width={88}
+                      height={88}
+                      className="block shrink-0"
+                      draggable={false}
+                    />
+                  ) : (
+                    <span className="size-[88px] shrink-0" />
+                  )}
+                  <span
+                    className="flex w-full items-center justify-between rounded-[24px] py-1 pl-2 pr-1.5"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <span
+                      className="text-[11px] font-normal leading-[1.4] text-[#030426]"
+                      style={{ fontFamily: FONT }}
+                    >
+                      Shared location
+                    </span>
+                    <span
+                      role="switch"
+                      aria-checked={locationEnabled}
+                      aria-label="Shared location"
+                      onClick={() => setLocationEnabled((v) => !v)}
+                      className={`flex w-6 items-center rounded-[24px] p-0.5 ${
+                        locationEnabled ? "justify-end bg-[#0fc950]" : "justify-start bg-[rgba(2,4,38,0.25)]"
+                      }`}
+                    >
+                      <span className="size-2 rounded-[4px] bg-[#fefefe]" />
+                    </span>
+                  </span>
+                  {showLocationDetails ? (
+                    <span className="absolute left-[56px] top-[74px] flex flex-col items-start gap-1">
+                      <span className="flex items-center gap-1 rounded-bl-[4px] rounded-br-[24px] rounded-tl-[12px] rounded-tr-[24px] bg-[#05f] py-0.5 pl-1.5 pr-2">
+                        <img
+                          alt=""
+                          src={locationDotIcon}
+                          width={2}
+                          height={2}
+                          className="block shrink-0"
+                          draggable={false}
+                        />
+                        <span
+                          className="text-[11px] font-normal leading-[1.4] text-[#fefefe]"
+                          style={{ fontFamily: FONT }}
+                        >
+                          {widgets.location ?? "Holland Park"}
+                        </span>
+                      </span>
+                      <img
+                        alt=""
+                        src={locationPinIcon}
+                        width={10}
+                        height={10}
+                        className="block shrink-0"
+                        draggable={false}
+                      />
+                    </span>
+                  ) : null}
+                </span>
                 {frostMap ? (
                   <div className="absolute inset-0 z-[1] flex flex-col items-center justify-center overflow-hidden rounded-2xl bg-[rgba(255,255,255,0.1)] px-[35px] backdrop-blur-[4px]">
                     <div className="flex w-[110px] flex-col items-center justify-center gap-[7px]">
@@ -1270,64 +1344,6 @@ function ProfileMainView({
                     </div>
                   </div>
                 ) : null}
-                <span
-                  className="absolute left-2 top-2 z-[2] rounded-[24px] bg-[#030426] py-0.5 pl-2 pr-2.5 text-[13px] leading-[1.4] text-[#fefefe]"
-                  style={{ fontFamily: FONT }}
-                >
-                  Current Location
-                </span>
-                {isIncognito ? (
-                  <div
-                    className="absolute bottom-2 left-2 right-2 z-[2]"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <button
-                      type="button"
-                      onClick={() => setLocationEnabled((v) => !v)}
-                      className="flex w-full items-center justify-between rounded-[24px] border border-[rgba(2,4,38,0.4)] bg-transparent py-1 pl-2 pr-1.5"
-                      aria-pressed={locationEnabled}
-                    >
-                      <span
-                        className="text-[11px] leading-[1.4] text-[#030426]"
-                        style={{ fontFamily: FONT }}
-                      >
-                        Shared location
-                      </span>
-                      <span
-                        className={`flex w-6 items-center rounded-[24px] p-0.5 transition ${
-                          locationEnabled
-                            ? "justify-end bg-[#0fc950]"
-                            : "justify-start bg-[rgba(2,4,38,0.25)]"
-                        }`}
-                      >
-                        <span className="size-2 rounded bg-[#fefefe]" />
-                      </span>
-                    </button>
-                  </div>
-                ) : (
-                  <div className="absolute bottom-2 left-1 right-1 z-[2] flex items-center gap-1 rounded-[24px] bg-[rgba(253,252,251,0.35)] p-1 shadow-[0_4px_4px_rgba(0,0,0,0.05)] backdrop-blur-[10px]">
-                    <span
-                      className="flex flex-1 items-center justify-center px-2.5 py-1 text-[11px] leading-[1.4] text-[#010211]"
-                      style={{ fontFamily: FONT }}
-                    >
-                      Target City
-                    </span>
-                    <span className="flex flex-1 items-center justify-center gap-1 rounded-[20px] bg-[#02031d] p-1">
-                      <img
-                        alt=""
-                        src={mapPinPreciseIcon}
-                        className="size-2.5 brightness-0 invert"
-                        draggable={false}
-                      />
-                      <span
-                        className="text-[11px] leading-[1.4] text-white"
-                        style={{ fontFamily: FONT }}
-                      >
-                        Precise
-                      </span>
-                    </span>
-                  </div>
-                )}
               </button>
 
               {hasWork ? (
