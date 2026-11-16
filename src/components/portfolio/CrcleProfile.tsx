@@ -1069,7 +1069,7 @@ function ProfileMainView({
           data-inspect-id="mood-toggle"
           onClick={onOpenMood}
           aria-label={`Broadcast mood: ${moodChipLabel}`}
-          className="relative flex items-center justify-center gap-1 self-stretch overflow-hidden rounded-[64px] bg-[rgba(247,246,242,0.2)] py-1 pl-2 pr-1"
+          className="relative flex items-center justify-center gap-1 self-stretch overflow-hidden rounded-[36px] border border-[rgba(2,4,38,0.28)] bg-[rgba(247,246,242,0.2)] py-1 pl-2 pr-1"
         >
           {isIncognito ? (
             <IconImg src={moodChipIcon} className="relative z-[1] h-[20.4px] w-[20.4px]" />
