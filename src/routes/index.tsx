@@ -29,10 +29,8 @@ import { isPhoneViewport } from "@/lib/viewport";
 import crcleHoverStill from "@/assets/portfolio/hover/crcle-in-the-area.jpg";
 import crcleHoverVideo from "@/assets/portfolio/hover/crcle-world-hover.mp4";
 import crcleHoverPoster from "@/assets/portfolio/hover/crcle-world-poster.jpg";
-import crcleHoverMark from "@/assets/portfolio/hover/crcle-mark.svg";
 import bendingSpoonsHoverStill from "@/assets/portfolio/hover/bending-spoons-desk.jpg";
 import odicciHoverStill from "@/assets/portfolio/hover/odicci-laptop.jpg";
-import odicciHoverMark from "@/assets/portfolio/hover/odicci-mark.svg";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -52,8 +50,6 @@ const PROJECTS: Project[] = [
       alt: "CRCLE In The Area on iPhone",
       width: 1400,
       height: 1050,
-      glassLogo: true,
-      logo: { src: crcleHoverMark, width: 248, height: 255 },
     },
     linkHoverPreview: {
       type: "video",
@@ -63,7 +59,6 @@ const PROJECTS: Project[] = [
       width: 1280,
       height: 720,
       playbackRate: 1.5,
-      chrome: false,
     },
     content: {
       "Create Workspace\u00a0": {
@@ -158,8 +153,6 @@ const PROJECTS: Project[] = [
       alt: "Productive on iPhone, on a wooden desk in sunlight",
       width: 1400,
       height: 1050,
-      glassLogo: true,
-      playColor: "#e29929",
     },
     content: {
       "Template Library": {
@@ -189,8 +182,6 @@ const PROJECTS: Project[] = [
       alt: "Odicci on a laptop",
       width: 1600,
       height: 1066,
-      playColor: "#E9582C",
-      logo: { src: odicciHoverMark, width: 248, height: 259 },
     },
     content: {
       "Create Workspace\u00a0": {

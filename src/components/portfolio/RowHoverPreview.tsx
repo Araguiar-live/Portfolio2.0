@@ -1,16 +1,11 @@
 import { AnimatePresence, motion, useMotionValue, useReducedMotion, useSpring, useTransform } from "framer-motion";
 import { useEffect, useRef, useState, type MouseEvent } from "react";
 import { createPortal } from "react-dom";
-import playSolid from "@/assets/portfolio/hover/play-solid.svg";
 import { isPhoneViewport } from "@/lib/viewport";
 
 const PREVIEW_MAX = 560;
 const RADIUS_FROM = 120 / 4096;
 const SPRING = { damping: 15, stiffness: 150, mass: 0.2 };
-const PLAY_COLOR = "#060A0C";
-const LOGO_RIGHT = 64 / 4096;
-const LOGO_BOTTOM = 64 / 2730;
-const LOGO_WIDTH = 248 / 4096;
 
 export interface HoverPreviewMedia {
   src: string;
@@ -22,13 +17,6 @@ export interface HoverPreviewMedia {
   poster?: string;
   /** HTMLMediaElement.playbackRate. Defaults to 1. */
   playbackRate?: number;
-  /** Play-me pill + corner logo. Defaults to true. */
-  chrome?: boolean;
-  glassLogo?: boolean;
-  playColor?: string;
-  /** Light “Play me” type on dark footage. */
-  onDark?: boolean;
-  logo?: { src: string; width: number; height: number };
 }
 
 function previewSize(media: HoverPreviewMedia) {
@@ -113,29 +101,6 @@ export function RowHoverPreview({
       style={{ width, height, borderRadius: radius }}
     >
       <PreviewFrame media={media} playing={hold} />
-      {media.chrome !== false ? (
-        <>
-          <div
-            className={
-              "absolute top-3 left-3 inline-flex items-center gap-1.5 rounded-full py-1 pr-3 pl-2 " +
-              (media.glassLogo
-                ? "border border-white/55 bg-white/20 shadow-[inset_0_1px_0_rgba(255,255,255,0.65)] backdrop-blur-xl"
-                : "bg-white/20 backdrop-blur-md")
-            }
-          >
-            <PlayGlyph color={media.playColor ?? PLAY_COLOR} />
-            <span
-              className={
-                "whitespace-nowrap text-[13px] leading-none tracking-[-0.5px] " +
-                (media.onDark ? "text-white" : "text-[#292d32]")
-              }
-            >
-              Play me
-            </span>
-          </div>
-          {media.logo ? <PreviewLogo media={media} /> : null}
-        </>
-      ) : null}
     </div>
   );
 
@@ -297,53 +262,3 @@ function PreviewFrame({
   );
 }
 
-function PreviewLogo({ media }: { media: HoverPreviewMedia }) {
-  const logo = media.logo;
-  if (!logo) return null;
-  return (
-    <div
-      className={
-        "pointer-events-none absolute overflow-hidden rounded-full " +
-        (media.glassLogo
-          ? "border border-white/55 bg-white/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.7),0_8px_20px_rgba(6,10,12,0.12)] backdrop-blur-xl"
-          : "")
-      }
-      style={{
-        right: `${LOGO_RIGHT * 100}%`,
-        bottom: `${LOGO_BOTTOM * 100}%`,
-        width: `${LOGO_WIDTH * 100}%`,
-        aspectRatio: `${logo.width} / ${logo.height}`,
-      }}
-    >
-      <img
-        src={logo.src}
-        alt=""
-        width={logo.width}
-        height={logo.height}
-        draggable={false}
-        className="pointer-events-none size-full max-w-none"
-      />
-    </div>
-  );
-}
-
-function PlayGlyph({ color }: { color: string }) {
-  return (
-    <span
-      aria-hidden
-      className="pointer-events-none inline-block size-3.5 shrink-0"
-      style={{
-        backgroundColor: color,
-        maskImage: `url("${playSolid}")`,
-        WebkitMaskImage: `url("${playSolid}")`,
-        maskRepeat: "no-repeat",
-        WebkitMaskRepeat: "no-repeat",
-        maskPosition: "center",
-        WebkitMaskPosition: "center",
-        maskSize: "contain",
-        WebkitMaskSize: "contain",
-        maskMode: "alpha",
-      }}
-    />
-  );
-}
