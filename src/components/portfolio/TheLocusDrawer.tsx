@@ -591,7 +591,12 @@ export function SignalCard({
               }}
               className="flex size-6 shrink-0 items-center justify-center"
             >
-              <img alt="" src={locusEditIcon} className="size-6 max-w-none" draggable={false} />
+              <img
+                alt=""
+                src={locusEditIcon}
+                className="size-6 max-w-none brightness-0 [.crcle-phone:not(.crcle-phone--light)_&]:invert"
+                draggable={false}
+              />
             </button>
             <button
               type="button"
