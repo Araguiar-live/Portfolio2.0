@@ -82,13 +82,11 @@ const CORNER = 8;
 /** Outer corners of the whole stack, not each file. */
 const STACK_CORNER = 24;
 
-/**
- * Quadratic fillet. The control point is the sharp vertex, and the curve
- * starts and ends `radius` px along the two edges, so it cannot bulge outside them.
- */
-function quadraticOutline(points: Array<[number, number]>, radii: number[]): string {
+type Pt = [number, number];
+
+function cornerCuts(points: Pt[], radii: number[]) {
   const n = points.length;
-  const cuts = points.map((curr, i) => {
+  return points.map((curr, i) => {
     const prev = points[(i - 1 + n) % n];
     const next = points[(i + 1) % n];
     const inLen = Math.hypot(curr[0] - prev[0], curr[1] - prev[1]) || 1;
@@ -99,19 +97,64 @@ function quadraticOutline(points: Array<[number, number]>, radii: number[]): str
     const ox = (next[0] - curr[0]) / outLen;
     const oy = (next[1] - curr[1]) / outLen;
     return {
-      start: [curr[0] - ix * radius, curr[1] - iy * radius] as [number, number],
-      end: [curr[0] + ox * radius, curr[1] + oy * radius] as [number, number],
+      start: [curr[0] - ix * radius, curr[1] - iy * radius] as Pt,
+      end: [curr[0] + ox * radius, curr[1] + oy * radius] as Pt,
       corner: curr,
     };
   });
+}
+
+/**
+ * Quadratic fillet. The control point is the sharp vertex, and the curve
+ * starts and ends `radius` px along the two edges, so it cannot bulge outside them.
+ */
+function quadraticOutline(points: Pt[], radii: number[]): string {
+  const cuts = cornerCuts(points, radii);
   let d = `M ${cuts[0].start[0]} ${cuts[0].start[1]}`;
-  for (let i = 0; i < n; i++) {
+  for (let i = 0; i < cuts.length; i++) {
+    const cut = cuts[i];
+    const next = cuts[(i + 1) % cuts.length];
+    d += ` Q ${cut.corner[0]} ${cut.corner[1]} ${cut.end[0]} ${cut.end[1]}`;
+    d += ` L ${next.start[0]} ${next.start[1]}`;
+  }
+  return `${d} Z`;
+}
+
+/** Same fillet, without the bottom edge, so a covered seam is not drawn twice. */
+function quadraticOpenStroke(points: Pt[], radii: number[]): string {
+  const cuts = cornerCuts(points, radii);
+  const n = cuts.length;
+  let d = `M ${cuts[1].start[0]} ${cuts[1].start[1]}`;
+  for (let i = 1; i < n; i++) {
     const cut = cuts[i];
     const next = cuts[(i + 1) % n];
     d += ` Q ${cut.corner[0]} ${cut.corner[1]} ${cut.end[0]} ${cut.end[1]}`;
     d += ` L ${next.start[0]} ${next.start[1]}`;
   }
-  return `${d} Z`;
+  const last = cuts[0];
+  d += ` Q ${last.corner[0]} ${last.corner[1]} ${last.end[0]} ${last.end[1]}`;
+  return d;
+}
+
+/** Move each edge inward so a 1px stroke sits fully inside the card. */
+function insetPoints(points: Pt[], amount: number): Pt[] {
+  const n = points.length;
+  const edges = points.map((p, i) => {
+    const q = points[(i + 1) % n];
+    const dx = q[0] - p[0];
+    const dy = q[1] - p[1];
+    const len = Math.hypot(dx, dy) || 1;
+    const nx = dy / len;
+    const ny = -dx / len;
+    return { p: [p[0] + nx * amount, p[1] + ny * amount] as Pt, d: [dx, dy] as Pt };
+  });
+  return edges.map((edge, i) => {
+    const prev = edges[(i - 1 + n) % n];
+    const det = prev.d[0] * edge.d[1] - prev.d[1] * edge.d[0];
+    if (Math.abs(det) < 1e-6) return edge.p;
+    const t = ((edge.p[0] - prev.p[0]) * edge.d[1] - (edge.p[1] - prev.p[1]) * edge.d[0]) / det;
+    return [prev.p[0] + prev.d[0] * t, prev.p[1] + prev.d[1] * t];
+  });
 }
 
 /** One outline: tab and body share a perimeter, with no stroke across the tab base. */
@@ -233,13 +276,19 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
     const el = faceRef.current;
     if (!el) return;
     const measure = () => {
-      const width = el.clientWidth;
-      const height = el.clientHeight;
+      const rect = el.getBoundingClientRect();
+      const width = rect.width;
+      const height = rect.height;
       if (width < 2 || height < 2) return;
       const shape = folderOutline(width, height, tabShift, index, count);
+      const strokeRadii = shape.radii.map((radius) => Math.max(0, radius - 0.5));
+      const strokePoints = insetPoints(shape.points, 0.5);
+      const closeBottom = index === count - 1;
       setOutline({
         d: quadraticOutline(shape.points, shape.radii),
-        stroke: quadraticOutline(shape.points, shape.radii),
+        stroke: closeBottom
+          ? quadraticOutline(strokePoints, strokeRadii)
+          : quadraticOpenStroke(strokePoints, strokeRadii),
         w: width,
         h: height,
       });
@@ -259,6 +308,9 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
         zIndex: raised ? 40 : index + 1,
         marginTop: index === 0 ? 0 : -TAB_H,
         top: raised ? -4 : 0,
+        border: 0,
+        outline: "none",
+        boxShadow: "none",
       }}
     >
       <div
@@ -267,6 +319,9 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
         style={{
           clipPath: outline ? `url(#folder-clip-${project.slug})` : "none",
           paddingTop: TAB_H,
+          border: 0,
+          outline: "none",
+          boxShadow: "none",
         }}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
@@ -476,8 +531,11 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
       {outline ? (
         <svg
           aria-hidden
-          className="pointer-events-none absolute inset-0 h-full w-full overflow-visible"
+          className="pointer-events-none absolute left-0 top-0 overflow-visible"
+          width={outline.w}
+          height={outline.h}
           viewBox={`0 0 ${outline.w} ${outline.h}`}
+          style={{ overflow: "visible" }}
         >
           <clipPath id={`folder-clip-${project.slug}`} clipPathUnits="userSpaceOnUse">
             <path d={outline.d} />
@@ -487,6 +545,8 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
             fill="none"
             stroke="#D1D5DB"
             strokeWidth="1"
+            strokeLinejoin="round"
+            strokeLinecap="butt"
             vectorEffect="non-scaling-stroke"
           />
         </svg>
