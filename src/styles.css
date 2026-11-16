@@ -458,8 +458,7 @@
 .folder-shell {
   border: none;
   outline: none;
-  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.04));
-  transition: transform 0.35s ease, filter 0.35s ease;
+  transition: top 0.35s ease;
 }
 
 .folder-face {

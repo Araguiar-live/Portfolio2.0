@@ -155,37 +155,6 @@ function folderOutline(
   return { points, radii };
 }
 
-/** Pull every edge 0.5px into the shape so a 1px stroke sits fully inside the clip. */
-function insetPoints(points: Array<[number, number]>, amount: number): Array<[number, number]> {
-  const n = points.length;
-  return points.map((curr, i) => {
-    const prev = points[(i - 1 + n) % n];
-    const next = points[(i + 1) % n];
-    let e1x = curr[0] - prev[0];
-    let e1y = curr[1] - prev[1];
-    let e2x = next[0] - curr[0];
-    let e2y = next[1] - curr[1];
-    const len1 = Math.hypot(e1x, e1y) || 1;
-    const len2 = Math.hypot(e2x, e2y) || 1;
-    e1x /= len1;
-    e1y /= len1;
-    e2x /= len2;
-    e2y /= len2;
-    const n1x = e1y;
-    const n1y = -e1x;
-    const n2x = e2y;
-    const n2y = -e2x;
-    let mx = n1x + n2x;
-    let my = n1y + n2y;
-    const ml = Math.hypot(mx, my) || 1;
-    mx /= ml;
-    my /= ml;
-    const denom = mx * n1x + my * n1y;
-    const scale = Math.abs(denom) > 0.25 ? amount / denom : amount;
-    return [curr[0] + mx * scale, curr[1] + my * scale];
-  });
-}
-
 /** White project accordion card — mockup / bento treatment TBD. */
 export function ProjectBentoStack({
   projects,
@@ -270,7 +239,7 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
       const shape = folderOutline(width, height, tabShift, index, count);
       setOutline({
         d: quadraticOutline(shape.points, shape.radii),
-        stroke: quadraticOutline(insetPoints(shape.points, 0.5), shape.radii),
+        stroke: quadraticOutline(shape.points, shape.radii),
         w: width,
         h: height,
       });
@@ -288,8 +257,8 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
       className="folder-shell pointer-events-none relative border-0 outline-none"
       style={{
         zIndex: raised ? 40 : index + 1,
-        marginTop: index === 0 ? 0 : -20,
-        transform: raised ? "translateY(-4px)" : "none",
+        marginTop: index === 0 ? 0 : -TAB_H,
+        top: raised ? -4 : 0,
       }}
     >
       <div
