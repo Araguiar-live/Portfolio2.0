@@ -1,6 +1,6 @@
 import { AnimatePresence, motion, type MotionValue } from "framer-motion";
 import { ArrowUpRight, ChevronLeft, ChevronRight } from "lucide-react";
-import { forwardRef, useEffect, useLayoutEffect, useRef, useState, type MutableRefObject } from "react";
+import { forwardRef, useEffect, useState, type MutableRefObject } from "react";
 import { createPortal } from "react-dom";
 import { CrcleVideoCard } from "@/components/portfolio/CrcleVideoCard";
 import { DesktopOnlyPill, useDesktopOnlyNudge } from "@/components/portfolio/DesktopOnlyNudge";
@@ -72,120 +72,12 @@ interface Props {
   index: number;
 }
 
-/** Trapezoid file-tab that stays a fixed size while the row body grows. */
-function folderPoints(width: number, height: number, index: number): Array<[number, number]> {
-  const narrow = width < 768;
-  // Rise/run leave a straight shoulder between the 8px fillets, so the tab reads as a trapezoid.
-  const tabH = narrow ? 24 : 40;
-  const tabW = narrow ? 78 : 148;
-  const slope = narrow ? 14 : 18;
-  const stagger = narrow ? 36 : 120;
-  const fromRight = (narrow ? 16 : 36) + index * stagger;
-  const x = Math.max(narrow ? 12 : 24, width - fromRight - tabW - slope * 2);
-  const lip = tabH;
-  return [
-    [0, lip],
-    [x, lip],
-    [x + slope, 0.5],
-    [x + slope + tabW, 0.5],
-    [x + slope * 2 + tabW, lip],
-    [width, lip],
-    [width, height],
-    [0, height],
-  ];
-}
-
-/** Pick the arc that cuts the sharp corner off, rather than bowing out past it. */
-function filletSweep(
-  from: [number, number],
-  to: [number, number],
-  corner: [number, number],
-  radius: number,
-): 0 | 1 {
-  const dx = to[0] - from[0];
-  const dy = to[1] - from[1];
-  const chord = Math.hypot(dx, dy) || 1;
-  const height = Math.sqrt(Math.max(0, radius * radius - (chord / 2) ** 2));
-  const midX = (from[0] + to[0]) / 2;
-  const midY = (from[1] + to[1]) / 2;
-  const px = -dy / chord;
-  const py = dx / chord;
-  const closer = (sweep: 0 | 1) => {
-    const cx = midX + (sweep ? 1 : -1) * height * px;
-    const cy = midY + (sweep ? 1 : -1) * height * py;
-    const vx = midX - cx;
-    const vy = midY - cy;
-    const vl = Math.hypot(vx, vy) || 1;
-    const ax = cx + (vx / vl) * radius;
-    const ay = cy + (vy / vl) * radius;
-    return (ax - corner[0]) ** 2 + (ay - corner[1]) ** 2;
-  };
-  return closer(1) < closer(0) ? 1 : 0;
-}
-
-/** 8px fillets on the body, 5px on the tab so the shoulders stay straight. */
-function roundedFolderPath(points: Array<[number, number]>): string {
-  const radii = points.map((_, i) => (i >= 1 && i <= 4 ? 5 : 8));
-  const n = points.length;
-  const corners: Array<{
-    v1x: number;
-    v1y: number;
-    v2x: number;
-    v2y: number;
-    len1: number;
-    tangent: number;
-    offset: number;
-    curr: [number, number];
-  }> = [];
-  let d = "";
-  for (let i = 0; i < n; i++) {
-    const prev = points[(i - 1 + n) % n];
-    const curr = points[i];
-    const next = points[(i + 1) % n];
-    let v1x = curr[0] - prev[0];
-    let v1y = curr[1] - prev[1];
-    let v2x = next[0] - curr[0];
-    let v2y = next[1] - curr[1];
-    const len1 = Math.hypot(v1x, v1y) || 1;
-    const len2 = Math.hypot(v2x, v2y) || 1;
-    v1x /= len1;
-    v1y /= len1;
-    v2x /= len2;
-    v2y /= len2;
-    const cross = v1x * v2y - v1y * v2x;
-    const dot = Math.min(1, Math.max(-1, v1x * v2x + v1y * v2y));
-    const turn = Math.abs(Math.atan2(cross, dot));
-    const tangent = Math.tan(turn / 2);
-    const radius = radii[i];
-    const offset = tangent > 0.001 ? radius / tangent : 0;
-    corners.push({ v1x, v1y, v2x, v2y, len1, tangent, offset, curr });
-  }
-  for (let pass = 0; pass < 4; pass++) {
-    for (let i = 0; i < n; i++) {
-      const edge = corners[(i + 1) % n].len1;
-      const used = corners[i].offset + corners[(i + 1) % n].offset;
-      if (used > edge - 0.5) {
-        const scale = (edge - 0.5) / used;
-        corners[i].offset *= scale;
-        corners[(i + 1) % n].offset *= scale;
-      }
-    }
-  }
-  for (let i = 0; i < n; i++) {
-    const { v1x, v1y, v2x, v2y, tangent, offset, curr } = corners[i];
-    const arc = tangent > 0.001 ? offset * tangent : 0;
-    const x1 = curr[0] - v1x * offset;
-    const y1 = curr[1] - v1y * offset;
-    const x2 = curr[0] + v2x * offset;
-    const y2 = curr[1] + v2y * offset;
-    d += i === 0 ? `M ${x1} ${y1}` : ` L ${x1} ${y1}`;
-    if (arc > 0.2) {
-      const sweep = filletSweep([x1, y1], [x2, y2], curr, arc);
-      d += ` A ${arc} ${arc} 0 0 ${sweep} ${x2} ${y2}`;
-    } else d += ` L ${x2} ${y2}`;
-  }
-  return `${d} Z`;
-}
+/** Figma 2789:208749 — fixed tab, flipped horizontally in the file. Do not stretch it. */
+const TAB_W = 213.449;
+const TAB_H = 50.72;
+const TAB_SHIFT = [0, 64, 128] as const;
+const TAB_OUTLINE =
+  "M212.949 50.5V12.5C212.949 5.87258 207.576 0.5 200.949 0.5H32.4322C27.8522 0.5 23.6716 3.10701 21.6563 7.21981L0.448995 50.5";
 
 /** White project accordion card — mockup / bento treatment TBD. */
 export function ProjectBentoStack({
@@ -254,30 +146,9 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
   const rowHover = useRowHoverPreview(project.hoverPreview, !isOpen);
   const linkHover = useRowHoverPreview(project.linkHoverPreview, Boolean(project.url) && isOpen);
 
-  const shapeRef = useRef<HTMLDivElement>(null);
-  const [clipPath, setClipPath] = useState("none");
-  const [outline, setOutline] = useState("");
   const [hovered, setHovered] = useState(false);
   const raised = hovered || isOpen;
-
-  useLayoutEffect(() => {
-    const el = shapeRef.current;
-    if (!el) return;
-    const measure = () => {
-      const width = el.clientWidth;
-      const height = el.clientHeight;
-      if (width < 1 || height < 1) return;
-      const points = folderPoints(width, height, index);
-      const path = roundedFolderPath(points);
-      el.parentElement?.style.setProperty("--folder-tab", `${points[0][1]}px`);
-      setClipPath(`url(#folder-clip-${project.slug})`);
-      setOutline(path);
-    };
-    measure();
-    const observer = new ResizeObserver(measure);
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [index, isOpen, project.slug]);
+  const tabShift = TAB_SHIFT[index] ?? TAB_SHIFT[TAB_SHIFT.length - 1];
 
   return (
     <div
@@ -286,18 +157,34 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
       className="folder-shell pointer-events-none relative"
       style={{
         zIndex: raised ? 40 : index + 1,
-        marginTop: index === 0 ? 0 : "calc(-1 * var(--folder-tab, 40px))",
+        marginTop: index === 0 ? 0 : -TAB_H,
+        paddingTop: TAB_H,
         transform: raised ? "translateY(-4px)" : "none",
         filter: raised ? "drop-shadow(0 12px 28px rgba(0,0,0,0.22))" : "none",
       }}
     >
       <div
-        ref={shapeRef}
-        className="folder-face pointer-events-auto relative border-0"
-        style={{
-          clipPath,
-          paddingTop: "var(--folder-tab, 40px)",
-        }}
+        className="pointer-events-none absolute"
+        style={{ left: tabShift, top: 1, width: TAB_W, height: TAB_H, transform: "scaleX(-1)" }}
+      >
+        <div className="folder-face size-full" style={{ clipPath: `path('${TAB_OUTLINE}Z')` }} />
+        <svg
+          aria-hidden
+          className="absolute inset-0 overflow-visible"
+          width={TAB_W}
+          height={TAB_H}
+          viewBox={`0 0 ${TAB_W} ${TAB_H}`}
+        >
+          <path
+            d={TAB_OUTLINE}
+            fill="none"
+            stroke="rgba(0,0,0,0.08)"
+            vectorEffect="non-scaling-stroke"
+          />
+        </svg>
+      </div>
+      <div
+        className="folder-face pointer-events-auto relative border border-[rgba(0,0,0,0.08)]"
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
       >
@@ -492,24 +379,6 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
         )}
       </AnimatePresence>
       </div>
-      {outline ? (
-        <svg
-          aria-hidden
-          className="pointer-events-none absolute inset-0 z-[2] h-full w-full overflow-visible"
-        >
-          <clipPath id={`folder-clip-${project.slug}`} clipPathUnits="userSpaceOnUse">
-            <path d={outline} />
-          </clipPath>
-          <path
-            d={outline}
-            fill="none"
-            stroke="rgba(0,0,0,0.08)"
-            strokeWidth="1"
-            strokeLinejoin="round"
-            vectorEffect="non-scaling-stroke"
-          />
-        </svg>
-      ) : null}
     </div>
   );
 });
