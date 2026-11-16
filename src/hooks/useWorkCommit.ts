@@ -10,8 +10,8 @@ const WORK_SECTION_ID = "work";
 const getWorkSection = () => document.getElementById(WORK_SECTION_ID);
 
 /**
- * One-way hand-off from the full-screen hero to `#work`.
- * Once committed, the page can't scroll (or wheel / swipe) back up into the hero.
+ * Hands off from the full-screen dark hero into `#work`.
+ * The hero stays at the top of the page, and scrolling back up returns to it.
  */
 export function useWorkCommit() {
   const reduceMotion = useReducedMotion();
@@ -44,16 +44,10 @@ export function useWorkCommit() {
     [reduceMotion],
   );
 
-  /** `#work` stays on the work section. A bare `/` still opens on the hero. */
+  /** Always land on the dark hero. A leftover `#work` must not skip it. */
   useLayoutEffect(() => {
     if (window.location.hash === "#work") {
-      const work = getWorkSection();
-      if (work) {
-        committedRef.current = true;
-        setWorkCommitted(true);
-        window.scrollTo(0, work.offsetTop);
-        return;
-      }
+      history.replaceState(null, "", `${window.location.pathname}${window.location.search}`);
     }
     window.scrollTo(0, 0);
   }, []);
@@ -92,52 +86,31 @@ export function useWorkCommit() {
       armed = true;
     }, 80);
 
-    const clampAboveWork = () => {
-      if (!committedRef.current || scrollingRef.current) return;
-      const top = workTop();
-      if (window.scrollY < top - 1) window.scrollTo({ top, behavior: "auto" });
-    };
-
     const onScroll = () => {
       const work = getWorkSection();
       if (!work) return;
+      if (window.scrollY < workTop() - 1) {
+        if (committedRef.current) {
+          committedRef.current = false;
+          setWorkCommitted(false);
+          if (window.location.hash === "#work") {
+            history.replaceState(null, "", `${window.location.pathname}${window.location.search}`);
+          }
+        }
+        return;
+      }
       if (!committedRef.current) {
         if (!armed) return;
         if (work.getBoundingClientRect().top < window.innerHeight * COMMIT_VIEWPORT_RATIO) {
           commitToWork();
         }
-        return;
       }
-      clampAboveWork();
-    };
-
-    const atWorkTop = () =>
-      committedRef.current && !scrollingRef.current && window.scrollY <= workTop() + 2;
-
-    const onWheel = (event: WheelEvent) => {
-      if (atWorkTop() && event.deltaY < 0) event.preventDefault();
-    };
-
-    let touchStartY = 0;
-    const onTouchStart = (event: TouchEvent) => {
-      touchStartY = event.touches[0]?.clientY ?? 0;
-    };
-    const onTouchMove = (event: TouchEvent) => {
-      if (atWorkTop() && (event.touches[0]?.clientY ?? 0) - touchStartY > 0) event.preventDefault();
     };
 
     window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("wheel", onWheel, { passive: false });
-    window.addEventListener("touchstart", onTouchStart, { passive: true });
-    window.addEventListener("touchmove", onTouchMove, { passive: false });
-    window.addEventListener("resize", clampAboveWork);
     return () => {
       window.clearTimeout(arm);
       window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("wheel", onWheel);
-      window.removeEventListener("touchstart", onTouchStart);
-      window.removeEventListener("touchmove", onTouchMove);
-      window.removeEventListener("resize", clampAboveWork);
     };
   }, [commitToWork, workTop]);
 
