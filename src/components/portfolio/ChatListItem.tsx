@@ -45,7 +45,7 @@ export function ChatListItem({ conversation, onSelect }: ChatListItemProps) {
       onClick={() => onSelect(id)}
       className="flex w-full items-center justify-between border-b border-[var(--crcle-border,#e6e6e9)] p-3 text-left transition-colors duration-300 hover:bg-[var(--crcle-list-hover,rgba(255,255,255,0.03))]"
     >
-      <div className="flex min-w-0 flex-1 items-center gap-3">
+      <div className="flex min-w-0 flex-1 items-center gap-3" data-inspect-id={`chat-row-${id}`}>
         <div className="relative flex shrink-0 items-end">
           <div className="relative mr-[-8px] size-[42px] shrink-0 overflow-hidden rounded-full border border-[var(--crcle-avatar-border,#f7f6f2)] transition-colors duration-300">
             <img
@@ -79,6 +79,7 @@ export function ChatListItem({ conversation, onSelect }: ChatListItemProps) {
             ) : null}
           </div>
           <p
+            data-inspect-id={`chat-preview-${id}`}
             className="w-full truncate text-[13px] font-light leading-[16.25px] text-[var(--crcle-fg-muted,#6b7280)] transition-colors duration-300"
             style={{ fontFamily: FONT }}
           >

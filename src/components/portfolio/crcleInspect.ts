@@ -68,6 +68,51 @@ export const CRCLE_PROFILE_INSPECT: SpecAnnotation[] = [
   },
 ];
 
+export function crcleMessagingInspect(
+  conversations: { id: string; userName: string; lastMessage: string }[],
+) {
+  return conversations.flatMap((conversation): SpecAnnotation[] => [
+    {
+      id: `chat-row-${conversation.id}`,
+      kind: "frame",
+      hotspot: { x: 50, y: 70 },
+      bounds: { x: 4, y: 64, w: 92, h: 8 },
+      toast: { side: "left", top: 24 },
+      category: "Frame",
+      element: conversation.userName,
+      elementType: "Chat List Row",
+      target: "Messaging inbox — one person in the active chat list.",
+      spacing: "Padding 12px · gap 12px · avatar 42px · meta column 20px · 1px row rule",
+      accessibleName: conversation.userName,
+      aria: 'role="button"',
+      description: `ChatListItem. class flex w-full items-center justify-between border-b p-3. Opens ${conversation.userName}'s thread.`,
+    },
+    {
+      id: `chat-preview-${conversation.id}`,
+      kind: "reading",
+      hotspot: { x: 50, y: 74 },
+      bounds: { x: 18, y: 70, w: 70, h: 3 },
+      toast: { side: "left", top: 48 },
+      category: "Reading",
+      element: conversation.lastMessage,
+      elementType: "Preview Line",
+      target: "Messaging inbox — the last message under the name.",
+      spacing: "13px light / 16.25px · 2px under the name · truncate to one line",
+      accessibleName: conversation.lastMessage,
+      aria: "text",
+      description:
+        "class w-full truncate text-[13px] font-light leading-[16.25px] text-[var(--crcle-fg-muted)].",
+    },
+  ]);
+}
+
+/** Spec cards for the hovered chat row. Idle inspection shows Alex Hart. */
+export function crcleMessagingInspectFocus(annotations: SpecAnnotation[], activeId: string | null) {
+  const stem = activeId?.replace(/^chat-(row|preview)-/, "") ?? "chat-alex";
+  const pair = annotations.filter((annotation) => annotation.id.endsWith(stem));
+  return pair.length > 0 ? pair : annotations.filter((annotation) => annotation.id.endsWith("chat-alex"));
+}
+
 export function crcleInspectForScreen(onboardingOpen: boolean, overlay: string | null) {
   if (onboardingOpen) return CRCLE_PROFILE_INSPECT.filter((a) => a.id === "onboarding-done");
   if (overlay === "work") return CRCLE_PROFILE_INSPECT.filter((a) => a.id === "sheet-close");
