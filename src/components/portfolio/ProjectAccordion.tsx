@@ -212,6 +212,35 @@ function folderOutline(
   return { points, radii };
 }
 
+/** Yellow wire clipped over the top edge of 02 Bending Spoons. */
+function BendingSpoonsPaperclip() {
+  const outer = "M15 30 C15 16 10 5 20 4 C30 3 33 14 33 24 L33 30";
+  const inner = "M31 28 C31 20 18 18 15 28 L15 48 C15 58 26 60 33 51";
+  const place =
+    "pointer-events-none absolute left-[32%] top-6 h-[54px] w-[30px] -translate-x-1/2 -translate-y-[42%] -rotate-[18deg] drop-shadow-[0_2px_3px_rgba(0,0,0,0.16)]";
+  const wire = (d: string) => (
+    <svg
+      viewBox="0 0 40 72"
+      className="block h-full w-full overflow-visible"
+      fill="none"
+      aria-hidden
+    >
+      <path d={d} stroke="#F5C43D" strokeWidth="3.5" strokeLinecap="round" />
+      <path d={d} stroke="#FDE047" strokeWidth="1.25" strokeLinecap="round" />
+    </svg>
+  );
+  return (
+    <>
+      <div aria-hidden className={`${place} z-[-1]`}>
+        {wire(outer)}
+      </div>
+      <div aria-hidden className={`${place} z-20`}>
+        {wire(inner)}
+      </div>
+    </>
+  );
+}
+
 /** White project accordion card — mockup / bento treatment TBD. */
 export function ProjectBentoStack({
   projects,
@@ -326,6 +355,7 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
         } as CSSProperties
       }
     >
+      {project.slug === "first-design" ? <BendingSpoonsPaperclip /> : null}
       <div
         ref={faceRef}
         className="folder-face pointer-events-auto relative border-0 outline-none"
