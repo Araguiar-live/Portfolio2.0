@@ -1,3 +1,4 @@
+import { ArrowUpRight } from "lucide-react";
 import { useRef, useState, type PointerEvent, type ReactNode } from "react";
 import {
   Dialog,
@@ -9,46 +10,26 @@ import {
 
 const HUES = ["#E9582C", "#3B29D8", "#0FC950", "#F2B84B"];
 
-/** Manila back of the sleeve. A touch warmer than the white project sheets. */
-const JACKET = "#f3e9d6";
-/** Front lip, slightly deeper so it reads in front of the sheets. */
-const LIP = "#e7dcc6";
+/** Folder cover hanging below the accordion. The overlap lives in --pocket-cover. */
+const EXTENSION = 110;
 
 /**
- * Full-width folder sleeve around the project accordion.
- * The jacket and lip are visual only; the tab is the one click target.
+ * The three project sheets sit above a solid front pocket.
+ * The pocket is the only playground control; the rows stay clickable above it.
  */
 export function AiPlaygroundFolder({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
 
   return (
     <div className="relative">
-      <div className="pointer-events-none absolute -inset-x-3 top-3 bottom-0 z-0">
-        <button
-          type="button"
-          onClick={() => setOpen(true)}
-          aria-haspopup="dialog"
-          aria-label="Open Built with AI and Playground"
-          className="pointer-events-auto absolute -top-7 right-3 z-20 flex h-7 cursor-pointer items-center rounded-t-[12px] border border-b-0 border-black/10 bg-[#f3e9d6] px-3 text-[11px] font-medium tracking-[-0.1px] text-[#3a3428] md:right-[168px]"
-        >
-          Built with AI & Playground
-          <span className="absolute inset-x-0 -bottom-px h-px bg-[#f3e9d6]" />
-        </button>
-        <div
-          className="h-full w-full rounded-[22px] border border-black/10"
-          style={{ background: JACKET }}
-        />
-      </div>
-
       <div className="relative z-10">{children}</div>
-
-      <FrontLip />
+      <FrontPocket onOpen={() => setOpen(true)} />
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-h-[min(86vh,720px)] max-w-[760px] overflow-y-auto border-black/10 bg-[#f7f4ee] sm:rounded-[24px]">
           <DialogHeader>
             <DialogTitle className="text-[22px] font-medium tracking-[-0.4px] text-[#111]">
-              Built with AI & Playground
+              Project Playground
             </DialogTitle>
             <DialogDescription className="text-[13px] text-[#76767a]">
               Three small experiments. Nothing here calls a server — they play in the browser.
@@ -65,30 +46,30 @@ export function AiPlaygroundFolder({ children }: { children: ReactNode }) {
   );
 }
 
-/** Front pocket along the bottom of the last sheet. Clicks pass through to Odicci. */
-function FrontLip() {
+/** Charcoal cover. Left edge is the high tab; it steps down toward the right. */
+function FrontPocket({ onOpen }: { onOpen: () => void }) {
   return (
-    <div aria-hidden className="pointer-events-none absolute -inset-x-3 bottom-0 z-20 h-8">
-      <div className="absolute inset-x-0 -top-3 h-3 bg-gradient-to-b from-transparent to-black/[0.06]" />
-      <div className="absolute inset-x-0 bottom-0 flex h-8 items-stretch overflow-hidden rounded-b-[20px] shadow-[0_-8px_16px_rgba(17,17,17,0.06)]">
-        <LipNotch side="left" />
-        <div className="h-full flex-1" style={{ background: LIP }} />
-        <LipNotch side="right" />
-      </div>
-    </div>
-  );
-}
-
-function LipNotch({ side }: { side: "left" | "right" }) {
-  const d =
-    side === "left"
-      ? "M0 32 V14 Q0 8 8 8 Q16 8 16 0 H40 V32 Z"
-      : "M40 32 V14 Q40 8 32 8 Q24 8 24 0 H0 V32 Z";
-
-  return (
-    <svg width="40" height="32" viewBox="0 0 40 32" className="block h-8 w-10 shrink-0">
-      <path d={d} fill={LIP} />
-    </svg>
+    <button
+      type="button"
+      onClick={onOpen}
+      aria-haspopup="dialog"
+      aria-label="Open Project Playground"
+      className="relative z-20 flex w-full cursor-pointer items-end justify-between border-0 px-6 pb-7 text-left [--pocket-cover:44px] [--pocket-step:16px] max-md:[--pocket-cover:20px] max-md:[--pocket-step:8px] md:px-10"
+      style={{
+        height: `calc(${EXTENSION}px + var(--pocket-cover))`,
+        marginTop: "calc(var(--pocket-cover) * -1)",
+        background: "#1C1D21",
+        clipPath:
+          "polygon(0 0, 30% 0, calc(30% + 52px) var(--pocket-step), 100% var(--pocket-step), 100% 100%, 0 100%)",
+        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.22)",
+        filter: "drop-shadow(0 16px 26px rgba(17,17,17,0.28))",
+      }}
+    >
+      <span className="font-mono text-[13px] tracking-tight text-[#f4efe6]">
+        Project Playground
+      </span>
+      <ArrowUpRight className="size-4 shrink-0 text-white/55" strokeWidth={1.5} aria-hidden />
+    </button>
   );
 }
 
