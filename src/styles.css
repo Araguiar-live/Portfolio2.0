@@ -478,9 +478,10 @@ html[data-work-locked] .portfolio-interactive-hero-shell {
 
 .folder-shell[data-hovered="true"] {
   transform: translateY(-10px) rotate(var(--sheet-tilt, 0deg));
+  transform-origin: center bottom;
 }
 
-.folder-shell[data-raised="true"] {
+.folder-shell[data-open="true"] {
   filter: drop-shadow(0 -4px 14px rgba(0, 0, 0, 0.06));
 }
 
