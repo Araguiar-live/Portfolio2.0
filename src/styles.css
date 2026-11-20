@@ -2595,9 +2595,9 @@ html.dark .thought-body-gradient {
 }
 
 .folder-binder-clip {
-  width: 116px;
-  height: 54px;
-  transform-origin: 22px 50%;
+  width: 128px;
+  height: 64px;
+  transform-origin: 28px 50%;
   filter: drop-shadow(0 7px 8px rgba(17, 17, 17, 0.28));
 }
 

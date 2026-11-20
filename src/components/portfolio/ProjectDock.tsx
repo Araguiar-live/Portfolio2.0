@@ -131,48 +131,43 @@ function FolderBinderClip() {
   return (
     <div
       aria-hidden
-      className="pointer-events-none absolute top-1/2 right-0 z-30 -translate-y-1/2 translate-x-[calc(100%-26px)]"
+      className="pointer-events-none absolute top-1/2 right-0 z-30 -translate-y-1/2 translate-x-[calc(100%-34px)]"
     >
       <div className="folder-binder-clip pointer-events-auto">
-        <svg viewBox="0 0 150 70" className="block h-full w-full overflow-visible" fill="none">
-          <path d="M2 27 L16 20 L16 50 L2 43 Z" fill="rgba(17,17,17,0.22)" />
+        <svg viewBox="0 0 168 84" className="block h-full w-full overflow-visible" fill="none">
+          <path d="M6 34 L24 24 L24 60 L6 50 Z" fill="rgba(17,17,17,0.22)" />
           <path
-            d="M6 23 L36 11 Q46 10 46 20 L46 50 Q46 60 36 59 L6 47 Q0 43 0 35 Q0 27 6 23 Z"
+            d="M12 30 L48 12 Q60 10 60 24 L60 60 Q60 74 48 72 L12 54 Q4 48 4 42 Q4 36 12 30 Z"
             fill="#E85D4A"
           />
-          <path d="M8 24 L36 13 Q43 12 43 20 L43 26 L12 33 Z" fill="#F4A394" />
-          <path d="M8 45 L36 57 Q43 58 43 50 L43 44 L12 37 Z" fill="#C44736" />
+          <path d="M14 32 L48 16 Q56 15 56 24 L56 34 L18 42 Z" fill="#F4A394" />
+          <path d="M14 52 L48 68 Q56 69 56 60 L56 50 L18 42 Z" fill="#C44736" />
+          <path d="M20 42 H52" stroke="rgba(255,255,255,0.5)" strokeWidth="1.4" strokeLinecap="round" />
+          <rect x="54" y="16" width="14" height="10" rx="5" fill="#E4E8EE" />
+          <rect x="54" y="58" width="14" height="10" rx="5" fill="#B7BEC8" />
+          <rect x="57" y="18" width="8" height="2.4" rx="1" fill="white" opacity="0.85" />
           <path
-            d="M14 34 H40"
-            stroke="rgba(255,255,255,0.45)"
-            strokeWidth="1.3"
-            strokeLinecap="round"
-          />
-          <rect x="40" y="16" width="12" height="9" rx="4.5" fill="#E4E8EE" />
-          <rect x="40" y="45" width="12" height="9" rx="4.5" fill="#B7BEC8" />
-          <rect x="42" y="17.5" width="7" height="2.2" rx="1" fill="white" opacity="0.8" />
-          <path
-            d="M52 20 C68 18 74 6 98 6 C128 6 146 15 146 27 C146 37 122 35 100 31 C80 28 66 26 52 24"
+            d="M68 22 C86 20 98 6 128 6 C150 6 164 16 164 28 C164 38 140 36 116 32 C96 28 80 26 68 24"
             stroke="#8E97A3"
-            strokeWidth="4.2"
+            strokeWidth="5"
             strokeLinecap="round"
           />
           <path
-            d="M52 20 C68 18 74 6 98 6 C128 6 146 15 146 27 C146 37 122 35 100 31 C80 28 66 26 52 24"
+            d="M68 22 C86 20 98 6 128 6 C150 6 164 16 164 28 C164 38 140 36 116 32 C96 28 80 26 68 24"
             stroke="#F7F9FB"
             strokeWidth="1.6"
             strokeLinecap="round"
           />
           <path
-            d="M52 50 C68 52 74 64 98 64 C128 64 146 55 146 43 C146 33 122 35 100 39 C80 42 66 44 52 46"
+            d="M68 62 C86 64 98 78 128 78 C150 78 164 68 164 56 C164 46 140 48 116 52 C96 56 80 58 68 60"
             stroke="#8E97A3"
-            strokeWidth="4.2"
+            strokeWidth="5"
             strokeLinecap="round"
           />
           <path
-            d="M52 50 C68 52 74 64 98 64 C128 64 146 55 146 43 C146 33 122 35 100 39 C80 42 66 44 52 46"
+            d="M68 62 C86 64 98 78 128 78 C150 78 164 68 164 56 C164 46 140 48 116 52 C96 56 80 58 68 60"
             stroke="#C7CDD6"
-            strokeWidth="2.4"
+            strokeWidth="2.2"
             strokeLinecap="round"
           />
         </svg>
