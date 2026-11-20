@@ -70,7 +70,10 @@ function FolderBinderClip() {
     </>
   );
   return (
-    <div aria-hidden className="pointer-events-none absolute right-0 top-[110px] z-30 translate-x-[58%]">
+    <div
+      aria-hidden
+      className="pointer-events-none absolute right-0 top-[110px] z-30 translate-x-[58%]"
+    >
       <div className="rotate-90">
         <div className="folder-binder-clip pointer-events-auto">
           <svg viewBox="0 -6 50 76" className="block h-full w-full overflow-visible" fill="none">
