@@ -3,7 +3,7 @@ import { useEffect, useRef, useState, type MouseEvent } from "react";
 import { createPortal } from "react-dom";
 import { isPhoneViewport } from "@/lib/viewport";
 
-const PREVIEW_MAX = 560;
+const PREVIEW_MAX = 644;
 const RADIUS_FROM = 120 / 4096;
 const SPRING = { damping: 15, stiffness: 150, mass: 0.2 };
 
@@ -90,15 +90,21 @@ export function RowHoverPreview({
   if (!mounted) return null;
 
   const { width, height } = previewSize(media);
-  const radius = RADIUS_FROM * width;
+  const radius = RADIUS_FROM * width + 20;
   const isVideo = media.type === "video";
   const hold = isVideo && (keepAlive || open);
   const visible = open;
 
   const frame = (
     <div
-      className="relative isolate overflow-hidden bg-white shadow-[0_18px_36px_rgba(6,10,12,0.32)]"
-      style={{ width, height, borderRadius: radius }}
+      className="relative isolate overflow-hidden bg-white"
+      style={{
+        width,
+        height,
+        borderRadius: radius,
+        clipPath: `polygon(0 0, calc(100% - ${radius}px) 0, 100% ${radius}px, 100% 100%, 0 100%)`,
+        filter: "drop-shadow(0 18px 36px rgba(6, 10, 12, 0.32))",
+      }}
     >
       <PreviewFrame media={media} playing={hold} />
     </div>
