@@ -481,6 +481,11 @@ html[data-work-locked] .portfolio-interactive-hero-shell {
   transform-origin: center bottom;
 }
 
+.folder-shell[data-open="true"],
+.ai-playground-folder:has(.folder-shell[data-open="true"]) .folder-shell {
+  transform: translateY(0) rotate(0deg);
+}
+
 .folder-shell[data-open="true"] {
   filter: drop-shadow(0 -4px 14px rgba(0, 0, 0, 0.06));
 }
