@@ -22,6 +22,7 @@ import { WireframeStage } from "@/components/portfolio/SiteWireframe";
 import { FirstDesignInspector } from "@/components/portfolio/firstDesign/FirstDesignInspector";
 import { InteractiveHero } from "@/components/portfolio/InteractiveHero";
 import { SpatialDotBadge } from "@/components/portfolio/SpatialDotBadge";
+import { AiPlaygroundFolder } from "@/components/portfolio/AiPlaygroundFolder";
 import { CalculatorCard, PeekMouse } from "@/components/portfolio/WorkDecorations";
 import { useWorkCommit } from "@/hooks/useWorkCommit";
 import { spatialChromeVisible } from "@/lib/spatialStyles";
@@ -448,6 +449,7 @@ function Index() {
                   <PeekMouse />
                 </div>
               </div>
+              <AiPlaygroundFolder />
               <ProjectBentoStack
                 projects={PROJECTS}
                 openSlug={openSlug}
