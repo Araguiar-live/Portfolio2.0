@@ -442,7 +442,7 @@ function Index() {
                 <div className="portfolio-mobile-deco-calculator absolute left-0 top-0 hidden -translate-y-1/2 max-md:-bottom-4 max-md:-left-3 max-md:top-auto max-md:block max-md:origin-bottom-left max-md:scale-[0.715] max-md:translate-x-0 max-md:translate-y-0 max-md:[--deco-scale:0.72] md:block md:translate-x-[max(-50%,calc(16px-50vw+50cqw))]">
                   <div
                     className="pointer-events-auto absolute right-0 z-0"
-                    style={{ top: -16, transform: "translateX(62%)" }}
+                    style={{ top: -24, transform: "translateX(62%)" }}
                   >
                     <SpatialDotBadge />
                   </div>
