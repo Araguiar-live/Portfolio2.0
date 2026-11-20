@@ -438,11 +438,11 @@ function Index() {
             </header>
 
             <div className="relative w-full shrink-0 overflow-visible md:-mt-10 max-md:pt-14 max-md:pb-10">
-              <div
-                aria-hidden
-                className="pointer-events-none absolute inset-0 z-[5] overflow-visible max-md:-top-14 max-md:bottom-0"
-              >
+              <div className="pointer-events-none absolute inset-0 z-[5] overflow-visible max-md:-top-14 max-md:bottom-0">
                 <div className="portfolio-mobile-deco-calculator absolute left-0 top-0 hidden -translate-y-1/2 max-md:-bottom-4 max-md:-left-3 max-md:top-auto max-md:block max-md:origin-bottom-left max-md:scale-[0.715] max-md:translate-x-0 max-md:translate-y-0 max-md:[--deco-scale:0.72] md:block md:translate-x-[max(-50%,calc(16px-50vw+50cqw))]">
+                  <div className="pointer-events-auto absolute top-0 right-0 z-0 translate-x-[62%]">
+                    <SpatialDotBadge />
+                  </div>
                   <CalculatorCard />
                 </div>
                 <div className="absolute right-4 top-4 hidden -translate-y-[70px] max-md:-right-1 max-md:top-[6px] max-md:bottom-auto max-md:block max-md:origin-top-right max-md:scale-80 max-md:translate-y-0 max-md:[--deco-scale:0.85] md:block">
@@ -458,10 +458,6 @@ function Index() {
                   nudgeSignal={nudgeSignal}
                 />
               </AiPlaygroundFolder>
-              {/* Tucked under the folder's bottom-left corner. */}
-              <div className="pointer-events-auto absolute bottom-7 left-0 z-[4] translate-y-1/2">
-                <SpatialDotBadge />
-              </div>
             </div>
             {/* Phones: 15% smaller than the 1.25 dock, pinned to the stage bottom. */}
             <div

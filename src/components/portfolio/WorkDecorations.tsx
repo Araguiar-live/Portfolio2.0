@@ -108,7 +108,7 @@ export function CalculatorCard() {
   return (
     <div
       aria-hidden
-      className="pointer-events-none relative shrink-0 select-none"
+      className="pointer-events-none relative z-[1] shrink-0 select-none"
       style={{ width: box, height: box }}
       data-name="calculator-card"
     >
