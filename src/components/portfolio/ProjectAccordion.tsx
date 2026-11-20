@@ -234,7 +234,7 @@ function BendingSpoonsPaperclip() {
   const outer = "M15 30 C15 16 10 5 20 4 C30 3 33 14 33 24 L33 30";
   const inner = "M31 28 C31 20 18 18 15 28 L15 48 C15 58 26 60 33 51";
   const place =
-    "pointer-events-none absolute left-[32%] top-6 h-[54px] w-[30px] -translate-x-1/2 -translate-y-[42%] -rotate-[18deg] drop-shadow-[0_2px_3px_rgba(0,0,0,0.16)]";
+    "pointer-events-none absolute left-[32%] top-6 h-[64.8px] w-[36px] -translate-x-1/2 -translate-y-[42%] -rotate-[18deg] drop-shadow-[0_2px_3px_rgba(0,0,0,0.16)]";
   const wire = (d: string) => (
     <svg
       viewBox="0 0 40 72"
