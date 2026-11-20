@@ -459,7 +459,7 @@ function Index() {
                 />
               </AiPlaygroundFolder>
               {/* Left of the calculator, above it, and under the project sheets. */}
-              <div className="pointer-events-auto absolute left-0 top-0 z-[5] translate-x-[116px] -translate-y-[78%]">
+              <div className="pointer-events-auto absolute left-0 top-0 z-[5] translate-x-[156px] -translate-y-[78%]">
                 <SpatialDotBadge />
               </div>
             </div>
