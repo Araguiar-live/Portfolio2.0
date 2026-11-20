@@ -21,14 +21,14 @@ export function AiPlaygroundFolder({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="ai-playground-folder relative [--pocket-h:201px] [--pocket-overlap:48px] [--pocket-rise:24px] max-md:[--pocket-h:193px] max-md:[--pocket-overlap:32px] max-md:[--pocket-rise:14px]">
+    <div className="ai-playground-folder relative mb-7 [--pocket-h:201px] [--pocket-overlap:48px] [--pocket-rise:24px] max-md:[--pocket-h:193px] max-md:[--pocket-overlap:32px] max-md:[--pocket-rise:14px]">
       <div className="relative z-10 px-6">
         <div
           aria-hidden
           className="pointer-events-none absolute inset-x-0 z-0 rounded-[28px]"
           style={{
             top: "30%",
-            bottom: "calc((var(--pocket-h) - var(--pocket-overlap)) * -1)",
+            bottom: 0,
             background: BACK,
           }}
         />
@@ -70,7 +70,7 @@ function FolderBinderClip() {
     </>
   );
   return (
-    <div aria-hidden className="pointer-events-none absolute right-[-38px] bottom-[44px] z-30">
+    <div aria-hidden className="pointer-events-none absolute right-0 top-[110px] z-30 translate-x-[58%]">
       <div className="rotate-90">
         <div className="folder-binder-clip pointer-events-auto">
           <svg viewBox="0 -6 50 76" className="block h-full w-full overflow-visible" fill="none">

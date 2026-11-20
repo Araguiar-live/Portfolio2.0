@@ -473,8 +473,8 @@ function Index() {
           </div>
         </WireframeStage>
 
-        {/* Exactly 2px of #f3f4f6 between wireframe frame and marquee */}
-        <div className="relative z-20 h-[2px] w-full shrink-0 bg-[#f3f4f6]" aria-hidden />
+        {/* Light gap between the folder stage and the showcase carousel. */}
+        <div className="relative z-20 h-[30px] w-full shrink-0 bg-[#f3f4f6]" aria-hidden />
 
         {/* Marquee + footer — continuous black plane under the bento strip */}
         <div className="relative z-20 bg-black max-sm:bg-[var(--portfolio-bottom-surface,#0a0d11)]">
