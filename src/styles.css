@@ -2595,10 +2595,10 @@ html.dark .thought-body-gradient {
 }
 
 .folder-binder-clip {
-  width: 128px;
-  height: 64px;
-  transform-origin: 28px 50%;
-  filter: drop-shadow(0 7px 8px rgba(17, 17, 17, 0.28));
+  width: 50px;
+  height: 70px;
+  transform-origin: center;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.22));
 }
 
 .folder-binder-clip:hover {

@@ -35,6 +35,7 @@ export function AiPlaygroundFolder({ children }: { children: ReactNode }) {
         {children}
         <FrontPocket onOpen={() => setOpen(true)} />
       </div>
+      <FolderBinderClip />
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-h-[min(86vh,720px)] max-w-[760px] overflow-y-auto border-black/10 bg-[#f7f4ee] sm:rounded-[24px]">
@@ -53,6 +54,36 @@ export function AiPlaygroundFolder({ children }: { children: ReactNode }) {
           </div>
         </DialogContent>
       </Dialog>
+    </div>
+  );
+}
+
+/**
+ * Flat black foldback clip. Drawn upright, then turned 90° so the mouth
+ * pinches the pocket's right edge and the wire handles point into the margin.
+ */
+function FolderBinderClip() {
+  const wire = (d: string) => (
+    <>
+      <path d={d} stroke="#9CA3AF" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+      <path d={d} stroke="#E5E7EB" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" />
+    </>
+  );
+  return (
+    <div aria-hidden className="pointer-events-none absolute right-[-38px] bottom-[44px] z-30">
+      <div className="rotate-90">
+        <div className="folder-binder-clip pointer-events-auto">
+          <svg viewBox="0 -6 50 76" className="block h-full w-full overflow-visible" fill="none">
+            <path d="M2 66 L48 66 L42 36 L8 36 Z" fill="#18181B" />
+            <path d="M8 36 L42 36 L39.2 44 L10.8 44 Z" fill="#27272A" />
+            <path d="M2.6 63 L47.4 63 L48 66 L2 66 Z" fill="#D4D4D8" />
+            <rect x="10" y="30" width="12" height="8" rx="4" fill="#3F3F46" />
+            <rect x="28" y="30" width="12" height="8" rx="4" fill="#3F3F46" />
+            {wire("M14 32 C13 20 8 10 12 2 C16 -4 24 0 22 10 C20 18 18 26 18 32")}
+            {wire("M32 32 C32 26 30 18 28 10 C26 0 34 -4 38 2 C42 10 37 20 36 32")}
+          </svg>
+        </div>
+      </div>
     </div>
   );
 }
