@@ -343,21 +343,21 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
           className="absolute inset-0 z-0 cursor-pointer"
         />
         <div className="relative z-10 flex min-w-0 flex-1 items-center gap-[37px] pointer-events-none max-md:gap-3 max-sm:gap-3">
-          <span className="folder-muted relative shrink-0 text-[16px] font-medium tracking-[1px] tabular-nums max-md:text-[10px] max-md:font-normal max-md:tracking-normal max-sm:text-[10px]">
+          <span className="folder-muted relative inline-flex shrink-0 items-center gap-2.5 text-[16px] font-medium tracking-[1px] tabular-nums max-md:gap-1.5 max-md:text-[10px] max-md:font-normal max-md:tracking-normal max-sm:text-[10px]">
+            {project.id}
             {FOLDER_MARKS[project.slug] ? (
               <img
                 src={FOLDER_MARKS[project.slug].src}
                 alt=""
                 width={FOLDER_MARKS[project.slug].width * FOLDER_MARK_SCALE}
                 height={FOLDER_MARKS[project.slug].height * FOLDER_MARK_SCALE}
-                className="pointer-events-none absolute bottom-full left-1/2 z-20 mb-1.5 max-w-none -translate-x-1/2 opacity-60"
+                className="pointer-events-none relative z-20 max-w-none opacity-100"
                 style={{
                   width: FOLDER_MARKS[project.slug].width * FOLDER_MARK_SCALE,
                   height: FOLDER_MARKS[project.slug].height * FOLDER_MARK_SCALE,
                 }}
               />
             ) : null}
-            {project.id}
           </span>
           <span className="flex min-w-0 items-center gap-2 max-md:gap-1.5">
             <span className="folder-title truncate text-[24px] font-normal tracking-[-0.5px] max-md:text-[24px] max-md:leading-[29px] max-md:tracking-normal max-sm:text-[24px] max-sm:leading-[29px] sm:text-[37px]">
