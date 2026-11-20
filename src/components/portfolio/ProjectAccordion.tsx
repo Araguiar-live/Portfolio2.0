@@ -106,6 +106,23 @@ const FOLDER_MARKS: Record<string, { src: string; width: number; height: number 
 };
 /** 60% smaller than the Figma mark. */
 const FOLDER_MARK_SCALE = 0.4;
+
+function FolderMark({ slug }: { slug: string }) {
+  const mark = FOLDER_MARKS[slug];
+  if (!mark) return null;
+  const width = mark.width * FOLDER_MARK_SCALE;
+  const height = mark.height * FOLDER_MARK_SCALE;
+  return (
+    <img
+      src={mark.src}
+      alt=""
+      width={width}
+      height={height}
+      className="pointer-events-none relative z-20 max-w-none"
+      style={{ width, height }}
+    />
+  );
+}
 /** Outer corners of the whole stack, not each file. */
 const STACK_CORNER = 24;
 
@@ -386,19 +403,6 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
         <div className="relative z-10 flex min-w-0 flex-1 items-center gap-[37px] pointer-events-none max-md:gap-3 max-sm:gap-3">
           <span className="folder-muted relative inline-flex shrink-0 items-center gap-2.5 text-[16px] font-medium tracking-[1px] tabular-nums max-md:gap-1.5 max-md:text-[10px] max-md:font-normal max-md:tracking-normal max-sm:text-[10px]">
             {project.id}
-            {FOLDER_MARKS[project.slug] ? (
-              <img
-                src={FOLDER_MARKS[project.slug].src}
-                alt=""
-                width={FOLDER_MARKS[project.slug].width * FOLDER_MARK_SCALE}
-                height={FOLDER_MARKS[project.slug].height * FOLDER_MARK_SCALE}
-                className="pointer-events-none relative z-20 max-w-none opacity-100"
-                style={{
-                  width: FOLDER_MARKS[project.slug].width * FOLDER_MARK_SCALE,
-                  height: FOLDER_MARKS[project.slug].height * FOLDER_MARK_SCALE,
-                }}
-              />
-            ) : null}
           </span>
           <span className="flex min-w-0 items-center gap-2 max-md:gap-1.5">
             <span className="folder-title truncate text-[24px] font-normal tracking-[-0.5px] max-md:text-[24px] max-md:leading-[29px] max-md:tracking-normal max-sm:text-[24px] max-sm:leading-[29px] sm:text-[37px]">
@@ -430,12 +434,15 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
             ) : null}
           </span>
         </div>
-        <div className="folder-muted relative z-10 flex shrink-0 items-center justify-end gap-[18px] text-[16px] pointer-events-none max-md:gap-2 max-md:text-[10px] max-sm:gap-2 max-sm:text-[10px]">
-          <span className="text-right max-md:flex-1 max-md:text-left max-md:leading-4 max-sm:flex-1 max-sm:text-left max-sm:leading-4">
-            {project.role}
-          </span>
-          <span className="font-light max-sm:font-normal">|</span>
-          <span className="tabular-nums">{project.year}</span>
+        <div className="relative z-10 flex shrink-0 flex-col items-end gap-2 pointer-events-none max-md:items-start max-sm:items-start">
+          <FolderMark slug={project.slug} />
+          <div className="folder-muted flex items-center justify-end gap-[18px] text-[16px] max-md:gap-2 max-md:text-[10px] max-sm:gap-2 max-sm:text-[10px]">
+            <span className="text-right max-md:flex-1 max-md:text-left max-md:leading-4 max-sm:flex-1 max-sm:text-left max-sm:leading-4">
+              {project.role}
+            </span>
+            <span className="font-light max-sm:font-normal">|</span>
+            <span className="tabular-nums">{project.year}</span>
+          </div>
         </div>
       </div>
 
