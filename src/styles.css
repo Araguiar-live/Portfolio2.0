@@ -2594,35 +2594,7 @@ html.dark .thought-body-gradient {
   cursor: pointer;
 }
 
-.folder-binder-clip {
-  width: 50px;
-  height: 70px;
-  transform-origin: center;
-  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.22));
-}
-
-.folder-binder-clip:hover {
-  animation: folder-clip-wiggle 0.55s cubic-bezier(0.34, 1.45, 0.64, 1);
-}
-
-@keyframes folder-clip-wiggle {
-  0%,
-  100% {
-    transform: rotate(0deg);
-  }
-  40% {
-    transform: rotate(-4deg);
-  }
-  72% {
-    transform: rotate(2deg);
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .folder-binder-clip:hover {
-    animation: none;
-  }
-
   .folder-shell,
   .folder-shell[data-raised="true"],
   .ai-playground-folder:has(.playground-pocket:hover) .folder-shell:not([data-raised="true"]) {
