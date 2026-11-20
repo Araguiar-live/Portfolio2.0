@@ -1,5 +1,5 @@
 import { ArrowUpRight } from "lucide-react";
-import { useRef, useState, type PointerEvent, type ReactNode } from "react";
+import { useLayoutEffect, useRef, useState, type PointerEvent, type ReactNode } from "react";
 import {
   Dialog,
   DialogContent,
@@ -10,19 +10,30 @@ import {
 
 const HUES = ["#E9582C", "#3B29D8", "#0FC950", "#F2B84B"];
 
-/** Folder cover hanging below the accordion. The overlap lives in --pocket-cover. */
-const EXTENSION = 110;
+const BACK = "#343740";
+const FRONT = "#1C1D21";
 
 /**
- * The three project sheets sit above a solid front pocket.
- * The pocket is the only playground control; the rows stay clickable above it.
+ * The three project sheets sit inside a jacket. The front pocket is the only
+ * playground control; the rows stay clickable above it.
  */
 export function AiPlaygroundFolder({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="relative">
-      <div className="relative z-10">{children}</div>
+    <div className="relative [--pocket-h:156px] [--pocket-overlap:48px] [--pocket-rise:24px] max-md:[--pocket-h:148px] max-md:[--pocket-overlap:32px] max-md:[--pocket-rise:14px]">
+      <div className="relative z-10">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -inset-x-4 z-0 rounded-[28px]"
+          style={{
+            top: "30%",
+            bottom: "calc((var(--pocket-h) - var(--pocket-overlap)) * -1)",
+            background: BACK,
+          }}
+        />
+        {children}
+      </div>
       <FrontPocket onOpen={() => setOpen(true)} />
 
       <Dialog open={open} onOpenChange={setOpen}>
@@ -46,29 +57,82 @@ export function AiPlaygroundFolder({ children }: { children: ReactNode }) {
   );
 }
 
-/** Charcoal cover. Left edge is the high tab; it steps down toward the right. */
+/** Charcoal cover. The raised tab is on the right and eases down toward the left. */
 function FrontPocket({ onOpen }: { onOpen: () => void }) {
+  const ref = useRef<HTMLButtonElement>(null);
+  const [shape, setShape] = useState({ width: 1200, height: 156, rise: 24 });
+
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const measure = () => {
+      const styles = getComputedStyle(el);
+      const height = parseFloat(styles.getPropertyValue("--pocket-h")) || 156;
+      const rise = parseFloat(styles.getPropertyValue("--pocket-rise")) || 24;
+      setShape({ width: Math.max(280, el.clientWidth), height, rise });
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  const { width, height, rise } = shape;
+  const radius = 28;
+  const stepStart = width * 0.56;
+  const stepEnd = width * 0.78;
+  const d = [
+    `M ${radius} ${height}`,
+    `H ${width - radius}`,
+    `Q ${width} ${height} ${width} ${height - radius}`,
+    `V ${radius}`,
+    `Q ${width} 0 ${width - radius} 0`,
+    `H ${stepEnd}`,
+    `C ${stepEnd - width * 0.07} 0 ${stepStart + width * 0.07} ${rise} ${stepStart} ${rise}`,
+    `H ${radius}`,
+    `Q 0 ${rise} 0 ${rise + radius}`,
+    `V ${height - radius}`,
+    `Q 0 ${height} ${radius} ${height}`,
+    "Z",
+  ].join(" ");
+
   return (
     <button
+      ref={ref}
       type="button"
       onClick={onOpen}
       aria-haspopup="dialog"
       aria-label="Open Project Playground"
-      className="relative z-20 flex w-full cursor-pointer items-end justify-between border-0 px-6 pb-7 text-left [--pocket-cover:44px] [--pocket-step:16px] max-md:[--pocket-cover:20px] max-md:[--pocket-step:8px] md:px-10"
+      className="relative z-20 flex w-full cursor-pointer items-end justify-between border-0 bg-transparent px-6 pb-7 text-left md:px-10"
       style={{
-        height: `calc(${EXTENSION}px + var(--pocket-cover))`,
-        marginTop: "calc(var(--pocket-cover) * -1)",
-        background: "#1C1D21",
-        clipPath:
-          "polygon(0 0, 30% 0, calc(30% + 52px) var(--pocket-step), 100% var(--pocket-step), 100% 100%, 0 100%)",
-        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.22)",
+        height: "var(--pocket-h)",
+        marginTop: "calc(var(--pocket-overlap) * -1)",
         filter: "drop-shadow(0 16px 26px rgba(17,17,17,0.28))",
       }}
     >
-      <span className="font-mono text-[13px] tracking-tight text-[#f4efe6]">
+      <svg
+        aria-hidden
+        className="pointer-events-none absolute inset-0 h-full w-full"
+        viewBox={`0 0 ${width} ${height}`}
+        preserveAspectRatio="none"
+      >
+        <path d={d} fill={FRONT} />
+        <path
+          d={`M 0 ${rise + radius} Q 0 ${rise} ${radius} ${rise} H ${stepStart} C ${stepStart + width * 0.07} ${rise} ${stepEnd - width * 0.07} 0 ${stepEnd} 0 H ${width - radius} Q ${width} 0 ${width} ${radius}`}
+          fill="none"
+          stroke="rgba(255,255,255,0.22)"
+          strokeWidth="1.25"
+          vectorEffect="non-scaling-stroke"
+        />
+      </svg>
+      <span className="relative font-mono text-base tracking-tight text-[#f4efe6]">
         Project Playground
       </span>
-      <ArrowUpRight className="size-4 shrink-0 text-white/55" strokeWidth={1.5} aria-hidden />
+      <ArrowUpRight
+        className="relative size-4 shrink-0 text-white/55"
+        strokeWidth={1.5}
+        aria-hidden
+      />
     </button>
   );
 }

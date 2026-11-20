@@ -195,7 +195,10 @@ function folderOutline(
   ];
   const radii = points.map((_, i) => {
     if (i === 0 || i === 1) return edge;
-    if (i === 2) return tr;
+    // Softer top of each sheet: body top-right and the tab's top corners.
+    if (i === 2) return Math.max(tr, 24);
+    if (i === 4 || i === 5) return 24;
+    if (i === 3 || i === 6 || i === 7) return 16;
     return CORNER;
   });
   return { points, radii };

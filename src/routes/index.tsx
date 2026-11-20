@@ -437,7 +437,7 @@ function Index() {
               </p>
             </header>
 
-            <div className="relative w-full shrink-0 overflow-visible max-md:pt-14 max-md:pb-10">
+            <div className="relative w-full shrink-0 overflow-visible md:-mt-10 max-md:pt-14 max-md:pb-10">
               <div
                 aria-hidden
                 className="pointer-events-none absolute inset-0 z-[5] overflow-visible max-md:-top-14 max-md:bottom-0"
@@ -459,7 +459,7 @@ function Index() {
                 />
               </AiPlaygroundFolder>
               {/* Left of the calculator, above it, and under the project sheets. */}
-              <div className="pointer-events-auto absolute left-0 top-0 z-[8] translate-x-2 -translate-y-[78%]">
+              <div className="pointer-events-auto absolute left-0 top-0 z-[5] translate-x-2 -translate-y-[78%]">
                 <SpatialDotBadge />
               </div>
             </div>
