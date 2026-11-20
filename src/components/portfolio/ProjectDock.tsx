@@ -142,7 +142,12 @@ function FolderBinderClip() {
           />
           <path d="M14 32 L48 16 Q56 15 56 24 L56 34 L18 42 Z" fill="#F4A394" />
           <path d="M14 52 L48 68 Q56 69 56 60 L56 50 L18 42 Z" fill="#C44736" />
-          <path d="M20 42 H52" stroke="rgba(255,255,255,0.5)" strokeWidth="1.4" strokeLinecap="round" />
+          <path
+            d="M20 42 H52"
+            stroke="rgba(255,255,255,0.5)"
+            strokeWidth="1.4"
+            strokeLinecap="round"
+          />
           <rect x="54" y="16" width="14" height="10" rx="5" fill="#E4E8EE" />
           <rect x="54" y="58" width="14" height="10" rx="5" fill="#B7BEC8" />
           <rect x="57" y="18" width="8" height="2.4" rx="1" fill="white" opacity="0.85" />
