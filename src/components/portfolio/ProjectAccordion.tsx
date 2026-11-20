@@ -118,7 +118,7 @@ function FolderMark({ slug }: { slug: string }) {
       alt=""
       width={width}
       height={height}
-      className="pointer-events-none relative z-20 max-w-none"
+      className="pointer-events-none relative z-20 max-w-none opacity-70"
       style={{ width, height }}
     />
   );
