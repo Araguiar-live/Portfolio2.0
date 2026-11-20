@@ -392,8 +392,8 @@ function Index() {
         Exact Figma auto-layout (530:151045 / 552:158232):
         cells → browser plate UNDER pattern → overlay on top.
         Closed 1262×847 · Open 1262×1522 · overlay scrolls when open.
-        Content column is ~45% wider than the original 1336px cap (→ 2024)
-        so the closed accordion reads 15% larger on desktop at the same aspect.
+        Content column is wider than the original 1336px cap (→ 2400)
+        so the closed accordion fills the wireframe stage on a wide desktop.
       */}
       <section
         id="work"
@@ -404,7 +404,7 @@ function Index() {
             className={
               isExpanded
                 ? "pointer-events-auto mx-auto flex w-full max-w-[1690px] flex-col items-center gap-[78px] overflow-visible px-6 pb-0 pt-10 sm:px-10"
-                : "@container pointer-events-auto absolute left-1/2 top-[calc(50%-76px)] flex h-[min(760px,86%)] w-[min(2024px,calc(100%-32px))] -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-[40px] overflow-visible max-md:relative max-md:left-auto max-md:top-auto max-md:mx-auto max-md:h-auto max-md:min-h-[100dvh] max-md:w-[min(350px,calc(100%-32px))] max-md:translate-x-0 max-md:translate-y-0 max-md:gap-8 max-md:px-1 max-md:pb-28 max-md:pt-14 max-sm:gap-[37px] max-sm:pb-32 max-sm:pt-[68px]"
+                : "@container pointer-events-auto absolute left-1/2 top-[calc(50%-76px)] flex h-[min(760px,86%)] w-[min(2400px,calc(100%-32px))] -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-[40px] overflow-visible max-md:relative max-md:left-auto max-md:top-auto max-md:mx-auto max-md:h-auto max-md:min-h-[100dvh] max-md:w-[min(350px,calc(100%-32px))] max-md:translate-x-0 max-md:translate-y-0 max-md:gap-8 max-md:px-1 max-md:pb-28 max-md:pt-14 max-sm:gap-[37px] max-sm:pb-32 max-sm:pt-[68px]"
             }
           >
             <header className="flex w-full max-w-[720px] shrink-0 flex-col items-center gap-5 text-center max-md:mt-3 max-md:gap-4 max-sm:mt-3 max-sm:gap-4">
