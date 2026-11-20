@@ -33,8 +33,8 @@ export function AiPlaygroundFolder({ children }: { children: ReactNode }) {
           }}
         />
         {children}
+        <FrontPocket onOpen={() => setOpen(true)} />
       </div>
-      <FrontPocket onOpen={() => setOpen(true)} />
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-h-[min(86vh,720px)] max-w-[760px] overflow-y-auto border-black/10 bg-[#f7f4ee] sm:rounded-[24px]">
@@ -103,7 +103,7 @@ function FrontPocket({ onOpen }: { onOpen: () => void }) {
       onClick={onOpen}
       aria-haspopup="dialog"
       aria-label="Open Project Playground"
-      className="relative z-20 flex w-full cursor-pointer items-end justify-between border-0 bg-transparent px-6 pb-7 text-left md:px-10"
+      className="relative z-20 -mx-6 flex w-[calc(100%+3rem)] cursor-pointer items-end justify-between border-0 bg-transparent px-6 pb-7 text-left md:px-10"
       style={{
         height: "var(--pocket-h)",
         marginTop: "calc(var(--pocket-overlap) * -1)",

@@ -97,7 +97,7 @@ export function RowHoverPreview({
 
   const frame = (
     <div
-      className="relative overflow-hidden shadow-[0_24px_60px_rgba(6,10,12,0.22)]"
+      className="relative isolate overflow-hidden bg-white shadow-[0_18px_36px_rgba(6,10,12,0.32)]"
       style={{ width, height, borderRadius: radius }}
     >
       <PreviewFrame media={media} playing={hold} />

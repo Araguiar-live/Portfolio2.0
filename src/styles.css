@@ -490,7 +490,7 @@ html[data-work-locked] .portfolio-interactive-hero-shell {
 }
 
 .folder-shell[data-raised="true"] .folder-face {
-  background-color: rgba(255, 255, 255, 0.98);
+  background-color: #ffffff;
   color: #111111;
 }
 

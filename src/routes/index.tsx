@@ -392,7 +392,7 @@ function Index() {
         Exact Figma auto-layout (530:151045 / 552:158232):
         cells → browser plate UNDER pattern → overlay on top.
         Closed 1262×847 · Open 1262×1522 · overlay scrolls when open.
-        Content column is ~45% wider than the original 1336px cap (→ 1944)
+        Content column is ~45% wider than the original 1336px cap (→ 2024)
         so the closed accordion reads 15% larger on desktop at the same aspect.
       */}
       <section
@@ -404,7 +404,7 @@ function Index() {
             className={
               isExpanded
                 ? "pointer-events-auto mx-auto flex w-full max-w-[1690px] flex-col items-center gap-[78px] overflow-visible px-6 pb-0 pt-10 sm:px-10"
-                : "pointer-events-auto absolute left-1/2 top-[calc(50%-76px)] flex h-[min(760px,86%)] w-[min(1944px,calc(100%-32px))] -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-[78px] overflow-visible max-md:relative max-md:left-auto max-md:top-auto max-md:mx-auto max-md:h-auto max-md:min-h-[100dvh] max-md:w-[min(350px,calc(100%-32px))] max-md:translate-x-0 max-md:translate-y-0 max-md:gap-8 max-md:px-1 max-md:pb-28 max-md:pt-14 max-sm:gap-[37px] max-sm:pb-32 max-sm:pt-[68px]"
+                : "@container pointer-events-auto absolute left-1/2 top-[calc(50%-76px)] flex h-[min(760px,86%)] w-[min(2024px,calc(100%-32px))] -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-[40px] overflow-visible max-md:relative max-md:left-auto max-md:top-auto max-md:mx-auto max-md:h-auto max-md:min-h-[100dvh] max-md:w-[min(350px,calc(100%-32px))] max-md:translate-x-0 max-md:translate-y-0 max-md:gap-8 max-md:px-1 max-md:pb-28 max-md:pt-14 max-sm:gap-[37px] max-sm:pb-32 max-sm:pt-[68px]"
             }
           >
             <header className="flex w-full max-w-[720px] shrink-0 flex-col items-center gap-5 text-center max-md:mt-3 max-md:gap-4 max-sm:mt-3 max-sm:gap-4">
@@ -442,7 +442,7 @@ function Index() {
                 aria-hidden
                 className="pointer-events-none absolute inset-0 z-[5] overflow-visible max-md:-top-14 max-md:bottom-0"
               >
-                <div className="portfolio-mobile-deco-calculator absolute left-0 top-0 hidden -translate-x-1/2 -translate-y-1/2 max-md:-bottom-4 max-md:-left-3 max-md:top-auto max-md:block max-md:origin-bottom-left max-md:scale-[0.715] max-md:translate-x-0 max-md:translate-y-0 max-md:[--deco-scale:0.72] md:block">
+                <div className="portfolio-mobile-deco-calculator absolute left-0 top-0 hidden -translate-y-1/2 max-md:-bottom-4 max-md:-left-3 max-md:top-auto max-md:block max-md:origin-bottom-left max-md:scale-[0.715] max-md:translate-x-0 max-md:translate-y-0 max-md:[--deco-scale:0.72] md:block md:translate-x-[max(-50%,calc(16px-50vw+50cqw))]">
                   <CalculatorCard />
                 </div>
                 <div className="absolute right-4 top-4 hidden -translate-y-[70px] max-md:-right-1 max-md:top-[6px] max-md:bottom-auto max-md:block max-md:origin-top-right max-md:scale-80 max-md:translate-y-0 max-md:[--deco-scale:0.85] md:block">
