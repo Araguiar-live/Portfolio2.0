@@ -458,8 +458,8 @@ function Index() {
                   nudgeSignal={nudgeSignal}
                 />
               </AiPlaygroundFolder>
-              {/* Left of the calculator, above it, and under the project sheets. */}
-              <div className="pointer-events-auto absolute left-0 top-0 z-[5] translate-x-[179px] -translate-y-[78%]">
+              {/* Tucked under the folder's bottom-left corner. */}
+              <div className="pointer-events-auto absolute bottom-7 left-0 z-[4] translate-y-1/2">
                 <SpatialDotBadge />
               </div>
             </div>
