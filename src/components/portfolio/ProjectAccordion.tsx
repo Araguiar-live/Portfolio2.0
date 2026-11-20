@@ -1,6 +1,14 @@
 import { AnimatePresence, motion, type MotionValue } from "framer-motion";
 import { ArrowUpRight, ChevronLeft, ChevronRight } from "lucide-react";
-import { forwardRef, useEffect, useLayoutEffect, useRef, useState, type MutableRefObject } from "react";
+import {
+  forwardRef,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type MutableRefObject,
+} from "react";
 import { createPortal } from "react-dom";
 import bendingSpoonsMark from "@/assets/bending-spoons-mark.svg";
 import crcleMark from "@/assets/crcle-mark.svg";
@@ -307,13 +315,16 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
       ref={ref}
       data-raised={raised ? "true" : "false"}
       className="folder-shell pointer-events-none relative border-0 outline-none"
-      style={{
-        zIndex: raised ? 40 : index + 1,
-        marginTop: index === 0 ? 0 : -FOLDER_OVERLAP,
-        border: 0,
-        outline: "none",
-        boxShadow: "none",
-      }}
+      style={
+        {
+          "--sheet-tilt": (index + 1) % 2 === 1 ? "-0.8deg" : "0.8deg",
+          zIndex: raised ? 30 : index + 1,
+          marginTop: index === 0 ? 0 : -FOLDER_OVERLAP,
+          border: 0,
+          outline: "none",
+          boxShadow: "none",
+        } as CSSProperties
+      }
     >
       <div
         ref={faceRef}

@@ -21,7 +21,7 @@ export function AiPlaygroundFolder({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="relative [--pocket-h:201px] [--pocket-overlap:48px] [--pocket-rise:24px] max-md:[--pocket-h:193px] max-md:[--pocket-overlap:32px] max-md:[--pocket-rise:14px]">
+    <div className="ai-playground-folder relative [--pocket-h:201px] [--pocket-overlap:48px] [--pocket-rise:24px] max-md:[--pocket-h:193px] max-md:[--pocket-overlap:32px] max-md:[--pocket-rise:14px]">
       <div className="relative z-10 px-6">
         <div
           aria-hidden
@@ -160,7 +160,7 @@ function FrontPocket({ onOpen }: { onOpen: () => void }) {
       onClick={onOpen}
       aria-haspopup="dialog"
       aria-label="Open Project Playground"
-      className="relative z-20 -mx-6 flex w-[calc(100%+3rem)] cursor-pointer items-end justify-between border-0 bg-transparent px-6 pb-7 text-left md:px-10"
+      className="playground-pocket relative z-20 -mx-6 flex w-[calc(100%+3rem)] cursor-pointer items-end justify-between border-0 bg-transparent px-6 pb-7 text-left md:px-10"
       style={{
         height: "var(--pocket-h)",
         marginTop: "calc(var(--pocket-overlap) * -1)",
