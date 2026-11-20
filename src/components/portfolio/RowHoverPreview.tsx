@@ -96,24 +96,25 @@ export function RowHoverPreview({
   const visible = open;
 
   const frame = (
-    <div
-      className="relative isolate overflow-hidden bg-white"
-      style={{
-        width,
-        height,
-        borderRadius: radius,
-        clipPath: `polygon(0 0, calc(100% - ${radius}px) 0, 100% ${radius}px, 100% 100%, 0 100%)`,
-        filter: "drop-shadow(0 18px 36px rgba(6, 10, 12, 0.32))",
-      }}
-    >
-      <PreviewFrame media={media} playing={hold} />
+    <div style={{ filter: "drop-shadow(0 16px 32px rgba(0, 0, 0, 0.14))" }}>
+      <div
+        className="relative overflow-hidden bg-white"
+        style={{
+          width,
+          height,
+          borderRadius: radius,
+          clipPath: `polygon(0 0, calc(100% - ${radius}px) 0, 100% ${radius}px, 100% 100%, 0 100%)`,
+        }}
+      >
+        <PreviewFrame media={media} playing={hold} />
+      </div>
     </div>
   );
 
   return createPortal(
     isVideo ? (
       <motion.div
-        className="pointer-events-none fixed top-0 left-0 z-[200] will-change-transform"
+        className="pointer-events-none fixed top-0 left-0 z-40 will-change-transform"
         style={{
           x,
           y,
@@ -130,7 +131,7 @@ export function RowHoverPreview({
         {open ? (
           <motion.div
             key={media.src}
-            className="pointer-events-none fixed top-0 left-0 z-[200] will-change-transform"
+            className="pointer-events-none fixed top-0 left-0 z-40 will-change-transform"
             style={{ x, y, rotate: reduceMotion ? 0 : rotate }}
             aria-hidden
           >
