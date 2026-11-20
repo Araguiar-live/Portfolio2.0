@@ -372,7 +372,7 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
       className="folder-shell pointer-events-none relative border-0 outline-none"
       style={
         {
-          zIndex: raised ? 30 : index + 1,
+          zIndex: !isOpen && hovered ? 30 : index + 1,
           marginTop: index === 0 ? 0 : -FOLDER_OVERLAP,
           border: 0,
           outline: "none",
