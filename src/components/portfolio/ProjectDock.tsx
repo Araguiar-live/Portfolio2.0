@@ -118,48 +118,10 @@ export function ProjectDock({ onPlus }: Props) {
             ))}
           </motion.div>
         </nav>
-        <BinderClip />
       </div>
 
       <GraduateWorkOverlay open={folderOpen} onClose={closeFolder} />
     </>
-  );
-}
-
-/** Silver-wire binder clip gripping the dock's right edge. */
-function BinderClip() {
-  return (
-    <div
-      aria-hidden
-      className="project-dock-binder-clip pointer-events-none absolute right-0 top-1/2 z-[4] -translate-y-[42%] translate-x-[38%]"
-    >
-      <svg viewBox="0 0 56 78" className="block h-full w-full overflow-visible" fill="none">
-        <path
-          d="M14 40V22q0-10 8-10t8 10v14"
-          stroke="#eef0f3"
-          strokeWidth="3"
-          strokeLinecap="round"
-        />
-        <path
-          d="M42 40V22q0-10-8-10t-8 10v14"
-          stroke="#b4bac3"
-          strokeWidth="3"
-          strokeLinecap="round"
-        />
-        <path
-          d="M6 36h44c3.2 0 5 2.4 5 6.2V50c0 9-6.2 15-15 17H16C7.2 65 1 59 1 50V42.2C1 38.4 2.8 36 6 36z"
-          fill="#1C1D21"
-        />
-        <path
-          d="M10 38.5h36"
-          stroke="rgba(255,255,255,0.32)"
-          strokeWidth="1.4"
-          strokeLinecap="round"
-        />
-        <rect x="7" y="44" width="42" height="7" rx="2" fill="#d5d8de" />
-        <rect x="7" y="44" width="42" height="2.2" rx="1" fill="rgba(255,255,255,0.7)" />
-      </svg>
-    </div>
   );
 }
 

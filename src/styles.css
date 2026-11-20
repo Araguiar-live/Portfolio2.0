@@ -2588,10 +2588,34 @@ html.dark .thought-body-gradient {
   cursor: pointer;
 }
 
-.project-dock-binder-clip {
-  width: calc(38px * var(--deco-scale, 1));
-  height: calc(54px * var(--deco-scale, 1));
-  filter: drop-shadow(0 6px 8px rgba(11, 14, 20, 0.22));
+.folder-binder-clip {
+  width: 116px;
+  height: 54px;
+  transform-origin: 22px 50%;
+  filter: drop-shadow(0 7px 8px rgba(17, 17, 17, 0.28));
+}
+
+.folder-binder-clip:hover {
+  animation: folder-clip-wiggle 0.55s cubic-bezier(0.34, 1.45, 0.64, 1);
+}
+
+@keyframes folder-clip-wiggle {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  40% {
+    transform: rotate(-4deg);
+  }
+  72% {
+    transform: rotate(2deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .folder-binder-clip:hover {
+    animation: none;
+  }
 }
 
 .project-dock-app-icon__grid {
