@@ -2588,6 +2588,12 @@ html.dark .thought-body-gradient {
   cursor: pointer;
 }
 
+.project-dock-binder-clip {
+  width: calc(38px * var(--deco-scale, 1));
+  height: calc(54px * var(--deco-scale, 1));
+  filter: drop-shadow(0 6px 8px rgba(11, 14, 20, 0.22));
+}
+
 .project-dock-app-icon__grid {
   column-gap: calc(9px * var(--deco-scale, 1));
   row-gap: calc(8px * var(--deco-scale, 1));
