@@ -4,7 +4,6 @@ import { createPortal } from "react-dom";
 import { isPhoneViewport } from "@/lib/viewport";
 
 const PREVIEW_MAX = 644;
-const RADIUS_FROM = 120 / 4096;
 const SPRING = { damping: 15, stiffness: 150, mass: 0.2 };
 
 export interface HoverPreviewMedia {
@@ -90,24 +89,13 @@ export function RowHoverPreview({
   if (!mounted) return null;
 
   const { width, height } = previewSize(media);
-  const radius = RADIUS_FROM * width + 20;
   const isVideo = media.type === "video";
   const hold = isVideo && (keepAlive || open);
   const visible = open;
 
   const frame = (
-    <div style={{ filter: "drop-shadow(0 16px 32px rgba(0, 0, 0, 0.14))" }}>
-      <div
-        className="relative overflow-hidden bg-white"
-        style={{
-          width,
-          height,
-          borderRadius: radius,
-          clipPath: `polygon(0 0, calc(100% - ${radius}px) 0, 100% ${radius}px, 100% 100%, 0 100%)`,
-        }}
-      >
-        <PreviewFrame media={media} playing={hold} />
-      </div>
+    <div className="overflow-hidden rounded-[24px] bg-white shadow-xl" style={{ width, height }}>
+      <PreviewFrame media={media} playing={hold} />
     </div>
   );
 
@@ -124,7 +112,9 @@ export function RowHoverPreview({
         }}
         aria-hidden
       >
-        <div className="pointer-events-none -translate-x-1/2 -translate-y-1/2">{hold ? frame : null}</div>
+        <div className="pointer-events-none" style={{ transform: "translate3d(-50%, -50%, 0)" }}>
+          {hold ? frame : null}
+        </div>
       </motion.div>
     ) : (
       <AnimatePresence>
@@ -136,7 +126,8 @@ export function RowHoverPreview({
             aria-hidden
           >
             <motion.div
-              className="pointer-events-none -translate-x-1/2 -translate-y-1/2"
+              className="pointer-events-none will-change-transform"
+              style={{ x: "-50%", y: "-50%" }}
               initial={reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.92 }}
               animate={reduceMotion ? { opacity: 1 } : { opacity: 1, scale: 1 }}
               exit={reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.92 }}

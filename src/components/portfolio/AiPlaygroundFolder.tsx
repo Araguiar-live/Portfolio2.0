@@ -110,6 +110,22 @@ function FrontPocket({ onOpen }: { onOpen: () => void }) {
         filter: "drop-shadow(0 16px 26px rgba(17,17,17,0.28))",
       }}
     >
+      <div aria-hidden className="pointer-events-none absolute -top-3 right-10 z-[-1]">
+        <svg
+          viewBox="0 0 22 48"
+          width="22"
+          height="48"
+          className="block overflow-visible"
+          fill="none"
+        >
+          <path
+            d="M17.2 13 V5.2 C17.2 2.4 4.8 2.4 4.8 5.2 V30"
+            stroke="#2326F5"
+            strokeWidth="2.8"
+            strokeLinecap="round"
+          />
+        </svg>
+      </div>
       <svg
         aria-hidden
         className="pointer-events-none absolute inset-0 h-full w-full"
@@ -125,6 +141,22 @@ function FrontPocket({ onOpen }: { onOpen: () => void }) {
           vectorEffect="non-scaling-stroke"
         />
       </svg>
+      <div aria-hidden className="pointer-events-none absolute -top-3 right-10 z-30">
+        <svg
+          viewBox="0 0 22 48"
+          width="22"
+          height="48"
+          className="block overflow-visible"
+          fill="none"
+        >
+          <path
+            d="M14.2 14 V36 C14.2 41.2 7.8 41.2 7.8 36 V14"
+            stroke="#2326F5"
+            strokeWidth="2.8"
+            strokeLinecap="round"
+          />
+        </svg>
+      </div>
       <span className="relative font-mono text-base tracking-tight text-[#f4efe6]">
         Project Playground
       </span>
