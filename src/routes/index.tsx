@@ -458,11 +458,9 @@ function Index() {
                   nudgeSignal={nudgeSignal}
                 />
               </AiPlaygroundFolder>
-              {/* Figma 2305:66727 — 24px under the accordion, painted behind it */}
-              <div className="pointer-events-auto absolute bottom-4 left-1/2 z-30 -translate-x-1/2 max-md:relative max-md:bottom-auto max-md:left-auto max-md:mt-3 max-md:flex max-md:translate-x-0 max-md:justify-center">
-                <div className="-ml-6">
-                  <SpatialDotBadge />
-                </div>
+              {/* Left of the calculator, above it, and under the project sheets. */}
+              <div className="pointer-events-auto absolute left-0 top-0 z-[8] -translate-x-14 -translate-y-[46%]">
+                <SpatialDotBadge />
               </div>
             </div>
             {/* Phones: 15% smaller than the 1.25 dock, pinned to the stage bottom. */}
