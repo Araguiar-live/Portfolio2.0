@@ -110,11 +110,11 @@ function FrontPocket({ onOpen }: { onOpen: () => void }) {
         filter: "drop-shadow(0 16px 26px rgba(17,17,17,0.28))",
       }}
     >
-      <div aria-hidden className="pointer-events-none absolute -top-[14px] right-12 z-0">
+      <div aria-hidden className="pointer-events-none absolute -top-[18px] right-12 z-0">
         <svg
           viewBox="0 0 24 64"
-          width="22"
-          height="56"
+          width="25.3"
+          height="64.4"
           className="block overflow-visible"
           fill="none"
         >
@@ -141,11 +141,11 @@ function FrontPocket({ onOpen }: { onOpen: () => void }) {
           vectorEffect="non-scaling-stroke"
         />
       </svg>
-      <div aria-hidden className="pointer-events-none absolute -top-[14px] right-12 z-20">
+      <div aria-hidden className="pointer-events-none absolute -top-[18px] right-12 z-20">
         <svg
           viewBox="0 0 24 64"
-          width="22"
-          height="56"
+          width="25.3"
+          height="64.4"
           className="block overflow-visible"
           fill="none"
         >

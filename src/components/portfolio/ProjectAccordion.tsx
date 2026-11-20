@@ -238,8 +238,8 @@ function ClipWire({ d, stroke }: { d: string; stroke: string }) {
   return (
     <svg
       viewBox="0 0 24 64"
-      width="22"
-      height="56"
+      width="25.3"
+      height="64.4"
       className="block overflow-visible"
       fill="none"
       aria-hidden
@@ -252,7 +252,7 @@ function ClipWire({ d, stroke }: { d: string; stroke: string }) {
 /** Straight vertical wire slid over the top edge of 02 Bending Spoons. */
 function BendingSpoonsPaperclip() {
   const place =
-    "pointer-events-none absolute left-[44%] -top-[14px] drop-shadow-[0_1px_2px_rgba(0,0,0,0.14)]";
+    "pointer-events-none absolute left-[44%] -top-[18px] drop-shadow-[0_1px_2px_rgba(0,0,0,0.14)]";
   return (
     <>
       <div aria-hidden className={`${place} z-0`} style={{ marginTop: TAB_H }}>
