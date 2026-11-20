@@ -366,10 +366,11 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
     <div
       ref={ref}
       data-raised={raised ? "true" : "false"}
+      data-open={isOpen ? "true" : "false"}
+      data-hovered={!isOpen && hovered ? "true" : "false"}
       className="folder-shell pointer-events-none relative border-0 outline-none"
       style={
         {
-          "--sheet-tilt": (index + 1) % 2 === 1 ? "-0.8deg" : "0.8deg",
           zIndex: raised ? 30 : index + 1,
           marginTop: index === 0 ? 0 : -FOLDER_OVERLAP,
           border: 0,

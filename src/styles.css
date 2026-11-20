@@ -476,8 +476,11 @@ html[data-work-locked] .portfolio-interactive-hero-shell {
     filter 300ms ease-out;
 }
 
+.folder-shell[data-hovered="true"] {
+  transform: translateY(-0.25rem) rotate(0deg);
+}
+
 .folder-shell[data-raised="true"] {
-  transform: translateY(-10px) rotate(var(--sheet-tilt, 0deg));
   filter: drop-shadow(0 -4px 14px rgba(0, 0, 0, 0.06));
 }
 
