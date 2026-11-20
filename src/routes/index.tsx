@@ -449,14 +449,15 @@ function Index() {
                   <PeekMouse />
                 </div>
               </div>
-              <AiPlaygroundFolder />
-              <ProjectBentoStack
-                projects={PROJECTS}
-                openSlug={openSlug}
-                onToggle={toggle}
-                rowRefs={rowRefs}
-                nudgeSignal={nudgeSignal}
-              />
+              <AiPlaygroundFolder>
+                <ProjectBentoStack
+                  projects={PROJECTS}
+                  openSlug={openSlug}
+                  onToggle={toggle}
+                  rowRefs={rowRefs}
+                  nudgeSignal={nudgeSignal}
+                />
+              </AiPlaygroundFolder>
               {/* Figma 2305:66727 — 24px under the accordion, painted behind it */}
               <div className="pointer-events-auto relative z-0 -mt-6 flex justify-center max-md:-mt-6">
                 <div className="-ml-6">
