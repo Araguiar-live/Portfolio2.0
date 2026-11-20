@@ -477,7 +477,7 @@ html[data-work-locked] .portfolio-interactive-hero-shell {
 }
 
 .folder-shell[data-hovered="true"] {
-  transform: translateY(-0.25rem) rotate(0deg);
+  transform: translateY(-10px) rotate(var(--sheet-tilt, 0deg));
 }
 
 .folder-shell[data-raised="true"] {
