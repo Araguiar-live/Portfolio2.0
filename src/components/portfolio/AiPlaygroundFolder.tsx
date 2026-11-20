@@ -110,17 +110,17 @@ function FrontPocket({ onOpen }: { onOpen: () => void }) {
         filter: "drop-shadow(0 16px 26px rgba(17,17,17,0.28))",
       }}
     >
-      <div aria-hidden className="pointer-events-none absolute -top-3 right-10 z-[-1]">
+      <div aria-hidden className="pointer-events-none absolute -top-[14px] right-12 z-0">
         <svg
-          viewBox="0 0 22 48"
+          viewBox="0 0 24 64"
           width="22"
-          height="48"
+          height="56"
           className="block overflow-visible"
           fill="none"
         >
           <path
-            d="M17.2 13 V5.2 C17.2 2.4 4.8 2.4 4.8 5.2 V30"
-            stroke="#2326F5"
+            d="M 6 18 L 6 10 A 6 6 0 0 1 18 10 L 18 18"
+            stroke="#3B82F6"
             strokeWidth="2.8"
             strokeLinecap="round"
           />
@@ -141,17 +141,17 @@ function FrontPocket({ onOpen }: { onOpen: () => void }) {
           vectorEffect="non-scaling-stroke"
         />
       </svg>
-      <div aria-hidden className="pointer-events-none absolute -top-3 right-10 z-30">
+      <div aria-hidden className="pointer-events-none absolute -top-[14px] right-12 z-20">
         <svg
-          viewBox="0 0 22 48"
+          viewBox="0 0 24 64"
           width="22"
-          height="48"
+          height="56"
           className="block overflow-visible"
           fill="none"
         >
           <path
-            d="M14.2 14 V36 C14.2 41.2 7.8 41.2 7.8 36 V14"
-            stroke="#2326F5"
+            d="M 18 14 L 18 48 A 5 5 0 0 1 8 48 L 8 24"
+            stroke="#3B82F6"
             strokeWidth="2.8"
             strokeLinecap="round"
           />

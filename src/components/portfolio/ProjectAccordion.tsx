@@ -229,17 +229,17 @@ function folderOutline(
   return { points, radii };
 }
 
-/** Outer wire. The sheet covers everything below the top edge. */
-const CLIP_BACK = "M17.2 13 V5.2 C17.2 2.4 4.8 2.4 4.8 5.2 V30";
-/** Inner U that rests on the sheet. */
-const CLIP_FRONT = "M14.2 14 V36 C14.2 41.2 7.8 41.2 7.8 36 V14";
+/** Top arch only. y=18 is the paper edge. */
+const CLIP_BACK = "M 6 18 L 6 10 A 6 6 0 0 1 18 10 L 18 18";
+/** Front loop: long right leg, bottom U, short left leg. */
+const CLIP_FRONT = "M 18 14 L 18 48 A 5 5 0 0 1 8 48 L 8 24";
 
 function ClipWire({ d, stroke }: { d: string; stroke: string }) {
   return (
     <svg
-      viewBox="0 0 22 48"
+      viewBox="0 0 24 64"
       width="22"
-      height="48"
+      height="56"
       className="block overflow-visible"
       fill="none"
       aria-hidden
@@ -251,13 +251,14 @@ function ClipWire({ d, stroke }: { d: string; stroke: string }) {
 
 /** Straight vertical wire slid over the top edge of 02 Bending Spoons. */
 function BendingSpoonsPaperclip() {
-  const place = "pointer-events-none absolute top-3 left-[44%]";
+  const place =
+    "pointer-events-none absolute left-[44%] -top-[14px] drop-shadow-[0_1px_2px_rgba(0,0,0,0.14)]";
   return (
     <>
-      <div aria-hidden className={`${place} z-[-1]`}>
+      <div aria-hidden className={`${place} z-0`} style={{ marginTop: TAB_H }}>
         <ClipWire d={CLIP_BACK} stroke="#EAB308" />
       </div>
-      <div aria-hidden className={`${place} z-20`}>
+      <div aria-hidden className={`${place} z-20`} style={{ marginTop: TAB_H }}>
         <ClipWire d={CLIP_FRONT} stroke="#EAB308" />
       </div>
     </>
