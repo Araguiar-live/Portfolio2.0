@@ -404,7 +404,7 @@ function Index() {
             className={
               isExpanded
                 ? "pointer-events-auto mx-auto flex w-full max-w-[1690px] flex-col items-center gap-[78px] overflow-visible px-6 pb-0 pt-10 sm:px-10"
-                : "pointer-events-auto absolute left-1/2 top-[calc(50%-36px)] flex h-[min(760px,86%)] w-[min(1944px,calc(100%-32px))] -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-[78px] overflow-visible max-md:relative max-md:left-auto max-md:top-auto max-md:mx-auto max-md:h-auto max-md:min-h-[100dvh] max-md:w-[min(350px,calc(100%-32px))] max-md:translate-x-0 max-md:translate-y-0 max-md:gap-8 max-md:px-1 max-md:pb-28 max-md:pt-14 max-sm:gap-[37px] max-sm:pb-32 max-sm:pt-[68px]"
+                : "pointer-events-auto absolute left-1/2 top-[calc(50%-76px)] flex h-[min(760px,86%)] w-[min(1944px,calc(100%-32px))] -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-[78px] overflow-visible max-md:relative max-md:left-auto max-md:top-auto max-md:mx-auto max-md:h-auto max-md:min-h-[100dvh] max-md:w-[min(350px,calc(100%-32px))] max-md:translate-x-0 max-md:translate-y-0 max-md:gap-8 max-md:px-1 max-md:pb-28 max-md:pt-14 max-sm:gap-[37px] max-sm:pb-32 max-sm:pt-[68px]"
             }
           >
             <header className="flex w-full max-w-[720px] shrink-0 flex-col items-center gap-5 text-center max-md:mt-3 max-md:gap-4 max-sm:mt-3 max-sm:gap-4">

@@ -21,11 +21,11 @@ export function AiPlaygroundFolder({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="relative [--pocket-h:156px] [--pocket-overlap:48px] [--pocket-rise:24px] max-md:[--pocket-h:148px] max-md:[--pocket-overlap:32px] max-md:[--pocket-rise:14px]">
-      <div className="relative z-10">
+    <div className="relative [--pocket-h:201px] [--pocket-overlap:48px] [--pocket-rise:24px] max-md:[--pocket-h:193px] max-md:[--pocket-overlap:32px] max-md:[--pocket-rise:14px]">
+      <div className="relative z-10 px-6">
         <div
           aria-hidden
-          className="pointer-events-none absolute -inset-x-4 z-0 rounded-[28px]"
+          className="pointer-events-none absolute inset-x-0 z-0 rounded-[28px]"
           style={{
             top: "30%",
             bottom: "calc((var(--pocket-h) - var(--pocket-overlap)) * -1)",
@@ -60,14 +60,14 @@ export function AiPlaygroundFolder({ children }: { children: ReactNode }) {
 /** Charcoal cover. The raised tab is on the right and eases down toward the left. */
 function FrontPocket({ onOpen }: { onOpen: () => void }) {
   const ref = useRef<HTMLButtonElement>(null);
-  const [shape, setShape] = useState({ width: 1200, height: 156, rise: 24 });
+  const [shape, setShape] = useState({ width: 1200, height: 201, rise: 24 });
 
   useLayoutEffect(() => {
     const el = ref.current;
     if (!el) return;
     const measure = () => {
       const styles = getComputedStyle(el);
-      const height = parseFloat(styles.getPropertyValue("--pocket-h")) || 156;
+      const height = parseFloat(styles.getPropertyValue("--pocket-h")) || 201;
       const rise = parseFloat(styles.getPropertyValue("--pocket-rise")) || 24;
       setShape({ width: Math.max(280, el.clientWidth), height, rise });
     };
