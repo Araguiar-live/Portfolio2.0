@@ -21,7 +21,7 @@ export function AiPlaygroundFolder({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="ai-playground-folder relative mb-7 [--pocket-h:201px] [--pocket-overlap:48px] [--pocket-rise:24px] max-md:[--pocket-h:193px] max-md:[--pocket-overlap:32px] max-md:[--pocket-rise:14px]">
+    <div className="ai-playground-folder relative mb-7 [--pocket-h:231px] [--pocket-overlap:48px] [--pocket-rise:24px] max-md:[--pocket-h:222px] max-md:[--pocket-overlap:32px] max-md:[--pocket-rise:14px]">
       <div className="relative z-10 px-6">
         <div
           aria-hidden

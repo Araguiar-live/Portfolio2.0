@@ -118,7 +118,7 @@ function FolderMark({ slug }: { slug: string }) {
       alt=""
       width={width}
       height={height}
-      className="pointer-events-none relative z-20 max-w-none opacity-70"
+      className="pointer-events-none relative z-20 max-w-none opacity-[0.56]"
       style={{ width, height }}
     />
   );
@@ -388,7 +388,7 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
       >
       {/* Row header — Figma 530:151817. Closed sheet is 20% taller than the 162px desktop / 130px phone rows; overlap stays 48px. */}
       <div
-        className="group relative flex w-full items-center justify-between gap-7 border-0 px-[37px] py-[66.2px] text-left outline-none transition-[background] duration-300 max-md:flex-col max-md:items-stretch max-md:gap-[15px] max-md:px-5 max-md:py-[36px] max-sm:gap-[15px] max-sm:px-5 max-sm:py-[36px]"
+        className="group relative flex w-full items-center justify-between gap-7 border-0 px-[37px] py-[78.6px] text-left outline-none transition-[background] duration-300 max-md:flex-col max-md:items-stretch max-md:gap-[15px] max-md:px-5 max-md:py-[41.4px] max-sm:gap-[15px] max-sm:px-5 max-sm:py-[41.4px]"
         onMouseEnter={rowHover.onMouseEnter}
         onMouseMove={rowHover.onMouseMove}
         onMouseLeave={rowHover.onMouseLeave}
