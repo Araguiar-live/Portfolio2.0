@@ -3,8 +3,6 @@ import { useCallback, useState, type MouseEvent } from "react";
 import { GraduateWorkOverlay } from "@/components/portfolio/GraduateWorkOverlay";
 import { isPhoneViewport } from "@/lib/viewport";
 import { GRADUATE_PROJECTS, type GraduateProject } from "@/components/portfolio/graduateProjects";
-import dockPaperclip from "@/assets/dock-paperclip.svg";
-
 /** Base icon cell at --deco-scale: 1 (scales with dock via CSS). */
 const ICON_BASE = 24;
 
@@ -127,23 +125,24 @@ export function ProjectDock({ onPlus }: Props) {
   );
 }
 
-/** Figma 2934:34177 paperclip on the dock's right edge. */
+/** Cobalt paperclip on the dock's upper-right corner. */
 function FolderBinderClip() {
   return (
-    <div
-      aria-hidden
-      className="pointer-events-none absolute top-1/2 right-0 z-30 -translate-y-1/2 translate-x-1/2"
-    >
-      <div className="relative size-[24px]">
-        <img
-          src={dockPaperclip}
-          alt=""
-          width={19.4995}
-          height={21.5002}
-          className="pointer-events-none absolute left-1/2 top-1/2 block max-w-none -translate-x-1/2 -translate-y-1/2"
-          style={{ width: 19.4995, height: 21.5002 }}
+    <div aria-hidden className="pointer-events-none absolute -top-3 right-8 z-30">
+      <svg
+        viewBox="0 0 24 24"
+        width="46"
+        height="46"
+        className="block drop-shadow-[0_2px_4px_rgba(0,0,0,0.2)]"
+        fill="none"
+      >
+        <path
+          d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"
+          stroke="#2326F5"
+          strokeWidth="2.2"
+          strokeLinecap="round"
         />
-      </div>
+      </svg>
     </div>
   );
 }

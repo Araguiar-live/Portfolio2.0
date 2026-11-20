@@ -10,7 +10,7 @@ import {
 
 const HUES = ["#E9582C", "#3B29D8", "#0FC950", "#F2B84B"];
 
-const BACK = "#343740";
+const BACK = "#18181B";
 const FRONT = "#1C1D21";
 
 /**

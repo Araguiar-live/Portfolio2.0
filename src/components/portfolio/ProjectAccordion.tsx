@@ -229,32 +229,21 @@ function folderOutline(
   return { points, radii };
 }
 
-/** Yellow wire clipped over the top edge of 02 Bending Spoons. */
+/** Diagonal double-loop paperclip, shared with the dock clip. */
+const PAPERCLIP_D =
+  "M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48";
+
+/** Yellow wire straddling the top edge of 02 Bending Spoons. */
 function BendingSpoonsPaperclip() {
-  const outer = "M15 30 C15 16 10 5 20 4 C30 3 33 14 33 24 L33 30";
-  const inner = "M31 28 C31 20 18 18 15 28 L15 48 C15 58 26 60 33 51";
-  const place =
-    "pointer-events-none absolute left-[32%] top-6 h-[64.8px] w-[36px] -translate-x-1/2 -translate-y-[42%] -rotate-[18deg] drop-shadow-[0_2px_3px_rgba(0,0,0,0.16)]";
-  const wire = (d: string) => (
-    <svg
-      viewBox="0 0 40 72"
-      className="block h-full w-full overflow-visible"
-      fill="none"
-      aria-hidden
-    >
-      <path d={d} stroke="#F5C43D" strokeWidth="3.5" strokeLinecap="round" />
-      <path d={d} stroke="#FDE047" strokeWidth="1.25" strokeLinecap="round" />
-    </svg>
-  );
   return (
-    <>
-      <div aria-hidden className={`${place} z-[-1]`}>
-        {wire(outer)}
-      </div>
-      <div aria-hidden className={`${place} z-20`}>
-        {wire(inner)}
-      </div>
-    </>
+    <div
+      aria-hidden
+      className="pointer-events-none absolute left-[32%] top-6 z-20 size-[52px] -translate-x-1/2 -translate-y-1/2 drop-shadow-[0_2px_4px_rgba(0,0,0,0.16)]"
+    >
+      <svg viewBox="0 0 24 24" className="block size-full overflow-visible" fill="none">
+        <path d={PAPERCLIP_D} stroke="#EAB308" strokeWidth="2.2" strokeLinecap="round" />
+      </svg>
+    </div>
   );
 }
 
