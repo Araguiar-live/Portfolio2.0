@@ -4,8 +4,9 @@ import {
   useReducedMotion,
   useSpring,
   useTransform,
+  type MotionValue,
 } from "framer-motion";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useRef } from "react";
 import ellipse2 from "@/assets/portfolio/spatial-dot-badge/ellipse-2.svg";
 import ellipse728 from "@/assets/portfolio/spatial-dot-badge/ellipse-728.svg";
 import { cn } from "@/lib/utils";
@@ -17,6 +18,26 @@ const DOTS = [
   { id: "bl", gx: -1, gy: 1, src: ellipse2, depth: 0.16 },
   { id: "br", gx: 1, gy: 1, src: ellipse728, depth: 0.22 },
 ] as const;
+
+function Dot({
+  src,
+  depth,
+  shiftX,
+  shiftY,
+}: {
+  src: string;
+  depth: number;
+  shiftX: MotionValue<number>;
+  shiftY: MotionValue<number>;
+}) {
+  const x = useTransform(shiftX, (value) => value * depth);
+  const y = useTransform(shiftY, (value) => value * depth);
+  return (
+    <motion.span className="block size-4 shrink-0" style={{ x, y, z: depth * 40 }}>
+      <img src={src} alt="" width={16} height={16} draggable={false} decoding="async" className="block" />
+    </motion.span>
+  );
+}
 
 const SPRING_ROTATE = { stiffness: 140, damping: 20, mass: 0.65 };
 const PARALLAX_MAX = 7;
@@ -35,8 +56,9 @@ export function SpatialDotBadge({ className }: Props) {
   const draggingRef = useRef(false);
   const lastPointerRef = useRef<{ x: number; y: number; t: number } | null>(null);
   const spinVelocityRef = useRef(0);
-  const [hovering, setHovering] = useState(false);
-  const [parallax, setParallax] = useState({ x: 0, y: 0 });
+  const rectRef = useRef<DOMRect | null>(null);
+  const shiftX = useSpring(0, { stiffness: 420, damping: 28 });
+  const shiftY = useSpring(0, { stiffness: 420, damping: 28 });
 
   const rotate = useMotionValue(0);
   const rotateSpring = useSpring(rotate, reduceMotion ? { stiffness: 500, damping: 50 } : SPRING_ROTATE);
@@ -46,17 +68,14 @@ export function SpatialDotBadge({ className }: Props) {
   const updateParallax = useCallback(
     (clientX: number, clientY: number) => {
       if (reduceMotion || draggingRef.current) return;
-      const el = rootRef.current;
-      if (!el) return;
-      const rect = el.getBoundingClientRect();
+      const rect = rectRef.current;
+      if (!rect) return;
       const cx = rect.left + rect.width / 2;
       const cy = rect.top + rect.height / 2;
       const nx = (clientX - cx) / (rect.width / 2);
       const ny = (clientY - cy) / (rect.height / 2);
-      setParallax({
-        x: Math.max(-1, Math.min(1, nx)) * PARALLAX_MAX,
-        y: Math.max(-1, Math.min(1, ny)) * PARALLAX_MAX,
-      });
+      shiftX.set(Math.max(-1, Math.min(1, nx)) * PARALLAX_MAX);
+      shiftY.set(Math.max(-1, Math.min(1, ny)) * PARALLAX_MAX);
     },
     [reduceMotion],
   );
@@ -109,10 +128,13 @@ export function SpatialDotBadge({ className }: Props) {
         "spatial-dot-frost relative size-[101.2px] cursor-grab rounded-[64px] border border-solid border-[rgba(24,116,170,0.2)] bg-gradient-to-l from-[rgba(3,104,199,0.4)] to-[rgba(19,136,129,0.24)] active:cursor-grabbing",
         className,
       )}
-      onPointerEnter={() => setHovering(true)}
+      onPointerEnter={() => {
+        rectRef.current = rootRef.current?.getBoundingClientRect() ?? null;
+      }}
       onPointerLeave={() => {
-        setHovering(false);
-        setParallax({ x: 0, y: 0 });
+        rectRef.current = null;
+        shiftX.set(0);
+        shiftY.set(0);
         draggingRef.current = false;
       }}
       onPointerMove={onPointerMove}
@@ -140,28 +162,15 @@ export function SpatialDotBadge({ className }: Props) {
           DOTS.slice(2, 4),
         ].map((row, rowIndex) => (
           <div key={rowIndex} className="flex w-full shrink-0 items-center gap-4">
-            {row.map((dot) => {
-              const px = hovering ? parallax.x * dot.depth : 0;
-              const py = hovering ? parallax.y * dot.depth : 0;
-              return (
-                <motion.span
-                  key={dot.id}
-                  className="block size-4 shrink-0"
-                  style={{ z: dot.depth * 40 }}
-                  animate={{ x: px, y: py }}
-                  transition={{ type: "spring", stiffness: 420, damping: 28 }}
-                >
-                  <img
-                    src={dot.src}
-                    alt=""
-                    width={16}
-                    height={16}
-                    draggable={false}
-                    className="block"
-                  />
-                </motion.span>
-              );
-            })}
+            {row.map((dot) => (
+              <Dot
+                key={dot.id}
+                src={dot.src}
+                depth={dot.depth}
+                shiftX={shiftX}
+                shiftY={shiftY}
+              />
+            ))}
           </div>
         ))}
       </div>

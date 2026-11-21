@@ -112,6 +112,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     ],
     scripts: [
       {
+        // Land on the hero before the browser paints a restored or hashed #work position.
+        children:
+          '(function(){try{history.scrollRestoration="manual"}catch(e){}if(location.hash==="#work"){history.replaceState(null,"",location.pathname+location.search)}scrollTo(0,0)})();',
+      },
+      {
         // Puts the personal mark back if a sync swaps the tab icon for Lovable's heart.
         children:
           '(function(){var SVG="/favicon.svg",PNG="/favicon-32.png",APPLE="/apple-touch-icon.png";function lock(){var links=document.querySelectorAll(\'link[rel*="icon"]\'),saw=false;for(var i=0;i<links.length;i++){var link=links[i],rel=(link.getAttribute("rel")||"").toLowerCase(),href=link.getAttribute("href")||"";if(rel.indexOf("apple")!==-1){if(href!==APPLE)link.setAttribute("href",APPLE);continue}if(href===SVG){saw=true;continue}if(href===PNG)continue;link.setAttribute("rel","icon");link.setAttribute("type","image/svg+xml");if(link.getAttribute("href")!==SVG)link.setAttribute("href",SVG);saw=true}if(!saw){var icon=document.createElement("link");icon.rel="icon";icon.type="image/svg+xml";icon.href=SVG;document.head.appendChild(icon)}}lock();new MutationObserver(lock).observe(document.head,{childList:true,subtree:true,attributes:true,attributeFilter:["href","rel"]})})();',

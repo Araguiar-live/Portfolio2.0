@@ -2,6 +2,7 @@ import { AnimatePresence, motion, type MotionValue } from "framer-motion";
 import { ArrowUpRight, ChevronLeft, ChevronRight } from "lucide-react";
 import {
   forwardRef,
+  Suspense,
   useEffect,
   useLayoutEffect,
   useRef,
@@ -119,6 +120,7 @@ function FolderMark({ slug }: { slug: string }) {
       width={width}
       height={height}
       className="pointer-events-none relative z-20 max-w-none opacity-[0.448]"
+      decoding="async"
       style={{ width, height }}
     />
   );
@@ -576,19 +578,21 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
                         ? "mx-auto flex w-full min-w-0 max-w-full items-start justify-center"
                         : "ml-auto flex w-full min-w-0 max-w-full items-start justify-end overflow-visible"}>
                         {tabContent.customBody ? (
-                          typeof tabContent.customBody === "function"
-                            ? tabContent.customBody({
-                                onNextTab: () => {
-                                  const i = tabs.indexOf(activeTab);
-                                  setActiveTab(tabs[(i + 1) % tabs.length]);
-                                },
-                                onPrevTab: () => {
-                                  const i = tabs.indexOf(activeTab);
-                                  setActiveTab(tabs[(i - 1 + tabs.length) % tabs.length]);
-                                },
-                                goToTab: (tab) => setActiveTab(tab),
-                              })
-                            : tabContent.customBody
+                          <Suspense fallback={<div className="min-h-[420px] w-full" />}>
+                            {typeof tabContent.customBody === "function"
+                              ? tabContent.customBody({
+                                  onNextTab: () => {
+                                    const i = tabs.indexOf(activeTab);
+                                    setActiveTab(tabs[(i + 1) % tabs.length]);
+                                  },
+                                  onPrevTab: () => {
+                                    const i = tabs.indexOf(activeTab);
+                                    setActiveTab(tabs[(i - 1 + tabs.length) % tabs.length]);
+                                  },
+                                  goToTab: (tab) => setActiveTab(tab),
+                                })
+                              : tabContent.customBody}
+                          </Suspense>
                         ) : (
                           <MockupGradientRing className="aspect-[4/5] h-[874px] max-h-[874px] w-auto max-w-full overflow-hidden rounded-3xl">
                             <div className="absolute inset-[1px] z-[1] flex items-center justify-center overflow-hidden rounded-[23px]">

@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { motion, useAnimationControls, useInView, useReducedMotion } from "framer-motion";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react";
 import girlPleaseLogo from "@/assets/girl-please.svg";
 import designToggleKnob from "@/assets/portfolio/design-toggle-knob.svg";
 import { ProjectBentoStack, type Project } from "@/components/portfolio/ProjectAccordion";
@@ -8,18 +8,47 @@ import { Dock } from "@/components/portfolio/Dock";
 import { ProjectDock } from "@/components/portfolio/ProjectDock";
 import { Marquee } from "@/components/portfolio/Marquee";
 import { Footer } from "@/components/portfolio/Footer";
-import { OdicciWorkspacePicker } from "@/components/portfolio/OdicciWorkspacePicker";
-import { OdicciColourPalette } from "@/components/portfolio/OdicciColourPalette";
-import { OdicciSignUp } from "@/components/portfolio/OdicciSignUp";
-import { OdicciTemplateLibrary } from "@/components/portfolio/OdicciTemplateLibrary";
 import { Sidebar, SIDEBAR_PANEL_ID } from "@/components/portfolio/Sidebar";
-import { CrcleMessaging } from "@/components/portfolio/CrcleMessaging";
-import { CrcleProfile } from "@/components/portfolio/CrcleProfile";
-import { CrcleRadar } from "@/components/portfolio/CrcleRadar";
-import { CrcleSignalHome } from "@/components/portfolio/CrcleSignalHome";
-import { FoodForThought } from "@/components/portfolio/FoodForThought";
 import { WireframeStage } from "@/components/portfolio/SiteWireframe";
-import { FirstDesignInspector } from "@/components/portfolio/firstDesign/FirstDesignInspector";
+
+const CrcleSignalHome = lazy(() =>
+  import("@/components/portfolio/CrcleSignalHome").then((m) => ({ default: m.CrcleSignalHome })),
+);
+const CrcleRadar = lazy(() =>
+  import("@/components/portfolio/CrcleRadar").then((m) => ({ default: m.CrcleRadar })),
+);
+const CrcleMessaging = lazy(() =>
+  import("@/components/portfolio/CrcleMessaging").then((m) => ({ default: m.CrcleMessaging })),
+);
+const CrcleProfile = lazy(() =>
+  import("@/components/portfolio/CrcleProfile").then((m) => ({ default: m.CrcleProfile })),
+);
+const FirstDesignInspector = lazy(() =>
+  import("@/components/portfolio/firstDesign/FirstDesignInspector").then((m) => ({
+    default: m.FirstDesignInspector,
+  })),
+);
+const OdicciWorkspacePicker = lazy(() =>
+  import("@/components/portfolio/OdicciWorkspacePicker").then((m) => ({
+    default: m.OdicciWorkspacePicker,
+  })),
+);
+const OdicciColourPalette = lazy(() =>
+  import("@/components/portfolio/OdicciColourPalette").then((m) => ({
+    default: m.OdicciColourPalette,
+  })),
+);
+const OdicciSignUp = lazy(() =>
+  import("@/components/portfolio/OdicciSignUp").then((m) => ({ default: m.OdicciSignUp })),
+);
+const OdicciTemplateLibrary = lazy(() =>
+  import("@/components/portfolio/OdicciTemplateLibrary").then((m) => ({
+    default: m.OdicciTemplateLibrary,
+  })),
+);
+const FoodForThought = lazy(() =>
+  import("@/components/portfolio/FoodForThought").then((m) => ({ default: m.FoodForThought })),
+);
 import { InteractiveHero } from "@/components/portfolio/InteractiveHero";
 import { SpatialDotBadge } from "@/components/portfolio/SpatialDotBadge";
 import { AiPlaygroundFolder } from "@/components/portfolio/AiPlaygroundFolder";
@@ -385,7 +414,11 @@ function Index() {
             Contact Me
           </a>
         </div>
-        {showChrome ? <FoodForThought className="hidden md:block" /> : null}
+        {showChrome ? (
+          <Suspense fallback={null}>
+            <FoodForThought className="hidden md:block" />
+          </Suspense>
+        ) : null}
       </div>
 
       {/*
@@ -476,7 +509,7 @@ function Index() {
         <div className="relative z-20 h-[30px] w-full shrink-0 bg-[#f3f4f6]" aria-hidden />
 
         {/* Marquee + footer — continuous black plane under the bento strip */}
-        <div className="relative z-20 bg-black max-sm:bg-[var(--portfolio-bottom-surface,#0a0d11)]">
+        <div className="relative z-20 bg-black [content-visibility:auto] [contain-intrinsic-size:auto_720px] max-sm:bg-[var(--portfolio-bottom-surface,#0a0d11)]">
           <Marquee />
           <Footer onSelectProject={handleDockSelect} onOpenSidebar={() => setSidebarOpen(true)} />
         </div>
@@ -604,16 +637,16 @@ function DesignToggle({ on, onToggle }: { on: boolean; onToggle: () => void }) {
         className="relative w-full cursor-pointer rounded-[64px] border p-1 backdrop-blur-[4px]"
         style={{ borderColor: border, backgroundImage: gradient }}
       >
-        <motion.div animate={flipControls} className="relative block h-8 w-full">
+        <motion.div animate={flipControls} className="@container relative block h-8 w-full">
           <motion.img
             src={designToggleKnob}
             alt=""
             width={32}
             height={32}
-            className="absolute top-0 size-8 drop-shadow-sm"
+            className="absolute top-0 left-0 size-8"
             initial={false}
             animate={{
-              left: on ? "calc(100% - 32px)" : 0,
+              x: on ? "calc(100cqw - 32px)" : 0,
               rotate: on ? 180 : 0,
               scale: on ? 1.05 : 1,
             }}

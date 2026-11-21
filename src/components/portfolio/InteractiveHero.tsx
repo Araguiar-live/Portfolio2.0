@@ -10,8 +10,8 @@ const LEDE =
 const COLS = 14;
 const GRID_PAD = 2;
 const GRID_GAP = 2;
-/** Enough DOM cells for the pre-canvas fallback grid on tall viewports. */
-const FALLBACK_CELLS = COLS * 48;
+/** Fallback cells for one tall screen. The canvas replaces this grid on the first frame. */
+const FALLBACK_CELLS = COLS * 18;
 const BG = "#090e15";
 const MOBILE_MAX_W = 768;
 /** Below this width the grid switches to ~64px tiles instead of a fixed 14 columns. */
@@ -177,22 +177,27 @@ export function InteractiveHero({ onEnterWork }: { onEnterWork?: () => void }) {
       sprites.set(radius, { canvas: sprite, css: size });
     };
 
-    const writeVars = (cursorBlur: number) => {
+    let lastVars = "";
+    const writeVars = () => {
+      const shiftX = pointer.active ? (lensX / Math.max(width, 1) - 0.5) * 14 : 0;
+      const shiftY = pointer.active ? (lensY / Math.max(height, 1) - 0.5) * 10 : 0;
+      const next = `${lensX.toFixed(1)}|${lensY.toFixed(1)}|${pointer.active ? 1 : 0}|${shiftX.toFixed(1)}|${shiftY.toFixed(1)}`;
+      if (next === lastVars) return;
+      lastVars = next;
       host.style.setProperty("--hero-lens-x", `${lensX}px`);
       host.style.setProperty("--hero-lens-y", `${lensY}px`);
-      host.style.setProperty("--hero-cursor-blur", `${cursorBlur}px`);
       host.style.setProperty("--hero-cursor-active", pointer.active ? "1" : "0");
-      const shiftX = pointer.active ? (lensX / width - 0.5) * 14 : 0;
-      const shiftY = pointer.active ? (lensY / height - 0.5) * 10 : 0;
       host.style.setProperty("--hero-frost-shift-x", `${shiftX}px`);
       host.style.setProperty("--hero-frost-shift-y", `${shiftY}px`);
     };
 
     const updateScroll = () => {
       const rect = host.getBoundingClientRect();
+      hostRect = rect;
       const progress = clamp(-rect.top / Math.max(rect.height, 1), 0, 1);
+      if (progress === scrollProgressRef.current) return;
       scrollProgressRef.current = progress;
-      host.style.setProperty("--hero-scroll", String(progress));
+      host.style.setProperty("--hero-scroll", progress.toFixed(3));
     };
 
     const buildCells = () => {
@@ -248,7 +253,7 @@ export function InteractiveHero({ onEnterWork }: { onEnterWork?: () => void }) {
         lensX += (width * 0.5 - lensX) * 0.04;
         lensY += (height * 0.5 - lensY) * 0.04;
       }
-      writeVars(interactive ? 14 : 0);
+      writeVars();
 
       ctx.clearRect(0, 0, width, height);
       ctx.fillStyle = BG;
@@ -402,8 +407,7 @@ export function InteractiveHero({ onEnterWork }: { onEnterWork?: () => void }) {
 
       if (scroll > 0) {
         ctx.save();
-        ctx.filter = `blur(${scroll * 4}px)`;
-        ctx.globalAlpha = 0.35;
+        ctx.globalAlpha = 0.28 * scroll;
         ctx.fillStyle = BG;
         ctx.fillRect(0, 0, width, height);
         ctx.restore();
@@ -511,10 +515,15 @@ export function InteractiveHero({ onEnterWork }: { onEnterWork?: () => void }) {
       wake();
     };
 
+    let scrollQueued = false;
     const onScroll = () => {
-      updateScroll();
-      hostRect = host.getBoundingClientRect();
-      wake();
+      if (scrollQueued) return;
+      scrollQueued = true;
+      requestAnimationFrame(() => {
+        scrollQueued = false;
+        updateScroll();
+        wake();
+      });
     };
 
     const io = new IntersectionObserver(([entry]) => {
@@ -581,9 +590,8 @@ export function InteractiveHero({ onEnterWork }: { onEnterWork?: () => void }) {
           backgroundColor: BG,
           color: "#ffffff",
           "--hero-scroll": 0,
-          "--hero-lens-x": "50%",
-          "--hero-lens-y": "50%",
-          "--hero-cursor-blur": "0px",
+          "--hero-lens-x": "50vw",
+          "--hero-lens-y": "42vh",
           "--hero-cursor-active": 0,
         } as CSSProperties
       }
@@ -604,7 +612,7 @@ export function InteractiveHero({ onEnterWork }: { onEnterWork?: () => void }) {
       />
       <div
         aria-hidden
-        className="interactive-hero__frost pointer-events-none absolute inset-0 z-[3] bg-[rgba(255,255,255,0.03)] backdrop-blur-[18px]"
+        className="interactive-hero__frost pointer-events-none absolute inset-0 z-[3] bg-[rgba(255,255,255,0.03)]"
       />
 
       <nav className="pointer-events-none absolute inset-0 z-10 sm:pointer-events-auto sm:relative sm:inset-auto sm:flex sm:w-full sm:items-center sm:justify-between sm:px-9 sm:pt-[139px]">

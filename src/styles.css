@@ -469,21 +469,18 @@ html[data-work-locked] .portfolio-interactive-hero-shell {
 .folder-shell {
   border: none;
   outline: none;
-  transform: translateY(0) rotate(0deg);
-  filter: none;
-  transition:
-    transform 300ms ease-out,
-    filter 300ms ease-out;
+  transform: translate3d(0, 0, 0) rotate(0deg);
+  transition: transform 300ms ease-out;
 }
 
 .folder-shell[data-hovered="true"] {
-  transform: translateY(-10px) rotate(var(--sheet-tilt, 0deg));
+  transform: translate3d(0, -10px, 0) rotate(var(--sheet-tilt, 0deg));
   transform-origin: center bottom;
 }
 
 .folder-shell[data-open="true"],
 .ai-playground-folder:has(.folder-shell[data-open="true"]) .folder-shell {
-  transform: translateY(0) rotate(0deg);
+  transform: translate3d(0, 0, 0) rotate(0deg);
 }
 
 .folder-shell[data-open="true"] {
@@ -491,16 +488,14 @@ html[data-work-locked] .portfolio-interactive-hero-shell {
 }
 
 .ai-playground-folder:has(.playground-pocket:hover) .folder-shell:not([data-raised="true"]) {
-  transform: translateY(-6px) rotate(0deg);
+  transform: translate3d(0, -6px, 0) rotate(0deg);
 }
 
 .folder-face {
   border: none;
   outline: none;
-  background-color: rgba(255, 255, 255, 0.84);
+  background-color: rgba(255, 255, 255, 0.94);
   color: #111111;
-  -webkit-backdrop-filter: blur(26.4px);
-  backdrop-filter: blur(26.4px);
   transition: background-color 260ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
@@ -2279,9 +2274,8 @@ html.dark .thought-body-gradient {
 /* araguiar.design interactive hero — full-viewport canvas grid, lens and frost. */
 .interactive-hero {
   --hero-scroll: 0;
-  --hero-lens-x: 50%;
-  --hero-lens-y: 50%;
-  --hero-cursor-blur: 0px;
+  --hero-lens-x: 50vw;
+  --hero-lens-y: 42vh;
   --hero-cursor-active: 0;
   box-sizing: border-box;
   flex-shrink: 0;
@@ -2404,27 +2398,27 @@ html.dark .thought-body-gradient {
 }
 
 .interactive-hero__liquid-lens {
-  left: var(--hero-lens-x);
-  top: var(--hero-lens-y);
+  left: 0;
+  top: 0;
   width: min(320px, 42vw);
   height: min(320px, 42vw);
   border-radius: 50%;
-  transform: translate(-50%, -50%);
+  transform: translate3d(var(--hero-lens-x), var(--hero-lens-y), 0) translate(-50%, -50%);
   background: radial-gradient(circle at 38% 32%, #ffffff24 0%, #8cc8ff0f 28%, #ff78500a 52%, #0000 72%);
-  -webkit-backdrop-filter: blur(calc(8px + var(--hero-cursor-blur))) saturate(160%) contrast(1.06);
-  backdrop-filter: blur(calc(8px + var(--hero-cursor-blur))) saturate(160%) contrast(1.06);
+  -webkit-backdrop-filter: blur(12px) saturate(160%) contrast(1.06);
+  backdrop-filter: blur(12px) saturate(160%) contrast(1.06);
   opacity: calc(0.35 + var(--hero-cursor-active) * 0.55);
   mix-blend-mode: screen;
-  will-change: left, top, opacity;
+  will-change: transform, opacity;
   -webkit-mask-image: radial-gradient(circle, #000 0% 38%, #0000 72%);
   mask-image: radial-gradient(circle, #000 0% 38%, #0000 72%);
 }
 
 .interactive-hero__frost {
-  -webkit-backdrop-filter: blur(calc(18px + var(--hero-scroll) * 28px + var(--hero-cursor-blur) * 0.45));
-  backdrop-filter: blur(calc(18px + var(--hero-scroll) * 28px + var(--hero-cursor-blur) * 0.45));
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
   opacity: calc(1 - var(--hero-scroll) * 0.35);
-  transform: translate(var(--hero-frost-shift-x, 0px), var(--hero-frost-shift-y, 0px));
+  transform: translate3d(var(--hero-frost-shift-x, 0px), var(--hero-frost-shift-y, 0px), 0);
   transition: transform 0.14s ease-out;
   -webkit-mask-image: radial-gradient(92% 82% at 50% 46%, #000 0%, #000000d1 38%, #0000006b 62%, #0000 100%);
   mask-image: radial-gradient(92% 82% at 50% 46%, #000 0%, #000000d1 38%, #0000006b 62%, #0000 100%);
