@@ -469,7 +469,7 @@ html[data-work-locked] .portfolio-interactive-hero-shell {
 .folder-shell {
   border: none;
   outline: none;
-  transform: translate3d(0, 0, 0) rotate(0deg);
+  transform: none;
   transition: transform 300ms ease-out;
 }
 
@@ -483,8 +483,8 @@ html[data-work-locked] .portfolio-interactive-hero-shell {
   transform: translate3d(0, 0, 0) rotate(0deg);
 }
 
-.folder-shell[data-open="true"] {
-  filter: drop-shadow(0 -4px 14px rgba(0, 0, 0, 0.06));
+.folder-shell[data-open="true"] .folder-face {
+  box-shadow: 0 -4px 14px rgba(0, 0, 0, 0.06);
 }
 
 .ai-playground-folder:has(.playground-pocket:hover) .folder-shell:not([data-raised="true"]) {
@@ -494,13 +494,15 @@ html[data-work-locked] .portfolio-interactive-hero-shell {
 .folder-face {
   border: none;
   outline: none;
-  background-color: rgba(255, 255, 255, 0.94);
+  background-color: rgba(255, 255, 255, 0.52);
   color: #111111;
+  -webkit-backdrop-filter: blur(22px) saturate(160%);
+  backdrop-filter: blur(22px) saturate(160%);
   transition: background-color 260ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .folder-shell[data-raised="true"] .folder-face {
-  background-color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.68);
   color: #111111;
 }
 
