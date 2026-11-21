@@ -69,7 +69,7 @@ function FrontPocket() {
   return (
     <div
       ref={ref}
-      className="playground-pocket relative z-20 ml-[calc(-10%-1.8rem)] flex w-[calc(120%+3.6rem)] items-end justify-between px-6 pb-7 md:px-10"
+      className="playground-pocket relative z-20 -mx-6 flex w-[calc(100%+3rem)] items-end justify-between px-6 pb-7 md:px-10"
       style={{
         height: "var(--pocket-h)",
         marginTop: "calc(var(--pocket-overlap) * -1)",
