@@ -517,6 +517,11 @@ html[data-work-locked] .portfolio-interactive-hero-shell {
   background-color: #ffffff;
 }
 
+.folder-shell[data-open="true"] .folder-face,
+.ai-playground-folder:has(.folder-shell[data-open="true"]) .folder-face {
+  background-color: #ffffff;
+}
+
 .folder-stroke {
   stroke: rgba(0, 0, 0, 0.12);
   transition: stroke 260ms cubic-bezier(0.22, 1, 0.36, 1);
