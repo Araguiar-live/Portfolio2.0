@@ -1,6 +1,7 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
+import cvHeader from "@/assets/resume/cv-header.png";
 
 /**
  * Resume card opened from the profile control.
@@ -28,7 +29,7 @@ type Role = {
 };
 
 function strong(text: string) {
-  return <strong className="font-semibold text-[#141416]">{text}</strong>;
+  return <strong className="font-bold">{text}</strong>;
 }
 
 const ROLES: Role[] = [
@@ -153,61 +154,50 @@ export function Sidebar({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 12 }}
             transition={{ duration: 0.28, ease: EASE }}
-            className="fixed top-24 right-4 z-[120] flex max-h-[calc(100dvh-7rem)] w-[min(680px,calc(100vw-2rem))] flex-col overflow-y-auto overscroll-contain rounded-[24px] border border-black/8 bg-white shadow-[0_24px_60px_rgba(20,20,22,0.16)] sm:right-8"
+            className="fixed top-24 right-4 z-[120] flex max-h-[calc(100dvh-7rem)] w-[min(680px,calc(100vw-2rem))] flex-col overflow-y-auto overscroll-contain rounded-[16px] bg-white shadow-[0_24px_60px_rgba(20,20,22,0.16)] sm:right-8"
           >
-            <div className="relative overflow-hidden rounded-t-[24px]">
-              <div
-                aria-hidden
-                className="pointer-events-none absolute inset-0 bg-[radial-gradient(120%_90%_at_12%_0%,#ffe4c4_0%,#f6d7ea_38%,#d9e6f5_72%,#f4f1ea_100%)]"
+            <div className="relative -mb-9 overflow-hidden rounded-t-[16px] px-4 pt-4 pb-[46px]">
+              <img
+                src={cvHeader}
+                alt=""
+                className="pointer-events-none absolute inset-0 size-full object-cover"
               />
-              <div className="relative bg-white/72 px-5 pt-5 pb-4 backdrop-blur-[20px] sm:px-6">
-                <div className="flex items-start justify-between gap-3">
-                  <h2 className="text-[36px] leading-[1.2] font-normal tracking-[-0.03em] text-[#141416]">
-                    Resume
-                  </h2>
-                  <div className="flex shrink-0 items-center gap-2">
-                    <span className="inline-flex items-center gap-2 rounded-full border border-white/80 bg-white/80 px-3 py-1 text-[13px] text-[#141416] shadow-sm backdrop-blur-md">
-                      <span className="size-[11px] rounded-full bg-[#0fc972]" aria-hidden />
-                      available
-                    </span>
-                    <a
-                      href={RESUME_HREF}
-                      download="Ana-Rafaela Aguiar - Product Designer Resume.pdf"
-                      className="inline-flex h-8 items-center rounded-full border border-black/8 bg-white/80 px-3 text-[12px] font-medium text-[#141416] backdrop-blur-md hover:bg-white"
-                    >
-                      Download PDF
-                    </a>
-                    <button
-                      type="button"
-                      onClick={() => onOpenChange(false)}
-                      aria-label="Close resume"
-                      className="grid size-8 cursor-pointer place-items-center rounded-full border border-black/8 bg-white/80 text-[#141416] backdrop-blur-md hover:bg-white"
-                    >
-                      <X className="size-4" strokeWidth={1.75} />
-                    </button>
-                  </div>
+              <div className="relative flex items-start justify-between gap-3">
+                <h2 className="text-[36px] leading-[1.2] font-normal text-white">Resume</h2>
+                <div className="flex shrink-0 items-center gap-2">
+                  <span className="inline-flex items-center gap-4 rounded-[24px] bg-white px-4 py-1 text-[20px] leading-[1.2] text-[#02031d]">
+                    <span className="size-[11px] rounded-full bg-[#0fc972]" aria-hidden />
+                    available
+                  </span>
+                  <a
+                    href={RESUME_HREF}
+                    download="Ana-Rafaela Aguiar - Product Designer Resume.pdf"
+                    className="inline-flex h-8 items-center rounded-full bg-white/90 px-3 text-[12px] font-medium text-[#02031d] hover:bg-white"
+                  >
+                    Download PDF
+                  </a>
+                  <button
+                    type="button"
+                    onClick={() => onOpenChange(false)}
+                    aria-label="Close resume"
+                    className="grid size-8 cursor-pointer place-items-center rounded-full bg-white/90 text-[#02031d] hover:bg-white"
+                  >
+                    <X className="size-4" strokeWidth={1.75} />
+                  </button>
                 </div>
+              </div>
 
-                <p className="mt-4 text-[16px] leading-[1.2] font-light text-[#3F3F46]">
-                  Key Impact & Scope:
-                </p>
-                <ul className="mt-3 flex list-disc flex-col gap-3 pl-5">
-                  {role.bullets.map((bullet, index) => (
-                    <li
-                      key={`${role.id}-${index}`}
-                      className="text-[16px] leading-[1.35] text-[#3F3F46]"
-                    >
-                      {bullet}
-                    </li>
-                  ))}
-                </ul>
+              <div className="relative mt-4 flex flex-col gap-4 text-[16px] leading-[1.2] text-white/80">
+                <p className="font-light">Key Impact & Scope:</p>
+                {role.bullets.map((bullet, index) => (
+                  <p key={`${role.id}-${index}`}>{bullet}</p>
+                ))}
               </div>
             </div>
 
-            <div className="flex items-end gap-px bg-[#efeae3] px-2 pt-2">
-              {ROLES.map((item, index) => {
+            <div className="relative flex items-end gap-px">
+              {ROLES.map((item) => {
                 const active = item.id === role.id;
-                const first = index === 0;
                 return (
                   <button
                     key={item.id}
@@ -216,41 +206,39 @@ export function Sidebar({
                     aria-pressed={active}
                     className={
                       active
-                        ? `relative z-10 -mb-px flex min-w-0 flex-1 items-center justify-center gap-2 border border-black/8 border-b-white bg-white px-2 py-2 text-[#141416] ${
-                            first ? "rounded-tr-[16px] rounded-tl-none" : "rounded-t-[16px]"
-                          }`
-                        : "mb-px flex min-w-0 flex-1 items-center justify-center gap-2 rounded-t-[12px] bg-white/45 px-2 py-2 text-[#71717A]"
+                        ? "relative z-10 -mb-px flex min-w-0 flex-1 items-center gap-4 rounded-t-[16px] border border-b-white border-[#a8a8ab] bg-white px-3 py-2 text-left"
+                        : "flex min-w-0 flex-1 items-center gap-4 rounded-t-[16px] border-b border-[#a8a8ab] bg-white px-3 py-2 text-left"
                     }
                   >
-                    <span className="text-[13px] tabular-nums sm:text-[16px]">{item.index}</span>
-                    <span className="truncate text-[13px] sm:text-[16px]">{item.name}</span>
+                    <span className="text-[16px] leading-[1.2] text-[#a8a8ab]">{item.index}</span>
+                    <span className="min-w-0 flex-1 truncate text-[16px] leading-[1.2] text-[#02031d]">
+                      {item.name}
+                    </span>
                   </button>
                 );
               })}
             </div>
 
-            <div className="bg-white px-5 py-4 sm:px-6">
-              <p className="text-[16px] leading-[1.2] text-[#3F3F46]">{role.meta}</p>
-              <p className="mt-2 text-[22px] leading-[1.25] tracking-[-0.02em] text-[#141416] sm:text-[24px]">
-                {role.summary}
-              </p>
+            <div className="flex flex-col gap-2 border-x border-[#a8a8ab] bg-white p-4 text-[#a8a8ab]">
+              <p className="text-[16px] leading-[1.2] font-light">{role.meta}</p>
+              <p className="text-[24px] leading-[1.2] font-normal">{role.summary}</p>
             </div>
 
-            <footer className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 rounded-b-[24px] border-t border-black/8 bg-white px-5 py-3 text-[13px] text-[#3F3F46] sm:px-6">
+            <footer className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 rounded-b-[16px] border-x border-b border-[#a8a8ab] bg-white px-4 py-3 text-[13px] leading-[1.2] text-[#a8a8ab]">
               <p>BA (Hons) Industrial Design & Technology · Loughborough University</p>
               <nav className="flex items-center gap-3" aria-label="Contact">
-                <a className="text-[#141416] underline-offset-2 hover:underline" href={`mailto:${EMAIL}`}>
+                <a className="text-[#02031d] underline-offset-2 hover:underline" href={`mailto:${EMAIL}`}>
                   Email
                 </a>
                 <a
-                  className="text-[#141416] underline-offset-2 hover:underline"
+                  className="text-[#02031d] underline-offset-2 hover:underline"
                   href={LINKEDIN}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
                   LinkedIn
                 </a>
-                <a className="text-[#141416] underline-offset-2 hover:underline" href={PHONE_HREF}>
+                <a className="text-[#02031d] underline-offset-2 hover:underline" href={PHONE_HREF}>
                   {PHONE_LABEL}
                 </a>
               </nav>
