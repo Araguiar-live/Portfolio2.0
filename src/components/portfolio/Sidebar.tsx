@@ -1,6 +1,7 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
+import cvHeader from "@/assets/resume/cv-header.png";
 
 /**
  * Centered resume modal. A white sheet, a pill switcher for the four roles,
@@ -191,11 +192,18 @@ export function Sidebar({
                       aria-pressed={active}
                       className={
                         active
-                          ? "min-w-max flex-1 cursor-pointer rounded-[8px] bg-white px-3 py-2 text-center text-[13px] whitespace-nowrap text-[#111113] shadow-[0_1px_2px_rgba(17,17,19,0.08)]"
+                          ? "relative min-w-max flex-1 cursor-pointer overflow-hidden rounded-[8px] px-3 py-2 text-center text-[13px] whitespace-nowrap text-white"
                           : "min-w-max flex-1 cursor-pointer rounded-[8px] px-3 py-2 text-center text-[13px] whitespace-nowrap text-[#71717A]"
                       }
                     >
-                      {item.index} {item.name}
+                      {active ? (
+                        <img
+                          src={cvHeader}
+                          alt=""
+                          className="pointer-events-none absolute inset-0 size-full object-cover"
+                        />
+                      ) : null}
+                      <span className="relative">{item.index} {item.name}</span>
                     </button>
                   );
                 })}
