@@ -412,7 +412,7 @@ export function WireframeStage({
         </div>
       )}
       {decorations ? (
-        <div className="pointer-events-none absolute inset-x-0 top-0 z-20 aspect-[1262/847] overflow-visible max-md:inset-0 max-md:aspect-auto">
+        <div className="pointer-events-none absolute inset-x-0 top-0 z-[1] aspect-[1262/847] overflow-visible max-md:inset-0 max-md:aspect-auto">
           {decorations}
         </div>
       ) : null}
