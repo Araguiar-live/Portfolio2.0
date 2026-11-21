@@ -550,18 +550,25 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
                   <div className={project.slug === "odicci"
                     ? "grid w-full min-w-0 grid-cols-1 items-start gap-8 lg:grid-cols-2"
                     : project.slug === "first-design"
-                    ? "grid h-full min-h-0 w-full min-w-0 grid-cols-1 items-start gap-3 overflow-x-clip lg:grid-cols-[0.98fr_0.8fr_1.32fr]"
+                    ? "grid h-full min-h-0 w-full min-w-0 grid-cols-1 items-start gap-3 overflow-x-clip lg:grid-cols-[minmax(0,0.98fr)_minmax(0,2.12fr)]"
                     : isEditorial(project.slug)
                     ? "grid h-full min-h-0 w-full min-w-0 grid-cols-1 items-start gap-3 overflow-x-clip lg:grid-cols-[1.1fr_0.9fr_1.1fr]"
                     : "grid w-full min-w-0 grid-cols-1 items-start gap-8 overflow-x-clip lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] lg:gap-8"}>
-                    {isEditorial(project.slug) ? (
-                      <EditorialNarrative copy={editorialCopy(project, activeTab, tabContent)} dense={project.slug === "first-design"} />
+                    {project.slug === "first-design" ? (
+                      <div className="flex min-h-0 min-w-0 flex-col gap-6">
+                        <EditorialNarrative copy={editorialCopy(project, activeTab, tabContent)} dense />
+                        <EditorialSpecs copy={editorialCopy(project, activeTab, tabContent)} dense />
+                      </div>
+                    ) : isEditorial(project.slug) ? (
+                      <EditorialNarrative copy={editorialCopy(project, activeTab, tabContent)} />
                     ) : (
                     <div className="flex max-h-[874px] min-h-0 min-w-0 flex-col overflow-x-hidden overflow-y-auto overscroll-contain">
                       <CaseStudyCopy project={project} tab={activeTab} content={tabContent} />
                     </div>
                     )}
-                    {isEditorial(project.slug) ? <EditorialSpecs copy={editorialCopy(project, activeTab, tabContent)} dense={project.slug === "first-design"} /> : null}
+                    {isEditorial(project.slug) && project.slug !== "first-design" ? (
+                      <EditorialSpecs copy={editorialCopy(project, activeTab, tabContent)} />
+                    ) : null}
 
                     <div className={project.slug === "odicci"
                       ? "flex w-full justify-center lg:col-span-2"
