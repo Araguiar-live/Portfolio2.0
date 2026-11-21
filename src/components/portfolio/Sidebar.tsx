@@ -140,7 +140,7 @@ export function Sidebar({
             exit={{ opacity: 0 }}
             transition={{ duration: 0.22, ease: EASE }}
             onClick={() => onOpenChange(false)}
-            className="fixed inset-0 z-[100] cursor-default border-0 bg-white/75 backdrop-blur-[16px]"
+            className="fixed inset-0 z-[100] cursor-default border-0 bg-white/40 backdrop-blur-[16px]"
           />
 
           <div className="pointer-events-none fixed inset-0 z-[120] flex items-center justify-center p-4">
