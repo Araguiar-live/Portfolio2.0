@@ -366,7 +366,15 @@ function BrowserPlate() {
  * Open: height follows accordion content; bottom seam to marquee is a sibling
  * 2px spacer in index (not padding here — padding was visually collapsing).
  */
-export function WireframeStage({ expanded, children }: { expanded: boolean; children: ReactNode }) {
+export function WireframeStage({
+  expanded,
+  decorations,
+  children,
+}: {
+  expanded: boolean;
+  decorations?: ReactNode;
+  children: ReactNode;
+}) {
   return (
     <div
       className={
@@ -403,6 +411,11 @@ export function WireframeStage({ expanded, children }: { expanded: boolean; chil
           {children}
         </div>
       )}
+      {decorations ? (
+        <div className="pointer-events-none absolute inset-x-0 top-0 z-20 aspect-[1262/847] overflow-visible max-md:inset-0 max-md:aspect-auto">
+          {decorations}
+        </div>
+      ) : null}
     </div>
   );
 }

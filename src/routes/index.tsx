@@ -342,6 +342,56 @@ function BouncyHeadline() {
   );
 }
 
+/**
+ * Calculator, color badge, and mouse stay in the closed stage frame.
+ * Opening a folder grows the sheet below them and does not move these props.
+ */
+function WorkStageDecorations() {
+  return (
+    <div className="@container pointer-events-none absolute left-1/2 top-[calc(50%-76px)] flex h-[min(874px,92%)] w-[min(2400px,calc(100%-32px))] -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-[40px] overflow-visible max-md:relative max-md:left-auto max-md:top-auto max-md:mx-auto max-md:h-auto max-md:min-h-[100dvh] max-md:w-[min(350px,calc(100%-32px))] max-md:translate-x-0 max-md:translate-y-0 max-md:gap-8 max-md:px-1 max-md:pb-28 max-md:pt-14 max-sm:gap-[37px] max-sm:pb-32 max-sm:pt-[68px]">
+      <header
+        aria-hidden
+        className="invisible flex w-full max-w-[720px] shrink-0 flex-col items-center gap-5 text-center max-md:mt-3 max-md:gap-4 max-sm:mt-3 max-sm:gap-4"
+      >
+        <p className="text-[11px] font-bold uppercase tracking-[2px] max-md:text-[9px] max-md:tracking-[1.5px] max-sm:tracking-normal">
+          Selected Work • Portfolio
+        </p>
+        <div className="flex items-end justify-center gap-[15px] max-md:gap-2.5 max-sm:gap-2.5">
+          <div className="hidden w-[87px] shrink-0 pb-2.5 sm:block" />
+          <BouncyHeadline />
+          <div className="w-[87px] shrink-0 pb-2.5 max-md:scale-[0.77] max-sm:pb-[3px]" />
+        </div>
+        <p className="max-w-[580px] text-[14px] leading-[22px] max-md:max-w-[277px] max-md:text-[12px] max-md:leading-[19px] max-sm:max-w-[277px]">
+          <span className="sm:hidden">
+            Small screen? Big FOMO. This portfolio is best on desktop—where the interactive
+            prototypes come out to play.
+          </span>
+          <span className="hidden sm:inline">
+            Multidisciplinary, self-sufficient designer. I build complex B2B platforms, design
+            systems, and code-backed prototypes from zero to one.
+          </span>
+        </p>
+      </header>
+      <div className="relative w-full shrink-0 overflow-visible md:-mt-10 max-md:pt-14 max-md:pb-10">
+        <div className="pointer-events-none absolute inset-0 z-[5] overflow-visible max-md:-top-14 max-md:bottom-0">
+          <div className="portfolio-mobile-deco-calculator absolute left-0 top-0 hidden -translate-y-1/2 max-md:-bottom-4 max-md:-left-3 max-md:top-auto max-md:block max-md:origin-bottom-left max-md:scale-[0.715] max-md:translate-x-0 max-md:translate-y-0 max-md:[--deco-scale:0.72] md:block md:translate-x-[max(-50%,calc(16px-50vw+50cqw))]">
+            <div
+              className="pointer-events-auto absolute right-0 z-0"
+              style={{ top: -36, transform: "translateX(62%)" }}
+            >
+              <SpatialDotBadge />
+            </div>
+            <CalculatorCard />
+          </div>
+          <div className="absolute right-4 top-4 hidden -translate-y-[70px] max-md:-right-1 max-md:top-[6px] max-md:bottom-auto max-md:block max-md:origin-top-right max-md:scale-80 max-md:translate-y-0 max-md:[--deco-scale:0.85] md:block">
+            <PeekMouse />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function Index() {
   const [openSlug, setOpenSlug] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -432,7 +482,7 @@ function Index() {
         id="work"
         className="relative z-10 scroll-mt-0 overflow-x-hidden max-md:relative max-md:z-[1] max-md:w-full max-md:max-w-[100vw] max-md:isolate max-md:bg-[#f3f4f6]"
       >
-        <WireframeStage expanded={isExpanded}>
+        <WireframeStage expanded={isExpanded} decorations={<WorkStageDecorations />}>
           <div
             className={
               isExpanded
@@ -471,20 +521,6 @@ function Index() {
             </header>
 
             <div className="relative w-full shrink-0 overflow-visible md:-mt-10 max-md:pt-14 max-md:pb-10">
-              <div className="pointer-events-none absolute inset-0 z-[5] overflow-visible max-md:-top-14 max-md:bottom-0">
-                <div className="portfolio-mobile-deco-calculator absolute left-0 top-0 hidden -translate-y-1/2 max-md:-bottom-4 max-md:-left-3 max-md:top-auto max-md:block max-md:origin-bottom-left max-md:scale-[0.715] max-md:translate-x-0 max-md:translate-y-0 max-md:[--deco-scale:0.72] md:block md:translate-x-[max(-50%,calc(16px-50vw+50cqw))]">
-                  <div
-                    className="pointer-events-auto absolute right-0 z-0"
-                    style={{ top: -36, transform: "translateX(62%)" }}
-                  >
-                    <SpatialDotBadge />
-                  </div>
-                  <CalculatorCard />
-                </div>
-                <div className="absolute right-4 top-4 hidden -translate-y-[70px] max-md:-right-1 max-md:top-[6px] max-md:bottom-auto max-md:block max-md:origin-top-right max-md:scale-80 max-md:translate-y-0 max-md:[--deco-scale:0.85] md:block">
-                  <PeekMouse />
-                </div>
-              </div>
               <AiPlaygroundFolder>
                 <ProjectBentoStack
                   projects={PROJECTS}
