@@ -221,7 +221,7 @@ export function Sidebar({
 
             <div className="flex flex-col gap-2 border-x border-[#a8a8ab] bg-white p-4 text-[#a8a8ab]">
               <p className="text-[16px] leading-[1.2] font-light">{role.meta}</p>
-              <p className="text-[24px] leading-[1.2] font-normal">{role.summary}</p>
+              <p className="text-[16px] leading-[1.2] font-normal">{role.summary}</p>
             </div>
 
             <footer className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 rounded-b-[16px] border-x border-b border-[#a8a8ab] bg-white px-4 py-3 text-[13px] leading-[1.2] text-[#a8a8ab]">
