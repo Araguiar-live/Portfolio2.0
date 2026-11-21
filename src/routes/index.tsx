@@ -521,7 +521,7 @@ function Index() {
             </header>
 
             <div
-              className={`relative mx-auto w-4/5 shrink-0 overflow-visible max-md:pt-14 max-md:pb-10 ${
+              className={`relative mx-auto w-[92%] shrink-0 overflow-visible max-md:pt-14 max-md:pb-10 ${
                 isExpanded ? "" : "md:mt-[122px]"
               }`}
             >
