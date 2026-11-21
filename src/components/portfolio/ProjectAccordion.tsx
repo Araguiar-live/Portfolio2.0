@@ -780,7 +780,7 @@ function EditorialSpecs({ copy, dense = false }: { copy: CrcleBentoCopy; dense?:
       {rows.map((row) => (
         <article key={row.label} className="flex flex-col gap-1">
           <div className="flex items-center gap-2">
-            <span className="spec-icon inline-flex size-[14px] shrink-0 opacity-[0.55]">
+            <span className="spec-icon inline-flex size-[14px] shrink-0">
               <img src={row.icon} alt="" width={14} height={14} className="size-[14px] max-w-none" />
             </span>
             <span className={`${dense ? "text-[13px]" : "text-[14.95px]"} font-normal tracking-normal text-[#737373]`}>{row.label}</span>
