@@ -371,6 +371,7 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
       data-raised={raised ? "true" : "false"}
       data-open={isOpen ? "true" : "false"}
       data-hovered={!isOpen && hovered ? "true" : "false"}
+      data-slug={project.slug}
       className="folder-shell pointer-events-none relative border-0 outline-none"
       style={
         {

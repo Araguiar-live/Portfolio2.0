@@ -506,6 +506,17 @@ html[data-work-locked] .portfolio-interactive-hero-shell {
   color: #111111;
 }
 
+/* Bending Spoons and Odicci sheets: 40% more opaque than the shared 0.624 frost. */
+.folder-shell[data-slug="first-design"] .folder-face,
+.folder-shell[data-slug="odicci"] .folder-face {
+  background-color: rgba(255, 255, 255, 0.874);
+}
+
+.folder-shell[data-slug="first-design"][data-raised="true"] .folder-face,
+.folder-shell[data-slug="odicci"][data-raised="true"] .folder-face {
+  background-color: #ffffff;
+}
+
 .folder-stroke {
   stroke: rgba(0, 0, 0, 0.1);
   transition: stroke 260ms cubic-bezier(0.22, 1, 0.36, 1);
