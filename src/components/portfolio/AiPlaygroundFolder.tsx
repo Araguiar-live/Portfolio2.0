@@ -13,10 +13,12 @@ export function AiPlaygroundFolder({ children }: { children: ReactNode }) {
       <div className="relative z-10 px-6">
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-x-0 z-0 rounded-[28px]"
+          className="pointer-events-none absolute z-0 rounded-[28px]"
           style={{
             top: "30%",
             bottom: 0,
+            left: "calc(-4% + 1.62rem)",
+            width: "calc(108% - 3.24rem)",
             background: BACK,
           }}
         />
@@ -69,7 +71,7 @@ function FrontPocket() {
   return (
     <div
       ref={ref}
-      className="playground-pocket relative z-20 -mx-6 flex w-[calc(100%+3rem)] items-end justify-between px-6 pb-7 md:px-10"
+      className="playground-pocket relative z-20 -ml-[4%] flex w-[108%] items-end justify-between px-6 pb-7 md:px-10"
       style={{
         height: "var(--pocket-h)",
         marginTop: "calc(var(--pocket-overlap) * -1)",
