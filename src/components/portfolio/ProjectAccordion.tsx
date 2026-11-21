@@ -550,7 +550,7 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
                   <div className={project.slug === "odicci"
                     ? "grid w-full min-w-0 grid-cols-1 items-start gap-8 lg:grid-cols-2"
                     : project.slug === "first-design"
-                    ? "grid h-full min-h-0 w-full min-w-0 grid-cols-1 items-start gap-3 overflow-x-clip lg:grid-cols-[minmax(0,0.98fr)_minmax(0,2.12fr)]"
+                    ? "grid h-full min-h-0 w-full min-w-0 grid-cols-1 items-start gap-3 overflow-x-clip lg:grid-cols-[0.98fr_2.12fr]"
                     : isEditorial(project.slug)
                     ? "grid h-full min-h-0 w-full min-w-0 grid-cols-1 items-start gap-3 overflow-x-clip lg:grid-cols-[1.1fr_0.9fr_1.1fr]"
                     : "grid w-full min-w-0 grid-cols-1 items-start gap-8 overflow-x-clip lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] lg:gap-8"}>
