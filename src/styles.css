@@ -518,12 +518,12 @@ html[data-work-locked] .portfolio-interactive-hero-shell {
 }
 
 .folder-stroke {
-  stroke: rgba(0, 0, 0, 0.1);
+  stroke: rgba(0, 0, 0, 0.12);
   transition: stroke 260ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .folder-shell[data-raised="true"] .folder-stroke {
-  stroke: rgba(0, 0, 0, 0.28);
+  stroke: rgba(0, 0, 0, 0.336);
 }
 
 .folder-face .folder-title {
