@@ -1,75 +1,104 @@
 import { AnimatePresence, motion } from "framer-motion";
-import {
-  ChevronDown,
-  Github,
-  Linkedin,
-  Mail,
-  Moon,
-  Phone,
-  Sun,
-} from "lucide-react";
+import { X } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
 
 /**
- * Sidebar — right-side flyout styled as an IDE Inspector / Dev Console panel.
- * Trigger lives in Index (top-right logo pill); this only renders the drawer.
+ * Resume card opened from the profile control.
+ * The upper half is frosted glass over a warm glow. The lower half is a
+ * solid white folder whose tab swaps the impact notes and the role summary.
  */
 
-const FONT_MONO =
-  "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace";
+const EMAIL = "A.rafaela.aguiar@outlook.com";
+const PHONE_LABEL = "07931256050";
+const PHONE_HREF = "tel:+447931256050";
+const LINKEDIN = "https://www.linkedin.com/";
+const RESUME_HREF = "/Ana-Rafaela%20Aguiar%20-%20Product%20Designer%20Resume.pdf";
+
 export const SIDEBAR_PANEL_ID = "profile-sidebar-panel";
 
-const CONTACT = {
-  email: "hello@example.com",
-  phone: "+44 0000 000000",
-  linkedin: "https://www.linkedin.com/",
-  github: "https://github.com/",
-} as const;
+const EASE = [0.22, 1, 0.36, 1] as const;
 
-interface Experience {
+type Role = {
   id: string;
-  company: string;
-  role: string;
-  dates: string;
-  summary: string;
+  index: string;
+  name: string;
+  meta: string;
+  summary: ReactNode;
+  bullets: ReactNode[];
+};
+
+function strong(text: string) {
+  return <strong className="font-semibold text-[#141416]">{text}</strong>;
 }
 
-const EXPERIENCE: Experience[] = [
+const ROLES: Role[] = [
   {
-    id: "odicci-pd",
-    company: "Odicci",
-    role: "Product Designer (Sole Designer)",
-    dates: "Feb 2026 – Present",
-    summary:
-      "Leading end-to-end product design across onboarding, brand systems, and core workspace flows.",
-  },
-  {
-    id: "odicci-intern",
-    company: "Odicci",
-    role: "UX/UI Intern",
-    dates: "Aug 2025 – Feb 2026",
-    summary:
-      "Shipped UX/UI across B2B SaaS surfaces and contributed to the design system before promotion.",
+    id: "odicci",
+    index: "01",
+    name: "Odicci",
+    meta: "Aug 2025 – Aug 2026 · Hybrid (Promoted from UX/UI Intern)",
+    summary: (
+      <>
+        Sole product designer across the entire B2B SaaS platform, keeping design delivery{" "}
+        {strong("3 months ahead")} of a 2-person engineering team from discovery through developer
+        handoff.
+      </>
+    ),
+    bullets: [
+      "Redesigned core infrastructure and gamification engines (onboarding, live interactive template libraries, analytics dashboards, API integrations, and conditional prize logic).",
+      <>
+        Rebuilt SSO flows and added strategic loading cues,{" "}
+        {strong("dropping loading-related user complaints to zero")}.
+      </>,
+      "Engineered a tokenised handoff framework (covering UI primitives, spacing, destinations, and ARIA logic) and pre-publishing validation gates to eliminate deployment and engineering errors.",
+    ],
   },
   {
     id: "crcle",
-    company: "CRCLE",
-    role: "Product Designer (Part-time)",
-    dates: "Dec 2025 – Present",
-    summary:
-      "Owning navigation and unified messaging for a live social product under a tight V2 timeline.",
+    index: "02",
+    name: "CRCLE",
+    meta: "Dec 2025 – Present · Remote (Part-Time)",
+    summary: (
+      <>
+        Architected the complete 0-to-1 V1 mobile product from onboarding to engineering handoff in{" "}
+        {strong("3 months")}.
+      </>
+    ),
+    bullets: [
+      'Designed core social discovery and privacy mechanics, including customizable Bento profile grids, the "Locus" calendar-integrated invitation system, and a real-time Incognito Mode.',
+      'Built the "In the Area" live proximity alert framework and the Signal Intercept compatibility vetting drawer.',
+      "Delivered high-fidelity interactive prototypes backed by WCAG-compliant design tokens for seamless developer execution.",
+    ],
   },
   {
     id: "bending-spoons",
-    company: "Bending Spoons",
-    role: "First Design Participant",
-    dates: "June 2026",
+    index: "03",
+    name: "Bending Spoons",
+    meta: "June 2026 · Milan HQ",
+    summary: (
+      <>
+        Selected as {strong("1 of 20")} rising European product designers out of a multi-stage logic
+        and execution screening to build an end-to-end digital product under tight time constraints.
+      </>
+    ),
+    bullets: [
+      "Executed rapid JTBD/use-case mapping and high-fidelity UI/UX prototyping on a complex Bending Spoons product brief with 1:1 mentorship from senior design leads.",
+      "Pitched fully functional interactive prototypes and product strategy directly to senior product executives and engineering stakeholders.",
+    ],
+  },
+  {
+    id: "hybytes",
+    index: "04",
+    name: "Hybytes",
+    meta: "Oct 2024 – Apr 2025 · Remote",
     summary:
-      "Selected for the First Design challenge and retreat among a small European cohort.",
+      "Embedded within an Agile product team to design and test user-centred features across desktop and mobile applications.",
+    bullets: [
+      "Produced wireframes, high-fidelity prototypes, and usability testing syntheses to validate user flows.",
+      "Collaborated directly with engineers in sprint planning and technical reviews to align UI solutions with performance and scalability constraints.",
+    ],
   },
 ];
-
-const EASE = [0.22, 1, 0.36, 1] as const;
 
 export function Sidebar({
   open,
@@ -78,9 +107,8 @@ export function Sidebar({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
-  const [theme, setTheme] = useState<"light" | "dark">("light");
-  const [openId, setOpenId] = useState<string | null>(EXPERIENCE[0]?.id ?? null);
-  const isDark = theme === "dark";
+  const [activeId, setActiveId] = useState(ROLES[0].id);
+  const role = ROLES.find((item) => item.id === activeId) ?? ROLES[0];
 
   useEffect(() => {
     if (!open) return;
@@ -100,295 +128,136 @@ export function Sidebar({
   }, [open, onOpenChange]);
 
   return (
-    <div style={{ fontFamily: FONT_MONO }}>
-      <AnimatePresence>
-        {open && (
-          <>
-            <motion.button
-              type="button"
-              key="sidebar-backdrop"
-              aria-label="Dismiss profile menu"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.22, ease: EASE }}
-              onClick={() => onOpenChange(false)}
-              className="fixed inset-0 z-[100] cursor-default border-0 bg-zinc-950/40 backdrop-blur-[4px]"
-            />
+    <AnimatePresence>
+      {open ? (
+        <>
+          <motion.button
+            type="button"
+            key="sidebar-backdrop"
+            aria-label="Dismiss profile menu"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.22, ease: EASE }}
+            onClick={() => onOpenChange(false)}
+            className="fixed inset-0 z-[100] cursor-default border-0 bg-zinc-950/40 backdrop-blur-[4px]"
+          />
 
-            <motion.aside
-              key="sidebar-panel"
-              id={SIDEBAR_PANEL_ID}
-              role="dialog"
-              aria-modal="true"
-              aria-label="Profile sidebar"
-              initial={{ x: "110%", opacity: 0.85 }}
-              animate={{ x: 0, opacity: 1 }}
-              exit={{ x: "110%", opacity: 0.85 }}
-              transition={{ duration: 0.34, ease: EASE }}
-              className="fixed right-4 top-20 z-[105] flex h-[calc(100vh-6.5rem)] w-[min(300px,calc(100vw-2rem))] flex-col sm:right-6 sm:w-[320px]"
-            >
+          <motion.aside
+            key="sidebar-panel"
+            id={SIDEBAR_PANEL_ID}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Resume"
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 12 }}
+            transition={{ duration: 0.28, ease: EASE }}
+            className="fixed top-24 right-4 z-[120] flex max-h-[calc(100dvh-7rem)] w-[min(680px,calc(100vw-2rem))] flex-col overflow-y-auto overscroll-contain rounded-[24px] border border-black/8 bg-white shadow-[0_24px_60px_rgba(20,20,22,0.16)] sm:right-8"
+          >
+            <div className="relative overflow-hidden rounded-t-[24px]">
               <div
-                className={`flex h-full flex-col overflow-hidden rounded-md border shadow-2xl transition-colors duration-300 ${
-                  isDark
-                    ? "border-white/10 bg-[#0c0e12] text-zinc-100 shadow-black/50"
-                    : "border-zinc-300/80 bg-[#f4f5f7] text-zinc-900 shadow-slate-900/15"
-                }`}
-              >
-                {/* Title bar */}
-                <div
-                  className={`flex shrink-0 items-center justify-between gap-2 border-b px-3 py-2 ${
-                    isDark ? "border-white/10 bg-[#12151b]" : "border-zinc-300/70 bg-[#e8eaee]"
-                  }`}
-                >
-                  <div className="flex min-w-0 items-center gap-2">
-                    <span
-                      className={`font-mono text-[10px] tracking-[0.14em] uppercase ${
-                        isDark ? "text-zinc-500" : "text-zinc-500"
-                      }`}
-                    >
-                      // INSPECTOR
-                    </span>
-                    <span
-                      className={`rounded border px-1.5 py-0.5 font-mono text-[9px] tracking-wider ${
-                        isDark
-                          ? "border-white/10 bg-white/5 text-zinc-400"
-                          : "border-zinc-300 bg-white/70 text-zinc-500"
-                      }`}
-                    >
-                      v1.0
-                    </span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setTheme((t) => (t === "light" ? "dark" : "light"))}
-                    className={`flex size-7 shrink-0 items-center justify-center rounded border transition-colors ${
-                      isDark
-                        ? "border-white/10 bg-white/5 text-zinc-400 hover:bg-white/10 hover:text-zinc-200"
-                        : "border-zinc-300 bg-white/80 text-zinc-500 hover:border-zinc-400 hover:text-zinc-800"
-                    }`}
-                    aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
-                  >
-                    {isDark ? <Sun className="size-3.5" /> : <Moon className="size-3.5" />}
-                  </button>
-                </div>
-
-                {/* Identity */}
-                <div
-                  className={`shrink-0 border-b px-4 py-4 ${
-                    isDark ? "border-white/10" : "border-zinc-300/70"
-                  }`}
-                >
-                  <h2 className="font-mono text-[14px] font-semibold leading-snug tracking-tight">
-                    Ana-Rafaela Aguiar
+                aria-hidden
+                className="pointer-events-none absolute inset-0 bg-[radial-gradient(120%_90%_at_12%_0%,#ffe4c4_0%,#f6d7ea_38%,#d9e6f5_72%,#f4f1ea_100%)]"
+              />
+              <div className="relative bg-white/72 px-5 pt-5 pb-4 backdrop-blur-[20px] sm:px-6">
+                <div className="flex items-start justify-between gap-3">
+                  <h2 className="text-[36px] leading-[1.2] font-normal tracking-[-0.03em] text-[#141416]">
+                    Resume
                   </h2>
-                  <p
-                    className={`mt-1 font-mono text-[10px] tracking-[0.16em] uppercase ${
-                      isDark ? "text-zinc-500" : "text-zinc-500"
-                    }`}
-                  >
-                    [PRODUCT_DESIGNER]
-                  </p>
-                  <p
-                    className={`mt-2 font-mono text-[10px] tracking-wide ${
-                      isDark ? "text-emerald-400/80" : "text-emerald-600"
-                    }`}
-                  >
-                    // STATUS · AVAILABLE
-                  </p>
-
-                  <nav className="mt-4 flex flex-wrap gap-1.5" aria-label="Contact">
-                    <ContactChip
-                      href={`mailto:${CONTACT.email}`}
-                      label="Email"
-                      icon={<Mail className="size-3" />}
-                      isDark={isDark}
-                    />
-                    <ContactChip
-                      href={`tel:${CONTACT.phone.replace(/\s/g, "")}`}
-                      label="Phone"
-                      icon={<Phone className="size-3" />}
-                      isDark={isDark}
-                    />
-                    <ContactChip
-                      href={CONTACT.linkedin}
-                      label="LinkedIn"
-                      icon={<Linkedin className="size-3" />}
-                      isDark={isDark}
-                      external
-                    />
-                    <ContactChip
-                      href={CONTACT.github}
-                      label="GitHub"
-                      icon={<Github className="size-3" />}
-                      isDark={isDark}
-                      external
-                    />
-                  </nav>
-                </div>
-
-                {/* Experience inspector list */}
-                <div className="min-h-0 flex-1 overflow-y-auto">
-                  <div
-                    className={`sticky top-0 z-[1] flex items-center justify-between border-b px-4 py-2 ${
-                      isDark
-                        ? "border-white/10 bg-[#12151b]/95"
-                        : "border-zinc-300/70 bg-[#e8eaee]/95"
-                    }`}
-                  >
-                    <span
-                      className={`font-mono text-[10px] font-medium tracking-[0.16em] uppercase ${
-                        isDark ? "text-zinc-500" : "text-zinc-500"
-                      }`}
-                    >
-                      [EXPERIENCE]
+                  <div className="flex shrink-0 items-center gap-2">
+                    <span className="inline-flex items-center gap-2 rounded-full border border-white/80 bg-white/80 px-3 py-1 text-[13px] text-[#141416] shadow-sm backdrop-blur-md">
+                      <span className="size-[11px] rounded-full bg-[#0fc972]" aria-hidden />
+                      available
                     </span>
-                    <span
-                      className={`font-mono text-[9px] tracking-wider ${
-                        isDark ? "text-zinc-600" : "text-zinc-400"
-                      }`}
+                    <a
+                      href={RESUME_HREF}
+                      download="Ana-Rafaela Aguiar - Product Designer Resume.pdf"
+                      className="inline-flex h-8 items-center rounded-full border border-black/8 bg-white/80 px-3 text-[12px] font-medium text-[#141416] backdrop-blur-md hover:bg-white"
                     >
-                      {EXPERIENCE.length} NODES
-                    </span>
+                      Download PDF
+                    </a>
+                    <button
+                      type="button"
+                      onClick={() => onOpenChange(false)}
+                      aria-label="Close resume"
+                      className="grid size-8 cursor-pointer place-items-center rounded-full border border-black/8 bg-white/80 text-[#141416] backdrop-blur-md hover:bg-white"
+                    >
+                      <X className="size-4" strokeWidth={1.75} />
+                    </button>
                   </div>
-
-                  <ul
-                    className={`divide-y ${isDark ? "divide-white/10" : "divide-zinc-300/70"}`}
-                  >
-                    {EXPERIENCE.map((job, index) => {
-                      const itemOpen = openId === job.id;
-                      return (
-                        <li key={job.id}>
-                          <button
-                            type="button"
-                            onClick={() => setOpenId(itemOpen ? null : job.id)}
-                            aria-expanded={itemOpen}
-                            className={`group w-full px-4 py-3 text-left transition-colors duration-150 ${
-                              itemOpen
-                                ? isDark
-                                  ? "bg-white/[0.06]"
-                                  : "bg-black/[0.04]"
-                                : isDark
-                                  ? "bg-transparent hover:bg-white/[0.04]"
-                                  : "bg-transparent hover:bg-black/[0.03]"
-                            }`}
-                          >
-                            <div className="flex items-start gap-2.5">
-                              <span
-                                className={`mt-0.5 w-4 shrink-0 font-mono text-[10px] tabular-nums ${
-                                  isDark ? "text-zinc-600" : "text-zinc-400"
-                                }`}
-                              >
-                                {String(index + 1).padStart(2, "0")}
-                              </span>
-                              <div className="min-w-0 flex-1">
-                                <div className="flex items-start justify-between gap-2">
-                                  <div className="min-w-0">
-                                    <div className="font-mono text-[12px] font-medium leading-snug tracking-tight">
-                                      {job.company}
-                                    </div>
-                                    <div
-                                      className={`mt-0.5 font-mono text-[10px] leading-snug ${
-                                        isDark ? "text-zinc-400" : "text-zinc-500"
-                                      }`}
-                                    >
-                                      {job.role}
-                                    </div>
-                                  </div>
-                                  <span
-                                    className={`mt-0.5 flex size-4 shrink-0 items-center justify-center border transition-colors ${
-                                      itemOpen
-                                        ? isDark
-                                          ? "border-white/25 bg-white/10 text-zinc-200"
-                                          : "border-zinc-400 bg-black/5 text-zinc-700"
-                                        : isDark
-                                          ? "border-white/10 text-zinc-500 group-hover:border-white/20"
-                                          : "border-zinc-300 text-zinc-400 group-hover:border-zinc-400"
-                                    }`}
-                                  >
-                                    <ChevronDown
-                                      className={`size-3 transition-transform duration-200 ${
-                                        itemOpen ? "rotate-180" : ""
-                                      }`}
-                                      strokeWidth={2}
-                                    />
-                                  </span>
-                                </div>
-                                <div
-                                  className={`mt-1.5 font-mono text-[9px] tracking-[0.12em] uppercase ${
-                                    isDark ? "text-zinc-500" : "text-zinc-400"
-                                  }`}
-                                >
-                                  {job.dates}
-                                </div>
-
-                                <AnimatePresence initial={false}>
-                                  {itemOpen && (
-                                    <motion.div
-                                      key="summary"
-                                      initial={{ height: 0, opacity: 0 }}
-                                      animate={{ height: "auto", opacity: 1 }}
-                                      exit={{ height: 0, opacity: 0 }}
-                                      transition={{ duration: 0.22, ease: EASE }}
-                                      className="overflow-hidden"
-                                    >
-                                      <p
-                                        className={`mt-2.5 border-l-2 pl-2.5 font-mono text-[11px] leading-relaxed ${
-                                          isDark
-                                            ? "border-white/15 text-zinc-400"
-                                            : "border-zinc-300 text-zinc-500"
-                                        }`}
-                                      >
-                                        {job.summary}
-                                      </p>
-                                    </motion.div>
-                                  )}
-                                </AnimatePresence>
-                              </div>
-                            </div>
-                          </button>
-                        </li>
-                      );
-                    })}
-                  </ul>
                 </div>
 
+                <p className="mt-4 text-[16px] leading-[1.2] font-light text-[#3F3F46]">
+                  Key Impact & Scope:
+                </p>
+                <ul className="mt-3 flex list-disc flex-col gap-3 pl-5">
+                  {role.bullets.map((bullet, index) => (
+                    <li
+                      key={`${role.id}-${index}`}
+                      className="text-[16px] leading-[1.35] text-[#3F3F46]"
+                    >
+                      {bullet}
+                    </li>
+                  ))}
+                </ul>
               </div>
-            </motion.aside>
-          </>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-}
+            </div>
 
-function ContactChip({
-  href,
-  label,
-  icon,
-  isDark,
-  external,
-}: {
-  href: string;
-  label: string;
-  icon: ReactNode;
-  isDark: boolean;
-  external?: boolean;
-}) {
-  return (
-    <a
-      href={href}
-      aria-label={label}
-      title={label}
-      {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-      className={`inline-flex h-7 items-center gap-1 rounded border px-2 font-mono text-[10px] tracking-tight transition-colors ${
-        isDark
-          ? "border-white/12 bg-white/[0.04] text-zinc-400 hover:border-white/25 hover:bg-white/[0.08] hover:text-zinc-200"
-          : "border-zinc-300 bg-white/70 text-zinc-600 hover:border-zinc-400 hover:bg-white hover:text-zinc-900"
-      }`}
-    >
-      {icon}
-      <span>{label}</span>
-    </a>
+            <div className="flex items-end gap-px bg-[#efeae3] px-2 pt-2">
+              {ROLES.map((item, index) => {
+                const active = item.id === role.id;
+                const first = index === 0;
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => setActiveId(item.id)}
+                    aria-pressed={active}
+                    className={
+                      active
+                        ? `relative z-10 -mb-px flex min-w-0 flex-1 items-center justify-center gap-2 border border-black/8 border-b-white bg-white px-2 py-2 text-[#141416] ${
+                            first ? "rounded-tr-[16px] rounded-tl-none" : "rounded-t-[16px]"
+                          }`
+                        : "mb-px flex min-w-0 flex-1 items-center justify-center gap-2 rounded-t-[12px] bg-white/45 px-2 py-2 text-[#71717A]"
+                    }
+                  >
+                    <span className="text-[13px] tabular-nums sm:text-[16px]">{item.index}</span>
+                    <span className="truncate text-[13px] sm:text-[16px]">{item.name}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="bg-white px-5 py-4 sm:px-6">
+              <p className="text-[16px] leading-[1.2] text-[#3F3F46]">{role.meta}</p>
+              <p className="mt-2 text-[22px] leading-[1.25] tracking-[-0.02em] text-[#141416] sm:text-[24px]">
+                {role.summary}
+              </p>
+            </div>
+
+            <footer className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 rounded-b-[24px] border-t border-black/8 bg-white px-5 py-3 text-[13px] text-[#3F3F46] sm:px-6">
+              <p>BA (Hons) Industrial Design & Technology · Loughborough University</p>
+              <nav className="flex items-center gap-3" aria-label="Contact">
+                <a className="text-[#141416] underline-offset-2 hover:underline" href={`mailto:${EMAIL}`}>
+                  Email
+                </a>
+                <a
+                  className="text-[#141416] underline-offset-2 hover:underline"
+                  href={LINKEDIN}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  LinkedIn
+                </a>
+                <a className="text-[#141416] underline-offset-2 hover:underline" href={PHONE_HREF}>
+                  {PHONE_LABEL}
+                </a>
+              </nav>
+            </footer>
+          </motion.aside>
+        </>
+      ) : null}
+    </AnimatePresence>
   );
 }

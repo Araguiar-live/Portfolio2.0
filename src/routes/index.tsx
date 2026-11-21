@@ -520,7 +520,11 @@ function Index() {
               </p>
             </header>
 
-            <div className="relative w-full shrink-0 overflow-visible md:-mt-10 max-md:pt-14 max-md:pb-10">
+            <div
+              className={`relative mx-auto w-full max-w-[1120px] shrink-0 overflow-visible max-md:pt-14 max-md:pb-10 ${
+                isExpanded ? "" : "md:mt-[122px]"
+              }`}
+            >
               <AiPlaygroundFolder>
                 <ProjectBentoStack
                   projects={PROJECTS}
