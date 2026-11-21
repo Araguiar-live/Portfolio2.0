@@ -154,7 +154,7 @@ export function Sidebar({
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 12 }}
               transition={{ duration: 0.28, ease: EASE }}
-              className="pointer-events-auto max-h-[calc(100dvh-2rem)] w-[92vw] max-w-[720px] overflow-y-auto overscroll-contain rounded-[24px] border border-black/8 bg-white px-9 py-8 shadow-[0_24px_80px_rgba(17,17,19,0.08)]"
+              className="pointer-events-auto flex h-[580px] max-h-[calc(100dvh-2rem)] w-[92vw] max-w-[720px] flex-col overflow-y-auto overscroll-contain rounded-[24px] border border-black/8 bg-white px-9 py-8 shadow-[0_24px_80px_rgba(17,17,19,0.08)]"
             >
               <div className="flex items-center justify-between gap-4">
                 <h2 className="text-[24px] font-semibold text-[#111113]">Resume</h2>
@@ -218,7 +218,7 @@ export function Sidebar({
                 ))}
               </ul>
 
-              <footer className="mt-6 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-t border-[#F0F0F2] pt-4">
+              <footer className="mt-auto flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-t border-[#F0F0F2] pt-4">
                 <p className="text-[12px] text-[#71717A]">
                   BA (Hons) Industrial Design & Technology · Loughborough University
                 </p>
