@@ -68,7 +68,7 @@ function FrontPocket() {
     "Z",
   ].join(" ");
 
-  const frost = "rgba(28, 29, 33, 0.7)";
+  const frost = FRONT;
 
   return (
     <div
