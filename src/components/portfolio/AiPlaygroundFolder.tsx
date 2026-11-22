@@ -16,7 +16,7 @@ export function AiPlaygroundFolder({ children }: { children: ReactNode }) {
           className="pointer-events-none absolute z-0 rounded-[28px]"
           style={{
             top: "30%",
-            bottom: 0,
+            bottom: "calc(var(--pocket-h) - var(--pocket-overlap))",
             left: "calc(-4% + 1.62rem)",
             width: "calc(108% - 3.24rem)",
             background: BACK,
@@ -68,6 +68,8 @@ function FrontPocket() {
     "Z",
   ].join(" ");
 
+  const frost = "rgba(28, 29, 33, 0.7)";
+
   return (
     <div
       ref={ref}
@@ -75,9 +77,34 @@ function FrontPocket() {
       style={{
         height: "var(--pocket-h)",
         marginTop: "calc(var(--pocket-overlap) * -1)",
-        filter: "drop-shadow(0 16px 26px rgba(17,17,17,0.28))",
       }}
     >
+      <svg
+        aria-hidden
+        className="pointer-events-none absolute inset-0 h-full w-full overflow-visible"
+        viewBox={`0 0 ${width} ${height}`}
+        preserveAspectRatio="none"
+      >
+        <defs>
+          <filter id="pocket-shadow" x="-20%" y="-20%" width="140%" height="160%">
+            <feGaussianBlur in="SourceAlpha" stdDeviation="13" result="blur" />
+            <feOffset in="blur" dy="16" result="offset" />
+            <feFlood floodColor="#111111" floodOpacity="0.28" result="color" />
+            <feComposite in="color" in2="offset" operator="in" />
+          </filter>
+        </defs>
+        <path d={d} fill={FRONT} filter="url(#pocket-shadow)" />
+      </svg>
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0"
+        style={{
+          clipPath: `path('${d}')`,
+          backgroundColor: frost,
+          WebkitBackdropFilter: "blur(22px) saturate(160%)",
+          backdropFilter: "blur(22px) saturate(160%)",
+        }}
+      />
       <div aria-hidden className="pointer-events-none absolute -top-[18px] right-12 z-0">
         <svg
           viewBox="0 0 24 64"
@@ -96,11 +123,10 @@ function FrontPocket() {
       </div>
       <svg
         aria-hidden
-        className="pointer-events-none absolute inset-0 h-full w-full"
+        className="pointer-events-none absolute inset-0 z-[1] h-full w-full"
         viewBox={`0 0 ${width} ${height}`}
         preserveAspectRatio="none"
       >
-        <path d={d} fill={FRONT} />
         <path
           d={`M 0 ${rise + radius} Q 0 ${rise} ${radius} ${rise} H ${stepStart} C ${stepStart + width * 0.07} ${rise} ${stepEnd - width * 0.07} 0 ${stepEnd} 0 H ${width - radius} Q ${width} 0 ${width} ${radius}`}
           fill="none"
