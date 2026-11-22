@@ -39,7 +39,7 @@ function FrontPocket() {
     if (!el) return;
     const measure = () => {
       const styles = getComputedStyle(el);
-      const height = parseFloat(styles.getPropertyValue("--pocket-h")) || 201;
+      const height = el.clientHeight || parseFloat(styles.getPropertyValue("--pocket-h")) || 201;
       const rise = parseFloat(styles.getPropertyValue("--pocket-rise")) || 24;
       setShape({ width: Math.max(280, el.clientWidth), height, rise });
     };
@@ -68,15 +68,15 @@ function FrontPocket() {
     "Z",
   ].join(" ");
 
-  const frost = FRONT;
+  const frost = "rgba(28, 29, 33, 0.7)";
 
   return (
     <div
       ref={ref}
       className="playground-pocket relative z-20 -ml-[4%] flex w-[108%] items-end justify-between px-6 pb-7 md:px-10"
       style={{
-        height: "var(--pocket-h)",
-        marginTop: "calc(var(--pocket-overlap) * -1 - var(--pocket-h) * 0.05)",
+        height: "calc(var(--pocket-h) + 28px)",
+        marginTop: "calc(var(--pocket-overlap) * -1 - var(--pocket-h) * 0.05 - 28px)",
       }}
     >
       <svg
