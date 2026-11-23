@@ -1,4 +1,4 @@
-import type { CSSProperties, ReactNode } from "react";
+import { useLayoutEffect, useRef, type CSSProperties, type ReactNode } from "react";
 import windowControls from "@/assets/portfolio/window-controls.svg";
 import logoIcon from "@/assets/portfolio/logo-icon.svg";
 import statusInfo from "@/assets/portfolio/status-info.svg";
@@ -104,7 +104,8 @@ function Tile({
 }) {
   return (
     <div
-      className={"flex items-center justify-center rounded-[12px] bg-white " + className}
+      data-wire-tile=""
+      className={"relative flex items-center justify-center rounded-[12px] bg-white " + className}
       style={style}
     >
       {mark === "none" ? null : mark === "house" ? (
@@ -144,10 +145,98 @@ function TileRow({
 /**
  * Figma 530:151777 — nested flex jenga (not a uniform square CSS grid).
  * Locked to 1258/630 so it never stretches when the canvas aspect changes.
+ * The one-over-two mark stays on the tile two places to the right of the
+ * design toggle. Counting along that row keeps it off the neighbouring cell
+ * when the production viewport is wider than this one.
  */
 function JengaCellBand() {
+  const rootRef = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    const root = rootRef.current;
+    if (!root) return;
+
+    let host: HTMLDivElement | null = null;
+    let hostTile: HTMLElement | null = null;
+
+    const mount = () => {
+      const toggle = document.querySelector('[aria-label^="Design mode"]');
+      const tiles = [...root.querySelectorAll<HTMLElement>("[data-wire-tile]")];
+      if (!toggle || tiles.length === 0) return;
+      const toggleRect = toggle.getBoundingClientRect();
+      if (toggleRect.width < 1 || toggleRect.height < 1) return;
+      const targetX = toggleRect.left + toggleRect.width / 2;
+      const targetY = toggleRect.top + toggleRect.height / 2;
+
+      const rows: HTMLElement[][] = [];
+      for (const tile of tiles) {
+        const top = tile.getBoundingClientRect().top;
+        const row = rows.find((entry) => Math.abs(entry[0].getBoundingClientRect().top - top) < 8);
+        if (row) row.push(tile);
+        else rows.push([tile]);
+      }
+      if (rows.length === 0) return;
+      for (const row of rows) {
+        row.sort((a, b) => a.getBoundingClientRect().left - b.getBoundingClientRect().left);
+      }
+
+      const row = rows.reduce((closest, entry) => {
+        const closestMid = closest[0].getBoundingClientRect();
+        const entryMid = entry[0].getBoundingClientRect();
+        const closestDistance = Math.abs((closestMid.top + closestMid.bottom) / 2 - targetY);
+        const entryDistance = Math.abs((entryMid.top + entryMid.bottom) / 2 - targetY);
+        return entryDistance < closestDistance ? entry : closest;
+      });
+
+      let index = 0;
+      let nearest = Infinity;
+      row.forEach((tile, tileIndex) => {
+        const rect = tile.getBoundingClientRect();
+        const distance = Math.abs(rect.left + rect.width / 2 - targetX);
+        if (distance < nearest) {
+          nearest = distance;
+          index = tileIndex;
+        }
+      });
+      const best = row[Math.min(row.length - 1, index + 2)];
+      if (!best || best === hostTile) return;
+
+      root.querySelectorAll<HTMLElement>("[data-anchor-hidden]").forEach((child) => {
+        child.style.visibility = "";
+        child.removeAttribute("data-anchor-hidden");
+      });
+      host?.remove();
+      for (const child of best.children) {
+        if (!(child instanceof HTMLElement)) continue;
+        child.style.visibility = "hidden";
+        child.setAttribute("data-anchor-hidden", "");
+      }
+      host = document.createElement("div");
+      host.className =
+        "pointer-events-none absolute inset-0 z-[1] flex items-center justify-center";
+      host.innerHTML =
+        '<div class="flex w-4 flex-col items-center" aria-hidden="true"><div class="mb-[-2px] size-1.5 rounded-[1px] bg-[#e5e7eb]"></div><div class="flex gap-1"><div class="size-1.5 rounded-[1px] bg-[#e5e7eb]"></div><div class="size-1.5 rounded-[1px] bg-[#e5e7eb]"></div></div></div>';
+      best.appendChild(host);
+      hostTile = best;
+    };
+
+    mount();
+    const observer = new ResizeObserver(mount);
+    observer.observe(root);
+    const toggle = document.querySelector('[aria-label^="Design mode"]');
+    if (toggle) observer.observe(toggle);
+    window.addEventListener("resize", mount);
+    document.fonts?.ready.then(mount).catch(() => undefined);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", mount);
+      host?.remove();
+    };
+  }, []);
+
   return (
     <div
+      ref={rootRef}
       className="relative w-full shrink-0"
       style={{ aspectRatio: `${CELL_BAND_W} / ${CELL_BAND_H}` }}
     >
