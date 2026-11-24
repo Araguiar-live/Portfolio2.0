@@ -329,7 +329,7 @@ export function Sidebar({
                         <a
                           href={RESUME_HREF}
                           download="Ana-Rafaela Aguiar - Product Designer Resume.pdf"
-                          className="inline-flex h-9 cursor-pointer items-center rounded-full border border-[#1d3fe0] bg-[#2F5BFF] px-4 text-[12px] font-medium text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.35),0_2px_0_#1d3fe0]"
+                          className="inline-flex h-9 cursor-pointer items-center rounded-full border-0 bg-[#2F5BFF] px-4 text-[12px] font-medium text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.35),0_2px_0_#1d3fe0]"
                         >
                           Download PDF
                         </a>
