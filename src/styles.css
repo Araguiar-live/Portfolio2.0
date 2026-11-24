@@ -72,10 +72,15 @@ html[data-work-locked] .portfolio-interactive-hero-shell {
     backdrop-filter: blur(2px);
   }
 
-  .portfolio-mobile-header-mask {
+  /* One tile row is 78px of the 390-wide sheet. Pin that first row only. */
+  .portfolio-mobile-tile-row {
+    width: 100%;
+    pointer-events: none !important;
+    aspect-ratio: 390 / 78;
     background-color: #f3f4f6;
     background-image: url("/work-grid-tile.svg");
-    background-repeat: repeat;
+    background-repeat: no-repeat;
+    background-position: top left;
     background-size: 100% auto;
   }
 

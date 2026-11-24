@@ -461,15 +461,16 @@ function Index() {
         <ProjectDock onPlus={() => setSidebarOpen(true)} />
       </div>
 
+      <div
+        aria-hidden
+        className={`portfolio-mobile-tile-row pointer-events-none fixed inset-x-0 top-0 z-[120] hidden max-md:block ${chromeClass}`}
+      />
+
       {/* Top-right cluster. The note hangs under Contact Me so the two never overlap. */}
       <div
         className={`fixed top-6 right-8 z-[110] flex origin-top-right flex-col items-end gap-3 max-md:left-1/2 max-md:right-auto max-md:top-4 max-md:z-[130] max-md:w-[min(350px,calc(100%-32px))] max-md:-translate-x-1/2 max-md:items-end max-md:gap-0 max-md:scale-100 ${chromeClass}`}
         aria-hidden={!showChrome}
       >
-        <div
-          aria-hidden
-          className="portfolio-mobile-header-mask pointer-events-none absolute -top-4 left-1/2 hidden h-[calc(100%+1.75rem)] w-screen -translate-x-1/2 max-md:block"
-        />
         <div className="spatial-glass spatial-glass-hairline spatial-layer relative z-[1] flex items-center gap-[4px] rounded-[16px] bg-black/[0.08] p-[4px] shadow-lg shadow-black/5 max-md:w-[60%] max-md:min-w-[200px] max-md:gap-1 max-md:rounded-[16px] max-md:p-1">
           <button
             type="button"
