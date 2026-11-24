@@ -254,7 +254,7 @@ function ClipWire({ d, stroke }: { d: string; stroke: string }) {
 /** Straight vertical wire slid over the top edge of 02 Bending Spoons. */
 function BendingSpoonsPaperclip() {
   const place =
-    "folder-paperclip pointer-events-none absolute left-[44%] -top-[18px] drop-shadow-[0_1px_2px_rgba(0,0,0,0.14)]";
+    "folder-paperclip pointer-events-none absolute left-[44%] -top-[18px] drop-shadow-[0_1px_2px_rgba(0,0,0,0.14)] max-md:hidden";
   return (
     <>
       <div aria-hidden className={`${place} z-0`} style={{ marginTop: TAB_H }}>
@@ -413,7 +413,7 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
           className="absolute inset-0 z-0 cursor-pointer"
         />
         <div className="relative z-10 flex min-w-0 flex-1 items-center gap-[37px] pointer-events-none max-md:w-full max-md:gap-3 max-sm:gap-3">
-          <span className="folder-muted relative inline-flex shrink-0 items-center gap-2.5 text-[16px] font-medium tracking-[1px] tabular-nums max-md:gap-1.5 max-md:text-[10px] max-md:font-normal max-md:tracking-normal max-sm:text-[10px]">
+          <span className="folder-index folder-muted relative inline-flex shrink-0 items-center gap-2.5 text-[16px] font-medium tracking-[1px] tabular-nums max-md:hidden">
             {project.id}
           </span>
           <span className="flex min-w-0 items-center gap-2 max-md:gap-1.5">

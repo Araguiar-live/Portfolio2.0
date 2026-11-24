@@ -48,20 +48,26 @@ html[data-work-locked] .portfolio-interactive-hero-shell {
     background-image: none;
   }
 
+  .ai-playground-folder {
+    min-height: 300px;
+  }
+
   .ai-playground-back {
     z-index: 0 !important;
-    top: 0 !important;
-    right: 0 !important;
+    top: 28% !important;
+    right: auto !important;
     bottom: 0 !important;
-    left: 0 !important;
-    width: auto !important;
-    border-radius: 24px !important;
-    background: #2c2c30 !important;
+    left: 2% !important;
+    width: 96% !important;
+    border-radius: 28px !important;
+    background: #636369 !important;
   }
 
   .portfolio-mobile-shake-root {
     position: relative;
     z-index: 10;
+    width: 88%;
+    margin-inline: auto;
   }
 
   .portfolio-mobile-header-mask {
@@ -71,17 +77,21 @@ html[data-work-locked] .portfolio-interactive-hero-shell {
     background-size: 90px 90px;
   }
 
-  /* Compact tactile stack: ~340×300, 44px title peeks, pocket over the lower 56%. */
+  /* Cards sit on top; the back starts lower so only the shoulders show. */
   .ai-playground-folder .playground-pocket {
+    position: absolute !important;
     z-index: 20 !important;
-    height: 168px !important;
-    margin-top: -36px !important;
-    margin-left: 0 !important;
+    top: 44% !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    left: 0 !important;
     width: 100% !important;
+    height: auto !important;
+    margin: 0 !important;
   }
 
   .ai-playground-folder .pocket-body {
-    fill: #454549;
+    fill: #3e3e42;
   }
 
   .ai-playground-folder .pocket-frost {
@@ -101,9 +111,9 @@ html[data-work-locked] .portfolio-interactive-hero-shell {
     padding-top: 0 !important;
     clip-path: none !important;
     border: 1px solid rgba(0, 0, 0, 0.06) !important;
-    border-radius: 16px;
+    border-radius: 24px;
     background-color: #ffffff !important;
-    box-shadow: 0 8px 18px rgba(17, 17, 17, 0.08) !important;
+    box-shadow: 0 -8px 16px rgba(17, 17, 17, 0.06) !important;
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
   }
@@ -120,17 +130,12 @@ html[data-work-locked] .portfolio-interactive-hero-shell {
 
   .folder-mark,
   .folder-meta,
+  .folder-index,
+  .folder-paperclip,
   .pocket-clip {
     display: none !important;
   }
 
-  .folder-paperclip {
-    z-index: 30 !important;
-    top: -10px !important;
-    right: 36px !important;
-    left: auto !important;
-    margin-top: 0 !important;
-  }
 }
 
 /* Marquee + footer ink (~15% darker than #0c0f14) */
