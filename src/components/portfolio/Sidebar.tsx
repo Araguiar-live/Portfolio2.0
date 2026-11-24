@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
+import { useEffect, useId, useRef, useState, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
 
 /**
  * Resume on the sand tile field. Paper columns sit on the tiles.
@@ -110,23 +110,34 @@ const SKILLS = [
 
 const TOOLS = ["Figma", "Prototypes", "Design tokens", "WCAG"];
 
-function Pin() {
+function Pin({ color, light }: { color: string; light: string }) {
+  const id = useId().replace(/:/g, "");
   return (
-    <img
-      src="/cursors/pin.svg"
-      alt=""
+    <svg
       aria-hidden
+      viewBox="0 0 24 24"
       className="pointer-events-none absolute -top-3 left-7 z-20 size-6"
-    />
+    >
+      <circle cx="12" cy="12" r="12" fill={`url(#${id})`} fillOpacity="0.71" />
+      <circle cx="12" cy="12" r="11.75" fill="none" stroke={color} strokeOpacity="0.71" strokeWidth="0.5" />
+      <defs>
+        <linearGradient id={id} x1="12" y1="0" x2="12" y2="24" gradientUnits="userSpaceOnUse">
+          <stop stopColor={color} />
+          <stop offset="1" stopColor={light} stopOpacity="0.43" />
+        </linearGradient>
+      </defs>
+    </svg>
   );
 }
 
 function Paper({
   tilt,
+  pin,
   className = "",
   children,
 }: {
   tilt: number;
+  pin: { color: string; light: string };
   className?: string;
   children: ReactNode;
 }) {
@@ -135,7 +146,7 @@ function Paper({
       className={`group relative [rotate:var(--pin-tilt)] select-text rounded-[16px] bg-[#fbfaf6] px-5 py-5 text-[#1d3b51] shadow-[0_12px_20px_rgba(48,36,24,0.12),0_1px_0_rgba(255,255,255,0.9)] transition duration-300 ease-out hover:z-10 hover:-translate-y-1 hover:[rotate:0deg] hover:shadow-[0_18px_28px_rgba(48,36,24,0.16)] ${className}`}
       style={{ ["--pin-tilt" as string]: `${tilt}deg` }}
     >
-      <Pin />
+      <Pin color={pin.color} light={pin.light} />
       {children}
     </article>
   );
@@ -291,7 +302,7 @@ export function Sidebar({
               <div ref={boardRef} className="relative z-10 min-h-0 flex-1">
                 <div className="relative z-10 h-full overflow-y-auto overscroll-contain px-4 pt-6 pb-6 sm:px-8 sm:pt-8">
                   <div className="grid grid-cols-1 items-start gap-6 md:grid-cols-2 md:gap-7">
-                    <Paper tilt={-1.2} className="md:col-span-2">
+                    <Paper tilt={-1.2} pin={{ color: "#ff5126", light: "#ffb199" }} className="md:col-span-2">
                       <div className="flex flex-wrap items-start justify-between gap-4">
                         <div>
                           <p className="text-[11px] tracking-[0.16em] text-[#1d3b51]/60 uppercase">
@@ -348,7 +359,7 @@ export function Sidebar({
                       </div>
                     </Paper>
 
-                    <Paper tilt={1.1} className="md:col-span-2">
+                    <Paper tilt={1.1} pin={{ color: "#0356E5", light: "#3B9EFF" }} className="md:col-span-2">
                       <p className="text-[11px] tracking-[0.16em] text-[#1d3b51]/55 uppercase">
                         Experience
                       </p>
@@ -380,7 +391,7 @@ export function Sidebar({
                       </div>
                     </Paper>
 
-                    <Paper tilt={-0.8}>
+                    <Paper tilt={-0.8} pin={{ color: "#4eab95", light: "#b7e6d6" }}>
                       <p className="text-[11px] tracking-[0.16em] text-[#1d3b51]/55 uppercase">
                         Core skills
                       </p>
@@ -414,7 +425,7 @@ export function Sidebar({
                       </div>
                     </Paper>
 
-                    <Paper tilt={1.4}>
+                    <Paper tilt={1.4} pin={{ color: "#7ec8e3", light: "#e4f6fb" }}>
                       <p className="text-[11px] tracking-[0.16em] text-[#1d3b51]/55 uppercase">
                         Education
                       </p>
