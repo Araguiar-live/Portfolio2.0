@@ -557,7 +557,7 @@ function Index() {
             >
               <div
                 aria-hidden
-                className="pointer-events-none absolute -left-10 top-0 z-0 hidden -translate-y-[42%] max-md:block"
+                className="mobile-calculator-frost pointer-events-none absolute -left-10 top-[calc(-0.42*201px*var(--deco-scale,1))] z-0 hidden max-md:block"
                 style={{ ["--deco-scale" as string]: "0.77" }}
               >
                 <CalculatorCard />

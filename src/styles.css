@@ -72,6 +72,12 @@ html[data-work-locked] .portfolio-interactive-hero-shell {
     backdrop-filter: blur(2px);
   }
 
+  .mobile-calculator-frost [data-name="calculator-card"] {
+    opacity: 0.85;
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+    backdrop-filter: blur(18px) saturate(160%);
+  }
+
   /* One tile row is 78px of the 390-wide sheet. Pin that first row only. */
   .portfolio-mobile-tile-row {
     width: 100%;
