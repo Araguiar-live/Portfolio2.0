@@ -146,10 +146,17 @@ function Paper({
 }) {
   return (
     <article
-      className={`group relative [rotate:var(--pin-tilt)] select-text rounded-[16px] px-5 py-5 text-[#1d3b51] shadow-[0_8px_16px_rgba(48,36,24,0.08)] ${frost == null ? "bg-[#fbfaf6]" : "backdrop-blur-[18px]"} ${className}`}
+      className={`group relative [rotate:var(--pin-tilt)] select-text rounded-[16px] px-5 py-5 text-[#1d3b51] shadow-[0_8px_16px_rgba(48,36,24,0.08)] ${frost == null ? "bg-[#fbfaf6]" : ""} ${className}`}
       style={{
         ["--pin-tilt" as string]: `${tilt}deg`,
-        ...(frost == null ? {} : { backgroundColor: `rgba(251, 250, 246, ${frost})` }),
+        ...(frost == null
+          ? {}
+          : {
+              backgroundColor: "#fbfaf6",
+              backgroundImage: `linear-gradient(rgba(251, 250, 246, ${frost}), rgba(251, 250, 246, ${frost})), url("/resume-sand-field.svg")`,
+              backgroundSize: "auto, 90px 90px",
+              backgroundRepeat: "no-repeat, repeat",
+            }),
       }}
     >
       <Pin color={pin.color} light={pin.light} />
@@ -185,27 +192,17 @@ export function Sidebar({
     };
   }, [open, onOpenChange]);
 
-  useEffect(() => {
+  const fitCanvas = () => {
     const board = boardRef.current;
     const canvas = canvasRef.current;
-    if (!open || !board || !canvas) return;
-    const fit = () => {
-      const rect = board.getBoundingClientRect();
-      const dpr = 1;
-      const nextW = Math.max(1, Math.round(rect.width * dpr));
-      const nextH = Math.max(1, Math.round(rect.height * dpr));
-      if (canvas.width !== nextW || canvas.height !== nextH) {
-        canvas.width = nextW;
-        canvas.height = nextH;
-      }
-      const ctx = canvas.getContext("2d");
-      ctx?.setTransform(dpr, 0, 0, dpr, 0, 0);
-    };
-    fit();
-    const observer = new ResizeObserver(fit);
-    observer.observe(board);
-    return () => observer.disconnect();
-  }, [open]);
+    if (!board || !canvas) return;
+    const rect = board.getBoundingClientRect();
+    const nextW = Math.max(1, Math.round(rect.width));
+    const nextH = Math.max(1, Math.round(rect.height));
+    if (canvas.width === nextW && canvas.height === nextH) return;
+    canvas.width = nextW;
+    canvas.height = nextH;
+  };
 
   const point = (event: ReactPointerEvent<HTMLElement>) => {
     const rect = canvasRef.current?.getBoundingClientRect();
@@ -289,6 +286,7 @@ export function Sidebar({
               }}
               onPointerDown={(event) => {
                 if ((event.target as HTMLElement).closest("a, button")) return;
+                fitCanvas();
                 const start = point(event);
                 if (!start) return;
                 drawing.current = true;
