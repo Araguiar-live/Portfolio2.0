@@ -40,10 +40,9 @@ html[data-work-locked] .portfolio-interactive-hero-shell {
     background-size: 100% auto;
   }
 
-  /* Let the page tile show through the work stage, including the gap above the carousel. */
+  /* Let the page tile show through the work stage. */
   #work,
-  #work > .wireframe-stage,
-  .work-stage-gap {
+  #work > .wireframe-stage {
     background-color: transparent;
     background-image: none;
   }
