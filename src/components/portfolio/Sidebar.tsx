@@ -2,7 +2,8 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
 
 /**
- * Resume on the sand tile field. Dragging the pencil cursor leaves a graphite mark.
+ * Resume on the sand tile field. Paper columns sit on the tiles.
+ * Dragging the pencil cursor leaves a graphite mark.
  */
 
 const EMAIL = "A.rafaela.aguiar@outlook.com";
@@ -108,6 +109,37 @@ const SKILLS = [
 ];
 
 const TOOLS = ["Figma", "Prototypes", "Design tokens", "WCAG"];
+
+function Pin() {
+  return (
+    <img
+      src="/cursors/pin.svg"
+      alt=""
+      aria-hidden
+      className="pointer-events-none absolute -top-3 left-7 z-20 size-6"
+    />
+  );
+}
+
+function Paper({
+  tilt,
+  className = "",
+  children,
+}: {
+  tilt: number;
+  className?: string;
+  children: ReactNode;
+}) {
+  return (
+    <article
+      className={`group relative [rotate:var(--pin-tilt)] select-text rounded-[16px] bg-[#fbfaf6] px-5 py-5 text-[#1d3b51] shadow-[0_12px_20px_rgba(48,36,24,0.12),0_1px_0_rgba(255,255,255,0.9)] transition duration-300 ease-out hover:z-10 hover:-translate-y-1 hover:[rotate:0deg] hover:shadow-[0_18px_28px_rgba(48,36,24,0.16)] ${className}`}
+      style={{ ["--pin-tilt" as string]: `${tilt}deg` }}
+    >
+      <Pin />
+      {children}
+    </article>
+  );
+}
 
 export function Sidebar({
   open,
@@ -253,8 +285,8 @@ export function Sidebar({
             >
               <div ref={boardRef} className="relative z-10 min-h-0 flex-1">
                 <div className="relative z-10 h-full overflow-y-auto overscroll-contain px-4 pt-6 pb-6 sm:px-8 sm:pt-8">
-                  <div className="grid grid-cols-1 items-start gap-8 text-[#1d3b51] md:grid-cols-2 md:gap-10">
-                    <section className="md:col-span-2">
+                  <div className="grid grid-cols-1 items-start gap-6 md:grid-cols-2 md:gap-7">
+                    <Paper tilt={-1.2} className="md:col-span-2">
                       <div className="flex flex-wrap items-start justify-between gap-4">
                         <div>
                           <p className="text-[11px] tracking-[0.16em] text-[#1d3b51]/60 uppercase">
@@ -309,15 +341,19 @@ export function Sidebar({
                           ×
                         </button>
                       </div>
-                    </section>
+                    </Paper>
 
-                    <section className="md:col-span-2">
+                    <Paper tilt={1.1} className="md:col-span-2">
                       <p className="text-[11px] tracking-[0.16em] text-[#1d3b51]/55 uppercase">
                         Experience
                       </p>
-                      <div className="mt-4 flex flex-col gap-6">
-                        {ROLES.map((role) => (
-                          <div key={role.id}>
+                      <div className="mt-3 flex flex-col gap-3">
+                        {ROLES.map((role, index) => (
+                          <div
+                            key={role.id}
+                            className="rounded-[12px] border border-[#ece6db] bg-white px-4 py-3 shadow-[0_1px_0_rgba(255,255,255,0.8)]"
+                            style={{ marginLeft: index % 2 === 0 ? 0 : 10 }}
+                          >
                             <div className="flex flex-wrap items-baseline justify-between gap-2">
                               <h3 className="text-[16px] font-semibold text-[#1d3b51]">
                                 {role.index} {role.name}
@@ -337,13 +373,21 @@ export function Sidebar({
                           </div>
                         ))}
                       </div>
-                    </section>
+                    </Paper>
 
-                    <section>
+                    <Paper tilt={-0.8}>
                       <p className="text-[11px] tracking-[0.16em] text-[#1d3b51]/55 uppercase">
                         Core skills
                       </p>
-                      <div className="mt-3 grid grid-cols-2 gap-x-4 gap-y-1">
+                      <div
+                        className="mt-3 grid grid-cols-2 gap-2 rounded-[10px] p-3"
+                        style={{
+                          backgroundImage:
+                            "linear-gradient(#efe8dc 1px, transparent 1px), radial-gradient(circle, #c9bfb0 1.1px, transparent 1.2px)",
+                          backgroundSize: "100% 28px, 14px 14px",
+                          backgroundPosition: "0 10px, 4px 0",
+                        }}
+                      >
                         {SKILLS.map((skill) => (
                           <span key={skill} className="text-[13px] leading-7 text-[#1d3b51]">
                             {skill}
@@ -363,14 +407,18 @@ export function Sidebar({
                           </span>
                         ))}
                       </div>
-                    </section>
+                    </Paper>
 
-                    <section>
+                    <Paper tilt={1.4}>
                       <p className="text-[11px] tracking-[0.16em] text-[#1d3b51]/55 uppercase">
                         Education
                       </p>
-                      <div className="mt-3">
-                        <p className="text-[15px] leading-[1.45] font-semibold text-[#1d3b51]">
+                      <div className="relative mt-3 rounded-[12px] border border-dashed border-[#d5cbbd] bg-[#fffdf8] px-4 py-4">
+                        <span
+                          aria-hidden
+                          className="absolute top-3 right-3 size-3 rounded-full border border-[#d5cbbd] bg-[#efe8dc]"
+                        />
+                        <p className="pr-6 text-[15px] leading-[1.45] font-semibold text-[#1d3b51]">
                           BA (Hons) Industrial Design & Technology
                         </p>
                         <p className="mt-1 text-[13px] text-[#1d3b51]/70">Loughborough University</p>
@@ -386,7 +434,7 @@ export function Sidebar({
                           </a>
                         </nav>
                       </div>
-                    </section>
+                    </Paper>
                   </div>
                 </div>
 
