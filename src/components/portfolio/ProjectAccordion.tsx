@@ -254,7 +254,7 @@ function ClipWire({ d, stroke }: { d: string; stroke: string }) {
 /** Straight vertical wire slid over the top edge of 02 Bending Spoons. */
 function BendingSpoonsPaperclip() {
   const place =
-    "folder-paperclip pointer-events-none absolute left-[44%] -top-[18px] drop-shadow-[0_1px_2px_rgba(0,0,0,0.14)] max-md:hidden";
+    "folder-paperclip pointer-events-none absolute left-[44%] -top-[18px] drop-shadow-[0_1px_2px_rgba(0,0,0,0.14)]";
   return (
     <>
       <div aria-hidden className={`${place} z-0`} style={{ marginTop: TAB_H }}>

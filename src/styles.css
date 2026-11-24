@@ -113,9 +113,15 @@ html[data-work-locked] .portfolio-interactive-hero-shell {
 
   .folder-mark,
   .folder-meta,
-  .folder-paperclip,
   .pocket-clip {
     display: none !important;
+  }
+
+  .folder-paperclip {
+    top: -10px !important;
+    right: 52px !important;
+    left: auto !important;
+    margin-top: 0 !important;
   }
 }
 
