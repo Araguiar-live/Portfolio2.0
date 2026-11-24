@@ -581,7 +581,7 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
                       : project.slug === "first-design"
                       ? "relative flex min-h-0 min-w-0 w-full items-start justify-center overflow-visible"
                       : isEditorial(project.slug)
-                      ? "relative ml-0 flex min-h-0 min-w-0 items-start justify-center overflow-auto rounded-[32px] border border-[rgba(0,0,0,0.06)] bg-[#F4F4F5]/80 px-[25.8px] py-3 lg:ml-12 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                      ? "relative ml-0 flex min-h-0 min-w-0 items-start justify-center overflow-auto rounded-[32px] border border-[rgba(0,0,0,0.06)] bg-[#F4F4F5]/80 px-[37.8px] py-3 lg:ml-12 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
                       : "relative flex w-full min-w-0 items-start justify-end overflow-visible"}>
                       <div className={project.slug === "odicci"
                         ? "flex w-full max-w-[980px] justify-center"
