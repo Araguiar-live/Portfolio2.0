@@ -77,11 +77,11 @@ html[data-work-locked] .portfolio-interactive-hero-shell {
     background-size: 100% auto;
   }
 
-  /* Cards sit on top; the back starts lower so only the shoulders show. */
+  /* Cards sit above the back. The pocket lip covers the lower half of Odicci. */
   .ai-playground-folder .playground-pocket {
     position: absolute !important;
     z-index: 20 !important;
-    top: 44% !important;
+    top: 40% !important;
     right: 0 !important;
     bottom: 0 !important;
     left: 0 !important;
