@@ -10,7 +10,7 @@ const FRONT = "#1C1D21";
 export function AiPlaygroundFolder({ children }: { children: ReactNode }) {
   return (
     <div className="ai-playground-folder relative mb-7 [--pocket-h:242.55px] [--pocket-overlap:48px] [--pocket-rise:24px] max-md:mx-auto max-md:w-[min(340px,calc(100vw-32px))] max-md:[--pocket-h:168px] max-md:[--pocket-overlap:0px] max-md:[--pocket-rise:22px]">
-      <div className="relative z-10 px-6 max-md:px-[10px]">
+      <div className="relative z-10 px-6 max-md:px-[10px] max-md:pt-4">
         <div
           aria-hidden
           className="ai-playground-back pointer-events-none absolute z-0 rounded-[28px]"
@@ -50,23 +50,42 @@ function FrontPocket() {
   }, []);
 
   const { width, height, rise } = shape;
-  const radius = width < 420 ? 24 : 28;
-  const stepStart = width * 0.56;
-  const stepEnd = width * 0.78;
-  const d = [
-    `M ${radius} ${height}`,
-    `H ${width - radius}`,
-    `Q ${width} ${height} ${width} ${height - radius}`,
-    `V ${radius}`,
-    `Q ${width} 0 ${width - radius} 0`,
-    `H ${stepEnd}`,
-    `C ${stepEnd - width * 0.07} 0 ${stepStart + width * 0.07} ${rise} ${stepStart} ${rise}`,
-    `H ${radius}`,
-    `Q 0 ${rise} 0 ${rise + radius}`,
-    `V ${height - radius}`,
-    `Q 0 ${height} ${radius} ${height}`,
-    "Z",
-  ].join(" ");
+  const compact = width < 420;
+  const radius = compact ? 24 : 28;
+  const stepStart = width * (compact ? 0.28 : 0.56);
+  const stepEnd = width * (compact ? 0.46 : 0.78);
+  const d = compact
+    ? [
+        `M ${radius} ${height}`,
+        `H ${width - radius}`,
+        `Q ${width} ${height} ${width} ${height - radius}`,
+        `V ${rise + radius}`,
+        `Q ${width} ${rise} ${width - radius} ${rise}`,
+        `H ${stepEnd}`,
+        `C ${stepEnd - width * 0.06} ${rise} ${stepStart + width * 0.06} 0 ${stepStart} 0`,
+        `H ${radius}`,
+        `Q 0 0 0 ${radius}`,
+        `V ${height - radius}`,
+        `Q 0 ${height} ${radius} ${height}`,
+        "Z",
+      ].join(" ")
+    : [
+        `M ${radius} ${height}`,
+        `H ${width - radius}`,
+        `Q ${width} ${height} ${width} ${height - radius}`,
+        `V ${radius}`,
+        `Q ${width} 0 ${width - radius} 0`,
+        `H ${stepEnd}`,
+        `C ${stepEnd - width * 0.07} 0 ${stepStart + width * 0.07} ${rise} ${stepStart} ${rise}`,
+        `H ${radius}`,
+        `Q 0 ${rise} 0 ${rise + radius}`,
+        `V ${height - radius}`,
+        `Q 0 ${height} ${radius} ${height}`,
+        "Z",
+      ].join(" ");
+  const lip = compact
+    ? `M ${radius} 0 H ${stepStart} C ${stepStart + width * 0.06} 0 ${stepEnd - width * 0.06} ${rise} ${stepEnd} ${rise} H ${width - radius} Q ${width} ${rise} ${width} ${rise + radius}`
+    : `M 0 ${rise + radius} Q 0 ${rise} ${radius} ${rise} H ${stepStart} C ${stepStart + width * 0.07} ${rise} ${stepEnd - width * 0.07} 0 ${stepEnd} 0 H ${width - radius} Q ${width} 0 ${width} ${radius}`;
 
   const frost = "rgba(28, 29, 33, 0.7)";
 
@@ -128,7 +147,7 @@ function FrontPocket() {
         preserveAspectRatio="none"
       >
         <path
-          d={`M 0 ${rise + radius} Q 0 ${rise} ${radius} ${rise} H ${stepStart} C ${stepStart + width * 0.07} ${rise} ${stepEnd - width * 0.07} 0 ${stepEnd} 0 H ${width - radius} Q ${width} 0 ${width} ${radius}`}
+          d={lip}
           fill="none"
           stroke="rgba(255,255,255,0.22)"
           strokeWidth="1.25"
