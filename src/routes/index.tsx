@@ -519,7 +519,7 @@ function Index() {
                 : "@container pointer-events-auto absolute left-[calc(50%-min(2400px,100%-32px)/2)] top-[calc(50%-76px-min(874px,92%)/2)] flex h-[min(874px,92%)] w-[min(2400px,calc(100%-32px))] flex-col items-center gap-[40px] overflow-visible max-md:relative max-md:left-auto max-md:top-auto max-md:mx-auto max-md:h-auto max-md:min-h-0 max-md:w-full max-md:max-w-[calc(100vw-32px)] max-md:gap-8 max-md:px-0 max-md:pb-16 max-md:pt-24 max-sm:gap-[37px] max-sm:pb-20"
             }
           >
-            <header className="flex w-full max-w-[720px] shrink-0 flex-col items-center gap-5 text-center max-md:mt-3 max-md:gap-4 max-sm:mt-3 max-sm:gap-4">
+            <header className="flex w-full max-w-[720px] shrink-0 flex-col items-center gap-5 text-center max-md:relative max-md:z-10 max-md:mt-3 max-md:gap-4 max-sm:mt-3 max-sm:gap-4">
               <p className="text-[11px] font-bold uppercase tracking-[2px] text-[#76767a] max-md:text-[9px] max-md:tracking-[1.5px] max-sm:tracking-normal">
                 Selected Work • Portfolio
               </p>
@@ -572,7 +572,7 @@ function Index() {
               </AiPlaygroundFolder>
               <div
                 aria-hidden
-                className="pointer-events-none absolute -right-4 bottom-14 z-20 hidden max-md:block"
+                className="pointer-events-none absolute -right-4 bottom-14 z-0 hidden max-md:block"
                 style={{ ["--deco-scale" as string]: "1" }}
               >
                 <PeekMouse />
