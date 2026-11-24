@@ -20,6 +20,17 @@
   Row size stays the authored size. A container-query scale collapsed the
   rows to thin strips in Safari.
 */
+/* Keep the 402px CRCLE phone inside the gray stage so the side padding stays visible. */
+.crcle-phone-stage {
+  container-type: inline-size;
+}
+
+.crcle-phone-stage [data-device="iphone-crcle-402x874"] {
+  margin-left: auto;
+  margin-right: auto;
+  zoom: min(1, calc(100cqw / 402px));
+}
+
 @media (min-width: 768px) and (max-width: 1536px) {
   .work-closed-column {
     top: calc(50% - 20px - min(874px, 92%) / 2);

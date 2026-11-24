@@ -558,7 +558,7 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
                     : project.slug === "first-design"
                     ? "grid h-full min-h-0 w-full min-w-0 grid-cols-1 items-start gap-3 overflow-x-clip lg:grid-cols-[0.98fr_2.12fr]"
                     : isEditorial(project.slug)
-                    ? "grid h-full min-h-0 w-full min-w-0 grid-cols-1 items-start gap-3 overflow-x-clip lg:grid-cols-[1.1fr_0.9fr_1.1fr]"
+                    ? "grid h-full min-h-0 w-full min-w-0 grid-cols-1 items-start gap-3 overflow-x-clip lg:grid-cols-[minmax(0,1fr)_minmax(0,0.82fr)_minmax(502px,1.2fr)]"
                     : "grid w-full min-w-0 grid-cols-1 items-start gap-8 overflow-x-clip lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] lg:gap-8"}>
                     {project.slug === "first-design" ? (
                       <div className="flex min-h-0 min-w-0 flex-col gap-6">
@@ -581,14 +581,14 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
                       : project.slug === "first-design"
                       ? "relative flex min-h-0 min-w-0 w-full items-start justify-center overflow-visible"
                       : isEditorial(project.slug)
-                      ? "relative ml-0 flex min-h-0 min-w-0 items-start justify-center overflow-auto rounded-[32px] border border-[rgba(0,0,0,0.06)] bg-[#F4F4F5]/80 px-[37.8px] py-3 lg:ml-12 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                      ? "crcle-phone-stage relative ml-0 flex min-h-0 min-w-0 items-start justify-center overflow-auto rounded-[32px] border border-[rgba(0,0,0,0.06)] bg-[#F4F4F5]/80 px-12 py-3 lg:ml-12 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
                       : "relative flex w-full min-w-0 items-start justify-end overflow-visible"}>
                       <div className={project.slug === "odicci"
                         ? "flex w-full max-w-[980px] justify-center"
                         : project.slug === "first-design"
                         ? "flex w-full min-w-0 max-w-full items-start justify-center"
                         : isEditorial(project.slug)
-                        ? "mx-auto flex w-full min-w-0 max-w-full items-start justify-center"
+                        ? "mx-auto flex w-full min-w-0 max-w-full items-start justify-center [&_[data-device=iphone-crcle-402x874]]:mx-auto"
                         : "ml-auto flex w-full min-w-0 max-w-full items-start justify-end overflow-visible"}>
                         {tabContent.customBody ? (
                           <Suspense fallback={<div className="min-h-[420px] w-full" />}>
