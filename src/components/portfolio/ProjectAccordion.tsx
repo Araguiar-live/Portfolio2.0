@@ -119,9 +119,9 @@ function FolderMark({ slug }: { slug: string }) {
       alt=""
       width={width}
       height={height}
-      className="pointer-events-none relative z-20 max-w-none opacity-[0.448]"
+      className="folder-mark pointer-events-none relative z-20 max-w-none opacity-[0.448]"
       decoding="async"
-      style={{ width, height }}
+      style={{ width, height, ["--mark-w" as string]: `${width}px`, ["--mark-h" as string]: `${height}px` }}
     />
   );
 }

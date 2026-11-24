@@ -69,6 +69,12 @@ html[data-work-locked] .portfolio-interactive-hero-shell {
   .folder-stroke {
     stroke-width: 1px;
   }
+
+  .folder-mark {
+    width: calc(var(--mark-w) * 0.9) !important;
+    height: calc(var(--mark-h) * 0.9) !important;
+    opacity: 0.3584 !important;
+  }
 }
 
 /* Marquee + footer ink (~15% darker than #0c0f14) */
