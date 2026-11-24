@@ -15,10 +15,6 @@ const RESUME_HREF = "/Ana-Rafaela%20Aguiar%20-%20Product%20Designer%20Resume.pdf
 export const SIDEBAR_PANEL_ID = "profile-sidebar-panel";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
-const CORAL = "#ff5126";
-const SKY = "#7ec8e3";
-const MINT = "#4eab95";
-
 const PENCIL_CURSOR = 'url("/cursors/pencil-cursor.svg") 1 37, auto';
 
 type Role = {
@@ -114,40 +110,23 @@ const SKILLS = [
 
 const TOOLS = ["Figma", "Prototypes", "Design tokens", "WCAG"];
 
-function darker(hex: string, amount: number) {
-  const value = hex.replace("#", "");
-  const channel = (start: number) =>
-    Math.round(parseInt(value.slice(start, start + 2), 16) * (1 - amount));
-  return `rgb(${channel(0)}, ${channel(2)}, ${channel(4)})`;
-}
-
-function Pin({ color }: { color: string }) {
-  const outline = darker(color, 0.42);
+function Pin() {
   return (
-    <span
+    <img
+      src="/cursors/pin.svg"
+      alt=""
       aria-hidden
-      className="pointer-events-none absolute -top-3 left-7 z-20 grid size-6 place-items-center rounded-full"
-      style={{ background: outline, boxShadow: "0 3px 0 rgba(40, 28, 18, 0.22)" }}
-    >
-      <span
-        className="size-[18px] rounded-full"
-        style={{
-          background: `radial-gradient(circle at 32% 28%, #ffffff 0 22%, ${color} 23% 70%, ${outline} 71%)`,
-          boxShadow: `inset 0 0 0 1.5px ${outline}`,
-        }}
-      />
-    </span>
+      className="pointer-events-none absolute -top-3 left-7 z-20 size-6"
+    />
   );
 }
 
 function Paper({
   tilt,
-  pin,
   className = "",
   children,
 }: {
   tilt: number;
-  pin: string;
   className?: string;
   children: ReactNode;
 }) {
@@ -156,7 +135,7 @@ function Paper({
       className={`group relative [rotate:var(--pin-tilt)] select-text rounded-[16px] bg-[#fbfaf6] px-5 py-5 text-[#1d3b51] shadow-[0_12px_20px_rgba(48,36,24,0.12),0_1px_0_rgba(255,255,255,0.9)] transition duration-300 ease-out hover:z-10 hover:-translate-y-1 hover:[rotate:0deg] hover:shadow-[0_18px_28px_rgba(48,36,24,0.16)] ${className}`}
       style={{ ["--pin-tilt" as string]: `${tilt}deg` }}
     >
-      <Pin color={pin} />
+      <Pin />
       {children}
     </article>
   );
@@ -307,7 +286,7 @@ export function Sidebar({
               <div ref={boardRef} className="relative z-10 min-h-0 flex-1">
                 <div className="relative z-10 h-full overflow-y-auto overscroll-contain px-4 pt-6 pb-6 sm:px-8 sm:pt-8">
                   <div className="grid grid-cols-1 items-start gap-6 md:grid-cols-2 md:gap-7">
-                    <Paper tilt={-1.2} pin={CORAL} className="md:col-span-2">
+                    <Paper tilt={-1.2} className="md:col-span-2">
                       <div className="flex flex-wrap items-start justify-between gap-4">
                         <div>
                           <p className="text-[11px] tracking-[0.16em] text-[#1d3b51]/60 uppercase">
@@ -364,7 +343,7 @@ export function Sidebar({
                       </div>
                     </Paper>
 
-                    <Paper tilt={1.1} pin={SKY} className="md:col-span-2">
+                    <Paper tilt={1.1} className="md:col-span-2">
                       <p className="text-[11px] tracking-[0.16em] text-[#1d3b51]/55 uppercase">
                         Experience
                       </p>
@@ -396,7 +375,7 @@ export function Sidebar({
                       </div>
                     </Paper>
 
-                    <Paper tilt={-0.8} pin={MINT}>
+                    <Paper tilt={-0.8}>
                       <p className="text-[11px] tracking-[0.16em] text-[#1d3b51]/55 uppercase">
                         Core skills
                       </p>
@@ -430,7 +409,7 @@ export function Sidebar({
                       </div>
                     </Paper>
 
-                    <Paper tilt={1.4} pin={CORAL}>
+                    <Paper tilt={1.4}>
                       <p className="text-[11px] tracking-[0.16em] text-[#1d3b51]/55 uppercase">
                         Education
                       </p>
