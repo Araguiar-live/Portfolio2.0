@@ -146,7 +146,7 @@ function Paper({
 }) {
   return (
     <article
-      className={`group relative [rotate:var(--pin-tilt)] select-text rounded-[16px] px-5 py-5 text-[#1d3b51] shadow-[0_8px_16px_rgba(48,36,24,0.08)] ${frost == null ? "bg-[#fbfaf6]" : ""} ${className}`}
+      className={`group relative [rotate:var(--pin-tilt)] select-text rounded-[16px] px-5 py-5 text-[#1d3b51] shadow-[0_8px_16px_rgba(48,36,24,0.08)] ${frost == null ? "bg-[#fbfaf6]" : "backdrop-blur-[18px]"} ${className}`}
       style={{
         ["--pin-tilt" as string]: `${tilt}deg`,
         ...(frost == null ? {} : { backgroundColor: `rgba(251, 250, 246, ${frost})` }),
