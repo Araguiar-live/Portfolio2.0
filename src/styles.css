@@ -80,6 +80,29 @@
   .work-closed-fit .folder-meta {
     font-size: calc(16px * var(--work-fit));
   }
+
+  /* Laptop stages: start the intro lower, and keep the folder inside the frame. */
+  @media (max-width: 1536px) {
+    .work-closed-fit {
+      --work-fit: min(1.05, max(0.5, (100cqh - 128px) / 1049px));
+      justify-content: flex-start;
+      padding-top: 52px;
+    }
+  }
+
+  /* 15% of each decoration's own height, below the previous anchor. */
+  .portfolio-deco-calculator {
+    translate: max(-50%, calc(16px - 50vw + 50cqw)) -35%;
+  }
+
+  .portfolio-deco-spin {
+    top: -36px;
+    translate: 62% 15%;
+  }
+
+  .portfolio-deco-mouse {
+    translate: 0 calc(-70px + 15%);
+  }
 }
 
 /* Portfolio page base fill — structural cells live in SiteWireframe (DOM). */

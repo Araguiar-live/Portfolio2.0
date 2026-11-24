@@ -398,16 +398,13 @@ function WorkStageDecorations() {
       </header>
       <div className="relative w-full shrink-0 overflow-visible md:-mt-10 max-md:pt-14 max-md:pb-10">
         <div className="pointer-events-none absolute inset-0 z-[5] overflow-visible max-md:-top-14 max-md:bottom-0">
-          <div className="portfolio-mobile-deco-calculator absolute left-0 top-0 hidden -translate-y-1/2 md:block md:translate-x-[max(-50%,calc(16px-50vw+50cqw))]">
-            <div
-              className="pointer-events-auto absolute right-0 z-0"
-              style={{ top: -36, transform: "translateX(62%)" }}
-            >
+          <div className="portfolio-deco-calculator portfolio-mobile-deco-calculator absolute left-0 top-0 hidden md:block">
+            <div className="portfolio-deco-spin pointer-events-auto absolute right-0 z-0">
               <SpatialDotBadge />
             </div>
             <CalculatorCard />
           </div>
-          <div className="absolute right-4 top-4 hidden -translate-y-[70px] md:block">
+          <div className="portfolio-deco-mouse absolute right-4 top-4 hidden md:block">
             <PeekMouse />
           </div>
         </div>
