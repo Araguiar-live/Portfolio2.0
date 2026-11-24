@@ -261,8 +261,13 @@ export function Sidebar({
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 12 }}
               transition={{ duration: 0.28, ease: EASE }}
-              className="pointer-events-auto relative flex h-[min(989px,calc(100dvh-1.5rem))] w-[min(1242px,96vw)] flex-col overflow-hidden rounded-[28px] border-0 bg-[#ddd9c6] bg-cover bg-center shadow-[0_28px_70px_rgba(29,59,81,0.12)]"
-              style={{ cursor: PENCIL_CURSOR, backgroundImage: 'url("/resume-sand-field.png")' }}
+              className="pointer-events-auto relative flex h-[min(989px,calc(100dvh-1.5rem))] w-[min(1242px,96vw)] flex-col overflow-hidden rounded-[28px] border-0 bg-[#ddd9c6] shadow-[0_28px_70px_rgba(29,59,81,0.12)]"
+              style={{
+                cursor: PENCIL_CURSOR,
+                backgroundImage: 'url("/resume-sand-field.svg")',
+                backgroundSize: "1260px 900px",
+                backgroundRepeat: "repeat",
+              }}
               onPointerDown={(event) => {
                 if ((event.target as HTMLElement).closest("a, button")) return;
                 const start = point(event);
