@@ -9,8 +9,8 @@ const FRONT = "#1C1D21";
  */
 export function AiPlaygroundFolder({ children }: { children: ReactNode }) {
   return (
-    <div className="ai-playground-folder relative mb-7 [--pocket-h:242.55px] [--pocket-overlap:48px] [--pocket-rise:24px] max-md:[--pocket-h:233.1px] max-md:[--pocket-overlap:0px] max-md:[--pocket-rise:14px]">
-      <div className="relative z-10 px-6 max-md:px-0">
+    <div className="ai-playground-folder relative mb-7 [--pocket-h:242.55px] [--pocket-overlap:48px] [--pocket-rise:24px] max-md:mx-auto max-md:w-[min(340px,calc(100vw-32px))] max-md:[--pocket-h:168px] max-md:[--pocket-overlap:0px] max-md:[--pocket-rise:22px]">
+      <div className="relative z-10 px-6 max-md:px-[10px]">
         <div
           aria-hidden
           className="ai-playground-back pointer-events-none absolute z-0 rounded-[28px]"
@@ -50,7 +50,7 @@ function FrontPocket() {
   }, []);
 
   const { width, height, rise } = shape;
-  const radius = 28;
+  const radius = width < 420 ? 24 : 28;
   const stepStart = width * 0.56;
   const stepEnd = width * 0.78;
   const d = [
@@ -93,11 +93,11 @@ function FrontPocket() {
             <feComposite in="color" in2="offset" operator="in" />
           </filter>
         </defs>
-        <path d={d} fill={FRONT} filter="url(#pocket-shadow)" />
+        <path className="pocket-body" d={d} fill={FRONT} filter="url(#pocket-shadow)" />
       </svg>
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0"
+        className="pocket-frost pointer-events-none absolute inset-0"
         style={{
           clipPath: `path('${d}')`,
           backgroundColor: frost,
@@ -105,7 +105,7 @@ function FrontPocket() {
           backdropFilter: "blur(22px) saturate(160%)",
         }}
       />
-      <div aria-hidden className="pointer-events-none absolute -top-[18px] right-12 z-0">
+      <div aria-hidden className="pocket-clip pointer-events-none absolute -top-[18px] right-12 z-0 max-md:hidden">
         <svg
           viewBox="0 0 24 64"
           width="25.3"
@@ -135,7 +135,7 @@ function FrontPocket() {
           vectorEffect="non-scaling-stroke"
         />
       </svg>
-      <div aria-hidden className="pointer-events-none absolute -top-[18px] right-12 z-20">
+      <div aria-hidden className="pocket-clip pointer-events-none absolute -top-[18px] right-12 z-20 max-md:hidden">
         <svg
           viewBox="0 0 24 64"
           width="25.3"
