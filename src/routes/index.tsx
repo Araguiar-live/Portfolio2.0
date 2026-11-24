@@ -580,7 +580,7 @@ function Index() {
               </div>
               <div
                 className={`project-dock-mobile pointer-events-auto absolute -left-2 top-[calc(100%-28px)] z-20 hidden max-md:block ${chromeClass}`}
-                style={{ ["--deco-scale" as string]: "1.25", transform: "translateY(-10%)" }}
+                style={{ ["--deco-scale" as string]: "1.25", transform: "translateY(-18%)" }}
                 aria-hidden={!showChrome}
               >
                 <ProjectDock onPlus={() => setSidebarOpen(true)} />
