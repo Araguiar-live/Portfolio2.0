@@ -133,17 +133,19 @@ function Pin({ color, light }: { color: string; light: string }) {
 function Paper({
   tilt,
   pin,
+  frost = false,
   className = "",
   children,
 }: {
   tilt: number;
   pin: { color: string; light: string };
+  frost?: boolean;
   className?: string;
   children: ReactNode;
 }) {
   return (
     <article
-      className={`group relative [rotate:var(--pin-tilt)] select-text rounded-[16px] bg-[#fbfaf6] px-5 py-5 text-[#1d3b51] shadow-[0_12px_20px_rgba(48,36,24,0.12),0_1px_0_rgba(255,255,255,0.9)] transition duration-300 ease-out hover:z-10 hover:-translate-y-1 hover:[rotate:0deg] hover:shadow-[0_18px_28px_rgba(48,36,24,0.16)] ${className}`}
+      className={`group relative [rotate:var(--pin-tilt)] select-text rounded-[16px] px-5 py-5 text-[#1d3b51] shadow-[0_12px_20px_rgba(48,36,24,0.12),0_1px_0_rgba(255,255,255,0.9)] transition duration-300 ease-out hover:z-10 hover:-translate-y-1 hover:[rotate:0deg] hover:shadow-[0_18px_28px_rgba(48,36,24,0.16)] ${frost ? "bg-[rgba(251,250,246,0.8)] backdrop-blur-[18px]" : "bg-[#fbfaf6]"} ${className}`}
       style={{ ["--pin-tilt" as string]: `${tilt}deg` }}
     >
       <Pin color={pin.color} light={pin.light} />
@@ -302,7 +304,7 @@ export function Sidebar({
               <div ref={boardRef} className="relative z-10 min-h-0 flex-1">
                 <div className="relative z-10 h-full overflow-y-auto overscroll-contain px-4 pt-6 pb-6 sm:px-8 sm:pt-8">
                   <div className="grid grid-cols-1 items-start gap-6 md:grid-cols-2 md:gap-7">
-                    <Paper tilt={-1.2} pin={{ color: "#ff5126", light: "#ffb199" }} className="md:col-span-2">
+                    <Paper tilt={-1.2} frost pin={{ color: "#ff5126", light: "#ffb199" }} className="md:col-span-2">
                       <div className="flex flex-wrap items-start justify-between gap-4">
                         <div>
                           <p className="text-[11px] tracking-[0.16em] text-[#1d3b51]/60 uppercase">
