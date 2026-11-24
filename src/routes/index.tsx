@@ -550,10 +550,17 @@ function Index() {
             </header>
 
             <div
-              className={`relative mx-auto w-[92%] shrink-0 overflow-visible max-md:w-full max-md:max-w-[calc(100vw-32px)] max-md:pt-2 max-md:pb-6 ${
+              className={`relative mx-auto w-[92%] shrink-0 overflow-visible max-md:w-full max-md:max-w-[350px] max-md:pt-2 max-md:pb-16 ${
                 isExpanded ? "" : "md:mt-[2px]"
               }`}
             >
+              <div
+                aria-hidden
+                className="pointer-events-none absolute -left-10 top-0 z-0 hidden -translate-y-[42%] max-md:block"
+                style={{ ["--deco-scale" as string]: "0.77" }}
+              >
+                <CalculatorCard />
+              </div>
               <AiPlaygroundFolder>
                 <ProjectBentoStack
                   projects={PROJECTS}
@@ -563,13 +570,20 @@ function Index() {
                   nudgeSignal={nudgeSignal}
                 />
               </AiPlaygroundFolder>
-            </div>
-            {/* Phones: 15% smaller than the 1.25 dock, pinned to the stage bottom. */}
-            <div
-              className={`project-dock-mobile pointer-events-auto absolute left-1 bottom-6 z-20 hidden ${chromeClass}`}
-              aria-hidden={!showChrome}
-            >
-              <ProjectDock onPlus={() => setSidebarOpen(true)} />
+              <div
+                aria-hidden
+                className="pointer-events-none absolute -right-4 bottom-14 z-20 hidden max-md:block"
+                style={{ ["--deco-scale" as string]: "1" }}
+              >
+                <PeekMouse />
+              </div>
+              <div
+                className={`project-dock-mobile pointer-events-auto absolute -left-2 top-[calc(100%-28px)] z-20 hidden max-md:block ${chromeClass}`}
+                style={{ ["--deco-scale" as string]: "1.25" }}
+                aria-hidden={!showChrome}
+              >
+                <ProjectDock onPlus={() => setSidebarOpen(true)} />
+              </div>
             </div>
           </div>
         </WireframeStage>

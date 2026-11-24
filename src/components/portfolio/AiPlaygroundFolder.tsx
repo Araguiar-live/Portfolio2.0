@@ -10,7 +10,7 @@ const FRONT = "#1C1D21";
 export function AiPlaygroundFolder({ children }: { children: ReactNode }) {
   return (
     <div className="ai-playground-folder relative mb-7 [--pocket-h:242.55px] [--pocket-overlap:48px] [--pocket-rise:24px] max-md:mx-auto max-md:w-[min(340px,calc(100vw-32px))] max-md:[--pocket-h:168px] max-md:[--pocket-overlap:0px] max-md:[--pocket-rise:10px]">
-      <div className="relative z-10 px-6 max-md:min-h-[300px] max-md:px-0 max-md:pt-0">
+      <div className="relative z-10 px-6 max-md:px-0 max-md:pt-0">
         <div
           aria-hidden
           className="ai-playground-back pointer-events-none absolute z-0 rounded-[28px]"

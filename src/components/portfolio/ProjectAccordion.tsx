@@ -385,6 +385,11 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
       }
     >
       {project.slug === "first-design" ? <BendingSpoonsPaperclip /> : null}
+      {index === count - 1 ? (
+        <p className="mobile-psst pointer-events-none absolute left-1/2 z-20 hidden -translate-x-1/2 whitespace-nowrap rounded-[64px] border border-[#bb9ffa] bg-[linear-gradient(161.4deg,rgba(3,86,229,0.284)_19.75%,rgba(1,208,129,0.052)_86.39%)] px-4 py-1 text-center text-[10px] font-bold uppercase text-[#090e15] backdrop-blur-[4px] max-md:block">
+          Psst… desktop-only
+        </p>
+      ) : null}
       <div
         ref={faceRef}
         className="folder-face pointer-events-auto relative border-0 outline-none"
@@ -455,7 +460,10 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
               {project.role}
             </span>
             <span className="font-light max-sm:font-normal">|</span>
-            <span className="tabular-nums">{project.year}</span>
+            <span className="tabular-nums max-md:hidden">{project.year}</span>
+            <span className="hidden tabular-nums max-md:inline">
+              {index === 0 ? "2025" : index === 1 ? "2026" : "2023"}
+            </span>
           </div>
         </div>
       </div>
