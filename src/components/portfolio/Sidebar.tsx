@@ -289,7 +289,18 @@ export function Sidebar({
               }}
             >
               <div ref={boardRef} className="relative min-h-0 flex-1">
-                <div className="h-full overflow-y-auto overscroll-contain px-4 pt-6 pb-6 sm:px-8 sm:pt-8">
+                <div
+                  aria-hidden
+                  className="pointer-events-none absolute inset-0 z-0 grid auto-rows-[88px] grid-cols-6 gap-[2px] p-[2px]"
+                >
+                  {Array.from({ length: 24 }, (_, index) => (
+                    <div
+                      key={index}
+                      className="rounded-[12px] border border-[#c4b096] bg-[#f3e7d6]"
+                    />
+                  ))}
+                </div>
+                <div className="relative z-10 h-full overflow-y-auto overscroll-contain px-4 pt-6 pb-6 sm:px-8 sm:pt-8">
                   <div className="grid grid-cols-1 items-start gap-6 md:grid-cols-2 md:gap-7">
                     <Paper tilt={-1.2} pin={CORAL} className="md:col-span-2">
                       <div className="flex flex-wrap items-start justify-between gap-4">
