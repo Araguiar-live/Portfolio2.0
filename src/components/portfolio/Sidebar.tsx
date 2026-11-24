@@ -360,7 +360,7 @@ export function Sidebar({
                           type="button"
                           onClick={() => onOpenChange(false)}
                           aria-label="Close resume"
-                          className="ml-auto grid size-9 cursor-pointer place-items-center rounded-full border border-[#d9d1c4] bg-[#f7f3ea] text-[16px] text-[#1d3b51] shadow-[inset_0_1px_0_#fff,0_2px_0_#c9c0b2]"
+                          className="ml-auto grid size-9 cursor-pointer place-items-center rounded-full border-0 bg-black text-[16px] text-[#fbfaf6]"
                         >
                           ×
                         </button>
