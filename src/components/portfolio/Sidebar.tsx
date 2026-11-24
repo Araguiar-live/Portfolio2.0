@@ -114,37 +114,6 @@ const SKILLS = [
 
 const TOOLS = ["Figma", "Prototypes", "Design tokens", "WCAG"];
 
-/** Figma 2250:23727 — sand tile field behind the resume cards. */
-function ResumeBackdrop() {
-  const marks = new Set(["0-0", "2-4", "5-11", "7-2"]);
-  return (
-    <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden bg-[#ddd9c6]">
-      <div className="flex h-full flex-col gap-[2px]">
-        {Array.from({ length: 12 }, (_, row) => (
-          <div key={row} className="flex min-h-0 flex-1 gap-[2px]">
-            {Array.from({ length: 14 }, (_, column) => (
-              <div
-                key={column}
-                className="flex min-w-0 flex-1 items-center justify-center rounded-[12px] bg-[rgba(110,102,102,0.1)]"
-              >
-                {marks.has(`${row}-${column}`) ? (
-                  <span className="grid grid-cols-2 gap-[2px]">
-                    {Array.from({ length: 4 }, (_, chip) => (
-                      <span key={chip} className="size-[6px] rounded-[1px] bg-[rgba(110,102,102,0.28)]" />
-                    ))}
-                  </span>
-                ) : (
-                  <span className="size-1 rounded-full bg-[rgba(110,102,102,0.35)]" />
-                )}
-              </div>
-            ))}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
 function darker(hex: string, amount: number) {
   const value = hex.replace("#", "");
   const channel = (start: number) =>
@@ -313,8 +282,8 @@ export function Sidebar({
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 12 }}
               transition={{ duration: 0.28, ease: EASE }}
-              className="pointer-events-auto relative flex h-[min(989px,calc(100dvh-1.5rem))] w-[min(1242px,96vw)] flex-col overflow-hidden rounded-[28px] border-0 bg-[#ddd9c6] shadow-[0_28px_70px_rgba(29,59,81,0.12)]"
-              style={{ cursor: PENCIL_CURSOR }}
+              className="pointer-events-auto relative flex h-[min(989px,calc(100dvh-1.5rem))] w-[min(1242px,96vw)] flex-col overflow-hidden rounded-[28px] border-0 bg-[#ddd9c6] bg-cover bg-center shadow-[0_28px_70px_rgba(29,59,81,0.12)]"
+              style={{ cursor: PENCIL_CURSOR, backgroundImage: 'url("/resume-sand-field.png")' }}
               onPointerDown={(event) => {
                 if ((event.target as HTMLElement).closest("a, button")) return;
                 const start = point(event);
@@ -335,7 +304,6 @@ export function Sidebar({
                 last.current = null;
               }}
             >
-              <ResumeBackdrop />
               <div ref={boardRef} className="relative z-10 min-h-0 flex-1">
                 <div className="relative z-10 h-full overflow-y-auto overscroll-contain px-4 pt-6 pb-6 sm:px-8 sm:pt-8">
                   <div className="grid grid-cols-1 items-start gap-6 md:grid-cols-2 md:gap-7">
