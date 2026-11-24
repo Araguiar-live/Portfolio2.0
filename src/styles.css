@@ -65,6 +65,10 @@ html[data-work-locked] .portfolio-interactive-hero-shell {
     padding-top: 9px !important;
     padding-bottom: 55px !important;
   }
+
+  .folder-stroke {
+    stroke-width: 1px;
+  }
 }
 
 /* Marquee + footer ink (~15% darker than #0c0f14) */
