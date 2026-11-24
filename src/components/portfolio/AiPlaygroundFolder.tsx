@@ -94,8 +94,8 @@ function FrontPocket() {
       ref={ref}
       className="playground-pocket relative z-20 -ml-[4%] flex w-[108%] items-end justify-between px-6 pb-7 max-md:ml-0 max-md:w-full md:px-10"
       style={{
-        height: "calc(var(--pocket-h) + 28px)",
-        marginTop: "calc(var(--pocket-overlap) * -1 - var(--pocket-h) * 0.05 - 28px)",
+        height: "calc(var(--pocket-h) + 28px * var(--work-fit, 1))",
+        marginTop: "calc(var(--pocket-overlap) * -1 - var(--pocket-h) * 0.05 - 28px * var(--work-fit, 1))",
       }}
     >
       <svg

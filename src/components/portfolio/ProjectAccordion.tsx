@@ -91,11 +91,6 @@ interface Props {
 
 /** Tab rise above the folder body. */
 const TAB_H = 24;
-/**
- * Pull the next folder up by the tab plus 24px, so its body — not only its tab —
- * covers 24px of the folder behind it. A 6px hover lift then leaves 18px tucked.
- */
-const FOLDER_OVERLAP = TAB_H + 24;
 const TAB_FLAT = 160;
 const TAB_SLOPE = 20;
 const TAB_SHIFT = [24, 160, 296] as const;
@@ -377,7 +372,7 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
         {
           "--sheet-tilt": (index + 1) % 2 === 1 ? "-0.8deg" : "0.8deg",
           zIndex: index + 1,
-          marginTop: index === 0 ? 0 : -FOLDER_OVERLAP,
+          marginTop: index === 0 ? 0 : "calc(-48px * var(--work-fit, 1))",
           border: 0,
           outline: "none",
           boxShadow: "none",
@@ -395,7 +390,7 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
         className="folder-face pointer-events-auto relative border-0 outline-none"
         style={{
           clipPath: outline ? `url(#folder-clip-${project.slug})` : "none",
-          paddingTop: TAB_H,
+          paddingTop: "calc(24px * var(--work-fit, 1))",
           border: 0,
           outline: "none",
           boxShadow: "none",
@@ -451,7 +446,7 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
             ) : null}
           </span>
         </div>
-        <div className="folder-meta relative z-10 flex shrink-0 flex-col items-end gap-2 pointer-events-none max-md:hidden">
+        <div className="folder-meta relative z-10 flex min-w-0 shrink flex-col items-end gap-2 pointer-events-none max-md:hidden md:max-w-[46%]">
           <span className="max-md:hidden">
             <FolderMark slug={project.slug} />
           </span>

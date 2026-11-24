@@ -15,6 +15,73 @@
   animation: marquee 40s linear infinite;
 }
 
+/*
+  Closed laptop/desktop column. 1049px is the authored header + gap + folder.
+  --work-fit scales that stack to the stage height so a short laptop does not
+  clip the pocket and a tall desktop does not leave the folder at one size.
+  Phones keep the fixed frame and do not set this variable.
+*/
+@media (min-width: 768px) {
+  .work-closed-column {
+    container-type: size;
+    top: 0;
+    height: 100%;
+  }
+
+  /* cqh has to be read on a child. On the container itself it falls back to the viewport. */
+  .work-closed-fit {
+    --work-fit: min(1.22, max(0.55, (100cqh - 56px) / 1049px));
+    display: flex;
+    width: 100%;
+    height: 100%;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: calc(40px * var(--work-fit));
+  }
+
+  .work-closed-fit > header {
+    gap: calc(20px * var(--work-fit));
+  }
+
+  .work-closed-fit > header > p:first-child {
+    font-size: calc(11px * var(--work-fit));
+    letter-spacing: calc(2px * var(--work-fit));
+  }
+
+  .work-closed-fit > header h1 {
+    font-size: calc(48px * var(--work-fit));
+    line-height: calc(56px * var(--work-fit));
+  }
+
+  .work-closed-fit > header > p:last-child {
+    font-size: calc(14px * var(--work-fit));
+    line-height: calc(22px * var(--work-fit));
+  }
+
+  .work-closed-fit .ai-playground-folder {
+    --pocket-h: calc(242.55px * var(--work-fit));
+    --pocket-overlap: calc(48px * var(--work-fit));
+    --pocket-rise: calc(24px * var(--work-fit));
+    margin-bottom: calc(28px * var(--work-fit));
+  }
+
+  .work-closed-fit .folder-row {
+    padding: calc(78.6px * var(--work-fit)) clamp(16px, calc(37px * var(--work-fit)), 37px);
+    gap: calc(28px * var(--work-fit));
+  }
+
+  .work-closed-fit .folder-title {
+    font-size: calc(37px * var(--work-fit));
+    line-height: 1.15;
+  }
+
+  .work-closed-fit .folder-index,
+  .work-closed-fit .folder-meta {
+    font-size: calc(16px * var(--work-fit));
+  }
+}
+
 /* Portfolio page base fill — structural cells live in SiteWireframe (DOM). */
 .portfolio-hero-grid {
   background-color: #f3f4f6;
