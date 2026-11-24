@@ -398,7 +398,7 @@ function WorkStageDecorations() {
       </header>
       <div className="relative w-full shrink-0 overflow-visible md:-mt-10 max-md:pt-14 max-md:pb-10">
         <div className="pointer-events-none absolute inset-0 z-[5] overflow-visible max-md:-top-14 max-md:bottom-0">
-          <div className="portfolio-mobile-deco-calculator absolute left-0 top-0 hidden -translate-y-1/2 max-md:-bottom-4 max-md:-left-3 max-md:top-auto max-md:block max-md:origin-bottom-left max-md:scale-[0.715] max-md:translate-x-0 max-md:translate-y-0 max-md:[--deco-scale:0.72] md:block md:translate-x-[max(-50%,calc(16px-50vw+50cqw))]">
+          <div className="portfolio-mobile-deco-calculator absolute left-0 top-0 hidden -translate-y-1/2 md:block md:translate-x-[max(-50%,calc(16px-50vw+50cqw))]">
             <div
               className="pointer-events-auto absolute right-0 z-0"
               style={{ top: -36, transform: "translateX(62%)" }}
@@ -407,7 +407,7 @@ function WorkStageDecorations() {
             </div>
             <CalculatorCard />
           </div>
-          <div className="absolute right-4 top-4 hidden -translate-y-[70px] max-md:-right-1 max-md:top-[6px] max-md:bottom-auto max-md:block max-md:origin-top-right max-md:scale-80 max-md:translate-y-0 max-md:[--deco-scale:0.85] md:block">
+          <div className="absolute right-4 top-4 hidden -translate-y-[70px] md:block">
             <PeekMouse />
           </div>
         </div>
@@ -463,10 +463,14 @@ function Index() {
 
       {/* Top-right cluster. The note hangs under Contact Me so the two never overlap. */}
       <div
-        className={`fixed top-6 right-8 z-[110] flex origin-top-right flex-col items-end gap-3 max-md:left-1/2 max-md:right-auto max-md:top-4 max-md:w-[min(350px,calc(100%-32px))] max-md:-translate-x-1/2 max-md:items-end max-md:gap-0 max-md:scale-100 ${chromeClass}`}
+        className={`fixed top-6 right-8 z-[110] flex origin-top-right flex-col items-end gap-3 max-md:left-1/2 max-md:right-auto max-md:top-4 max-md:z-[130] max-md:w-[min(350px,calc(100%-32px))] max-md:-translate-x-1/2 max-md:items-end max-md:gap-0 max-md:scale-100 ${chromeClass}`}
         aria-hidden={!showChrome}
       >
-        <div className="spatial-glass spatial-glass-hairline spatial-layer flex items-center gap-[4px] rounded-[16px] bg-black/[0.08] p-[4px] shadow-lg shadow-black/5 max-md:w-[60%] max-md:min-w-[200px] max-md:gap-1 max-md:rounded-[16px] max-md:p-1">
+        <div
+          aria-hidden
+          className="portfolio-mobile-header-mask pointer-events-none absolute -top-4 left-1/2 hidden h-[calc(100%+1.75rem)] w-screen -translate-x-1/2 max-md:block"
+        />
+        <div className="spatial-glass spatial-glass-hairline spatial-layer relative z-[1] flex items-center gap-[4px] rounded-[16px] bg-black/[0.08] p-[4px] shadow-lg shadow-black/5 max-md:w-[60%] max-md:min-w-[200px] max-md:gap-1 max-md:rounded-[16px] max-md:p-1">
           <button
             type="button"
             onClick={() => setSidebarOpen((v) => !v)}
@@ -512,7 +516,7 @@ function Index() {
             className={
               isExpanded
                 ? "pointer-events-auto mx-auto flex w-full max-w-[1690px] flex-col items-center gap-[78px] overflow-visible px-6 pb-0 pt-10 sm:px-10"
-                : "@container pointer-events-auto absolute left-[calc(50%-min(2400px,100%-32px)/2)] top-[calc(50%-76px-min(874px,92%)/2)] flex h-[min(874px,92%)] w-[min(2400px,calc(100%-32px))] flex-col items-center gap-[40px] overflow-visible max-md:relative max-md:left-auto max-md:top-auto max-md:mx-auto max-md:h-auto max-md:min-h-[100dvh] max-md:w-[min(350px,calc(100%-32px))] max-md:gap-8 max-md:px-1 max-md:pb-28 max-md:pt-14 max-sm:gap-[37px] max-sm:pb-32 max-sm:pt-[68px]"
+                : "@container pointer-events-auto absolute left-[calc(50%-min(2400px,100%-32px)/2)] top-[calc(50%-76px-min(874px,92%)/2)] flex h-[min(874px,92%)] w-[min(2400px,calc(100%-32px))] flex-col items-center gap-[40px] overflow-visible max-md:relative max-md:left-auto max-md:top-auto max-md:mx-auto max-md:h-auto max-md:min-h-0 max-md:w-full max-md:max-w-[calc(100vw-32px)] max-md:gap-8 max-md:px-0 max-md:pb-16 max-md:pt-24 max-sm:gap-[37px] max-sm:pb-20"
             }
           >
             <header className="flex w-full max-w-[720px] shrink-0 flex-col items-center gap-5 text-center max-md:mt-3 max-md:gap-4 max-sm:mt-3 max-sm:gap-4">
@@ -546,7 +550,7 @@ function Index() {
             </header>
 
             <div
-              className={`relative mx-auto w-[92%] shrink-0 overflow-visible max-md:pt-14 max-md:pb-10 ${
+              className={`relative mx-auto w-[92%] shrink-0 overflow-visible max-md:w-full max-md:max-w-[calc(100vw-32px)] max-md:pt-2 max-md:pb-6 ${
                 isExpanded ? "" : "md:mt-[2px]"
               }`}
             >
@@ -562,7 +566,7 @@ function Index() {
             </div>
             {/* Phones: 15% smaller than the 1.25 dock, pinned to the stage bottom. */}
             <div
-              className={`project-dock-mobile pointer-events-auto absolute left-1 bottom-6 z-20 md:hidden ${chromeClass}`}
+              className={`project-dock-mobile pointer-events-auto absolute left-1 bottom-6 z-20 hidden ${chromeClass}`}
               aria-hidden={!showChrome}
             >
               <ProjectDock onPlus={() => setSidebarOpen(true)} />
@@ -571,7 +575,7 @@ function Index() {
         </WireframeStage>
 
         {/* Light gap between the folder stage and the showcase carousel. */}
-        <div className="relative z-20 h-[30px] w-full shrink-0 bg-[#f3f4f6]" aria-hidden />
+        <div className="work-stage-gap relative z-20 h-[30px] w-full shrink-0 bg-[#f3f4f6]" aria-hidden />
 
         {/* Marquee + footer — continuous black plane under the bento strip */}
         <div className="relative z-20 bg-black [content-visibility:auto] [contain-intrinsic-size:auto_720px] max-sm:bg-[var(--portfolio-bottom-surface,#0a0d11)]">

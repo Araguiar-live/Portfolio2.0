@@ -400,7 +400,7 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
       >
       {/* Row header — Figma 530:151817. Closed sheet is 20% taller than the 162px desktop / 130px phone rows; overlap stays 48px. */}
       <div
-        className="group relative flex w-full items-center justify-between gap-7 border-0 px-[37px] py-[78.6px] text-left outline-none transition-[background] duration-300 max-md:flex-col max-md:items-stretch max-md:gap-[15px] max-md:px-5 max-md:py-[41.4px] max-sm:gap-[15px] max-sm:px-5 max-sm:py-[41.4px]"
+        className="group relative flex w-full items-center justify-between gap-7 border-0 px-[37px] py-[78.6px] text-left outline-none transition-[background] duration-300 max-md:flex-col max-md:items-stretch max-md:gap-2 max-md:px-4 max-md:pt-5 max-md:pb-20 max-sm:gap-2 max-sm:px-4 max-sm:pt-5 max-sm:pb-20"
         onMouseEnter={rowHover.onMouseEnter}
         onMouseMove={rowHover.onMouseMove}
         onMouseLeave={rowHover.onMouseLeave}
@@ -446,10 +446,10 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
             ) : null}
           </span>
         </div>
-        <div className="relative z-10 flex shrink-0 flex-col items-end gap-2 pointer-events-none max-md:items-start max-sm:items-start">
+        <div className="relative z-10 flex shrink-0 flex-col items-end gap-2 pointer-events-none max-md:w-full max-md:min-w-0 max-md:shrink max-md:items-start max-sm:items-start">
           <FolderMark slug={project.slug} />
-          <div className="folder-muted flex items-center justify-end gap-[18px] text-[16px] max-md:gap-2 max-md:text-[10px] max-sm:gap-2 max-sm:text-[10px]">
-            <span className="text-right max-md:flex-1 max-md:text-left max-md:leading-4 max-sm:flex-1 max-sm:text-left max-sm:leading-4">
+          <div className="folder-muted flex w-full min-w-0 items-center justify-end gap-[18px] text-[16px] max-md:justify-start max-md:gap-1.5 max-md:text-[11px] max-md:leading-[14px] max-sm:gap-1.5 max-sm:text-[11px]">
+            <span className="truncate text-right max-md:min-w-0 max-md:text-left max-sm:text-left">
               {project.role}
             </span>
             <span className="font-light max-sm:font-normal">|</span>

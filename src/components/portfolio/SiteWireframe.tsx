@@ -382,8 +382,8 @@ export function WireframeStage({
     <div
       className={
         expanded
-          ? "relative w-full overflow-x-hidden bg-[#f3f4f6] pb-0 pt-[96px]"
-          : "relative aspect-[1262/847] w-full overflow-hidden bg-[#f3f4f6] max-md:z-30 max-md:aspect-auto max-md:min-h-[100dvh] max-md:overflow-x-hidden max-sm:overflow-visible"
+          ? "wireframe-stage relative w-full overflow-x-hidden bg-[#f3f4f6] pb-0 pt-[96px]"
+          : "wireframe-stage relative aspect-[1262/847] w-full overflow-hidden bg-[#f3f4f6] max-md:z-10 max-md:aspect-auto max-md:min-h-[100dvh] max-md:overflow-x-hidden max-sm:overflow-visible"
       }
     >
       {/*
@@ -392,7 +392,7 @@ export function WireframeStage({
       */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 z-0 overflow-hidden bg-[#f3f4f6]"
+        className="pointer-events-none absolute inset-0 z-0 overflow-hidden bg-[#f3f4f6] max-md:hidden"
       >
         {/* Phones keep the desktop tile size (Figma 2250:24937) and crop the band instead. */}
         <div className="absolute inset-x-0 top-0 flex w-full flex-col gap-[2px] p-[2px] max-sm:w-[1113px]">
@@ -410,7 +410,7 @@ export function WireframeStage({
       {expanded ? (
         <div className="pointer-events-none relative z-10">{children}</div>
       ) : (
-        <div className="pointer-events-none absolute inset-0 z-10 overflow-hidden max-sm:relative max-sm:inset-auto max-sm:overflow-visible">
+        <div className="pointer-events-none absolute inset-0 z-10 overflow-hidden max-md:relative max-md:inset-auto max-md:overflow-visible">
           {children}
         </div>
       )}

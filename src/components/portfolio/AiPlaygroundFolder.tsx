@@ -10,10 +10,10 @@ const FRONT = "#1C1D21";
 export function AiPlaygroundFolder({ children }: { children: ReactNode }) {
   return (
     <div className="ai-playground-folder relative mb-7 [--pocket-h:242.55px] [--pocket-overlap:48px] [--pocket-rise:24px] max-md:[--pocket-h:233.1px] max-md:[--pocket-overlap:32px] max-md:[--pocket-rise:14px]">
-      <div className="relative z-10 px-6">
+      <div className="relative z-10 px-6 max-md:px-0">
         <div
           aria-hidden
-          className="pointer-events-none absolute z-0 rounded-[28px]"
+          className="ai-playground-back pointer-events-none absolute z-0 rounded-[28px]"
           style={{
             top: "30%",
             bottom: "calc(var(--pocket-h) - var(--pocket-overlap))",
@@ -73,7 +73,7 @@ function FrontPocket() {
   return (
     <div
       ref={ref}
-      className="playground-pocket relative z-20 -ml-[4%] flex w-[108%] items-end justify-between px-6 pb-7 md:px-10"
+      className="playground-pocket relative z-20 -ml-[4%] flex w-[108%] items-end justify-between px-6 pb-7 max-md:ml-0 max-md:w-full md:px-10"
       style={{
         height: "calc(var(--pocket-h) + 28px)",
         marginTop: "calc(var(--pocket-overlap) * -1 - var(--pocket-h) * 0.05 - 28px)",

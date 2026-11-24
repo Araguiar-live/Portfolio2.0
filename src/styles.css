@@ -26,13 +26,38 @@ html[data-work-locked] .portfolio-interactive-hero-shell {
   display: none;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 767px) {
   .portfolio-hero-grid {
     width: 100%;
     max-width: 100%;
+    min-height: 100vh;
     margin: 0;
     padding: 0;
     overflow-x: hidden;
+    background-color: #f3f4f6;
+    background-image: url("/work-grid-tile.svg");
+    background-repeat: repeat;
+    background-size: 90px 90px;
+  }
+
+  /* Let the page tile show through the work stage, including the gap above the carousel. */
+  #work,
+  #work > .wireframe-stage,
+  .work-stage-gap {
+    background-color: transparent;
+    background-image: none;
+  }
+
+  .ai-playground-back {
+    left: 0 !important;
+    width: 100% !important;
+  }
+
+  .portfolio-mobile-header-mask {
+    background-color: #f3f4f6;
+    background-image: url("/work-grid-tile.svg");
+    background-repeat: repeat;
+    background-size: 90px 90px;
   }
 }
 
