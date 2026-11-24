@@ -146,7 +146,7 @@ function Paper({
 }) {
   return (
     <article
-      className={`group relative [rotate:var(--pin-tilt)] select-text rounded-[16px] px-5 py-5 text-[#1d3b51] shadow-[0_12px_20px_rgba(48,36,24,0.12),0_1px_0_rgba(255,255,255,0.9)] transition duration-300 ease-out hover:z-10 hover:-translate-y-1 hover:[rotate:0deg] hover:shadow-[0_18px_28px_rgba(48,36,24,0.16)] ${frost == null ? "bg-[#fbfaf6]" : "backdrop-blur-[18px]"} ${className}`}
+      className={`group relative [rotate:var(--pin-tilt)] select-text rounded-[16px] px-5 py-5 text-[#1d3b51] shadow-[0_8px_16px_rgba(48,36,24,0.08)] ${frost == null ? "bg-[#fbfaf6]" : ""} ${className}`}
       style={{
         ["--pin-tilt" as string]: `${tilt}deg`,
         ...(frost == null ? {} : { backgroundColor: `rgba(251, 250, 246, ${frost})` }),
@@ -191,7 +191,7 @@ export function Sidebar({
     if (!open || !board || !canvas) return;
     const fit = () => {
       const rect = board.getBoundingClientRect();
-      const dpr = window.devicePixelRatio || 1;
+      const dpr = 1;
       const nextW = Math.max(1, Math.round(rect.width * dpr));
       const nextH = Math.max(1, Math.round(rect.height * dpr));
       if (canvas.width !== nextW || canvas.height !== nextH) {
@@ -264,7 +264,7 @@ export function Sidebar({
             exit={{ opacity: 0 }}
             transition={{ duration: 0.22, ease: EASE }}
             onClick={() => onOpenChange(false)}
-            className="fixed inset-0 z-[100] cursor-default border-0 bg-white/40 backdrop-blur-[16px]"
+            className="fixed inset-0 z-[100] cursor-default border-0 bg-white/50"
           />
 
           <div className="pointer-events-none fixed inset-0 z-[120] flex items-center justify-center p-3 sm:p-5">
@@ -274,15 +274,15 @@ export function Sidebar({
               role="dialog"
               aria-modal="true"
               aria-label="Resume"
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 12 }}
-              transition={{ duration: 0.28, ease: EASE }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.16, ease: EASE }}
               className="pointer-events-auto relative flex h-[min(989px,calc(100dvh-1.5rem))] w-[min(1242px,96vw)] flex-col overflow-hidden rounded-[28px] border-0 bg-[#DDD9C6] p-[2px] shadow-[0_28px_70px_rgba(29,59,81,0.12)]"
               style={{
                 cursor: PENCIL_CURSOR,
                 backgroundImage: 'url("/resume-sand-field.svg"), linear-gradient(#DDD9C6, #DDD9C6)',
-                backgroundSize: "1260px 900px, auto",
+                backgroundSize: "90px 90px, auto",
                 backgroundRepeat: "repeat, no-repeat",
                 backgroundClip: "content-box, border-box",
                 backgroundOrigin: "content-box, border-box",

@@ -228,7 +228,7 @@ function PreviewFrame({
           loop
           playsInline
           autoPlay
-          preload="auto"
+          preload="metadata"
           disablePictureInPicture
           controls={false}
           draggable={false}

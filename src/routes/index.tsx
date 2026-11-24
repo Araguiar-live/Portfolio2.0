@@ -66,6 +66,30 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
+/** Warm the case-study chunks during idle time so opening a project does not pop in empty. */
+function usePrefetchCaseStudies() {
+  useEffect(() => {
+    const load = () => {
+      void import("@/components/portfolio/CrcleSignalHome");
+      void import("@/components/portfolio/CrcleRadar");
+      void import("@/components/portfolio/CrcleMessaging");
+      void import("@/components/portfolio/CrcleProfile");
+      void import("@/components/portfolio/firstDesign/FirstDesignInspector");
+      void import("@/components/portfolio/OdicciWorkspacePicker");
+      void import("@/components/portfolio/OdicciColourPalette");
+      void import("@/components/portfolio/OdicciSignUp");
+      void import("@/components/portfolio/OdicciTemplateLibrary");
+      void import("@/components/portfolio/FoodForThought");
+    };
+    const idle = window.requestIdleCallback;
+    const id = idle ? idle(load, { timeout: 1500 }) : window.setTimeout(load, 300);
+    return () => {
+      if (idle) window.cancelIdleCallback(id as number);
+      else window.clearTimeout(id as number);
+    };
+  }, []);
+}
+
 // Master project registry. Drop real content into `content` per tab later.
 const PROJECTS: Project[] = [
   {
@@ -393,6 +417,7 @@ function WorkStageDecorations() {
 }
 
 function Index() {
+  usePrefetchCaseStudies();
   const [openSlug, setOpenSlug] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [designOn, setDesignOn] = useState(false);
