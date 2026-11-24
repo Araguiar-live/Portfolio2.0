@@ -316,7 +316,7 @@ export function Sidebar({
                             platforms, design systems, and code-backed prototypes from zero to one.
                           </p>
                         </div>
-                        <span className="inline-flex items-center gap-2 rounded-full border border-[#cfe8d4] bg-[#f4fff7] px-3 py-1.5 text-[12px] text-[#1d3b51]">
+                        <span className="inline-flex items-center gap-2 text-[12px] text-[#1d3b51]">
                           <span
                             className="size-2 rounded-full bg-[#0fc972]"
                             style={{ boxShadow: "0 0 8px #0fc972" }}
