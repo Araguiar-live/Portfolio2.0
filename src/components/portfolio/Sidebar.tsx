@@ -342,14 +342,14 @@ export function Sidebar({
                         <a
                           href={RESUME_HREF}
                           download="Ana-Rafaela Aguiar - Product Designer Resume.pdf"
-                          className="inline-flex h-9 items-center rounded-full border border-[#d9d1c4] bg-[#f7f3ea] px-4 text-[12px] font-medium text-[#1d3b51] shadow-[inset_0_1px_0_#fff,0_2px_0_#c9c0b2]"
+                          className="inline-flex h-9 items-center rounded-full border border-[#1d3fe0] bg-[#2F5BFF] px-4 text-[12px] font-medium text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.35),0_2px_0_#1d3fe0]"
                         >
                           Download PDF
                         </a>
                         <button
                           type="button"
                           onClick={copyEmail}
-                          className="inline-flex h-9 cursor-pointer items-center rounded-full border border-[#d9d1c4] bg-[#f7f3ea] px-4 text-[12px] font-medium text-[#1d3b51] shadow-[inset_0_1px_0_#fff,0_2px_0_#c9c0b2]"
+                          className="inline-flex h-9 cursor-pointer items-center rounded-full border border-[#3d907c] bg-[#4eab95] px-4 text-[12px] font-medium text-[#f7f6f2] shadow-[inset_0_1px_0_rgba(255,255,255,0.35),0_2px_0_#3d907c]"
                         >
                           {copied ? "Copied" : "Copy Email"}
                         </button>
