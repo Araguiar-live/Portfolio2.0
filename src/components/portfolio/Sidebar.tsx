@@ -19,6 +19,10 @@ const CORAL = "#ff5126";
 const SKY = "#7ec8e3";
 const MINT = "#4eab95";
 
+const TILE_PATTERN = `url("data:image/svg+xml,${encodeURIComponent(
+  `<svg xmlns="http://www.w3.org/2000/svg" width="207" height="90" viewBox="0 0 207 90"><rect x="1" y="1" width="204" height="86" rx="12" fill="#f3e7d6" stroke="#c4b096"/></svg>`,
+)}")`;
+
 const ERASER_CURSOR = `url("data:image/svg+xml,${encodeURIComponent(
   `<svg xmlns="http://www.w3.org/2000/svg" width="37" height="37" viewBox="0 0 32 32"><g transform="rotate(-18 16 16)"><rect x="6" y="11" width="20" height="12" rx="2" fill="#f4b8c4" fill-opacity="0.62"/><rect x="6" y="11" width="7" height="12" rx="2" fill="#7ec8e3" fill-opacity="0.62"/></g></svg>`,
 )}") 9 25, cell`;
@@ -275,10 +279,10 @@ export function Sidebar({
               transition={{ duration: 0.28, ease: EASE }}
               className="pointer-events-auto relative flex h-[min(989px,calc(100dvh-1.5rem))] w-[min(1242px,96vw)] flex-col overflow-hidden rounded-[28px] border-0 shadow-[inset_0_1px_0_rgba(255,255,255,0.65),inset_0_-14px_28px_rgba(90,70,48,0.06),0_28px_70px_rgba(29,59,81,0.12)] backdrop-blur-[18px]"
               style={{
-                backgroundColor: "rgba(239, 232, 220, 0.62)",
-                backgroundImage:
-                  "radial-gradient(circle at 20% 10%, rgba(255,255,255,0.4), transparent 42%), radial-gradient(rgba(90,70,48,0.06) 0.6px, transparent 0.7px)",
-                backgroundSize: "auto, 7px 7px",
+                backgroundColor: "rgba(226, 214, 196, 0.72)",
+                backgroundImage: TILE_PATTERN,
+                backgroundSize: "207px 90px",
+                backgroundRepeat: "repeat",
                 cursor: ERASER_CURSOR,
               }}
               onPointerDown={(event) => {
@@ -302,17 +306,6 @@ export function Sidebar({
               }}
             >
               <div ref={boardRef} className="relative min-h-0 flex-1">
-                <div
-                  aria-hidden
-                  className="pointer-events-none absolute inset-0 z-0 grid auto-rows-[88px] grid-cols-6 gap-[2px] p-[2px]"
-                >
-                  {Array.from({ length: 24 }, (_, index) => (
-                    <div
-                      key={index}
-                      className="rounded-[12px] border border-[#c4b096] bg-[#f3e7d6]"
-                    />
-                  ))}
-                </div>
                 <div className="relative z-10 h-full overflow-y-auto overscroll-contain px-4 pt-6 pb-6 sm:px-8 sm:pt-8">
                   <div className="grid grid-cols-1 items-start gap-6 md:grid-cols-2 md:gap-7">
                     <Paper tilt={-1.2} pin={CORAL} className="md:col-span-2">
