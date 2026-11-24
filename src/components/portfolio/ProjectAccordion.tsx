@@ -372,7 +372,7 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
         {
           "--sheet-tilt": (index + 1) % 2 === 1 ? "-0.8deg" : "0.8deg",
           zIndex: index + 1,
-          marginTop: index === 0 ? 0 : "calc(-48px * var(--work-fit, 1))",
+          marginTop: index === 0 ? 0 : -48,
           border: 0,
           outline: "none",
           boxShadow: "none",
@@ -390,7 +390,7 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
         className="folder-face pointer-events-auto relative border-0 outline-none"
         style={{
           clipPath: outline ? `url(#folder-clip-${project.slug})` : "none",
-          paddingTop: "calc(24px * var(--work-fit, 1))",
+          paddingTop: TAB_H,
           border: 0,
           outline: "none",
           boxShadow: "none",
