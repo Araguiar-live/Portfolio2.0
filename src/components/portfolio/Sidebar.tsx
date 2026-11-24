@@ -264,10 +264,10 @@ export function Sidebar({
             exit={{ opacity: 0 }}
             transition={{ duration: 0.22, ease: EASE }}
             onClick={() => onOpenChange(false)}
-            className="fixed inset-0 z-[100] cursor-default border-0 bg-white/50"
+            className="fixed inset-0 z-[140] cursor-default border-0 bg-white/50"
           />
 
-          <div className="pointer-events-none fixed inset-0 z-[120] flex items-center justify-center p-3 sm:p-5">
+          <div className="pointer-events-none fixed inset-0 z-[150] flex items-center justify-center p-3 sm:p-5">
             <motion.aside
               key="sidebar-panel"
               id={SIDEBAR_PANEL_ID}
