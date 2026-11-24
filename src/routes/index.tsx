@@ -509,7 +509,7 @@ function Index() {
       */}
       <section
         id="work"
-        className="relative z-10 scroll-mt-0 overflow-x-hidden max-md:relative max-md:z-[1] max-md:w-full max-md:max-w-[100vw] max-md:isolate max-md:bg-[#f3f4f6]"
+        className="relative z-10 scroll-mt-0 overflow-x-hidden max-md:relative max-md:z-[1] max-md:w-full max-md:max-w-[100vw] max-md:isolate max-md:bg-transparent"
       >
         <WireframeStage expanded={isExpanded} decorations={<WorkStageDecorations />}>
           <div

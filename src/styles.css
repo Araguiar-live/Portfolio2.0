@@ -37,7 +37,7 @@ html[data-work-locked] .portfolio-interactive-hero-shell {
     background-color: #f3f4f6;
     background-image: url("/work-grid-tile.svg");
     background-repeat: repeat;
-    background-size: 90px 90px;
+    background-size: 100% auto;
   }
 
   /* Let the page tile show through the work stage, including the gap above the carousel. */
@@ -74,7 +74,7 @@ html[data-work-locked] .portfolio-interactive-hero-shell {
     background-color: #f3f4f6;
     background-image: url("/work-grid-tile.svg");
     background-repeat: repeat;
-    background-size: 90px 90px;
+    background-size: 100% auto;
   }
 
   /* Cards sit on top; the back starts lower so only the shoulders show. */
@@ -2470,7 +2470,8 @@ html.dark .thought-body-gradient {
     max-width: 100%;
     margin-top: 0;
     isolation: isolate;
-    background-color: #f3f4f6;
+    background-color: transparent;
+    background-image: none;
   }
 }
 
