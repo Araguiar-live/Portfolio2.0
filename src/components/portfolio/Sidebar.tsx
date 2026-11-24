@@ -336,7 +336,7 @@ export function Sidebar({
                         <button
                           type="button"
                           onClick={copyEmail}
-                          className="inline-flex h-9 cursor-pointer items-center rounded-full border border-[#3d907c] bg-[#4eab95] px-4 text-[12px] font-medium text-[#f7f6f2] shadow-[inset_0_1px_0_rgba(255,255,255,0.35),0_2px_0_#3d907c]"
+                          className="inline-flex h-9 cursor-pointer items-center rounded-full border border-[#0eae82] bg-[#12d6a0] px-4 text-[12px] font-medium text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.4),0_2px_0_#0eae82]"
                         >
                           {copied ? "Copied" : "Copy Email"}
                         </button>
