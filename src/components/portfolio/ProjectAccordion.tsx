@@ -412,7 +412,7 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
           aria-label={`${isOpen ? "Collapse" : "Open"} ${project.title}`}
           className="absolute inset-0 z-0 cursor-pointer"
         />
-        <div className="relative z-10 flex min-w-0 flex-1 items-center gap-[37px] pointer-events-none max-md:gap-3 max-sm:gap-3">
+        <div className="relative z-10 flex min-w-0 flex-1 items-center gap-[37px] pointer-events-none max-md:w-full max-md:gap-3 max-sm:gap-3">
           <span className="folder-muted relative inline-flex shrink-0 items-center gap-2.5 text-[16px] font-medium tracking-[1px] tabular-nums max-md:gap-1.5 max-md:text-[10px] max-md:font-normal max-md:tracking-normal max-sm:text-[10px]">
             {project.id}
           </span>
@@ -445,9 +445,14 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
               </a>
             ) : null}
           </span>
+          <span className="ml-auto hidden shrink-0 items-center max-md:flex">
+            <FolderMark slug={project.slug} />
+          </span>
         </div>
         <div className="relative z-10 flex shrink-0 flex-col items-end gap-2 pointer-events-none max-md:w-full max-md:min-w-0 max-md:shrink max-md:items-start max-sm:items-start">
-          <FolderMark slug={project.slug} />
+          <span className="max-md:hidden">
+            <FolderMark slug={project.slug} />
+          </span>
           <div className="folder-muted flex w-full min-w-0 items-center justify-end gap-[18px] text-[16px] max-md:justify-start max-md:gap-1.5 max-md:text-[11px] max-md:leading-[14px] max-sm:gap-1.5 max-sm:text-[11px]">
             <span className="truncate text-right max-md:min-w-0 max-md:text-left max-sm:text-left">
               {project.role}
