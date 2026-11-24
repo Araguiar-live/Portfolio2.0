@@ -333,21 +333,21 @@ export function Sidebar({
                         <a
                           href={RESUME_HREF}
                           download="Ana-Rafaela Aguiar - Product Designer Resume.pdf"
-                          className="inline-flex h-9 cursor-pointer items-center rounded-full border-0 bg-[#2F5BFF] px-4 text-[12px] font-medium text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.35),0_2px_0_#1d3fe0]"
+                          className="inline-flex h-9 cursor-pointer items-center justify-center rounded-[12px] border-0 bg-[#2F5BFF] px-5 text-xs font-semibold text-white"
                         >
                           Download PDF
                         </a>
                         <button
                           type="button"
                           onClick={copyEmail}
-                          className="inline-flex h-9 cursor-pointer items-center rounded-full border border-[#0eae82] bg-[#12d6a0] px-4 text-[12px] font-medium text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.4),0_2px_0_#0eae82]"
+                          className="inline-flex h-9 cursor-pointer items-center justify-center rounded-[12px] border-0 bg-[#12d6a0] px-5 text-xs font-semibold text-white"
                         >
                           {copied ? "Copied" : "Copy Email"}
                         </button>
                         <button
                           type="button"
                           onClick={clearMarks}
-                          className="inline-flex h-9 cursor-pointer items-center gap-1.5 rounded-full border border-[#c4b096] bg-[#f3e7d6] px-3 text-[12px] font-medium text-[#1d3b51] shadow-[inset_0_1px_0_rgba(255,255,255,0.7),0_2px_0_#c4b096]"
+                          className="inline-flex h-9 cursor-pointer items-center justify-center gap-1.5 rounded-[12px] border-0 bg-[#f3e7d6] px-5 text-xs font-semibold text-[#1d3b51]"
                         >
                           <img src="/cursors/pencil.svg" alt="" className="size-4 -rotate-45" />
                           Clear
