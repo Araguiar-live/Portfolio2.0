@@ -304,7 +304,7 @@ export function Sidebar({
               <div ref={boardRef} className="relative z-10 min-h-0 flex-1">
                 <div className="relative z-10 h-full overflow-y-auto overscroll-contain px-4 pt-6 pb-6 sm:px-8 sm:pt-8">
                   <div className="grid grid-cols-1 items-start gap-6 md:grid-cols-2 md:gap-7">
-                    <Paper tilt={-1.2} frost pin={{ color: "#ff5126", light: "#ffb199" }} className="md:col-span-2">
+                    <Paper tilt={-1.2} frost pin={{ color: "#ff5126", light: "#ffb199" }} className="border border-[#c4b096] md:col-span-2">
                       <div className="flex flex-wrap items-start justify-between gap-4">
                         <div>
                           <p className="text-[11px] tracking-[0.16em] text-[#1d3b51]/60 uppercase">
@@ -361,7 +361,7 @@ export function Sidebar({
                       </div>
                     </Paper>
 
-                    <Paper tilt={1.1} pin={{ color: "#0356E5", light: "#3B9EFF" }} className="md:col-span-2">
+                    <Paper tilt={1.1} pin={{ color: "#0356E5", light: "#3B9EFF" }} className="border border-[#c4b096] md:col-span-2">
                       <p className="text-[11px] tracking-[0.16em] text-[#1d3b51]/55 uppercase">
                         Experience
                       </p>
