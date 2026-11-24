@@ -375,7 +375,7 @@ export function Sidebar({
                         {ROLES.map((role, index) => (
                           <div
                             key={role.id}
-                            className="rounded-[12px] border border-[#ece6db] bg-white px-4 py-3 shadow-[0_1px_0_rgba(255,255,255,0.8)]"
+                            className="rounded-[12px] border border-[#f0ebe2] bg-[#ffffff] px-4 py-3 shadow-[0_1px_0_rgba(255,255,255,0.8)]"
                             style={{ marginLeft: index % 2 === 0 ? 0 : 10 }}
                           >
                             <div className="flex flex-wrap items-baseline justify-between gap-2">
