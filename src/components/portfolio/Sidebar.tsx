@@ -3,7 +3,7 @@ import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent, ty
 
 /**
  * Studio pinboard for the resume. Four paper cards sit on a felt board.
- * A hardware dock switches between pointing, drawing, and erasing.
+ * Dragging the eraser cursor rubs graphite off the board.
  */
 
 const EMAIL = "A.rafaela.aguiar@outlook.com";
@@ -15,20 +15,13 @@ const RESUME_HREF = "/Ana-Rafaela%20Aguiar%20-%20Product%20Designer%20Resume.pdf
 export const SIDEBAR_PANEL_ID = "profile-sidebar-panel";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
-const INK = "#1d3b51";
 const CORAL = "#ff5126";
 const SKY = "#7ec8e3";
 const MINT = "#4eab95";
 
-const PENCIL_CURSOR = `url("data:image/svg+xml,${encodeURIComponent(
-  `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><g transform="rotate(-32 16 16)"><rect x="13" y="2" width="6" height="18" rx="1" fill="#f2c14e" stroke="#1d3b51" stroke-width="1"/><rect x="13" y="2" width="6" height="4" fill="#ff5126"/><polygon points="13,20 19,20 16,29" fill="#f7f4ee" stroke="#1d3b51" stroke-width="1"/></g></svg>`,
-)}") 6 28, crosshair`;
-
 const ERASER_CURSOR = `url("data:image/svg+xml,${encodeURIComponent(
-  `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><g transform="rotate(-18 16 16)"><rect x="6" y="11" width="20" height="12" rx="2" fill="#f4b8c4" stroke="#1d3b51" stroke-width="1"/><rect x="6" y="11" width="7" height="12" rx="2" fill="#7ec8e3"/></g></svg>`,
-)}") 8 22, cell`;
-
-type Tool = "pointer" | "pencil" | "eraser";
+  `<svg xmlns="http://www.w3.org/2000/svg" width="37" height="37" viewBox="0 0 32 32"><g transform="rotate(-18 16 16)"><rect x="6" y="11" width="20" height="12" rx="2" fill="#f4b8c4" fill-opacity="0.62"/><rect x="6" y="11" width="7" height="12" rx="2" fill="#7ec8e3" fill-opacity="0.62"/></g></svg>`,
+)}") 9 25, cell`;
 
 type Role = {
   id: string;
@@ -165,7 +158,6 @@ export function Sidebar({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
-  const [tool, setTool] = useState<Tool>("pointer");
   const [copied, setCopied] = useState(false);
   const boardRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -208,21 +200,22 @@ export function Sidebar({
     return () => observer.disconnect();
   }, [open]);
 
-  const point = (event: ReactPointerEvent<HTMLCanvasElement>) => {
-    const rect = event.currentTarget.getBoundingClientRect();
+  const point = (event: ReactPointerEvent<HTMLElement>) => {
+    const rect = canvasRef.current?.getBoundingClientRect();
+    if (!rect) return null;
     return { x: event.clientX - rect.left, y: event.clientY - rect.top };
   };
 
-  const stroke = (event: ReactPointerEvent<HTMLCanvasElement>) => {
+  const stroke = (event: ReactPointerEvent<HTMLElement>) => {
     const ctx = canvasRef.current?.getContext("2d");
     const from = last.current;
     if (!ctx || !from) return;
     const to = point(event);
+    if (!to) return;
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
-    ctx.lineWidth = tool === "eraser" ? 26 : 2.2;
-    ctx.strokeStyle = "rgba(29, 59, 81, 0.82)";
-    ctx.globalCompositeOperation = tool === "eraser" ? "destination-out" : "source-over";
+    ctx.lineWidth = 30;
+    ctx.globalCompositeOperation = "destination-out";
     ctx.beginPath();
     ctx.moveTo(from.x, from.y);
     ctx.lineTo(to.x, to.y);
@@ -238,18 +231,6 @@ export function Sidebar({
     } catch {
       setCopied(false);
     }
-  };
-
-  const clearDrawing = () => {
-    const canvas = canvasRef.current;
-    const ctx = canvas?.getContext("2d");
-    if (!canvas || !ctx) return;
-    ctx.save();
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.restore();
-    const dpr = window.devicePixelRatio || 1;
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   };
 
   return (
@@ -279,12 +260,32 @@ export function Sidebar({
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 12 }}
               transition={{ duration: 0.28, ease: EASE }}
-              className="pointer-events-auto relative flex h-[min(860px,calc(100dvh-1.5rem))] w-[min(1080px,96vw)] flex-col overflow-hidden rounded-[28px] border border-white/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),inset_0_-14px_28px_rgba(90,70,48,0.08),0_28px_70px_rgba(29,59,81,0.16)]"
+              className="pointer-events-auto relative flex h-[min(989px,calc(100dvh-1.5rem))] w-[min(1242px,96vw)] flex-col overflow-hidden rounded-[28px] border-0 shadow-[inset_0_1px_0_rgba(255,255,255,0.65),inset_0_-14px_28px_rgba(90,70,48,0.06),0_28px_70px_rgba(29,59,81,0.12)] backdrop-blur-[18px]"
               style={{
-                backgroundColor: "#efe8dc",
+                backgroundColor: "rgba(239, 232, 220, 0.62)",
                 backgroundImage:
-                  "radial-gradient(circle at 20% 10%, rgba(255,255,255,0.55), transparent 42%), radial-gradient(rgba(90,70,48,0.08) 0.6px, transparent 0.7px)",
+                  "radial-gradient(circle at 20% 10%, rgba(255,255,255,0.4), transparent 42%), radial-gradient(rgba(90,70,48,0.06) 0.6px, transparent 0.7px)",
                 backgroundSize: "auto, 7px 7px",
+                cursor: ERASER_CURSOR,
+              }}
+              onPointerDown={(event) => {
+                if ((event.target as HTMLElement).closest("a, button")) return;
+                const start = point(event);
+                if (!start) return;
+                drawing.current = true;
+                last.current = start;
+              }}
+              onPointerMove={(event) => {
+                if (!drawing.current) return;
+                stroke(event);
+              }}
+              onPointerUp={() => {
+                drawing.current = false;
+                last.current = null;
+              }}
+              onPointerLeave={() => {
+                drawing.current = false;
+                last.current = null;
               }}
             >
               <div ref={boardRef} className="relative min-h-0 flex-1">
@@ -436,68 +437,9 @@ export function Sidebar({
 
                 <canvas
                   ref={canvasRef}
-                  aria-hidden={tool === "pointer"}
-                  className="absolute inset-0 z-30 h-full w-full touch-none"
-                  style={{
-                    pointerEvents: tool === "pointer" ? "none" : "auto",
-                    cursor: tool === "pencil" ? PENCIL_CURSOR : tool === "eraser" ? ERASER_CURSOR : "auto",
-                  }}
-                  onPointerDown={(event) => {
-                    if (tool === "pointer") return;
-                    drawing.current = true;
-                    last.current = point(event);
-                    event.currentTarget.setPointerCapture(event.pointerId);
-                  }}
-                  onPointerMove={(event) => {
-                    if (!drawing.current || tool === "pointer") return;
-                    stroke(event);
-                  }}
-                  onPointerUp={() => {
-                    drawing.current = false;
-                    last.current = null;
-                  }}
-                  onPointerCancel={() => {
-                    drawing.current = false;
-                    last.current = null;
-                  }}
+                  aria-hidden
+                  className="pointer-events-none absolute inset-0 z-30 h-full w-full"
                 />
-              </div>
-
-              <div className="flex justify-center px-4 pt-1 pb-4">
-                <div
-                  className="flex items-center gap-1 rounded-full border border-white/80 bg-[#f7f3ea]/95 px-2 py-2 shadow-[0_12px_24px_rgba(29,59,81,0.16),inset_0_1px_0_#fff]"
-                  role="toolbar"
-                  aria-label="Drawing tools"
-                >
-                  {(
-                    [
-                      ["pointer", "Pointer"],
-                      ["pencil", "Pencil"],
-                      ["eraser", "Eraser"],
-                    ] as const
-                  ).map(([id, label]) => (
-                    <button
-                      key={id}
-                      type="button"
-                      aria-pressed={tool === id}
-                      onClick={() => setTool(id)}
-                      className={
-                        tool === id
-                          ? "h-8 cursor-pointer rounded-full bg-[#1d3b51] px-3 text-[12px] text-white"
-                          : "h-8 cursor-pointer rounded-full px-3 text-[12px] text-[#1d3b51]"
-                      }
-                    >
-                      {label}
-                    </button>
-                  ))}
-                  <button
-                    type="button"
-                    onClick={clearDrawing}
-                    className="h-8 cursor-pointer rounded-full px-3 text-[12px] text-[#ff5126]"
-                  >
-                    Clear
-                  </button>
-                </div>
               </div>
             </motion.aside>
           </div>
