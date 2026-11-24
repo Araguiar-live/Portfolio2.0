@@ -118,12 +118,12 @@ function Pin({ color, light }: { color: string; light: string }) {
       viewBox="0 0 24 24"
       className="pointer-events-none absolute -top-3 left-7 z-20 size-6"
     >
-      <circle cx="12" cy="12" r="12" fill={`url(#${id})`} fillOpacity="0.71" />
-      <circle cx="12" cy="12" r="11.75" fill="none" stroke={color} strokeOpacity="0.71" strokeWidth="0.5" />
+      <circle cx="12" cy="12" r="12" fill={`url(#${id})`} fillOpacity="0.923" />
+      <circle cx="12" cy="12" r="11.75" fill="none" stroke={color} strokeOpacity="0.923" strokeWidth="0.5" />
       <defs>
         <linearGradient id={id} x1="12" y1="0" x2="12" y2="24" gradientUnits="userSpaceOnUse">
           <stop stopColor={color} />
-          <stop offset="1" stopColor={light} stopOpacity="0.43" />
+          <stop offset="1" stopColor={light} stopOpacity="0.559" />
         </linearGradient>
       </defs>
     </svg>
