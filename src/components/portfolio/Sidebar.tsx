@@ -261,8 +261,13 @@ export function Sidebar({
             exit={{ opacity: 0 }}
             transition={{ duration: 0.22, ease: EASE }}
             onClick={() => onOpenChange(false)}
-            className="fixed inset-0 z-[140] cursor-default border-0 bg-white/50"
-          />
+            className="fixed inset-0 z-[140] cursor-default border-0 bg-transparent"
+          >
+            <span
+              aria-hidden
+              className="pointer-events-none absolute inset-0 bg-white/40 backdrop-blur-[16px] [-webkit-backdrop-filter:blur(16px)]"
+            />
+          </motion.button>
 
           <div className="pointer-events-none fixed inset-0 z-[150] flex items-center justify-center p-3 sm:p-5">
             <motion.aside
