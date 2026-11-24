@@ -2,8 +2,8 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
 
 /**
- * Studio pinboard for the resume. Four paper cards sit on a felt board.
- * Dragging the eraser cursor rubs graphite off the board.
+ * Studio pinboard for the resume. Four paper cards sit on the sand tile field.
+ * Dragging the pencil cursor leaves a graphite mark on the board.
  */
 
 const EMAIL = "A.rafaela.aguiar@outlook.com";
@@ -19,9 +19,7 @@ const CORAL = "#ff5126";
 const SKY = "#7ec8e3";
 const MINT = "#4eab95";
 
-const ERASER_CURSOR = `url("data:image/svg+xml,${encodeURIComponent(
-  `<svg xmlns="http://www.w3.org/2000/svg" width="37" height="37" viewBox="0 0 32 32"><g transform="rotate(-18 16 16)"><rect x="6" y="11" width="20" height="12" rx="2" fill="#f4b8c4" fill-opacity="0.62"/><rect x="6" y="11" width="7" height="12" rx="2" fill="#7ec8e3" fill-opacity="0.62"/></g></svg>`,
-)}") 9 25, cell`;
+const PENCIL_CURSOR = 'url("/cursors/pencil-cursor.svg") 1 37, auto';
 
 type Role = {
   id: string;
@@ -258,13 +256,24 @@ export function Sidebar({
     if (!to) return;
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
-    ctx.lineWidth = 30;
-    ctx.globalCompositeOperation = "destination-out";
+    ctx.lineWidth = 2.25;
+    ctx.strokeStyle = "rgba(42, 36, 28, 0.82)";
+    ctx.globalCompositeOperation = "source-over";
     ctx.beginPath();
     ctx.moveTo(from.x, from.y);
     ctx.lineTo(to.x, to.y);
     ctx.stroke();
     last.current = to;
+  };
+
+  const clearMarks = () => {
+    const canvas = canvasRef.current;
+    const ctx = canvas?.getContext("2d");
+    if (!canvas || !ctx) return;
+    ctx.save();
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.restore();
   };
 
   const copyEmail = async () => {
@@ -305,7 +314,7 @@ export function Sidebar({
               exit={{ opacity: 0, y: 12 }}
               transition={{ duration: 0.28, ease: EASE }}
               className="pointer-events-auto relative flex h-[min(989px,calc(100dvh-1.5rem))] w-[min(1242px,96vw)] flex-col overflow-hidden rounded-[28px] border-0 bg-[#ddd9c6] shadow-[0_28px_70px_rgba(29,59,81,0.12)]"
-              style={{ cursor: ERASER_CURSOR }}
+              style={{ cursor: PENCIL_CURSOR }}
               onPointerDown={(event) => {
                 if ((event.target as HTMLElement).closest("a, button")) return;
                 const start = point(event);
@@ -357,7 +366,7 @@ export function Sidebar({
                         <a
                           href={RESUME_HREF}
                           download="Ana-Rafaela Aguiar - Product Designer Resume.pdf"
-                          className="inline-flex h-9 items-center rounded-full border border-[#1d3fe0] bg-[#2F5BFF] px-4 text-[12px] font-medium text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.35),0_2px_0_#1d3fe0]"
+                          className="inline-flex h-9 cursor-pointer items-center rounded-full border border-[#1d3fe0] bg-[#2F5BFF] px-4 text-[12px] font-medium text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.35),0_2px_0_#1d3fe0]"
                         >
                           Download PDF
                         </a>
@@ -367,6 +376,14 @@ export function Sidebar({
                           className="inline-flex h-9 cursor-pointer items-center rounded-full border border-[#3d907c] bg-[#4eab95] px-4 text-[12px] font-medium text-[#f7f6f2] shadow-[inset_0_1px_0_rgba(255,255,255,0.35),0_2px_0_#3d907c]"
                         >
                           {copied ? "Copied" : "Copy Email"}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={clearMarks}
+                          className="inline-flex h-9 cursor-pointer items-center gap-1.5 rounded-full border border-[#c4b096] bg-[#f3e7d6] px-3 text-[12px] font-medium text-[#1d3b51] shadow-[inset_0_1px_0_rgba(255,255,255,0.7),0_2px_0_#c4b096]"
+                        >
+                          <img src="/cursors/pencil.svg" alt="" className="size-4 -rotate-45" />
+                          Clear
                         </button>
                         <button
                           type="button"
