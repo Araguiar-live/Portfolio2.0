@@ -59,6 +59,12 @@ html[data-work-locked] .portfolio-interactive-hero-shell {
     background-repeat: repeat;
     background-size: 90px 90px;
   }
+
+  /* 40% shorter than the 232px desktop-padded row, with the type 30% higher. */
+  .folder-row {
+    padding-top: 9px !important;
+    padding-bottom: 55px !important;
+  }
 }
 
 /* Marquee + footer ink (~15% darker than #0c0f14) */
