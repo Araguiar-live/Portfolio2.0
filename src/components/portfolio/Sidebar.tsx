@@ -116,16 +116,29 @@ const SKILLS = [
 
 const TOOLS = ["Figma", "Prototypes", "Design tokens", "WCAG"];
 
+function darker(hex: string, amount: number) {
+  const value = hex.replace("#", "");
+  const channel = (start: number) =>
+    Math.round(parseInt(value.slice(start, start + 2), 16) * (1 - amount));
+  return `rgb(${channel(0)}, ${channel(2)}, ${channel(4)})`;
+}
+
 function Pin({ color }: { color: string }) {
+  const outline = darker(color, 0.42);
   return (
     <span
       aria-hidden
-      className="pointer-events-none absolute -top-2.5 left-7 z-20 size-[18px] rounded-full"
-      style={{
-        background: `radial-gradient(circle at 35% 30%, #ffffff 0 18%, ${color} 46%, rgba(0,0,0,0.28) 100%)`,
-        boxShadow: "0 1px 0 rgba(255,255,255,0.7) inset, 0 5px 6px rgba(40,30,20,0.32)",
-      }}
-    />
+      className="pointer-events-none absolute -top-3 left-7 z-20 grid size-6 place-items-center rounded-full"
+      style={{ background: outline, boxShadow: "0 3px 0 rgba(40, 28, 18, 0.22)" }}
+    >
+      <span
+        className="size-[18px] rounded-full"
+        style={{
+          background: `radial-gradient(circle at 32% 28%, #ffffff 0 22%, ${color} 23% 70%, ${outline} 71%)`,
+          boxShadow: `inset 0 0 0 1.5px ${outline}`,
+        }}
+      />
+    </span>
   );
 }
 
