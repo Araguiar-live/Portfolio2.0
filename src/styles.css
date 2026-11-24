@@ -27,6 +27,18 @@
 }
 
 @media (min-width: 768px) {
+  /* Authored closed-row size, written as plain lengths so Safari cannot collapse it. */
+  .folder-shell .folder-row {
+    min-height: 196px;
+    padding-top: 78.6px;
+    padding-bottom: 78.6px;
+  }
+
+  .folder-shell .folder-title {
+    font-size: 37px;
+    line-height: 1.15;
+  }
+
   /* 15% of each decoration's own height, below the previous anchor. */
   .portfolio-deco-calculator {
     translate: max(-50%, calc(16px - 50vw + 50cqw)) -35%;
