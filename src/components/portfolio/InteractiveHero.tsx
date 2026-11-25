@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, type CSSProperties } from "react";
+import { ScannerPillLoop } from "@/components/craft/ScannerPillLoop";
 import heroMark from "@/assets/hero/hero-mark.svg";
 import toggleKnobHover from "@/assets/hero/hero-toggle-knob-hover.svg";
 import toggleRest from "@/assets/hero/hero-toggle-rest.svg";
@@ -81,6 +82,7 @@ function lockMobileHeroViewport(host: HTMLElement | null) {
 export function InteractiveHero({ onEnterWork }: { onEnterWork?: () => void }) {
   const hostRef = useRef<HTMLElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const scannerRef = useRef<HTMLDivElement>(null);
   const scrollProgressRef = useRef(0);
   const pointerRef = useRef({ x: -1000, y: -1000, active: false });
 
@@ -139,6 +141,9 @@ export function InteractiveHero({ onEnterWork }: { onEnterWork?: () => void }) {
     let cols = COLS;
     let cornerRadius = 12;
     let hostRect = host.getBoundingClientRect();
+    let scannerIndex = -1;
+    let placedKey = "";
+    let blocked: Array<{ l: number; t: number; r: number; b: number }> = [];
 
     const blobs: Blob[] = [
       { homeX: 0.08, homeY: 0.12, x: 0, y: 0, r: 92, phase: 0 },
@@ -215,6 +220,90 @@ export function InteractiveHero({ onEnterWork }: { onEnterWork?: () => void }) {
       cells = next;
       cols = g.cols;
       cornerRadius = g.cols === COLS ? Math.min(12, g.cellW * 0.18) : g.cellW * 0.137;
+      chooseScanner();
+      placedKey = "";
+    };
+
+    const measureBlocked = () => {
+      const hostBox = host.getBoundingClientRect();
+      const nodes = [
+        host.querySelector<HTMLElement>(".interactive-hero__content"),
+        host.querySelector<HTMLElement>(".interactive-hero__mark"),
+        host.querySelector<HTMLElement>("nav > div"),
+      ];
+      blocked = [];
+      for (const el of nodes) {
+        if (!el) continue;
+        const box = el.getBoundingClientRect();
+        blocked.push({
+          l: box.left - hostBox.left - 12,
+          t: box.top - hostBox.top - 12,
+          r: box.right - hostBox.left + 12,
+          b: box.bottom - hostBox.top + 12,
+        });
+      }
+    };
+
+    const hitsBlocked = (cell: Cell) =>
+      blocked.some(
+        (box) =>
+          cell.x < box.r && cell.x + cell.w > box.l && cell.y < box.b && cell.y + cell.h > box.t,
+      );
+
+    /** One cell, two columns right of center and one row above the middle, nudged until it clears the type. */
+    const chooseScanner = () => {
+      measureBlocked();
+      if (isMobile || cols < 8 || cells.length === 0) {
+        scannerIndex = -1;
+        return;
+      }
+      const rows = Math.floor(cells.length / cols);
+      const preferCol = Math.min(cols - 2, Math.floor(cols / 2) + 2);
+      const preferRow = Math.max(1, Math.floor(rows / 2) - 1);
+      const preferred = preferRow * cols + preferCol;
+      if (cells[preferred] && !hitsBlocked(cells[preferred])) {
+        scannerIndex = preferred;
+        return;
+      }
+      let best = -1;
+      let bestD = Infinity;
+      for (let row = 1; row < rows - 1; row++) {
+        for (let col = Math.floor(cols / 2) + 1; col < cols - 1; col++) {
+          const cell = cells[row * cols + col];
+          if (!cell || hitsBlocked(cell)) continue;
+          const distance = Math.abs(row - preferRow) * 4 + Math.abs(col - preferCol);
+          if (distance < bestD) {
+            bestD = distance;
+            best = row * cols + col;
+          }
+        }
+      }
+      scannerIndex = best;
+    };
+
+    const placeScanner = (off?: Offset) => {
+      const tile = scannerRef.current;
+      if (!tile) return;
+      if (scannerIndex < 0 || !cells[scannerIndex]) {
+        tile.style.display = "none";
+        return;
+      }
+      const cell = cells[scannerIndex];
+      const key = `${scannerIndex}|${cell.x.toFixed(1)}|${cell.y.toFixed(1)}|${cell.w.toFixed(1)}|${cell.h.toFixed(1)}|${cornerRadius.toFixed(1)}`;
+      if (key !== placedKey) {
+        placedKey = key;
+        tile.style.display = "block";
+        tile.style.left = `${cell.x}px`;
+        tile.style.top = `${cell.y}px`;
+        tile.style.width = `${cell.w}px`;
+        tile.style.height = `${cell.h}px`;
+        tile.style.borderRadius = `${cornerRadius}px`;
+      }
+      const glow = off?.glow ?? 0;
+      tile.style.transform = `translate3d(${off?.x ?? 0}px, ${off?.y ?? 0}px, 0)`;
+      tile.style.backgroundColor = `rgba(255,255,255,${(0.1 + glow * 0.08).toFixed(3)})`;
+      tile.style.boxShadow =
+        glow > 0.05 ? `inset 0 0 0 1px rgba(180,210,255,${(glow * 0.22).toFixed(3)})` : "none";
     };
 
     const drawBlobs = () => {
@@ -380,6 +469,7 @@ export function InteractiveHero({ onEnterWork }: { onEnterWork?: () => void }) {
       }
 
       cells.forEach((cell, i) => {
+        if (i === scannerIndex) return;
         const off = offsets[i];
         const x = cell.x + off.x;
         const y = cell.y + off.y;
@@ -404,6 +494,8 @@ export function InteractiveHero({ onEnterWork }: { onEnterWork?: () => void }) {
         ctx.arc(cell.cx + off.x, cell.cy + off.y, 2, 0, Math.PI * 2);
         ctx.fill();
       });
+
+      placeScanner(scannerIndex >= 0 ? offsets[scannerIndex] : undefined);
 
       if (scroll > 0) {
         ctx.save();
@@ -606,6 +698,9 @@ export function InteractiveHero({ onEnterWork }: { onEnterWork?: () => void }) {
         aria-hidden
         className="pointer-events-none absolute inset-0 z-[1] size-full max-h-none max-w-none"
       />
+      <div ref={scannerRef} aria-hidden className="hero-scanner-tile" data-scanner-tile="">
+        <ScannerPillLoop embedded />
+      </div>
       <div
         aria-hidden
         className="interactive-hero__liquid-lens pointer-events-none absolute z-[2]"
