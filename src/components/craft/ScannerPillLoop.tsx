@@ -21,17 +21,17 @@ function PillGraphic({ tone }: { tone: string }) {
               rx="13"
               fill="none"
               stroke={tone}
-              strokeWidth="1.35"
+              strokeWidth="2.4"
             />
             {Array.from({ length: TICKS }, (_, tick) => (
               <line
                 key={tick}
                 x1={20 + tick * 8}
                 x2={20 + tick * 8}
-                y1={y + 8}
-                y2={y + 18}
+                y1={y + 7}
+                y2={y + 19}
                 stroke={tone}
-                strokeWidth="1.2"
+                strokeWidth="1.8"
                 strokeLinecap="round"
               />
             ))}
@@ -49,7 +49,7 @@ function PillGraphic({ tone }: { tone: string }) {
 export function ScannerPillLoop({ embedded = false }: ScannerPillLoopProps) {
   const art = (
     <div className="scanner-pill__art">
-      <PillGraphic tone="#141a22" />
+      <PillGraphic tone="#8b95a3" />
       <div className="scanner-pill__lit">
         <PillGraphic tone="#FF5500" />
       </div>

@@ -2751,14 +2751,16 @@ html.dark .thought-body-gradient {
   }
   .scanner-pill__lit {
     animation: none;
-    visibility: hidden;
+    -webkit-mask-position: center 36%;
+    mask-position: center 36%;
   }
 }
 
 /* One hero-grid cell hosts the scanner. The canvas loop positions it. */
 .hero-scanner-tile {
   position: absolute;
-  z-index: 1;
+  /* Above the hero frost. That blur sits over the whole grid and was wiping the graphic out. */
+  z-index: 4;
   display: none;
   overflow: hidden;
   pointer-events: none;
@@ -2806,14 +2808,14 @@ html.dark .thought-body-gradient {
   inset: 0;
   -webkit-mask-image: linear-gradient(#000 0%, #000 100%);
   mask-image: linear-gradient(#000 0%, #000 100%);
-  -webkit-mask-size: 100% 28%;
-  mask-size: 100% 28%;
+  -webkit-mask-size: 100% 42%;
+  mask-size: 100% 42%;
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
   -webkit-mask-position: center -30%;
   mask-position: center -30%;
   animation: scanner-pill-sweep 2.6s linear infinite;
-  filter: drop-shadow(0 0 1.5px #ff5500);
+  filter: drop-shadow(0 0 3px #ff5500);
 }
 
 @keyframes scanner-pill-sweep {
