@@ -256,7 +256,7 @@ export function InteractiveHero({ onEnterWork }: { onEnterWork?: () => void }) {
           cell.x < box.r && cell.x + cell.w > box.l && cell.y < box.b && cell.y + cell.h > box.t,
       );
 
-    /** One cell, two columns right of center and one row above the middle, nudged until it clears the type. */
+    /** One cell, second row from the bottom and three columns in from the right edge. */
     const chooseScanner = () => {
       measureBlocked();
       if (isMobile || cols < 8 || cells.length === 0) {
@@ -264,8 +264,8 @@ export function InteractiveHero({ onEnterWork }: { onEnterWork?: () => void }) {
         return;
       }
       const rows = Math.floor(cells.length / cols);
-      const preferCol = Math.min(cols - 2, Math.floor(cols / 2) + 2);
-      const preferRow = Math.max(1, Math.floor(rows / 2) - 1);
+      const preferRow = Math.max(0, rows - 2);
+      const preferCol = Math.max(0, cols - 3);
       const preferred = preferRow * cols + preferCol;
       if (cells[preferred] && !hitsBlocked(cells[preferred])) {
         scannerIndex = preferred;
@@ -273,7 +273,7 @@ export function InteractiveHero({ onEnterWork }: { onEnterWork?: () => void }) {
       }
       let best = -1;
       let bestD = Infinity;
-      for (let row = 1; row < rows - 1; row++) {
+      for (let row = Math.max(0, rows - 4); row < rows; row++) {
         for (let col = Math.floor(cols / 2) + 1; col < cols - 1; col++) {
           const cell = cells[row * cols + col];
           if (!cell || hitsBlocked(cell)) continue;
@@ -321,6 +321,7 @@ export function InteractiveHero({ onEnterWork }: { onEnterWork?: () => void }) {
       setKey: (next: string) => void,
       off?: Offset,
       span = 1,
+      white = false,
     ) => {
       if (!tile) return;
       if (index < 0 || !cells[index]) {
@@ -338,21 +339,18 @@ export function InteractiveHero({ onEnterWork }: { onEnterWork?: () => void }) {
         tile.style.top = `${cell.y}px`;
         tile.style.width = `${widthPx}px`;
         tile.style.height = `${heightPx}px`;
-        tile.style.borderRadius = `${cornerRadius}px`;
+        tile.style.borderRadius = white ? "12px" : `${cornerRadius}px`;
         tile.style.setProperty("--tile-radius", `${cornerRadius}px`);
       }
       const glow = off?.glow ?? 0;
-      const fill = `rgba(255,255,255,${(0.1 + glow * 0.08).toFixed(3)})`;
-      const line = glow > 0.05 ? `rgba(180,210,255,${(glow * 0.22).toFixed(3)})` : "transparent";
       tile.style.transform = `translate3d(${off?.x ?? 0}px, ${off?.y ?? 0}px, 0)`;
-      if (span > 1) {
-        tile.style.backgroundColor = "transparent";
+      if (span > 1 || white) {
+        tile.style.backgroundColor = "#ffffff";
         tile.style.boxShadow = "none";
-        tile.style.setProperty("--tile-fill", fill);
-        tile.style.setProperty("--tile-line", line);
       } else {
-        tile.style.backgroundColor = fill;
-        tile.style.boxShadow = glow > 0.05 ? `inset 0 0 0 1px ${line}` : "none";
+        tile.style.backgroundColor = `rgba(255,255,255,${(0.1 + glow * 0.08).toFixed(3)})`;
+        tile.style.boxShadow =
+          glow > 0.05 ? `inset 0 0 0 1px rgba(180,210,255,${(glow * 0.22).toFixed(3)})` : "none";
       }
     };
 
@@ -556,6 +554,8 @@ export function InteractiveHero({ onEnterWork }: { onEnterWork?: () => void }) {
           placedKey = next;
         },
         scannerIndex >= 0 ? offsets[scannerIndex] : undefined,
+        1,
+        true,
       );
       placeCraftTile(
         hangmanRef.current,
@@ -769,21 +769,15 @@ export function InteractiveHero({ onEnterWork }: { onEnterWork?: () => void }) {
         aria-hidden
         className="pointer-events-none absolute inset-0 z-[1] size-full max-h-none max-w-none"
       />
-      <div
-        ref={hangmanRef}
-        aria-hidden
-        className="hero-craft-tile hero-craft-tile--quad"
-        data-hangman-tile=""
-      >
-        <div className="hangman-quad">
-          <span />
-          <span />
-          <span />
-          <span />
-        </div>
+      <div ref={hangmanRef} className="hero-craft-tile hero-craft-tile--span" data-hangman-tile="">
         <Hangman embedded />
       </div>
-      <div ref={scannerRef} aria-hidden className="hero-craft-tile" data-scanner-tile="">
+      <div
+        ref={scannerRef}
+        aria-hidden
+        className="hero-craft-tile hero-craft-tile--white"
+        data-scanner-tile=""
+      >
         <ScannerPillLoop embedded />
       </div>
       <div

@@ -9,9 +9,7 @@ function HangmanPage() {
   return (
     <main className="flex min-h-dvh items-center justify-center bg-[#090e15]">
       <h1 className="sr-only">Hangman</h1>
-      <div className="w-[min(280px,70vw)]">
-        <Hangman />
-      </div>
+      <Hangman />
     </main>
   );
 }
