@@ -287,31 +287,31 @@ export function InteractiveHero({ onEnterWork }: { onEnterWork?: () => void }) {
       scannerIndex = best;
     };
 
-    /** The corner cell, clear of the headline and the name label. */
+    /** Top-left 2×2. The glass mark no longer occupies this corner. */
     const chooseHangman = () => {
-      if (isMobile || cols < 8 || cells.length === 0) {
-        hangmanIndex = -1;
-        return;
-      }
-      if (cells[0] && !hitsBlocked(cells[0])) {
-        hangmanIndex = 0;
-        return;
-      }
       const rows = Math.floor(cells.length / cols);
-      let best = -1;
-      let bestD = Infinity;
-      for (let row = 0; row < Math.min(3, rows); row++) {
-        for (let col = 0; col < Math.min(3, cols); col++) {
-          const cell = cells[row * cols + col];
-          if (!cell || hitsBlocked(cell)) continue;
-          const distance = row * 4 + col;
-          if (distance < bestD) {
-            bestD = distance;
-            best = row * cols + col;
-          }
-        }
+      hangmanIndex = !isMobile && cols >= 2 && rows >= 2 ? 0 : -1;
+    };
+
+    const hangmanCells = () => {
+      if (hangmanIndex < 0) return [];
+      return [hangmanIndex, hangmanIndex + 1, hangmanIndex + cols, hangmanIndex + cols + 1];
+    };
+
+    const coversHangman = (index: number) => hangmanCells().includes(index);
+
+    /** Keep the four cells moving as one block so the pendulum stays on the gap. */
+    const stickHangman = (list: Offset[]) => {
+      const group = hangmanCells();
+      const src = list[hangmanIndex];
+      if (!src || group.some((index) => !list[index])) return;
+      let glow = 0;
+      for (const index of group) glow = Math.max(glow, list[index].glow);
+      for (const index of group) {
+        list[index].x = src.x;
+        list[index].y = src.y;
+        list[index].glow = glow;
       }
-      hangmanIndex = best;
     };
 
     const placeCraftTile = (
@@ -320,6 +320,7 @@ export function InteractiveHero({ onEnterWork }: { onEnterWork?: () => void }) {
       key: string,
       setKey: (next: string) => void,
       off?: Offset,
+      span = 1,
     ) => {
       if (!tile) return;
       if (index < 0 || !cells[index]) {
@@ -327,21 +328,32 @@ export function InteractiveHero({ onEnterWork }: { onEnterWork?: () => void }) {
         return;
       }
       const cell = cells[index];
-      const next = `${index}|${cell.x.toFixed(1)}|${cell.y.toFixed(1)}|${cell.w.toFixed(1)}|${cell.h.toFixed(1)}|${cornerRadius.toFixed(1)}`;
+      const widthPx = cell.w * span + GRID_GAP * (span - 1);
+      const heightPx = cell.h * span + GRID_GAP * (span - 1);
+      const next = `${index}|${span}|${cell.x.toFixed(1)}|${cell.y.toFixed(1)}|${widthPx.toFixed(1)}|${heightPx.toFixed(1)}|${cornerRadius.toFixed(1)}`;
       if (next !== key) {
         setKey(next);
         tile.style.display = "block";
         tile.style.left = `${cell.x}px`;
         tile.style.top = `${cell.y}px`;
-        tile.style.width = `${cell.w}px`;
-        tile.style.height = `${cell.h}px`;
+        tile.style.width = `${widthPx}px`;
+        tile.style.height = `${heightPx}px`;
         tile.style.borderRadius = `${cornerRadius}px`;
+        tile.style.setProperty("--tile-radius", `${cornerRadius}px`);
       }
       const glow = off?.glow ?? 0;
+      const fill = `rgba(255,255,255,${(0.1 + glow * 0.08).toFixed(3)})`;
+      const line = glow > 0.05 ? `rgba(180,210,255,${(glow * 0.22).toFixed(3)})` : "transparent";
       tile.style.transform = `translate3d(${off?.x ?? 0}px, ${off?.y ?? 0}px, 0)`;
-      tile.style.backgroundColor = `rgba(255,255,255,${(0.1 + glow * 0.08).toFixed(3)})`;
-      tile.style.boxShadow =
-        glow > 0.05 ? `inset 0 0 0 1px rgba(180,210,255,${(glow * 0.22).toFixed(3)})` : "none";
+      if (span > 1) {
+        tile.style.backgroundColor = "transparent";
+        tile.style.boxShadow = "none";
+        tile.style.setProperty("--tile-fill", fill);
+        tile.style.setProperty("--tile-line", line);
+      } else {
+        tile.style.backgroundColor = fill;
+        tile.style.boxShadow = glow > 0.05 ? `inset 0 0 0 1px ${line}` : "none";
+      }
     };
 
     const drawBlobs = () => {
@@ -407,6 +419,7 @@ export function InteractiveHero({ onEnterWork }: { onEnterWork?: () => void }) {
         }
         return { x, y, glow, dotDist };
       });
+      stickHangman(offsets);
 
       const keepInViewport = (cell: Cell, off: Offset) => {
         const minX = -cell.x;
@@ -503,11 +516,13 @@ export function InteractiveHero({ onEnterWork }: { onEnterWork?: () => void }) {
             }
           }
           for (let i = 0; i < cells.length; i++) keepInViewport(cells[i], offsets[i]);
+          stickHangman(offsets);
         }
       }
+      stickHangman(offsets);
 
       cells.forEach((cell, i) => {
-        if (i === scannerIndex || i === hangmanIndex) return;
+        if (i === scannerIndex || coversHangman(i)) return;
         const off = offsets[i];
         const x = cell.x + off.x;
         const y = cell.y + off.y;
@@ -550,6 +565,7 @@ export function InteractiveHero({ onEnterWork }: { onEnterWork?: () => void }) {
           hangmanKey = next;
         },
         hangmanIndex >= 0 ? offsets[hangmanIndex] : undefined,
+        2,
       );
 
       if (scroll > 0) {
@@ -753,7 +769,18 @@ export function InteractiveHero({ onEnterWork }: { onEnterWork?: () => void }) {
         aria-hidden
         className="pointer-events-none absolute inset-0 z-[1] size-full max-h-none max-w-none"
       />
-      <div ref={hangmanRef} aria-hidden className="hero-craft-tile" data-hangman-tile="">
+      <div
+        ref={hangmanRef}
+        aria-hidden
+        className="hero-craft-tile hero-craft-tile--quad"
+        data-hangman-tile=""
+      >
+        <div className="hangman-quad">
+          <span />
+          <span />
+          <span />
+          <span />
+        </div>
         <Hangman embedded />
       </div>
       <div ref={scannerRef} aria-hidden className="hero-craft-tile" data-scanner-tile="">
@@ -771,10 +798,10 @@ export function InteractiveHero({ onEnterWork }: { onEnterWork?: () => void }) {
       <nav className="pointer-events-none absolute inset-0 z-10 sm:pointer-events-auto sm:relative sm:inset-auto sm:flex sm:w-full sm:items-center sm:justify-between sm:px-9 sm:pt-[139px]">
         <span
           aria-hidden
-          className="interactive-hero__mark absolute bottom-[max(31px,env(safe-area-inset-bottom))] left-[max(2rem,env(safe-area-inset-left))] shrink-0 sm:static"
+          className="interactive-hero__mark absolute bottom-[max(31px,env(safe-area-inset-bottom))] left-[max(2rem,env(safe-area-inset-left))] shrink-0 sm:hidden"
           style={{ maskImage: `url("${heroMark}")`, WebkitMaskImage: `url("${heroMark}")` }}
         />
-        <div className="absolute right-[max(18px,env(safe-area-inset-right))] top-[max(3.5rem,env(safe-area-inset-top))] flex flex-col gap-0.5 text-center font-[family-name:system-ui,sans-serif] leading-normal text-[rgba(255,255,255,0.6)] sm:static sm:gap-0 sm:text-right sm:font-sans">
+        <div className="absolute right-[max(18px,env(safe-area-inset-right))] top-[max(3.5rem,env(safe-area-inset-top))] flex flex-col gap-0.5 text-center font-[family-name:system-ui,sans-serif] leading-normal text-[rgba(255,255,255,0.6)] sm:static sm:ml-auto sm:gap-0 sm:text-right sm:font-sans">
           <p className="text-[20px]">Ana.R Design</p>
           <p className="text-[12px]">Product Designer</p>
         </div>

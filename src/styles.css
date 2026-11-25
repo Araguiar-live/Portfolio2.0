@@ -2829,10 +2829,30 @@ html.dark .thought-body-gradient {
   }
 }
 
+.hero-craft-tile--quad {
+  background: transparent;
+}
+
+.hangman-quad {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 2px;
+  pointer-events: none;
+}
+
+.hangman-quad > span {
+  border-radius: var(--tile-radius, 12px);
+  background: var(--tile-fill, #ffffff1a);
+  box-shadow: inset 0 0 0 1px var(--tile-line, transparent);
+}
+
 .hangman {
   box-sizing: border-box;
   display: grid;
-  width: 220px;
+  width: 280px;
   height: 280px;
   place-items: center;
   padding: 16px;
@@ -2841,6 +2861,8 @@ html.dark .thought-body-gradient {
 }
 
 .hangman--embedded {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   padding: 0;
@@ -2850,18 +2872,20 @@ html.dark .thought-body-gradient {
 
 .hangman__svg {
   display: block;
-  width: 68%;
+  width: 62%;
   height: auto;
 }
 
 .hangman__gallows,
+.hangman__rope,
 .hangman__part {
   fill: none;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
 
-.hangman__gallows {
+.hangman__gallows,
+.hangman__rope {
   stroke: #8b95a3;
   stroke-width: 3.2;
 }
@@ -2869,82 +2893,22 @@ html.dark .thought-body-gradient {
 .hangman__part {
   stroke: #ff5500;
   stroke-width: 3.2;
-  opacity: 0;
   filter: drop-shadow(0 0 2px #ff5500);
 }
 
-.hangman__part--head {
-  animation: hangman-head 4.8s linear infinite;
-}
-.hangman__part--body {
-  animation: hangman-body 4.8s linear infinite;
-}
-.hangman__part--arm-l,
-.hangman__part--arm-r {
-  animation: hangman-arms 4.8s linear infinite;
-}
-.hangman__part--leg-l,
-.hangman__part--leg-r {
-  animation: hangman-legs 4.8s linear infinite;
+.hangman__swing {
+  transform-box: view-box;
+  transform-origin: 78px 18px;
+  animation: hangman-pendulum 2.6s ease-in-out infinite;
 }
 
-@keyframes hangman-head {
+@keyframes hangman-pendulum {
   0%,
-  6% {
-    opacity: 0;
-  }
-  12%,
-  82% {
-    opacity: 1;
-  }
-  92%,
   100% {
-    opacity: 0;
+    transform: rotate(-11deg);
   }
-}
-
-@keyframes hangman-body {
-  0%,
-  18% {
-    opacity: 0;
-  }
-  24%,
-  82% {
-    opacity: 1;
-  }
-  92%,
-  100% {
-    opacity: 0;
-  }
-}
-
-@keyframes hangman-arms {
-  0%,
-  32% {
-    opacity: 0;
-  }
-  38%,
-  82% {
-    opacity: 1;
-  }
-  92%,
-  100% {
-    opacity: 0;
-  }
-}
-
-@keyframes hangman-legs {
-  0%,
-  46% {
-    opacity: 0;
-  }
-  52%,
-  82% {
-    opacity: 1;
-  }
-  92%,
-  100% {
-    opacity: 0;
+  50% {
+    transform: rotate(11deg);
   }
 }
 
@@ -2955,9 +2919,8 @@ html.dark .thought-body-gradient {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hangman__part {
+  .hangman__swing {
     animation: none;
-    opacity: 1;
   }
 }
 

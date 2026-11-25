@@ -4,20 +4,22 @@ type HangmanProps = {
 };
 
 /**
- * A gallows that draws its figure on a loop. The frame stays charcoal; each
- * limb lights in orange, then the figure clears and starts again.
+ * Gallows with the figure hung from the beam. The rope and body swing as one
+ * pendulum around the beam tip.
  */
 export function Hangman({ embedded = false }: HangmanProps) {
   const art = (
-    <svg viewBox="0 0 88 112" className="hangman__svg" aria-hidden>
-      <path className="hangman__gallows" d="M16 100 H72 M30 100 V16 H64 M64 16 V28" />
-      <line className="hangman__gallows" x1="64" y1="28" x2="64" y2="36" />
-      <circle className="hangman__part hangman__part--head" cx="64" cy="46" r="9" />
-      <line className="hangman__part hangman__part--body" x1="64" y1="55" x2="64" y2="78" />
-      <line className="hangman__part hangman__part--arm-l" x1="64" y1="62" x2="50" y2="72" />
-      <line className="hangman__part hangman__part--arm-r" x1="64" y1="62" x2="78" y2="72" />
-      <line className="hangman__part hangman__part--leg-l" x1="64" y1="78" x2="52" y2="94" />
-      <line className="hangman__part hangman__part--leg-r" x1="64" y1="78" x2="76" y2="94" />
+    <svg viewBox="0 0 120 150" className="hangman__svg" aria-hidden>
+      <path className="hangman__gallows" d="M14 140 H58 M34 140 V18 H78" />
+      <g className="hangman__swing">
+        <line className="hangman__rope" x1="78" y1="18" x2="78" y2="46" />
+        <circle className="hangman__part" cx="78" cy="58" r="12" />
+        <line className="hangman__part" x1="78" y1="70" x2="78" y2="98" />
+        <line className="hangman__part" x1="78" y1="78" x2="62" y2="90" />
+        <line className="hangman__part" x1="78" y1="78" x2="94" y2="90" />
+        <line className="hangman__part" x1="78" y1="98" x2="66" y2="118" />
+        <line className="hangman__part" x1="78" y1="98" x2="90" y2="118" />
+      </g>
     </svg>
   );
 
