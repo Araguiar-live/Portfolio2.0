@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, type CSSProperties } from "react";
+import { Hangman } from "@/components/craft/Hangman";
 import { ScannerPillLoop } from "@/components/craft/ScannerPillLoop";
 import heroMark from "@/assets/hero/hero-mark.svg";
 import toggleKnobHover from "@/assets/hero/hero-toggle-knob-hover.svg";
@@ -83,6 +84,7 @@ export function InteractiveHero({ onEnterWork }: { onEnterWork?: () => void }) {
   const hostRef = useRef<HTMLElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const scannerRef = useRef<HTMLDivElement>(null);
+  const hangmanRef = useRef<HTMLDivElement>(null);
   const scrollProgressRef = useRef(0);
   const pointerRef = useRef({ x: -1000, y: -1000, active: false });
 
@@ -142,7 +144,9 @@ export function InteractiveHero({ onEnterWork }: { onEnterWork?: () => void }) {
     let cornerRadius = 12;
     let hostRect = host.getBoundingClientRect();
     let scannerIndex = -1;
+    let hangmanIndex = -1;
     let placedKey = "";
+    let hangmanKey = "";
     let blocked: Array<{ l: number; t: number; r: number; b: number }> = [];
 
     const blobs: Blob[] = [
@@ -221,7 +225,9 @@ export function InteractiveHero({ onEnterWork }: { onEnterWork?: () => void }) {
       cols = g.cols;
       cornerRadius = g.cols === COLS ? Math.min(12, g.cellW * 0.18) : g.cellW * 0.137;
       chooseScanner();
+      chooseHangman();
       placedKey = "";
+      hangmanKey = "";
     };
 
     const measureBlocked = () => {
@@ -281,17 +287,49 @@ export function InteractiveHero({ onEnterWork }: { onEnterWork?: () => void }) {
       scannerIndex = best;
     };
 
-    const placeScanner = (off?: Offset) => {
-      const tile = scannerRef.current;
+    /** The corner cell, clear of the headline and the name label. */
+    const chooseHangman = () => {
+      if (isMobile || cols < 8 || cells.length === 0) {
+        hangmanIndex = -1;
+        return;
+      }
+      if (cells[0] && !hitsBlocked(cells[0])) {
+        hangmanIndex = 0;
+        return;
+      }
+      const rows = Math.floor(cells.length / cols);
+      let best = -1;
+      let bestD = Infinity;
+      for (let row = 0; row < Math.min(3, rows); row++) {
+        for (let col = 0; col < Math.min(3, cols); col++) {
+          const cell = cells[row * cols + col];
+          if (!cell || hitsBlocked(cell)) continue;
+          const distance = row * 4 + col;
+          if (distance < bestD) {
+            bestD = distance;
+            best = row * cols + col;
+          }
+        }
+      }
+      hangmanIndex = best;
+    };
+
+    const placeCraftTile = (
+      tile: HTMLDivElement | null,
+      index: number,
+      key: string,
+      setKey: (next: string) => void,
+      off?: Offset,
+    ) => {
       if (!tile) return;
-      if (scannerIndex < 0 || !cells[scannerIndex]) {
+      if (index < 0 || !cells[index]) {
         tile.style.display = "none";
         return;
       }
-      const cell = cells[scannerIndex];
-      const key = `${scannerIndex}|${cell.x.toFixed(1)}|${cell.y.toFixed(1)}|${cell.w.toFixed(1)}|${cell.h.toFixed(1)}|${cornerRadius.toFixed(1)}`;
-      if (key !== placedKey) {
-        placedKey = key;
+      const cell = cells[index];
+      const next = `${index}|${cell.x.toFixed(1)}|${cell.y.toFixed(1)}|${cell.w.toFixed(1)}|${cell.h.toFixed(1)}|${cornerRadius.toFixed(1)}`;
+      if (next !== key) {
+        setKey(next);
         tile.style.display = "block";
         tile.style.left = `${cell.x}px`;
         tile.style.top = `${cell.y}px`;
@@ -469,7 +507,7 @@ export function InteractiveHero({ onEnterWork }: { onEnterWork?: () => void }) {
       }
 
       cells.forEach((cell, i) => {
-        if (i === scannerIndex) return;
+        if (i === scannerIndex || i === hangmanIndex) return;
         const off = offsets[i];
         const x = cell.x + off.x;
         const y = cell.y + off.y;
@@ -495,7 +533,24 @@ export function InteractiveHero({ onEnterWork }: { onEnterWork?: () => void }) {
         ctx.fill();
       });
 
-      placeScanner(scannerIndex >= 0 ? offsets[scannerIndex] : undefined);
+      placeCraftTile(
+        scannerRef.current,
+        scannerIndex,
+        placedKey,
+        (next) => {
+          placedKey = next;
+        },
+        scannerIndex >= 0 ? offsets[scannerIndex] : undefined,
+      );
+      placeCraftTile(
+        hangmanRef.current,
+        hangmanIndex,
+        hangmanKey,
+        (next) => {
+          hangmanKey = next;
+        },
+        hangmanIndex >= 0 ? offsets[hangmanIndex] : undefined,
+      );
 
       if (scroll > 0) {
         ctx.save();
@@ -698,7 +753,10 @@ export function InteractiveHero({ onEnterWork }: { onEnterWork?: () => void }) {
         aria-hidden
         className="pointer-events-none absolute inset-0 z-[1] size-full max-h-none max-w-none"
       />
-      <div ref={scannerRef} aria-hidden className="hero-scanner-tile" data-scanner-tile="">
+      <div ref={hangmanRef} aria-hidden className="hero-craft-tile" data-hangman-tile="">
+        <Hangman embedded />
+      </div>
+      <div ref={scannerRef} aria-hidden className="hero-craft-tile" data-scanner-tile="">
         <ScannerPillLoop embedded />
       </div>
       <div

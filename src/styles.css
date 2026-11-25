@@ -2757,7 +2757,7 @@ html.dark .thought-body-gradient {
 }
 
 /* One hero-grid cell hosts the scanner. The canvas loop positions it. */
-.hero-scanner-tile {
+.hero-craft-tile {
   position: absolute;
   /* Above the hero frost. That blur sits over the whole grid and was wiping the graphic out. */
   z-index: 4;
@@ -2829,9 +2829,135 @@ html.dark .thought-body-gradient {
   }
 }
 
+.hangman {
+  box-sizing: border-box;
+  display: grid;
+  width: 220px;
+  height: 280px;
+  place-items: center;
+  padding: 16px;
+  border-radius: 12px;
+  background: #121820;
+}
+
+.hangman--embedded {
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border-radius: inherit;
+  background: transparent;
+}
+
+.hangman__svg {
+  display: block;
+  width: 68%;
+  height: auto;
+}
+
+.hangman__gallows,
+.hangman__part {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.hangman__gallows {
+  stroke: #8b95a3;
+  stroke-width: 3.2;
+}
+
+.hangman__part {
+  stroke: #ff5500;
+  stroke-width: 3.2;
+  opacity: 0;
+  filter: drop-shadow(0 0 2px #ff5500);
+}
+
+.hangman__part--head {
+  animation: hangman-head 4.8s linear infinite;
+}
+.hangman__part--body {
+  animation: hangman-body 4.8s linear infinite;
+}
+.hangman__part--arm-l,
+.hangman__part--arm-r {
+  animation: hangman-arms 4.8s linear infinite;
+}
+.hangman__part--leg-l,
+.hangman__part--leg-r {
+  animation: hangman-legs 4.8s linear infinite;
+}
+
+@keyframes hangman-head {
+  0%,
+  6% {
+    opacity: 0;
+  }
+  12%,
+  82% {
+    opacity: 1;
+  }
+  92%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes hangman-body {
+  0%,
+  18% {
+    opacity: 0;
+  }
+  24%,
+  82% {
+    opacity: 1;
+  }
+  92%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes hangman-arms {
+  0%,
+  32% {
+    opacity: 0;
+  }
+  38%,
+  82% {
+    opacity: 1;
+  }
+  92%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes hangman-legs {
+  0%,
+  46% {
+    opacity: 0;
+  }
+  52%,
+  82% {
+    opacity: 1;
+  }
+  92%,
+  100% {
+    opacity: 0;
+  }
+}
+
 @media (max-width: 767px) {
-  .hero-scanner-tile {
+  .hero-craft-tile {
     display: none !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hangman__part {
+    animation: none;
+    opacity: 1;
   }
 }
 
