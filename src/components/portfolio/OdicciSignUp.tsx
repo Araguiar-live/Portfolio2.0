@@ -389,7 +389,6 @@ function SignupModalBody({
   lastName,
   email,
   password,
-  signedUp,
   setFirstName,
   setLastName,
   setEmail,
@@ -497,7 +496,7 @@ function SignupModalBody({
             className="inline-flex w-[266px] items-center justify-center rounded-[24px] px-[86px] py-2 text-[12px] font-normal text-white"
             style={{ background: ACCENT }}
           >
-            {signedUp ? "Account created" : "Sign Up"}
+            Sign Up
           </button>
         </div>
       </div>
