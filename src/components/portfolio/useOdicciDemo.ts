@@ -37,6 +37,7 @@ function reveal(el: HTMLElement, screen: HTMLElement) {
 async function pointAt(refs: DemoRefs, el: HTMLElement, alive: () => boolean, wait: (ms: number) => Promise<void>) {
   const screen = refs.screenRef.current;
   if (!screen) return false;
+  el.scrollIntoView({ block: "nearest", inline: "nearest" });
   reveal(el, screen);
   await wait(320);
   if (!alive() || !refs.screenRef.current) return false;
@@ -81,7 +82,23 @@ export function useOdicciDemo() {
     const press = async (selector: string) => {
       const el = find(selector);
       if (!el || !(await pointAt(refs, el, alive, wait)) || !alive()) return false;
-      el.click();
+      const target = find(selector) ?? el;
+      const reactKey = Object.keys(target).find((key) => key.startsWith("__reactProps"));
+      const onClick = reactKey
+        ? (target as unknown as Record<string, { onClick?: (event: unknown) => void } | undefined>)[
+            reactKey
+          ]?.onClick
+        : undefined;
+      if (onClick) {
+        onClick({
+          preventDefault() {},
+          stopPropagation() {},
+          target,
+          currentTarget: target,
+        });
+      } else {
+        target.click();
+      }
       return true;
     };
     const typeInto = async (selector: string, text: string) => {
@@ -159,7 +176,9 @@ export function useOdicciDemo() {
       setPaused(true);
       setTouch(null);
     },
-    stopFromPointer() {
+    stopFromPointer(event?: { target?: EventTarget | null }) {
+      const target = event?.target;
+      if (target instanceof Element && target.closest("[data-demo-target]")) return;
       if (pausedRef.current) return;
       gen.current += 1;
       setCodeOn(false);

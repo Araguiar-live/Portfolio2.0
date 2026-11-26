@@ -496,7 +496,7 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
             className="overflow-hidden"
           >
             <div
-              className={`relative flex flex-col px-6 py-6 ${project.slug === "odicci" ? "h-auto" : "h-full"}`}
+              className={`relative flex flex-col px-6 pt-6 ${project.slug === "odicci" ? "h-auto pb-32" : "h-full pb-6"}`}
               style={project.slug === "odicci" ? undefined : { height: EXPANDED_BODY_H }}
             >
               {showTabChrome ? (

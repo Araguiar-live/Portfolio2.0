@@ -1,11 +1,13 @@
 import { motion } from "framer-motion";
-import { ChevronDown, Home, Info } from "lucide-react";
+import { Home, Info } from "lucide-react";
 import { useState } from "react";
 import odicciLogo from "@/assets/odicci/odicci-logo-wordmark.png";
 import workspaceGradientPattern from "@/assets/odicci/workspace-gradient-pattern.svg";
 import workspaceGradient2 from "@/assets/odicci/workspace-gradient-2.svg";
 import workspaceDiamondMeshSvg from "@/assets/odicci/workspace-diamond-mesh.svg?raw";
 import { OdicciBrandNavActions } from "@/components/portfolio/OdicciBrandNavActions";
+import { OdicciPreviewMark } from "@/components/portfolio/OdicciPreviewMark";
+import { OdicciBrandSelect } from "@/components/portfolio/OdicciBrandSelect";
 
 /**
  * OdicciBusinessProfile — Figma 713:199885.
@@ -13,6 +15,8 @@ import { OdicciBrandNavActions } from "@/components/portfolio/OdicciBrandNavActi
  */
 
 const ACCENT = "#FF5126";
+const INDUSTRIES = ["Fashion", "Beauty", "Food & Drink", "Health", "Electronics", "Home", "Other"] as const;
+const NICHES = ["Babywear", "Accessories", "Skincare", "Streetwear", "Coffee", "Fitness", "Other"] as const;
 /** Match Create Workspace wordmark scale; PNG is padded (~189/600 left) */
 const LOGO_W = Math.round(178 * 1.4); // 249
 const LOGO_H = Math.round(86 * 1.4); // 120
@@ -31,6 +35,7 @@ export function OdicciBusinessProfile({
   const [industry, setIndustry] = useState("Fashion");
   const [niche, setNiche] = useState("Babywear");
   const [other, setOther] = useState("");
+  const [openField, setOpenField] = useState<"industry" | "niche" | null>(null);
   const textMain = isDark ? "text-white" : "text-zinc-900";
 
   return (
@@ -143,37 +148,30 @@ export function OdicciBusinessProfile({
                     <div className="flex w-full gap-[18px]">
                       <div className="flex min-w-0 flex-1 flex-col gap-1">
                         <p className={`text-[12px] leading-[1.2] ${textMain}`}>Industry</p>
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setIndustry((v) => (v === "Fashion" ? "Retail" : "Fashion"))
-                          }
-                          className="flex h-12 w-full items-center justify-between rounded-lg border border-[#d0d8e2] bg-white px-3 py-3.5 text-left"
-                        >
-                          <span className="min-w-0 flex-1 truncate text-[16px] leading-[1.2] text-[#0d2847]">
-                            {industry}
-                          </span>
-                          <ChevronDown className="size-4 shrink-0 text-[#0d2847]/60" />
-                        </button>
+                        <OdicciBrandSelect
+                          value={industry}
+                          options={INDUSTRIES}
+                          onChange={setIndustry}
+                          triggerAttr="brand-industry"
+                          open={openField === "industry"}
+                          onOpenChange={(next) => setOpenField(next ? "industry" : null)}
+                        />
                       </div>
                       <div className="flex min-w-0 flex-1 flex-col gap-1">
                         <p className={`text-[12px] leading-[1.2] ${textMain}`}>Niche</p>
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setNiche((v) => (v === "Babywear" ? "Accessories" : "Babywear"))
-                          }
-                          className="flex h-12 w-full items-center justify-between rounded-lg border border-[#d0d8e2] bg-white px-3 py-3.5 text-left"
-                        >
-                          <span className="min-w-0 flex-1 truncate text-[16px] leading-[1.2] text-[#0d2847]">
-                            {niche}
-                          </span>
-                          <ChevronDown className="size-4 shrink-0 text-[#0d2847]/60" />
-                        </button>
+                        <OdicciBrandSelect
+                          value={niche}
+                          options={NICHES}
+                          onChange={setNiche}
+                          triggerAttr="brand-niche"
+                          open={openField === "niche"}
+                          onOpenChange={(next) => setOpenField(next ? "niche" : null)}
+                        />
                       </div>
                     </div>
 
                     <input
+                      data-demo-target="brand-other"
                       value={other}
                       onChange={(e) => setOther(e.target.value)}
                       placeholder="If other type it in here..."
@@ -216,8 +214,8 @@ function WorkspacePreviewWindow({ title }: { title: string }) {
         </div>
       </div>
       <div className="flex min-h-0 w-full flex-1 flex-col items-start rounded-b-xl bg-[#f9fafb] p-[60px]">
-        <div className="flex w-full items-center justify-center rounded-xl bg-white px-6 pb-6 pt-9">
-          <FigmaLinkIcon className="size-9 text-zinc-900" />
+        <div className="flex w-full items-center justify-center rounded-xl border-2 border-[#d0d8e2] bg-white px-6 pb-6 pt-9">
+          <OdicciPreviewMark />
         </div>
       </div>
     </div>

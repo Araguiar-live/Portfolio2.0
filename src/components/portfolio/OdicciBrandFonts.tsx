@@ -1,11 +1,12 @@
 import { motion } from "framer-motion";
 import { ChevronDown, HelpCircle, Type, Upload } from "lucide-react";
-import { useState, type CSSProperties } from "react";
+import { useEffect, useState } from "react";
 import odicciLogo from "@/assets/odicci/odicci-logo-wordmark.png";
 import workspaceGradientPattern from "@/assets/odicci/workspace-gradient-pattern.svg";
 import workspaceGradient2 from "@/assets/odicci/workspace-gradient-2.svg";
 import workspaceDiamondMeshSvg from "@/assets/odicci/workspace-diamond-mesh.svg?raw";
 import workspaceMark from "@/assets/odicci/workspace-mark.png";
+import { OdicciPreviewMark } from "@/components/portfolio/OdicciPreviewMark";
 
 /**
  * OdicciBrandFonts — Figma 735:201375.
@@ -26,17 +27,26 @@ export function OdicciBrandFonts({
   isDark = true,
   onContinue,
   onBack,
+  colors,
 }: {
   isDark?: boolean;
   onContinue?: () => void;
   onBack?: () => void;
+  colors?: { primary: string; secondary: string; accent: string };
 }) {
+  const primary = colors?.primary ?? "#FB5A60";
+  const secondary = colors?.secondary ?? "#FCDF3C";
+  const accent = colors?.accent ?? ACCENT;
   const [headingFont, setHeadingFont] = useState<(typeof HEADING_FONTS)[number]>("Inter");
   const [bodyFont, setBodyFont] = useState<(typeof BODY_FONTS)[number]>("Inter");
   const [previewText, setPreviewText] = useState("");
   const [size, setSize] = useState<(typeof SIZES)[number]>("116px");
-  const [fill, setFill] = useState("#0024EE");
+  const [fill, setFill] = useState(primary);
   const [opacity] = useState(100);
+
+  useEffect(() => {
+    setFill(primary);
+  }, [primary]);
 
   const textMain = isDark ? "text-white" : "text-zinc-900";
   const sizePx = Number.parseInt(size, 10) || 116;
@@ -98,6 +108,9 @@ export function OdicciBrandFonts({
             bodyFont={bodyFont}
             previewText={previewText}
             fill={fill}
+            primary={primary}
+            secondary={secondary}
+            accent={accent}
           />
 
           <div
@@ -143,6 +156,7 @@ export function OdicciBrandFonts({
                     <p className="text-[10px] leading-[1.2] text-white">Heading Font</p>
                     <button
                       type="button"
+                      data-demo-target="font-heading"
                       onClick={() =>
                         setHeadingFont(
                           (v) => HEADING_FONTS[(HEADING_FONTS.indexOf(v) + 1) % HEADING_FONTS.length],
@@ -159,6 +173,7 @@ export function OdicciBrandFonts({
                     <p className="text-[10px] leading-[1.2] text-white">Body Font</p>
                     <button
                       type="button"
+                      data-demo-target="font-body"
                       onClick={() =>
                         setBodyFont((v) => BODY_FONTS[(BODY_FONTS.indexOf(v) + 1) % BODY_FONTS.length])
                       }
@@ -190,6 +205,7 @@ export function OdicciBrandFonts({
                     <HelpCircle className="size-4 text-white/70" strokeWidth={1.75} />
                   </div>
                   <input
+                    data-demo-target="font-preview"
                     value={previewText}
                     onChange={(e) => setPreviewText(e.target.value)}
                     placeholder="Type preview text here"
@@ -259,6 +275,7 @@ export function OdicciBrandFonts({
               </button>
               <button
                 type="button"
+                data-demo-target="brand-continue"
                 onClick={onContinue}
                 className="flex flex-1 items-center justify-center rounded-[36px] px-2.5 py-3 text-center text-[12px] leading-[1.2] text-white transition hover:brightness-110"
                 style={{ background: ACCENT }}
@@ -278,12 +295,24 @@ function WorkspacePreviewWindow({
   bodyFont,
   previewText,
   fill,
+  primary,
+  secondary,
+  accent,
 }: {
   headingFont: string;
   bodyFont: string;
   previewText: string;
   fill: string;
+  primary: string;
+  secondary: string;
+  accent: string;
 }) {
+  const brandApplied = secondary !== "#FCDF3C" && secondary !== "#9294FE";
+  const lighter = (color: string) => `color-mix(in srgb, ${color} 70%, white)`;
+  const cardBackground = brandApplied
+    ? `linear-gradient(to bottom, ${lighter(secondary)}, ${lighter(primary)})`
+    : "linear-gradient(to bottom, #fcdf3c, #ffb326)";
+  const actionColor = brandApplied ? accent : ACCENT;
   return (
     <div className="absolute left-0 top-[101.5px] flex h-[536px] w-[617px] flex-col">
       <div className="flex w-full items-center justify-between rounded-t-lg border border-[#dbe5ef] bg-white p-3">
@@ -293,16 +322,19 @@ function WorkspacePreviewWindow({
         </p>
         <div
           className="flex size-6 shrink-0 items-center justify-center rounded-full text-[12px] leading-[1.2] text-white"
-          style={{ background: ACCENT }}
+          style={{ background: actionColor }}
         >
           A
         </div>
       </div>
       <div className="flex min-h-0 w-full flex-1 flex-col items-start rounded-b-xl bg-[#f9fafb] p-[60px]">
-        <div className="flex w-full flex-col items-center justify-center gap-2.5 rounded-xl bg-gradient-to-b from-[#fcdf3c] to-[#ffb326] px-6 pb-6 pt-9">
-          <FigmaMark className="size-9 text-[#fb5a60]" />
+        <div
+          className="flex w-full flex-col items-center justify-center gap-2.5 rounded-xl px-6 pb-6 pt-9 transition-colors duration-500"
+          style={{ background: cardBackground }}
+        >
+          <OdicciPreviewMark />
           <div className="flex h-[257px] w-full max-w-[453px] flex-col items-center justify-between">
-            <div className="flex w-full flex-col items-start gap-6 text-center" style={{ color: fill || "#fb5a60" }}>
+            <div className="flex w-full flex-col items-start gap-6 text-center" style={{ color: fill }}>
               <p
                 className="w-full text-[24px] font-medium leading-[1.2]"
                 style={{ fontFamily: `${headingFont}, ui-sans-serif, system-ui, sans-serif` }}
@@ -318,9 +350,9 @@ function WorkspacePreviewWindow({
             </div>
             <div
               className="flex items-start justify-center rounded-[46px] border px-4 py-1.5"
-              style={{ borderColor: ACCENT }}
+              style={{ borderColor: actionColor }}
             >
-              <span className="text-[16px] leading-[1.2]" style={{ color: ACCENT }}>
+              <span className="text-[16px] leading-[1.2]" style={{ color: actionColor }}>
                 Press play
               </span>
             </div>
@@ -328,33 +360,5 @@ function WorkspacePreviewWindow({
         </div>
       </div>
     </div>
-  );
-}
-
-function FigmaMark({ className, style }: { className?: string; style?: CSSProperties }) {
-  return (
-    <svg viewBox="0 0 38 57" fill="none" className={className} style={style} aria-hidden>
-      <path
-        d="M19 28.5c0-5.247 4.253-9.5 9.5-9.5S38 23.253 38 28.5 33.747 38 28.5 38 19 33.747 19 28.5Z"
-        fill="currentColor"
-        fillOpacity="0.9"
-      />
-      <path
-        d="M0 47.5C0 42.253 4.253 38 9.5 38H19v9.5C19 52.747 14.747 57 9.5 57S0 52.747 0 47.5Z"
-        fill="currentColor"
-        fillOpacity="0.75"
-      />
-      <path
-        d="M19 0v19H9.5C4.253 19 0 14.747 0 9.5S4.253 0 9.5 0H19Z"
-        fill="currentColor"
-        fillOpacity="0.85"
-      />
-      <path d="M19 0h9.5C33.747 0 38 4.253 38 9.5S33.747 19 28.5 19H19V0Z" fill="currentColor" />
-      <path
-        d="M0 28.5C0 23.253 4.253 19 9.5 19H19v19H9.5C4.253 38 0 33.747 0 28.5Z"
-        fill="currentColor"
-        fillOpacity="0.65"
-      />
-    </svg>
   );
 }

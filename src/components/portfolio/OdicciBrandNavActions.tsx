@@ -29,6 +29,7 @@ export function OdicciBrandNavActions({
       </div>
       <button
         type="button"
+        data-demo-target="brand-continue"
         onClick={onContinue}
         className="w-[280px] rounded-[36px] py-3 text-center text-[12px] leading-[1.2] text-white transition hover:brightness-110"
         style={{ background: ACCENT }}

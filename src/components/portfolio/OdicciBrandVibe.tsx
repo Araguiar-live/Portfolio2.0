@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { ChevronDown, Info, Loader } from "lucide-react";
+import { Info, Loader } from "lucide-react";
 import { useState } from "react";
 import odicciLogo from "@/assets/odicci/odicci-logo-wordmark.png";
 import workspaceGradientPattern from "@/assets/odicci/workspace-gradient-pattern.svg";
@@ -7,6 +7,8 @@ import workspaceGradient2 from "@/assets/odicci/workspace-gradient-2.svg";
 import workspaceDiamondMeshSvg from "@/assets/odicci/workspace-diamond-mesh.svg?raw";
 import workspaceMark from "@/assets/odicci/workspace-mark.png";
 import { OdicciBrandNavActions } from "@/components/portfolio/OdicciBrandNavActions";
+import { OdicciPreviewMark } from "@/components/portfolio/OdicciPreviewMark";
+import { OdicciBrandSelect } from "@/components/portfolio/OdicciBrandSelect";
 
 /**
  * OdicciBrandVibe — Figma 727:200380.
@@ -20,8 +22,8 @@ const LOGO_H = Math.round(86 * 1.4); // 120
 const CONTENT_LEFT = 76;
 const LOGO_LEFT = Math.round(CONTENT_LEFT - LOGO_W * (189 / 600));
 
-const TONES = ["Energetic", "Calm", "Playful", "Professional"] as const;
-const AESTHETICS = ["Art Deco", "Minimal", "Bold", "Organic"] as const;
+const TONES = ["Energetic", "Calm", "Playful", "Professional", "Other"] as const;
+const AESTHETICS = ["Art Deco", "Minimal", "Bold", "Organic", "Other"] as const;
 
 export function OdicciBrandVibe({
   isDark = true,
@@ -35,6 +37,7 @@ export function OdicciBrandVibe({
   const [tone, setTone] = useState<(typeof TONES)[number]>("Energetic");
   const [aesthetic, setAesthetic] = useState<(typeof AESTHETICS)[number]>("Art Deco");
   const [other, setOther] = useState("");
+  const [openField, setOpenField] = useState<"tone" | "aesthetic" | null>(null);
   const textMain = isDark ? "text-white" : "text-zinc-900";
 
   return (
@@ -132,39 +135,32 @@ export function OdicciBrandVibe({
                   <div className="flex w-full gap-4">
                     <div className="flex w-[276.5px] min-w-0 flex-1 flex-col gap-1">
                       <p className={`text-[12px] leading-[1.2] ${textMain}`}>Tone</p>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setTone((v) => TONES[(TONES.indexOf(v) + 1) % TONES.length])
-                        }
-                        className="flex h-[43px] w-full items-center justify-between rounded-lg border border-[#e0e0e0] bg-white p-3 text-left"
-                      >
-                        <span className="min-w-0 flex-1 truncate text-[16px] leading-[1.2] text-[#0a0a0a]">
-                          {tone}
-                        </span>
-                        <ChevronDown className="size-4 shrink-0 text-[#0a0a0a]/60" />
-                      </button>
+                      <OdicciBrandSelect
+                        value={tone}
+                        options={TONES}
+                        onChange={(next) => setTone(next as (typeof TONES)[number])}
+                        triggerAttr="vibe-tone"
+                        menuClassName="text-[#0a0a0a]"
+                        open={openField === "tone"}
+                        onOpenChange={(next) => setOpenField(next ? "tone" : null)}
+                      />
                     </div>
                     <div className="flex w-[276.5px] min-w-0 flex-1 flex-col gap-1">
                       <p className={`text-[12px] leading-[1.2] ${textMain}`}>Aesthetic</p>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setAesthetic(
-                            (v) => AESTHETICS[(AESTHETICS.indexOf(v) + 1) % AESTHETICS.length],
-                          )
-                        }
-                        className="flex h-[43px] w-full items-center justify-between rounded-lg border border-[#e0e0e0] bg-white p-3 text-left"
-                      >
-                        <span className="min-w-0 flex-1 truncate text-[16px] leading-[1.2] text-[#0a0a0a]">
-                          {aesthetic}
-                        </span>
-                        <ChevronDown className="size-4 shrink-0 text-[#0a0a0a]/60" />
-                      </button>
+                      <OdicciBrandSelect
+                        value={aesthetic}
+                        options={AESTHETICS}
+                        onChange={(next) => setAesthetic(next as (typeof AESTHETICS)[number])}
+                        triggerAttr="vibe-aesthetic"
+                        menuClassName="text-[#0a0a0a]"
+                        open={openField === "aesthetic"}
+                        onOpenChange={(next) => setOpenField(next ? "aesthetic" : null)}
+                      />
                     </div>
                   </div>
 
                   <input
+                    data-demo-target="vibe-other"
                     value={other}
                     onChange={(e) => setOther(e.target.value)}
                     placeholder="If other type it in here..."
@@ -207,38 +203,10 @@ function WorkspacePreviewWindow() {
         </div>
       </div>
       <div className="flex min-h-0 w-full flex-1 flex-col items-start rounded-b-xl bg-[#f9fafb] p-[60px]">
-        <div className="flex w-full items-center justify-center rounded-xl bg-white px-6 pb-6 pt-9">
-          <FigmaMark className="size-9 text-zinc-400" />
+        <div className="flex w-full items-center justify-center rounded-xl border-2 border-[#d0d8e2] bg-white px-6 pb-6 pt-9">
+          <OdicciPreviewMark />
         </div>
       </div>
     </div>
-  );
-}
-
-function FigmaMark({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 38 57" fill="none" className={className} aria-hidden>
-      <path
-        d="M19 28.5c0-5.247 4.253-9.5 9.5-9.5S38 23.253 38 28.5 33.747 38 28.5 38 19 33.747 19 28.5Z"
-        fill="currentColor"
-        fillOpacity="0.9"
-      />
-      <path
-        d="M0 47.5C0 42.253 4.253 38 9.5 38H19v9.5C19 52.747 14.747 57 9.5 57S0 52.747 0 47.5Z"
-        fill="currentColor"
-        fillOpacity="0.75"
-      />
-      <path
-        d="M19 0v19H9.5C4.253 19 0 14.747 0 9.5S4.253 0 9.5 0H19Z"
-        fill="currentColor"
-        fillOpacity="0.85"
-      />
-      <path d="M19 0h9.5C33.747 0 38 4.253 38 9.5S33.747 19 28.5 19H19V0Z" fill="currentColor" />
-      <path
-        d="M0 28.5C0 23.253 4.253 19 9.5 19H19v19H9.5C4.253 38 0 33.747 0 28.5Z"
-        fill="currentColor"
-        fillOpacity="0.65"
-      />
-    </svg>
   );
 }

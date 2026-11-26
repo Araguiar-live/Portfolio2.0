@@ -1,11 +1,12 @@
 import { motion } from "framer-motion";
-import { useState, type CSSProperties } from "react";
+import { useState } from "react";
 import odicciLogo from "@/assets/odicci/odicci-logo-wordmark.png";
 import brushIcon from "@/assets/odicci/brush.svg";
 import workspaceGradientPattern from "@/assets/odicci/workspace-gradient-pattern.svg";
 import workspaceGradient2 from "@/assets/odicci/workspace-gradient-2.svg";
 import workspaceDiamondMeshSvg from "@/assets/odicci/workspace-diamond-mesh.svg?raw";
 import workspaceMark from "@/assets/odicci/workspace-mark.png";
+import { OdicciPreviewMark } from "@/components/portfolio/OdicciPreviewMark";
 
 /**
  * OdicciBrandPalette — Figma 733:200840.
@@ -46,10 +47,12 @@ export function OdicciBrandPalette({
   isDark = true,
   onContinue,
   onBack,
+  onColors,
 }: {
   isDark?: boolean;
   onContinue?: () => void;
   onBack?: () => void;
+  onColors?: (colors: { primary: string; secondary: string; accent: string }) => void;
 }) {
   const [selectedPalette, setSelectedPalette] = useState("Custom");
   const [tooltip, setTooltip] = useState<{ name: string; index: number } | null>(null);
@@ -64,16 +67,22 @@ export function OdicciBrandPalette({
   const secondary = slots.find((s) => s.key === "secondary")!;
   const accent = slots.find((s) => s.key === "accent")!;
 
+  const publish = (next: { primary: string; secondary: string; accent: string }) => {
+    onColors?.(next);
+  };
+
   const applyPalette = (p: Palette) => {
+    const next = { primary: p.colors[0], secondary: p.colors[1], accent: p.colors[2] };
     setSelectedPalette(p.name);
     setSlots((prev) =>
       prev.map((s) => {
-        if (s.key === "primary") return { ...s, color: p.colors[0] };
-        if (s.key === "secondary") return { ...s, color: p.colors[1] };
-        if (s.key === "accent") return { ...s, color: p.colors[2] };
+        if (s.key === "primary") return { ...s, color: next.primary };
+        if (s.key === "secondary") return { ...s, color: next.secondary };
+        if (s.key === "accent") return { ...s, color: next.accent };
         return s;
       }),
     );
+    publish(next);
   };
 
   const updateColor = (key: SlotKey, color: string) =>
@@ -173,7 +182,15 @@ export function OdicciBrandPalette({
             </div>
 
             <div className="flex min-h-0 w-full flex-1 flex-col gap-6">
-              <div className="min-h-0 w-full flex-1 overflow-y-auto overflow-x-hidden pr-1">
+              <div
+                className="min-h-0 w-full flex-1 overflow-y-auto overflow-x-hidden pr-1 pb-8"
+                style={{
+                  WebkitMaskImage:
+                    "linear-gradient(to bottom, #000 0, #000 calc(100% - 72px), transparent)",
+                  maskImage:
+                    "linear-gradient(to bottom, #000 0, #000 calc(100% - 72px), transparent)",
+                }}
+              >
                 <div className="flex w-full flex-col gap-9">
                   <div className="flex w-full flex-col gap-2">
                     <p className="text-[10px] leading-[1.2] text-white">Suggested palletes</p>
@@ -184,6 +201,7 @@ export function OdicciBrandPalette({
                           <button
                             key={p.name}
                             type="button"
+                            data-demo-target={`palette-${p.name}`}
                             onClick={() => applyPalette(p)}
                             className="flex w-full flex-col items-center gap-1 focus:outline-none"
                           >
@@ -272,7 +290,15 @@ export function OdicciBrandPalette({
                 </button>
                 <button
                   type="button"
-                  onClick={onContinue}
+                  data-demo-target="brand-continue"
+                  onClick={() => {
+                    publish({
+                      primary: primary.color,
+                      secondary: secondary.color,
+                      accent: accent.color,
+                    });
+                    onContinue?.();
+                  }}
                   className="flex flex-1 items-center justify-center rounded-[36px] px-2.5 py-3 text-center text-[12px] leading-[1.2] text-white transition hover:brightness-110"
                   style={{ background: ACCENT }}
                 >
@@ -312,40 +338,12 @@ function WorkspacePreviewWindow({
       </div>
       <div className="flex min-h-0 w-full flex-1 flex-col items-start rounded-b-xl bg-[#f9fafb] p-[60px]">
         <div
-          className="flex w-full items-center justify-center rounded-xl px-6 pb-6 pt-9 transition-colors duration-500"
-          style={{ background: secondary === "#9294FE" ? "#FCDF3C" : secondary }}
+          className="flex w-full items-center justify-center rounded-xl border-2 bg-white px-6 pb-6 pt-9 transition-colors duration-500"
+          style={{ borderColor: secondary === "#9294FE" ? "#d0d8e2" : primary }}
         >
-          <FigmaMark className="size-9" style={{ color: primary }} />
+          <OdicciPreviewMark />
         </div>
       </div>
     </div>
-  );
-}
-
-function FigmaMark({ className, style }: { className?: string; style?: CSSProperties }) {
-  return (
-    <svg viewBox="0 0 38 57" fill="none" className={className} style={style} aria-hidden>
-      <path
-        d="M19 28.5c0-5.247 4.253-9.5 9.5-9.5S38 23.253 38 28.5 33.747 38 28.5 38 19 33.747 19 28.5Z"
-        fill="currentColor"
-        fillOpacity="0.9"
-      />
-      <path
-        d="M0 47.5C0 42.253 4.253 38 9.5 38H19v9.5C19 52.747 14.747 57 9.5 57S0 52.747 0 47.5Z"
-        fill="currentColor"
-        fillOpacity="0.75"
-      />
-      <path
-        d="M19 0v19H9.5C4.253 19 0 14.747 0 9.5S4.253 0 9.5 0H19Z"
-        fill="currentColor"
-        fillOpacity="0.85"
-      />
-      <path d="M19 0h9.5C33.747 0 38 4.253 38 9.5S33.747 19 28.5 19H19V0Z" fill="currentColor" />
-      <path
-        d="M0 28.5C0 23.253 4.253 19 9.5 19H19v19H9.5C4.253 38 0 33.747 0 28.5Z"
-        fill="currentColor"
-        fillOpacity="0.65"
-      />
-    </svg>
   );
 }
