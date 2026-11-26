@@ -1,5 +1,11 @@
 /** The brand mark shown in every Brand Personality preview. The drawing stays fixed. */
-export function OdicciPreviewMark({ className = "size-9 text-zinc-900" }: { className?: string }) {
+export function OdicciPreviewMark({
+  className = "size-9 text-zinc-900",
+  color,
+}: {
+  className?: string;
+  color?: string;
+}) {
   return (
     <svg
       width="36"
@@ -7,6 +13,7 @@ export function OdicciPreviewMark({ className = "size-9 text-zinc-900" }: { clas
       viewBox="0 0 36 36"
       fill="none"
       className={className}
+      style={color ? { color } : undefined}
       aria-hidden
       xmlns="http://www.w3.org/2000/svg"
     >

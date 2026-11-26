@@ -332,7 +332,7 @@ function WorkspacePreviewWindow({
           className="flex w-full flex-col items-center justify-center gap-2.5 rounded-xl px-6 pb-6 pt-9 transition-colors duration-500"
           style={{ background: cardBackground }}
         >
-          <OdicciPreviewMark />
+          <OdicciPreviewMark color={brandApplied ? primary : undefined} />
           <div className="flex h-[257px] w-full max-w-[453px] flex-col items-center justify-between">
             <div className="flex w-full flex-col items-start gap-6 text-center" style={{ color: fill }}>
               <p

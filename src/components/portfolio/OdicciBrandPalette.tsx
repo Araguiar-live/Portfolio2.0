@@ -338,10 +338,13 @@ function WorkspacePreviewWindow({
       </div>
       <div className="flex min-h-0 w-full flex-1 flex-col items-start rounded-b-xl bg-[#f9fafb] p-[60px]">
         <div
-          className="flex w-full items-center justify-center rounded-xl border-2 bg-white px-6 pb-6 pt-9 transition-colors duration-500"
-          style={{ borderColor: secondary === "#9294FE" ? "#d0d8e2" : primary }}
+          className="flex w-full items-center justify-center rounded-xl border-2 px-6 pb-6 pt-9 transition-colors duration-500"
+          style={{
+            background: secondary === "#9294FE" ? "#ffffff" : secondary,
+            borderColor: secondary === "#9294FE" ? "#d0d8e2" : primary,
+          }}
         >
-          <OdicciPreviewMark />
+          <OdicciPreviewMark color={secondary === "#9294FE" ? undefined : primary} />
         </div>
       </div>
     </div>
