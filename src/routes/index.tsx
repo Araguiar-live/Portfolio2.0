@@ -373,7 +373,7 @@ function BouncyHeadline() {
 }
 
 /**
- * Calculator + SpatialDotBadge — desktop: stage bottom-right; mobile: right edge, vertical center.
+ * Calculator + SpatialDotBadge — desktop frame deco; mobile stage-bottom in wireframe-stage-deco.
  */
 function WorkStageDecorations() {
   return (
@@ -384,15 +384,16 @@ function WorkStageDecorations() {
         </div>
         <CalculatorCard />
       </div>
+      <MobileWorkCalculatorDeco />
     </>
   );
 }
 
-/** Mobile: lives in the work column so the calculator stays visible above the grid (folder can stack above it locally). */
+/** Mobile: pinned to wireframe-stage bottom (marquee seam) via WorkStageDecorations. */
 function MobileWorkCalculatorDeco() {
   return (
     <div
-      className="portfolio-deco-calculator portfolio-deco-calculator--mobile pointer-events-none absolute inset-y-0 right-0 z-[5] hidden w-[min(48vw,220px)] max-md:block"
+      className="portfolio-deco-calculator portfolio-deco-calculator--mobile pointer-events-none absolute bottom-0 right-0 top-auto z-[5] hidden w-[min(48vw,220px)] max-md:block"
       aria-hidden
     >
       <div className="portfolio-deco-spin portfolio-deco-spin--mobile pointer-events-auto absolute z-0">
@@ -541,7 +542,6 @@ function Index() {
                 : "work-closed-column @container pointer-events-auto absolute flex flex-col items-center overflow-visible max-md:relative max-md:left-auto max-md:top-auto max-md:mx-auto max-md:h-auto max-md:min-h-[calc(100dvh-7.5rem)] max-md:w-full max-md:max-w-[calc(100vw-32px)] max-md:items-stretch max-md:gap-8 max-md:px-0 max-md:pb-6 max-md:pt-24 max-sm:min-h-[calc(100dvh-6.5rem)] max-sm:gap-[37px] max-sm:pb-8"
             }
           >
-            <MobileWorkCalculatorDeco />
             <MobileWorkMouseDeco />
             <header className="flex w-full max-w-[720px] shrink-0 flex-col items-center gap-5 text-center max-md:relative max-md:z-[1] max-md:mt-3 max-md:gap-4 max-sm:mt-3 max-sm:gap-4">
               <p className="text-[11px] font-bold uppercase tracking-[2px] text-[#76767a] max-md:text-[9px] max-md:tracking-[1.5px] max-sm:tracking-normal">

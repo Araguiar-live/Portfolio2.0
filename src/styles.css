@@ -783,13 +783,15 @@ html[data-work-locked] .portfolio-interactive-hero-shell {
     pointer-events: auto;
   }
 
-  #work .work-closed-column .portfolio-deco-calculator--mobile {
-    top: 50%;
+  #work .wireframe-stage-closed .portfolio-deco-calculator--mobile {
+    top: auto;
     right: max(-4px, calc(-1 * env(safe-area-inset-right, 0px)));
+    bottom: -36px;
     height: auto;
-    translate: 0 -50%;
+    overflow: visible;
+    translate: none;
     transform: scale(0.86);
-    transform-origin: center right;
+    transform-origin: bottom right;
   }
 
   #work .work-closed-column .portfolio-deco-mouse--mobile {
@@ -800,10 +802,17 @@ html[data-work-locked] .portfolio-interactive-hero-shell {
   }
 
   #work .portfolio-deco-calculator--mobile .portfolio-deco-spin--mobile {
-    top: -54px;
-    right: -18px;
+    top: -48px;
+    bottom: auto;
+    right: -8px;
     left: auto;
-    translate: none;
+    z-index: 0;
+    translate: 14px 12%;
+  }
+
+  #work .portfolio-deco-calculator--mobile .mobile-calculator-frost {
+    position: relative;
+    z-index: 2;
   }
 
   /* First grid row at page top — scrolls with content (Contact Me stays fixed separately). */
