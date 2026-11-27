@@ -57,7 +57,7 @@
 
   /* Frame calculator + SpatialDotBadge: 15% smaller, 24px lower (24px → 0 bottom). */
   #work .portfolio-deco-calculator.portfolio-deco-calculator--frame {
-    bottom: 0;
+    bottom: 56px;
     transform: scale(0.9775);
     transform-origin: bottom right;
     translate: -15% 13%;
@@ -218,7 +218,7 @@
   #work .portfolio-deco-calculator--frame {
     top: auto;
     right: 24px;
-    bottom: 24px;
+    bottom: 80px;
     left: auto;
     translate: -15% 13%;
     transform: scale(1.15);
@@ -235,7 +235,7 @@
   /* ≥1537px desktop — flush to wireframe stage bottom; laptop band (768–1536) unchanged above. */
   @media (min-width: 1537px) {
     #work .portfolio-deco-calculator.portfolio-deco-calculator--frame {
-      bottom: 0;
+      bottom: 56px;
       right: clamp(16px, 1.25vw, 28px);
       translate: -15% 0;
     }
@@ -783,10 +783,11 @@ html[data-work-locked] .portfolio-interactive-hero-shell {
     pointer-events: auto;
   }
 
+  /* Mobile — calc stack at stage bottom; desktop uses --frame rules. */
   #work .wireframe-stage-closed .portfolio-deco-calculator--mobile {
     top: auto;
     right: max(-4px, calc(-1 * env(safe-area-inset-right, 0px)));
-    bottom: -36px;
+    bottom: 20px;
     height: auto;
     overflow: visible;
     translate: none;
