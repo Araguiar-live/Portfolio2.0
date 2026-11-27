@@ -1,6 +1,8 @@
 import { ChevronDown, Moon, Sun } from "lucide-react";
 import { useEffect, useRef, useState, type ReactNode, type RefObject } from "react";
 import { CrcleScreenToolbar, DemoToolbar } from "@/components/portfolio/CrcleDemoToolbar";
+import { useOdicciMobileLayout } from "@/components/portfolio/OdicciMobileLayout";
+import { cn } from "@/lib/utils";
 
 /** Figma Odicci onboarding viewport (65:94009 and siblings). */
 export const ODICCI_FRAME_W = 1512;
@@ -50,6 +52,9 @@ export function OdicciBrowserFrame({
   demo,
   children,
 }: OdicciBrowserFrameProps) {
+  const mobileLayout = useOdicciMobileLayout();
+  const embed = mobileLayout?.embed ?? false;
+  const toolbarBelow = mobileLayout?.toolbarBelow ?? false;
   const fallbackStageRef = useRef<HTMLDivElement>(null);
   const stageRef = stageRefProp ?? fallbackStageRef;
   const [scale, setScale] = useState(1);
@@ -61,48 +66,114 @@ export function OdicciBrowserFrame({
 
     const update = () => {
       const { width, height } = el.getBoundingClientRect();
-      setScale(Math.min(width / ODICCI_FRAME_W, height / ODICCI_FRAME_H));
+      setScale(
+        embed
+          ? width / ODICCI_FRAME_W
+          : Math.min(width / ODICCI_FRAME_W, height / ODICCI_FRAME_H),
+      );
     };
 
     update();
     const ro = new ResizeObserver(update);
     ro.observe(el);
     return () => ro.disconnect();
-  }, []);
+  }, [embed]);
 
-  return (
-    <div className="flex w-full min-w-0 max-w-[980px] flex-col items-center">
+  const toolbar = demo ? (
+    <DemoToolbar
+      playing={demo.playing}
+      codeOn={demo.codeOn}
+      onPlay={demo.onPlay}
+      onDesign={demo.onDesign}
+      onCode={demo.onCode}
+      className={embed ? "mb-0 mt-0" : "mb-3"}
+    />
+  ) : (
+    <CrcleScreenToolbar className={embed ? "mb-0 mt-0" : "mb-3"} />
+  );
+
+  const browserShell = (
     <div
-      className="relative w-full min-w-0 overflow-hidden rounded-2xl border border-white/10 bg-white shadow-2xl shadow-black/40"
+      className={cn(
+        "odicci-browser-frame-shell relative w-full min-w-0 overflow-hidden bg-white",
+        embed
+          ? "rounded-[14px] border border-zinc-200/80 shadow-[0_8px_24px_rgba(11,14,20,0.12)]"
+          : "rounded-2xl border border-white/10 shadow-2xl shadow-black/40",
+      )}
       style={{ fontFamily: FONT }}
     >
       {/* Title bar */}
-      <div className="flex h-10 items-center border-b border-zinc-200 bg-white px-4">
-        <div className="flex items-center gap-[7px]">
-          <span className="size-3 rounded-full bg-[#FF5F57] shadow-inner" />
-          <span className="size-3 rounded-full bg-[#FEBC2E] shadow-inner" />
-          <span className="size-3 rounded-full bg-[#28C840] shadow-inner" />
+      <div
+        className={cn(
+          "flex min-w-0 items-center border-b border-zinc-200 bg-white",
+          embed ? "h-7 gap-1 px-2" : "h-10 px-4",
+        )}
+      >
+        <div className="flex shrink-0 items-center gap-[5px]">
+          <span className={embed ? "size-2 rounded-full bg-[#FF5F57] shadow-inner" : "size-3 rounded-full bg-[#FF5F57] shadow-inner"} />
+          <span className={embed ? "size-2 rounded-full bg-[#FEBC2E] shadow-inner" : "size-3 rounded-full bg-[#FEBC2E] shadow-inner"} />
+          <span className={embed ? "size-2 rounded-full bg-[#28C840] shadow-inner" : "size-3 rounded-full bg-[#28C840] shadow-inner"} />
         </div>
-        <div className="flex h-full flex-1 items-end pl-5">
-          <div className="flex h-8 items-center gap-2 rounded-t-lg border-x border-t border-zinc-200 bg-zinc-100 px-3.5">
-            <span className="size-3.5 rounded-full" style={{ background: ACCENT }} />
-            <span className="text-[12px] font-medium tracking-tight text-zinc-900">{tabLabel}</span>
-            <span className="ml-1 text-[10px] text-zinc-500">✕</span>
+        <div className={cn("flex h-full min-w-0 flex-1 items-end", embed ? "pl-1.5" : "pl-5")}>
+          <div
+            className={cn(
+              "flex min-w-0 items-center gap-1 rounded-t-lg border-x border-t border-zinc-200 bg-zinc-100",
+              embed ? "h-5 max-w-[min(100%,148px)] px-1.5" : "h-8 gap-2 px-3.5",
+            )}
+          >
+            <span className={embed ? "size-2 shrink-0 rounded-full" : "size-3.5 rounded-full"} style={{ background: ACCENT }} />
+            <span
+              className={cn(
+                "min-w-0 truncate font-medium tracking-tight text-zinc-900",
+                embed ? "text-[8px] leading-none" : "text-[12px]",
+              )}
+            >
+              {tabLabel}
+            </span>
+            <span className={cn("shrink-0 text-zinc-500", embed ? "text-[7px]" : "ml-1 text-[10px]")}>✕</span>
           </div>
-          <span className="flex size-7 items-center justify-center text-base leading-none text-zinc-800">+</span>
+          <span
+            className={cn(
+              "flex shrink-0 items-center justify-center leading-none text-zinc-800",
+              embed ? "size-4 text-[11px]" : "size-7 text-base",
+            )}
+          >
+            +
+          </span>
         </div>
-        <div className="text-[11px] tabular-nums text-zinc-500">{stepLabel}</div>
+        <div className={cn("shrink-0 tabular-nums text-zinc-500", embed ? "text-[8px]" : "text-[11px]")}>
+          {stepLabel}
+        </div>
       </div>
 
       {/* Toolbar */}
-      <div className="flex h-11 items-center gap-2 border-b border-zinc-200 bg-white px-3">
-        <ChevronDown className="size-4 rotate-90 text-zinc-400" />
-        <ChevronDown className="size-4 -rotate-90 text-zinc-900" />
+      <div
+        className={cn(
+          "odicci-browser-frame-nav flex min-w-0 items-center border-b border-zinc-200 bg-white",
+          embed ? "h-6 gap-0.5 px-1.5" : "h-11 gap-2 px-3",
+        )}
+      >
+        <ChevronDown className={cn("shrink-0 rotate-90 text-zinc-400", embed ? "size-2.5" : "size-4")} />
+        <ChevronDown className={cn("shrink-0 -rotate-90 text-zinc-900", embed ? "size-2.5" : "size-4")} />
         {toolbarExtra}
-        <div className="flex h-[30px] flex-1 items-center gap-2 rounded-lg border border-zinc-200 bg-zinc-100 px-3">
-          <span className="text-[13px] tracking-tight text-zinc-500">{url}</span>
+        <div
+          className={cn(
+            "flex min-w-0 flex-1 items-center rounded-md border border-zinc-200 bg-zinc-100",
+            embed ? "h-[18px] px-1.5" : "h-[30px] gap-2 px-3",
+          )}
+        >
+          <span
+            className={cn(
+              "min-w-0 truncate tracking-tight text-zinc-500",
+              embed ? "text-[9px] leading-none" : "text-[13px]",
+            )}
+          >
+            {url}
+          </span>
         </div>
-        <span className="text-base leading-none tracking-widest text-zinc-500">···</span>
+        <span className={cn("shrink-0 leading-none tracking-widest text-zinc-500", embed ? "text-[10px]" : "text-base")}>
+          ···
+        </span>
         {showThemeToggle && onToggleTheme && (
           <button
             type="button"
@@ -122,28 +193,34 @@ export function OdicciBrowserFrame({
         className={`relative aspect-[1512/982] w-full overflow-hidden ${canvasClassName}`}
       >
         <div
-          className="absolute left-1/2 top-1/2 origin-center"
+          className={cn(
+            "absolute left-1/2",
+            embed ? "top-0 origin-top" : "top-1/2 origin-center",
+          )}
           style={{
             width: ODICCI_FRAME_W,
             height: ODICCI_FRAME_H,
-            transform: `translate(-50%, -50%) scale(${scale})`,
+            transform: embed
+              ? `translateX(-50%) scale(${scale})`
+              : `translate(-50%, -50%) scale(${scale})`,
           }}
         >
           {children}
         </div>
       </div>
     </div>
-    {demo ? (
-      <DemoToolbar
-        playing={demo.playing}
-        codeOn={demo.codeOn}
-        onPlay={demo.onPlay}
-        onDesign={demo.onDesign}
-        onCode={demo.onCode}
-      />
-    ) : (
-      <CrcleScreenToolbar />
-    )}
+  );
+
+  return (
+    <div
+      className={cn(
+        "odicci-browser-frame-root flex w-full min-w-0 flex-col",
+        embed ? "max-w-full items-stretch gap-2" : "max-w-[980px] items-center",
+      )}
+    >
+      {!toolbarBelow ? toolbar : null}
+      {browserShell}
+      {toolbarBelow ? toolbar : null}
     </div>
   );
 }

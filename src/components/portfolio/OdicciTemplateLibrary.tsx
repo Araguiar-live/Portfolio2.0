@@ -4,6 +4,8 @@ import { useOdicciDemo } from "@/components/portfolio/useOdicciDemo";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronDown, ChevronLeft, ChevronRight, Search, Share2, SlidersHorizontal } from "lucide-react";
 import { OdicciBrowserFrame } from "@/components/portfolio/OdicciBrowserFrame";
+import { useOdicciMobileLayout } from "@/components/portfolio/OdicciMobileLayout";
+import { cn } from "@/lib/utils";
 import {
   PLAYABLE_THEMES,
   PlayableTemplatePreview,
@@ -187,6 +189,7 @@ const RECENT_EXPERIENCES = [
 ] as const;
 
 export function OdicciTemplateLibrary() {
+  const embed = useOdicciMobileLayout()?.embed ?? false;
   const [category, setCategory] = useState<(typeof CATEGORIES)[number]>("For you");
   const [selectedId, setSelectedId] = useState(TEMPLATE_CARDS[0].id);
   const [query, setQuery] = useState("");
@@ -268,21 +271,35 @@ export function OdicciTemplateLibrary() {
         onCode: demo.code,
       }}
     >
-      <div className="relative flex size-full flex-col overflow-hidden bg-white text-[#1a1d21]" style={{ fontFamily: FONT }}>
-        <TemplateNavbar onCreateNew={() => setCreateOpen(true)} />
+      <div
+        data-odicci-template-library=""
+        className="relative flex size-full flex-col overflow-hidden bg-white text-[#1a1d21]"
+        style={{ fontFamily: FONT }}
+      >
+        <TemplateNavbar onCreateNew={() => setCreateOpen(true)} edgeToEdge={embed} />
 
         <div className="flex min-h-0 min-w-0 flex-1 overflow-hidden">
           <OdicciAppSidebar activeId="layers" />
 
-          <div className="flex min-h-0 min-w-0 flex-1 gap-4 overflow-hidden px-4 pb-4 pt-3">
+          <div
+            className={cn(
+              "flex min-h-0 min-w-0 flex-1 overflow-hidden",
+              embed ? "gap-2 px-0 pb-2 pt-0" : "gap-4 px-4 pb-4 pt-3",
+            )}
+          >
             {/* Left — scrollable feed; filter sticks while cards scroll */}
             <div
               data-demo-scroll="templates"
               className="relative min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-contain pr-1 [-ms-overflow-style:none] [scrollbar-width:thin]"
             >
-              <WelcomeBanner />
+              <WelcomeBanner edgeToEdge={embed} />
 
-              <div className="sticky -top-px z-20 -mx-1 bg-white/95 px-1 pb-3 pt-3 backdrop-blur-md">
+              <div
+                className={cn(
+                  "sticky -top-px z-20 bg-white/95 pb-3 pt-3 backdrop-blur-md",
+                  embed ? "px-0" : "-mx-1 px-1",
+                )}
+              >
                 <FilterBar query={query} onQueryChange={setQuery} />
                 <CategoryTabs active={category} onChange={setCategory} />
               </div>
@@ -327,9 +344,20 @@ export function OdicciTemplateLibrary() {
   );
 }
 
-function TemplateNavbar({ onCreateNew }: { onCreateNew: () => void }) {
+function TemplateNavbar({
+  onCreateNew,
+  edgeToEdge = false,
+}: {
+  onCreateNew: () => void;
+  edgeToEdge?: boolean;
+}) {
   return (
-    <header className="flex h-14 shrink-0 items-center justify-between gap-4 border-b border-[#e8e8e8]/80 bg-white/90 pr-5 backdrop-blur-md">
+    <header
+      className={cn(
+        "flex h-14 w-full shrink-0 items-center justify-between border-b border-[#e8e8e8]/80 bg-white/90 backdrop-blur-md",
+        edgeToEdge ? "gap-2 px-0" : "gap-4 pr-5",
+      )}
+    >
       {/* Logo sits over the app sidebar; nav aligns with the content column (search bar) */}
       <div className="flex min-w-0 items-center">
         <div className="flex w-[72px] shrink-0 items-center justify-center">
@@ -388,12 +416,17 @@ function TemplateNavbar({ onCreateNew }: { onCreateNew: () => void }) {
   );
 }
 
-function WelcomeBanner() {
+function WelcomeBanner({ edgeToEdge = false }: { edgeToEdge?: boolean }) {
   return (
     /* Outer radius = inner header radius + 4px */
     <section
-      className="odicci-welcome-ring relative overflow-hidden bg-white p-3"
-      style={{ borderRadius: "calc(var(--welcome-inner-r, 16px) + 4px)" }}
+      className={cn(
+        "odicci-welcome-ring relative overflow-hidden bg-white",
+        edgeToEdge ? "p-0" : "p-3",
+      )}
+      style={{
+        borderRadius: edgeToEdge ? 0 : "calc(var(--welcome-inner-r, 16px) + 4px)",
+      }}
     >
       {/* Header strip only — Sign Uo Flow 393:172696 / patterns 393:172038 */}
       <div

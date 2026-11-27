@@ -26,6 +26,9 @@ import {
   useRowHoverPreview,
   type HoverPreviewMedia,
 } from "@/components/portfolio/RowHoverPreview";
+import { CrcleMobileCaseStudy } from "@/components/portfolio/CrcleMobileCaseStudy";
+import { FirstDesignMobileCaseStudy } from "@/components/portfolio/firstDesign/FirstDesignMobileCaseStudy";
+import { OdicciMobileCaseStudy } from "@/components/portfolio/OdicciMobileCaseStudy";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { isPhoneViewport } from "@/lib/viewport";
 
@@ -87,6 +90,9 @@ interface Props {
   onToggle: () => void;
   index: number;
   count: number;
+  /** Project page: case study only, no folder sheet. */
+  floating?: boolean;
+  visualOnly?: boolean;
 }
 
 /** Tab rise above the folder body. */
@@ -269,6 +275,8 @@ export function ProjectBentoStack({
   onToggle,
   rowRefs,
   nudgeSignal = 0,
+  floating = false,
+  visualOnly = false,
 }: {
   projects: Project[];
   openSlug: string | null;
@@ -276,6 +284,9 @@ export function ProjectBentoStack({
   rowRefs: MutableRefObject<Record<string, HTMLDivElement | null>>;
   /** Bump to play the phone "desktop-only" nudge from outside (e.g. footer links). */
   nudgeSignal?: number;
+  floating?: boolean;
+  /** Mobile closed work: folder silhouette only (no copy, pills, or nudge). */
+  visualOnly?: boolean;
 }) {
   const isMobile = useIsMobile();
   const { controls: shake, pillVisible, nudge } = useDesktopOnlyNudge();
@@ -285,14 +296,17 @@ export function ProjectBentoStack({
   }, [nudgeSignal, nudge]);
 
   const handleToggle = (slug: string) => {
-    if (isPhoneViewport()) nudge();
-    else onToggle(slug);
+    if (visualOnly || isPhoneViewport()) {
+      if (!visualOnly) nudge();
+      return;
+    }
+    onToggle(slug);
   };
 
   return (
     <motion.div
       animate={shake}
-      className="portfolio-mobile-shake-root relative flex w-full max-w-full shrink-0 flex-col"
+      className="portfolio-mobile-shake-root relative flex w-full max-w-full shrink-0 flex-col md:-ml-[4%] md:w-[108%] md:max-w-none"
     >
       {projects.map((p, index) => (
         <ProjectAccordion
@@ -303,26 +317,33 @@ export function ProjectBentoStack({
           index={index}
           count={projects.length}
           project={p}
-          isOpen={!isMobile && openSlug === p.slug}
+          isOpen={floating || (!isMobile && openSlug === p.slug)}
+          floating={floating}
+          visualOnly={visualOnly}
           onToggle={() => handleToggle(p.slug)}
         />
       ))}
 
-      <DesktopOnlyPill
-        visible={pillVisible}
-        className="bottom-3 left-1/2 -translate-x-1/2 md:hidden"
-      />
+      {visualOnly ? null : (
+        <DesktopOnlyPill
+          visible={pillVisible}
+          className="bottom-3 left-1/2 -translate-x-1/2 md:hidden"
+        />
+      )}
     </motion.div>
   );
 }
 
 export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function ProjectAccordion(
-  { project, isOpen, onToggle, index, count },
+  { project, isOpen, onToggle, index, count, floating = false, visualOnly = false },
   ref,
 ) {
+  const isMobile = useIsMobile();
   const tabs = project.tabs?.length ? project.tabs : TABS;
   const [activeTab, setActiveTab] = useState<Tab>(() => {
-    if (project.slug === "crcle") return "Template Library";
+    if (project.slug === "crcle") {
+      return "Brand Personality";
+    }
     return (project.tabs?.[0] as Tab | undefined) ?? "Template Library";
   });
   const tabContent = project.content?.[activeTab] ?? {};
@@ -340,9 +361,8 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
     const el = faceRef.current;
     if (!el) return;
     const measure = () => {
-      const rect = el.getBoundingClientRect();
-      const width = rect.width;
-      const height = rect.height;
+      const width = el.offsetWidth;
+      const height = el.offsetHeight;
       if (width < 2 || height < 2) return;
       const shape = folderOutline(width, height, tabShift, index, count);
       const strokeRadii = shape.radii.map((radius) => Math.max(0, radius - 0.5));
@@ -360,6 +380,39 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
     return () => observer.disconnect();
   }, [count, index, isOpen, tabShift]);
 
+  const glassCard =
+    "flex min-w-0 flex-col overflow-auto rounded-[32px] border border-[#F4F4F5] bg-white/[0.05] px-12 py-10 shadow-[0_12px_40px_rgba(0,0,0,0.08)] backdrop-blur-xl [scrollbar-width:none] [&::-webkit-scrollbar]:hidden";
+
+  const crcleMobileFloating = floating && project.slug === "crcle" && isMobile;
+  const firstDesignMobileFloating = floating && project.slug === "first-design" && isMobile;
+  const odicciMobileFloating = floating && project.slug === "odicci" && isMobile;
+  const mobileWorkCaseStudy = crcleMobileFloating || odicciMobileFloating;
+  const floatingTabChrome = floating
+    ? mobileWorkCaseStudy
+      ? "work-project-floating-tabs pointer-events-auto z-[50] mb-2 flex w-full shrink-0 items-stretch max-md:sticky max-md:top-[var(--work-project-tabs-sticky-top)] max-md:px-0 md:fixed md:top-6 md:left-1/2 md:z-[70] md:h-11 md:w-auto md:-translate-x-1/2 md:items-center md:justify-center"
+      : "pointer-events-auto fixed top-6 left-1/2 z-[70] flex h-11 -translate-x-1/2 items-center justify-center"
+    : isEditorial(project.slug)
+      ? "mb-6 flex shrink-0 justify-start px-4 sm:px-8 lg:px-6"
+      : "mb-6 flex shrink-0 justify-center";
+  const mobileTabPillGap = odicciMobileFloating ? "gap-0.5" : "gap-1";
+  const mobileWorkTabChrome =
+    odicciMobileFloating ? " odicci-mobile-work-tab-chrome" : crcleMobileFloating ? " crcle-mobile-work-tab-chrome" : "";
+  const crcleMobileTabPill = mobileWorkCaseStudy
+    ? `crcle-mobile-tab-pill flex w-full min-w-0 items-stretch ${mobileTabPillGap} rounded-full border border-black bg-black p-1 shadow-2xl shadow-slate-900/20`
+    : "inline-flex max-w-full items-center gap-1 overflow-x-auto rounded-full border border-white bg-white/70 p-1 shadow-2xl shadow-slate-200/50 backdrop-blur-xl [scrollbar-width:none] [&::-webkit-scrollbar]:hidden";
+  const mobileWorkTabBtn = odicciMobileFloating
+    ? "flex min-w-0 flex-1 items-center justify-center rounded-full border px-0 py-1 text-center text-[8.5px] font-medium leading-[1.05] tracking-tight transition-all duration-300"
+    : "flex min-w-0 flex-1 items-center justify-center rounded-full border px-0.5 py-1.5 text-center text-[10px] font-medium leading-[1.15] tracking-tight transition-all duration-300";
+  const mobileWorkTabLabel = odicciMobileFloating
+    ? "block w-full min-w-0 truncate whitespace-nowrap px-0.5 text-[8.5px] leading-[1.05]"
+    : "block w-full whitespace-normal break-words px-0.5 text-[10px] leading-[1.15]";
+  const crcleGlassCard = crcleMobileFloating
+    ? `${glassCard} max-md:rounded-[20px] max-md:px-5 max-md:py-6 max-md:shadow-[0_8px_24px_rgba(0,0,0,0.06)]`
+    : glassCard;
+  const crcleSpecsCard =
+    "flex min-h-0 flex-1 flex-col overflow-auto rounded-[32px] border border-[rgba(0,0,0,0.08)] bg-[#F4F4F5]/80 px-12 py-10 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" +
+    (crcleMobileFloating ? " max-md:rounded-[20px] max-md:px-5 max-md:py-6" : "");
+
   return (
     <div
       ref={ref}
@@ -367,40 +420,47 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
       data-open={isOpen ? "true" : "false"}
       data-hovered={!isOpen && hovered ? "true" : "false"}
       data-slug={project.slug}
-      className="folder-shell pointer-events-none relative border-0 outline-none"
+      className={floating ? "relative w-full" : "folder-shell pointer-events-none relative border-0 outline-none"}
       style={
-        {
-          "--sheet-tilt": (index + 1) % 2 === 1 ? "-0.8deg" : "0.8deg",
-          zIndex: index + 1,
-          marginTop: index === 0 ? 0 : -48,
-          border: 0,
-          outline: "none",
-          boxShadow: "none",
-        } as CSSProperties
+        floating
+          ? undefined
+          : ({
+              "--sheet-tilt": (index + 1) % 2 === 1 ? "-0.8deg" : "0.8deg",
+              zIndex: index + 1,
+              marginTop: index === 0 ? 0 : undefined,
+              border: 0,
+              outline: "none",
+              boxShadow: "none",
+            } as CSSProperties)
       }
     >
-      {project.slug === "first-design" ? <BendingSpoonsPaperclip /> : null}
-      {index === count - 1 ? (
+      {floating ? null : project.slug === "first-design" ? <BendingSpoonsPaperclip /> : null}
+      {!floating && !visualOnly && index === count - 1 ? (
         <p className="mobile-psst pointer-events-none absolute left-1/2 z-20 hidden -translate-x-1/2 whitespace-nowrap rounded-[64px] border border-[#bb9ffa] bg-[linear-gradient(161.4deg,rgba(3,86,229,0.284)_19.75%,rgba(1,208,129,0.052)_86.39%)] px-4 py-1 text-center text-[10px] font-bold uppercase text-[#090e15] backdrop-blur-[4px] max-md:block">
           Psst… desktop-only
         </p>
       ) : null}
       <div
         ref={faceRef}
-        className="folder-face pointer-events-auto relative border-0 outline-none"
-        style={{
-          clipPath: outline ? `url(#folder-clip-${project.slug})` : "none",
-          paddingTop: TAB_H,
-          border: 0,
-          outline: "none",
-          boxShadow: "none",
-        }}
+        className={floating ? "relative w-full" : "folder-face pointer-events-auto relative border-0 outline-none"}
+        style={
+          floating
+            ? undefined
+            : {
+                clipPath: outline ? `url(#folder-clip-${project.slug})` : "none",
+                paddingTop: TAB_H,
+                border: 0,
+                outline: "none",
+                boxShadow: "none",
+              }
+        }
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
       >
       {/* Row header — Figma 530:151817. Closed sheet is 20% taller than the 162px desktop / 130px phone rows; overlap stays 48px. */}
+      {!floating ? (
       <div
-        className="folder-row group relative flex w-full items-center justify-between gap-7 border-0 px-[37px] py-[78.6px] text-left outline-none transition-[background] duration-300 max-md:flex-col max-md:items-stretch max-md:gap-2 max-md:px-4 max-sm:gap-2 max-sm:px-4"
+        className="folder-row group relative flex w-full items-center justify-between border-0 text-left outline-none transition-[background] duration-300 max-md:flex-col max-md:items-stretch max-md:gap-2 max-md:px-4 max-md:py-[61px] max-sm:gap-2 max-sm:px-4"
         onMouseEnter={rowHover.onMouseEnter}
         onMouseMove={rowHover.onMouseMove}
         onMouseLeave={rowHover.onMouseLeave}
@@ -417,7 +477,7 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
             {project.id}
           </span>
           <span className="flex min-w-0 items-center gap-2 max-md:gap-1.5">
-            <span className="folder-title truncate text-[24px] font-normal tracking-[-0.5px] max-md:text-[24px] max-md:leading-[29px] max-md:tracking-normal max-sm:text-[24px] max-sm:leading-[29px] sm:text-[37px]">
+            <span className="folder-title truncate font-normal tracking-[-0.5px] max-md:text-[24px] max-md:leading-[29px] max-md:tracking-normal max-sm:text-[24px] max-sm:leading-[29px]">
               {project.title}
             </span>
             {project.url && isOpen ? (
@@ -462,6 +522,7 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
           </div>
         </div>
       </div>
+      ) : null}
 
       {project.hoverPreview ? (
         <RowHoverPreview
@@ -489,19 +550,29 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
         {isOpen && (
           <motion.div
             key="body"
-            initial={{ height: 0 }}
-            animate={{ height: project.slug === "odicci" ? "auto" : EXPANDED_BODY_H }}
-            exit={{ height: 0 }}
-            transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-            className="overflow-hidden"
+            initial={floating ? false : { height: 0 }}
+            animate={
+              floating
+                ? { height: "auto" }
+                : { height: project.slug === "odicci" ? "auto" : EXPANDED_BODY_H }
+            }
+            exit={floating ? undefined : { height: 0 }}
+            transition={floating ? { duration: 0 } : { duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+            className={floating ? "overflow-visible" : "overflow-hidden"}
           >
             <div
-              className={`relative flex flex-col px-6 pt-6 ${project.slug === "odicci" ? "h-auto pb-32" : "h-full pb-6"}`}
-              style={project.slug === "odicci" ? undefined : { height: EXPANDED_BODY_H }}
+              className={
+                floating
+                  ? "relative flex w-full flex-col"
+                  : `relative flex flex-col px-6 pt-6 ${project.slug === "odicci" ? "h-auto pb-32" : "h-full pb-6"}`
+              }
+              style={
+                floating || project.slug === "odicci" ? undefined : { height: EXPANDED_BODY_H }
+              }
             >
               {showTabChrome ? (
-                <div className={isEditorial(project.slug) ? "mb-6 flex shrink-0 justify-start px-4 sm:px-8 lg:px-6" : "mb-6 flex shrink-0 justify-center"}>
-                  <div className="inline-flex items-center gap-1 rounded-full border border-white bg-white/70 p-1 shadow-2xl shadow-slate-200/50 backdrop-blur-xl">
+                <div className={floatingTabChrome + mobileWorkTabChrome}>
+                  <div className={crcleMobileTabPill}>
                     {tabs.map((tab) => {
                       const active = tab === activeTab;
                       return (
@@ -510,20 +581,33 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
                           type="button"
                           onClick={() => setActiveTab(tab)}
                           className={
-                            "rounded-full border px-4 py-1.5 text-xs font-medium tracking-tight transition-all duration-300 " +
-                            (active
-                              ? "border-black bg-black text-white hover:bg-black hover:text-white"
-                              : "border-transparent bg-transparent text-zinc-500 hover:border-black hover:bg-transparent hover:text-zinc-900")
+                            (mobileWorkCaseStudy ? `${mobileWorkTabBtn} ` : "shrink-0 rounded-full border px-4 py-1.5 text-xs font-medium tracking-tight transition-all duration-300 ") +
+                            (mobileWorkCaseStudy
+                              ? active
+                                ? "border-white bg-white text-black shadow-sm"
+                                : "border-transparent bg-transparent text-white/70 hover:text-white"
+                              : active
+                                ? "border-black bg-black text-white hover:bg-black hover:text-white"
+                                : "border-transparent bg-transparent text-zinc-500 hover:border-black hover:bg-transparent hover:text-zinc-900")
                           }
                         >
-                          {project.content?.[tab]?.tabLabel ?? tab}
+                          <span
+                            className={
+                              mobileWorkCaseStudy
+                                ? `${mobileWorkTabLabel} ${active ? "text-black" : "text-inherit"}`
+                                : undefined
+                            }
+                            title={mobileWorkCaseStudy ? String(project.content?.[tab]?.tabLabel ?? tab) : undefined}
+                          >
+                            {(project.content?.[tab]?.tabLabel ?? tab).replace(/\u00a0/g, " ").trim()}
+                          </span>
                         </button>
                       );
                     })}
                   </div>
                 </div>
-              ) : (
-                <div className={isEditorial(project.slug) ? "mb-6 flex shrink-0 justify-start px-4 sm:px-8 lg:px-6" : "mb-6 flex shrink-0 justify-center"}>
+              ) : firstDesignMobileFloating ? null : (
+                <div className={floatingTabChrome}>
                   <div className="inline-flex items-center rounded-full border border-white bg-white/70 p-1 shadow-2xl shadow-slate-200/50 backdrop-blur-xl">
                     <span className="rounded-full border border-black bg-black px-4 py-1.5 text-xs font-medium tracking-tight text-white">
                       {project.content?.[activeTab]?.tabLabel ?? activeTab}
@@ -535,6 +619,7 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
               {showTabChrome ? (
                 <>
                   <NavArrow
+                    floating={floating}
                     direction="prev"
                     onClick={() => {
                       const i = tabs.indexOf(activeTab);
@@ -542,6 +627,7 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
                     }}
                   />
                   <NavArrow
+                    floating={floating}
                     direction="next"
                     onClick={() => {
                       const i = tabs.indexOf(activeTab);
@@ -552,19 +638,64 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
               ) : null}
 
               {/* Editorial rows: story, spec list, prototype stage. */}
-              <div className={`mx-auto flex min-h-0 w-full flex-1 items-start overflow-visible px-4 sm:px-8 lg:px-6 ${isEditorial(project.slug) ? "" : "pt-2"}`}>
+              <div
+                className={`mx-auto flex min-h-0 w-full flex-1 items-start overflow-visible px-4 sm:px-8 lg:px-6 ${isEditorial(project.slug) ? "" : "pt-2"} ${crcleMobileFloating || firstDesignMobileFloating || odicciMobileFloating ? "max-md:px-0" : ""}`}
+              >
                   <div className={project.slug === "odicci"
                     ? "grid w-full min-w-0 grid-cols-1 items-start gap-8 lg:grid-cols-2"
                     : project.slug === "first-design"
                     ? "grid h-full min-h-0 w-full min-w-0 grid-cols-1 items-start gap-3 overflow-x-clip lg:grid-cols-[0.98fr_2.12fr]"
                     : isEditorial(project.slug)
-                    ? "grid h-full min-h-0 w-full min-w-0 grid-cols-1 items-start gap-3 overflow-x-clip lg:grid-cols-[minmax(0,1fr)_minmax(0,0.82fr)_minmax(502px,1.2fr)]"
+                    ? floating
+                      ? crcleMobileFloating
+                        ? "grid w-full min-w-0 grid-cols-1 items-stretch gap-2 overflow-visible md:grid md:h-full md:min-h-0 md:gap-[36px] md:overflow-x-clip lg:grid-cols-[minmax(0,1fr)_minmax(502px,1.2fr)]"
+                        : "grid h-full min-h-0 w-full min-w-0 grid-cols-1 items-stretch gap-[36px] overflow-x-clip lg:grid-cols-[minmax(0,1fr)_minmax(502px,1.2fr)]"
+                      : "grid h-full min-h-0 w-full min-w-0 grid-cols-1 items-start gap-3 overflow-x-clip lg:grid-cols-[minmax(0,1fr)_minmax(0,0.82fr)_minmax(502px,1.2fr)]"
                     : "grid w-full min-w-0 grid-cols-1 items-start gap-8 overflow-x-clip lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] lg:gap-8"}>
                     {project.slug === "first-design" ? (
-                      <div className="flex min-h-0 min-w-0 flex-col gap-6">
-                        <EditorialNarrative copy={editorialCopy(project, activeTab, tabContent)} dense />
-                        <EditorialSpecs copy={editorialCopy(project, activeTab, tabContent)} dense />
-                      </div>
+                      firstDesignMobileFloating ? (
+                        <FirstDesignMobileCaseStudy
+                          copy={editorialCopy(project, activeTab, tabContent)}
+                          tabLabel={tabContent.tabLabel ?? "Productive"}
+                        />
+                      ) : (
+                        <div className="flex min-h-0 min-w-0 flex-col gap-6">
+                          <EditorialNarrative copy={editorialCopy(project, activeTab, tabContent)} dense />
+                          <EditorialSpecs copy={editorialCopy(project, activeTab, tabContent)} dense />
+                        </div>
+                      )
+                    ) : odicciMobileFloating ? (
+                        <OdicciMobileCaseStudy
+                          copy={editorialCopy(project, activeTab, tabContent)}
+                          tabContent={tabContent}
+                          tabHelpers={{
+                            onNextTab: () => {
+                              const i = tabs.indexOf(activeTab);
+                              setActiveTab(tabs[(i + 1) % tabs.length]);
+                            },
+                            onPrevTab: () => {
+                              const i = tabs.indexOf(activeTab);
+                              setActiveTab(tabs[(i - 1 + tabs.length) % tabs.length]);
+                            },
+                            goToTab: (tab) => setActiveTab(tab as Tab),
+                          }}
+                        />
+                    ) : isEditorial(project.slug) && floating && project.slug === "crcle" ? (
+                      crcleMobileFloating ? (
+                        <CrcleMobileCaseStudy
+                          copy={editorialCopy(project, activeTab, tabContent)}
+                          activeTab={activeTab}
+                        />
+                      ) : (
+                        <div className="flex h-full min-h-0 min-w-0 flex-col gap-8">
+                          <div className={`${crcleGlassCard} min-h-0 flex-1`}>
+                            <EditorialNarrative copy={editorialCopy(project, activeTab, tabContent)} />
+                          </div>
+                          <div className={crcleSpecsCard}>
+                            <EditorialSpecs copy={editorialCopy(project, activeTab, tabContent)} />
+                          </div>
+                        </div>
+                      )
                     ) : isEditorial(project.slug) ? (
                       <EditorialNarrative copy={editorialCopy(project, activeTab, tabContent)} />
                     ) : (
@@ -572,16 +703,23 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
                       <CaseStudyCopy project={project} tab={activeTab} content={tabContent} />
                     </div>
                     )}
-                    {isEditorial(project.slug) && project.slug !== "first-design" ? (
+                    {isEditorial(project.slug) &&
+                    project.slug !== "first-design" &&
+                    !(floating && project.slug === "crcle") &&
+                    !(odicciMobileFloating && floating) ? (
                       <EditorialSpecs copy={editorialCopy(project, activeTab, tabContent)} />
                     ) : null}
 
-                    <div className={project.slug === "odicci"
+                    {crcleMobileFloating || firstDesignMobileFloating || odicciMobileFloating ? null : (
+                    <div
+                      className={project.slug === "odicci"
                       ? "flex w-full justify-center lg:col-span-2"
                       : project.slug === "first-design"
                       ? "relative flex min-h-0 min-w-0 w-full items-start justify-center overflow-visible"
                       : isEditorial(project.slug)
-                      ? "crcle-phone-stage relative ml-0 flex min-h-0 min-w-0 items-start justify-center overflow-auto rounded-[32px] border border-[rgba(0,0,0,0.06)] bg-[#F4F4F5]/80 px-12 py-3 lg:ml-12 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                      ? floating
+                        ? "crcle-phone-stage relative ml-0 flex min-h-0 min-w-0 items-start justify-center overflow-hidden rounded-[32px] border border-[rgba(0,0,0,0.06)] bg-[#F4F4F5]/80 px-12 pt-3 pb-8 lg:ml-0"
+                        : "crcle-phone-stage relative ml-0 flex min-h-0 min-w-0 items-start justify-center overflow-auto rounded-[32px] border border-[rgba(0,0,0,0.06)] bg-[#F4F4F5]/80 px-12 py-3 lg:ml-12 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
                       : "relative flex w-full min-w-0 items-start justify-end overflow-visible"}>
                       <div className={project.slug === "odicci"
                         ? "flex w-full max-w-[980px] justify-center"
@@ -622,6 +760,7 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
                         )}
                       </div>
                     </div>
+                    )}
                   </div>
               </div>
             </div>
@@ -629,7 +768,7 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
         )}
       </AnimatePresence>
       </div>
-      {outline ? (
+      {outline && !floating ? (
         <svg
           aria-hidden
           className="pointer-events-none absolute left-0 top-0 overflow-visible"
@@ -773,7 +912,15 @@ function EditorialNarrative({ copy, dense = false }: { copy: CrcleBentoCopy; den
   );
 }
 
-function EditorialSpecs({ copy, dense = false }: { copy: CrcleBentoCopy; dense?: boolean }) {
+function EditorialSpecs({
+  copy,
+  dense = false,
+  inverse = false,
+}: {
+  copy: CrcleBentoCopy;
+  dense?: boolean;
+  inverse?: boolean;
+}) {
   const rows: Array<{ label: string; icon: string; lines: string[] }> = [
     { label: "Role & Scope", icon: specPen, lines: [copy.role] },
     { label: "Problems Solved", icon: specTarget, lines: copy.problems },
@@ -786,13 +933,19 @@ function EditorialSpecs({ copy, dense = false }: { copy: CrcleBentoCopy; dense?:
         <article key={row.label} className="flex flex-col gap-1">
           <div className="flex items-center gap-2">
             <span className="spec-icon inline-flex size-[14px] shrink-0">
-              <img src={row.icon} alt="" width={14} height={14} className="size-[14px] max-w-none" />
+              <img
+                src={row.icon}
+                alt=""
+                width={14}
+                height={14}
+                className={`size-[14px] max-w-none ${inverse ? "brightness-0 invert" : ""}`}
+              />
             </span>
-            <span className={`${dense ? "text-[13px]" : "text-[14.95px]"} font-normal tracking-normal text-[#737373]`}>{row.label}</span>
+            <span className={`${dense ? "text-[13px]" : "text-[14.95px]"} font-normal tracking-normal ${inverse ? "text-white/70" : "text-[#737373]"}`}>{row.label}</span>
           </div>
           <div className="flex flex-col gap-1 pl-[22px]">
             {row.lines.map((line) => (
-              <p key={line} className={`${dense ? "text-[13px] leading-5" : "text-[14.95px] leading-[23px]"} text-[#111111]`}>
+              <p key={line} className={`${dense ? "text-[13px] leading-5" : "text-[14.95px] leading-[23px]"} ${inverse ? "text-white" : "text-[#111111]"}`}>
                 {line}
               </p>
             ))}
@@ -905,19 +1058,32 @@ function TextBlock({ heading, children }: { heading: string; children: React.Rea
   );
 }
 
-function NavArrow({ direction, onClick }: { direction: "prev" | "next"; onClick: () => void }) {
+function NavArrow({
+  direction,
+  onClick,
+  floating = false,
+}: {
+  direction: "prev" | "next";
+  onClick: () => void;
+  floating?: boolean;
+}) {
   const isPrev = direction === "prev";
-  return (
+  const button = (
     <button
       type="button"
       onClick={onClick}
       aria-label={isPrev ? "Previous step" : "Next step"}
       className={
-        "hidden md:flex absolute top-1/2 -translate-y-1/2 z-10 w-10 h-10 items-center justify-center rounded-full border border-zinc-200 bg-white/80 backdrop-blur hover:bg-white text-black transition-colors " +
-        (isPrev ? "left-6" : "right-6")
+        floating
+          ? "fixed top-1/2 z-[80] hidden h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-zinc-200 bg-white/80 text-black shadow-lg shadow-black/5 backdrop-blur transition-colors hover:bg-white md:flex " +
+            (isPrev ? "left-6" : "right-8")
+          : "absolute top-1/2 z-10 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-zinc-200 bg-white/80 text-black backdrop-blur transition-colors hover:bg-white md:flex " +
+            (isPrev ? "left-6" : "right-6")
       }
     >
-      {isPrev ? <ChevronLeft className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+      {isPrev ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
     </button>
   );
+  if (floating && typeof document !== "undefined") return createPortal(button, document.body);
+  return button;
 }

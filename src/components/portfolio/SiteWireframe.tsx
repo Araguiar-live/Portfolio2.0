@@ -371,51 +371,67 @@ function BrowserPlate() {
  */
 export function WireframeStage({
   expanded,
+  fillTiles = false,
   decorations,
   children,
+  className,
 }: {
   expanded: boolean;
+  /** Repeat the Figma tile field down the page instead of one band plus a flat fill. */
+  fillTiles?: boolean;
   decorations?: ReactNode;
   children: ReactNode;
+  className?: string;
 }) {
+  const expandedStage =
+    fillTiles
+      ? "wireframe-stage relative w-full overflow-visible bg-[#f3f4f6] pb-0 pt-[96px]"
+      : "wireframe-stage relative w-full overflow-x-hidden bg-[#f3f4f6] pb-0 pt-[96px]";
+
   return (
     <div
       className={
         expanded
-          ? "wireframe-stage relative w-full overflow-x-hidden bg-[#f3f4f6] pb-0 pt-[96px]"
-          : "wireframe-stage relative aspect-[1262/847] w-full overflow-hidden bg-[#f3f4f6] max-md:z-10 max-md:aspect-auto max-md:min-h-[100dvh] max-md:overflow-x-hidden max-sm:overflow-visible"
+          ? `${expandedStage}${className ? ` ${className}` : ""}`
+          : "wireframe-stage wireframe-stage-closed relative aspect-[1262/847] w-full overflow-hidden bg-[#f3f4f6] max-md:z-10 max-md:aspect-auto max-md:min-h-[100dvh] max-md:overflow-x-hidden max-sm:overflow-visible"
       }
     >
-      {/*
+        {/*
         Background fills the full stage (including expanded top padding).
         Cell band + browser plate stay top-aligned; solid #f3f4f6 covers the rest.
+        A project page repeats the tile band so the field continues under the folder.
       */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 z-0 overflow-hidden bg-[#f3f4f6] max-md:hidden"
+        className={`pointer-events-none absolute inset-0 z-0 overflow-hidden bg-[#f3f4f6] ${fillTiles ? "" : "max-md:hidden"}`}
       >
-        {/* Phones keep the desktop tile size (Figma 2250:24937) and crop the band instead. */}
         <div className="absolute inset-x-0 top-0 flex w-full flex-col gap-[2px] p-[2px] max-sm:w-[1113px]">
-          <JengaCellBand />
-          <div className="contents sm:hidden">
-            <JengaCellBand />
-          </div>
-          <div className="contents max-sm:hidden">
-            <BrowserPlate />
-          </div>
+          {fillTiles ? (
+            Array.from({ length: 6 }, (_, i) => <JengaCellBand key={i} />)
+          ) : (
+            <>
+              <JengaCellBand />
+              <div className="contents sm:hidden">
+                <JengaCellBand />
+              </div>
+              <div className="contents max-sm:hidden">
+                <BrowserPlate />
+              </div>
+            </>
+          )}
         </div>
       </div>
 
       {/* Content overlay — Figma 530:151856 */}
       {expanded ? (
-        <div className="pointer-events-none relative z-10">{children}</div>
+        <div className="wireframe-stage-expanded-content pointer-events-none relative z-10 w-full min-h-0">{children}</div>
       ) : (
-        <div className="pointer-events-none absolute inset-0 z-10 overflow-hidden max-md:relative max-md:inset-auto max-md:overflow-visible">
+        <div className="wireframe-stage-content pointer-events-none absolute inset-0 z-10 overflow-hidden max-md:relative max-md:inset-auto max-md:overflow-visible">
           {children}
         </div>
       )}
       {decorations ? (
-        <div className="pointer-events-none absolute inset-x-0 top-0 z-[1] aspect-[1262/847] overflow-visible max-md:inset-0 max-md:aspect-auto">
+        <div className="wireframe-stage-deco pointer-events-none absolute inset-0 z-[1] overflow-visible">
           {decorations}
         </div>
       ) : null}

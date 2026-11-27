@@ -1,4 +1,5 @@
 import { useState, type ReactNode } from "react";
+import { useCrcleCaseStudyChrome } from "@/components/portfolio/CrcleCaseStudyChrome";
 import codeActiveIcon from "@/assets/crcle/demo-toolbar/code-active.svg";
 import codeIdleIcon from "@/assets/crcle/demo-toolbar/code-idle.svg";
 import penActiveIcon from "@/assets/crcle/demo-toolbar/pen-active.svg";
@@ -43,26 +44,65 @@ export function DemoToolbar({
   onPlay,
   onDesign,
   onCode,
+  className = "mt-3",
+  compact = false,
 }: {
   playing: boolean;
   codeOn: boolean;
   onPlay: () => void;
   onDesign: () => void;
   onCode: () => void;
+  className?: string;
+  compact?: boolean;
 }) {
   const designOn = !playing && !codeOn;
+  const caseStudyChrome = useCrcleCaseStudyChrome();
+
+  const playButton = (
+    <DemoToolbarButton
+      active={playing}
+      label={playing ? "Demo playing" : "Replay demo"}
+      onClick={onPlay}
+      activeClassName="border border-[rgba(250,131,46,0.2)] bg-[rgba(255,81,38,0.4)]"
+    >
+      <img src={playing ? playActiveIcon : playIdleIcon} alt="" className="h-[26px] w-6" />
+    </DemoToolbarButton>
+  );
+
+  const codeButton = (
+    <DemoToolbarButton
+      active={codeOn}
+      label="Dev inspection"
+      onClick={onCode}
+      activeClassName="border border-[rgba(1,208,180,0.13)] bg-[linear-gradient(124deg,rgba(1,208,129,0.104)_19.75%,rgba(1,208,129,0.48)_86.39%)]"
+    >
+      <img src={codeOn ? codeActiveIcon : codeIdleIcon} alt="" className="size-6 object-contain" />
+    </DemoToolbarButton>
+  );
+
+  if (caseStudyChrome) {
+    return (
+      <div className="crcle-case-study-toolbar flex w-full shrink-0 items-center justify-center">
+        {/* Figma 3161:13763 — Play + Dev only (135×44). */}
+        <div className="crcle-case-study-toolbar__rail flex w-[135px] items-center gap-0.5 rounded-[64px] bg-white p-0.5">
+          {playButton}
+          {codeButton}
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="mt-3 flex items-center justify-center">
-      <div className="flex w-[224px] items-center gap-1 rounded-full bg-white p-1">
-        <DemoToolbarButton
-          active={playing}
-          label={playing ? "Demo playing" : "Replay demo"}
-          onClick={onPlay}
-          activeClassName="border border-[rgba(250,131,46,0.2)] bg-[rgba(255,81,38,0.4)]"
-        >
-          <img src={playing ? playActiveIcon : playIdleIcon} alt="" className="h-[26px] w-6" />
-        </DemoToolbarButton>
+    <div className={`flex items-center justify-center ${className}`}>
+      <div
+        className="flex w-[224px] items-center gap-1 rounded-full bg-white p-1"
+        style={
+          compact
+            ? { transform: "scale(0.95)", transformOrigin: "center top", marginBottom: -2.5 }
+            : undefined
+        }
+      >
+        {playButton}
         <DemoToolbarButton
           active={designOn}
           label="Design mode"
@@ -71,21 +111,14 @@ export function DemoToolbar({
         >
           <img src={designOn ? penActiveIcon : penIdleIcon} alt="" className="size-6 object-contain" />
         </DemoToolbarButton>
-        <DemoToolbarButton
-          active={codeOn}
-          label="Dev inspection"
-          onClick={onCode}
-          activeClassName="border border-[rgba(1,208,180,0.13)] bg-[linear-gradient(126deg,rgba(1,208,129,0.104)_19.75%,rgba(1,208,129,0.48)_86.39%)]"
-        >
-          <img src={codeOn ? codeActiveIcon : codeIdleIcon} alt="" className="h-6 w-6" />
-        </DemoToolbarButton>
+        {codeButton}
       </div>
     </div>
   );
 }
 
 /** Same toolbar on screens whose play / design / code routes are still to come. */
-export function CrcleScreenToolbar() {
+export function CrcleScreenToolbar({ className = "mt-3" }: { className?: string }) {
   const [tab, setTab] = useState<CrcleToolbarTab>("play");
 
   return (
@@ -95,6 +128,7 @@ export function CrcleScreenToolbar() {
       onPlay={() => setTab("play")}
       onDesign={() => setTab("design")}
       onCode={() => setTab("code")}
+      className={className}
     />
   );
 }

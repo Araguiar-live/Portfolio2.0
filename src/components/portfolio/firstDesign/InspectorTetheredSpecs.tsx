@@ -26,7 +26,7 @@ type KeyEntry = {
 };
 
 /** Figma 1992:35174 — Annotation Button variants. */
-const SPEC_KEY: KeyEntry[] = [
+export const SPEC_KEY: KeyEntry[] = [
   { kind: "image", label: "Image", bg: "#0091ff", border: "#b0ddff", text: "#ffffff", icon: ImageIcon },
   { kind: "focus", label: "Focus", bg: "#ff9500", border: "#ffdeb0", text: "#ffffff", icon: Sun },
   { kind: "link", label: "Link", bg: "#2b00ff", border: "#bdb0ff", text: "#ffffff", icon: Link },
@@ -366,7 +366,7 @@ function KindIcon({ entry, className }: { entry: KeyEntry; className?: string })
   return <Icon className={cn("size-3.5 shrink-0", className)} color={entry.text} strokeWidth={2} />;
 }
 
-function KeyPill({ entry, active = false }: { entry: KeyEntry; active?: boolean }) {
+export function KeyPill({ entry, active = false }: { entry: KeyEntry; active?: boolean }) {
   return (
     <div
       className={cn(
@@ -386,33 +386,61 @@ function KeyPill({ entry, active = false }: { entry: KeyEntry; active?: boolean 
 }
 
 /** Compact floating spec card — fixed width, natural height, no inner scroll. */
-function SpecDetailCard({
+function truncateNote(text: string, max = 118) {
+  const t = text.trim();
+  if (t.length <= max) return t;
+  return `${t.slice(0, max - 1).trimEnd()}…`;
+}
+
+export function SpecDetailCard({
   ref,
   annotation,
   frameRole,
   active,
   onHover,
+  onSelect,
+  className,
+  condensed = false,
 }: {
   ref?: Ref<HTMLElement>;
   annotation: SpecAnnotation;
   frameRole?: string;
   active?: boolean;
   onHover?: (id: string | null) => void;
+  onSelect?: (id: string) => void;
+  className?: string;
+  /** Mobile overlay — three tight rows only (desktop/laptop unchanged). */
+  condensed?: boolean;
 }) {
   const entry = KEY_BY_KIND[annotation.kind];
-  const rows: { label: string; value: string }[] = [
-    { label: "Type", value: annotation.elementType },
-    { label: "Target / Frame Purpose", value: annotation.target },
-    ...(frameRole ? [{ label: "Frame Role", value: frameRole }] : []),
-    { label: "Padding & Spacing", value: annotation.spacing },
-    { label: "Accessible Name & ARIA", value: `${annotation.accessibleName} · ${annotation.aria}` },
-    { label: "Behavioral Description", value: annotation.description },
-  ];
+  const rows: { label: string; value: string }[] = condensed
+    ? [
+        {
+          label: "Type / Role",
+          value: [annotation.elementType, frameRole].filter(Boolean).join(" · "),
+        },
+        {
+          label: "Spec / Behavior",
+          value: truncateNote(annotation.description || annotation.spacing),
+        },
+      ]
+    : [
+        { label: "Type", value: annotation.elementType },
+        { label: "Target / Frame Purpose", value: annotation.target },
+        ...(frameRole ? [{ label: "Frame Role", value: frameRole }] : []),
+        { label: "Padding & Spacing", value: annotation.spacing },
+        { label: "Accessible Name & ARIA", value: `${annotation.accessibleName} · ${annotation.aria}` },
+        { label: "Behavioral Description", value: annotation.description },
+      ];
 
   return (
     <article
       ref={ref}
-      className="spatial-glass spatial-glass-hairline relative flex h-auto w-[min(260px,100%)] shrink-0 flex-col items-start gap-1.5 overflow-visible rounded-2xl bg-white/30 p-3 text-[11px] text-[#1e1e1e] shadow-[0_20px_50px_rgba(0,0,0,0.1)] before:pointer-events-none before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-white/60 before:to-transparent dark:bg-black/40 dark:text-white"
+      className={cn(
+        "spatial-glass spatial-glass-hairline relative flex h-auto w-[min(260px,100%)] shrink-0 flex-col items-start overflow-visible rounded-2xl bg-white/30 text-[#1e1e1e] shadow-[0_20px_50px_rgba(0,0,0,0.1)] before:pointer-events-none before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-white/60 before:to-transparent dark:bg-black/40 dark:text-white",
+        condensed ? "gap-1 p-2 text-[10px]" : "gap-1.5 p-3 text-[11px]",
+        className,
+      )}
       style={
         active
           ? { boxShadow: `0 0 0 2px ${entry.border}, 0 28px 60px rgba(0,0,0,0.16)` }
@@ -420,42 +448,101 @@ function SpecDetailCard({
       }
       onMouseEnter={() => onHover?.(annotation.id)}
       onMouseLeave={() => onHover?.(null)}
+      onClick={() => onSelect?.(annotation.id)}
     >
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-br from-white/45 via-white/10 to-transparent"
       />
-      <header className="relative z-[1] flex w-full items-center gap-2">
-        <div className="flex items-center gap-2 self-stretch">
+      <header className={cn("relative z-[1] flex w-full items-center", condensed ? "gap-1.5" : "gap-2")}>
+        <div className="flex items-center gap-1.5 self-stretch">
           <div
-            className="flex items-start rounded-[20px] border border-solid p-1.5"
+            className={cn(
+              "flex items-start rounded-[20px] border border-solid",
+              condensed ? "p-1" : "p-1.5",
+            )}
             style={{ backgroundColor: entry.bg, borderColor: entry.border }}
           >
-            <KindIcon entry={entry} />
+            <KindIcon entry={entry} className={condensed ? "size-3" : undefined} />
           </div>
           <span aria-hidden className="w-px self-stretch bg-white/50" />
         </div>
-        <h4 className="flex-1 text-[12px] font-semibold leading-tight">{entry.label} Details</h4>
+        <h4 className={cn("flex-1 font-semibold leading-tight", condensed ? "text-[10px]" : "text-[12px]")}>
+          {condensed ? entry.label : `${entry.label} Details`}
+        </h4>
       </header>
 
-      <dl className="relative z-[1] flex h-auto w-full flex-col gap-1.5 overflow-visible">
-        <div className="flex w-full flex-col gap-1">
-          <div className="flex w-full items-start">
-            <dt className="flex-1 self-stretch text-[11px] font-medium leading-tight">Element</dt>
-            <dd className="flex flex-1 items-center justify-center rounded-xl bg-white/70 px-2 py-1 shadow-inner backdrop-blur-md dark:bg-white/20">
-              <span className="w-full text-[11px] font-medium leading-tight">{annotation.element}</span>
+      <dl
+        className={cn(
+          "relative z-[1] flex h-auto w-full flex-col overflow-visible",
+          condensed ? "gap-1" : "gap-1.5",
+        )}
+      >
+        <div className="flex w-full flex-col gap-0.5">
+          <div className={cn("flex w-full items-start", condensed ? "flex-col gap-0.5" : "")}>
+            <dt
+              className={cn(
+                "font-medium leading-tight",
+                condensed ? "text-[9px] uppercase tracking-wide text-white/55" : "flex-1 text-[11px]",
+              )}
+            >
+              {condensed ? "Element / Name" : "Element"}
+            </dt>
+            <dd
+              className={cn(
+                "flex items-center bg-white/70 shadow-inner backdrop-blur-md dark:bg-white/20",
+                condensed
+                  ? "w-full rounded-md px-1.5 py-0.5"
+                  : "flex-1 justify-center rounded-xl px-2 py-1",
+              )}
+            >
+              <span
+                className={cn(
+                  "w-full font-medium leading-snug",
+                  condensed ? "text-[10px] line-clamp-2" : "text-[11px] leading-tight",
+                )}
+              >
+                {condensed ? annotation.accessibleName || annotation.element : annotation.element}
+              </span>
             </dd>
           </div>
-          <span aria-hidden className="h-px w-full bg-white/40" />
+          {!condensed ? <span aria-hidden className="h-px w-full bg-white/40" /> : null}
+          {condensed && rows.length > 0 ? (
+            <span aria-hidden className="h-px w-full bg-white/25" />
+          ) : null}
         </div>
 
-        {rows.map((row) => (
-          <div key={row.label} className="flex w-full flex-col gap-1">
-            <div className="flex w-full items-start justify-between gap-2 text-[11px] leading-snug">
-              <dt className="w-[42%] shrink-0 font-medium">{row.label}</dt>
-              <dd className="min-w-0 flex-1 whitespace-normal break-words font-normal">{row.value}</dd>
+        {rows.map((row, rowIndex) => (
+          <div key={row.label} className="flex w-full flex-col gap-0.5">
+            <div
+              className={cn(
+                "flex w-full leading-snug",
+                condensed ? "flex-col gap-0.5" : "items-start justify-between gap-2 text-[11px]",
+              )}
+            >
+              <dt
+                className={cn(
+                  "shrink-0 font-medium",
+                  condensed ? "text-[9px] uppercase tracking-wide text-white/55" : "w-[42%] text-[11px]",
+                )}
+              >
+                {row.label}
+              </dt>
+              <dd
+                className={cn(
+                  "min-w-0 whitespace-normal break-words font-normal",
+                  condensed ? "text-[10px] leading-[1.35] line-clamp-3" : "flex-1",
+                )}
+              >
+                {row.value}
+              </dd>
             </div>
-            <span aria-hidden className="h-px w-full bg-white/40" />
+            {!condensed || rowIndex < rows.length - 1 ? (
+              <span
+                aria-hidden
+                className={cn("h-px w-full", condensed ? "bg-white/25" : "bg-white/40")}
+              />
+            ) : null}
           </div>
         ))}
       </dl>

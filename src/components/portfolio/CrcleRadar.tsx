@@ -1,5 +1,5 @@
 import { AnimatePresence, motion, type PanInfo } from "framer-motion";
-import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 import arrowChevronIcon from "@/assets/crcle/arrow-chevron.svg";
 import arrowForwardIcon from "@/assets/crcle/arrow-forward.svg";
 import arrowLeftIcon from "@/assets/crcle/arrow-left.svg";
@@ -49,7 +49,9 @@ import unlockIcon from "@/assets/crcle/unlock.svg";
 import wifiIcon from "@/assets/crcle/wifi.svg";
 import { DemoToolbar } from "@/components/portfolio/CrcleDemoToolbar";
 import { PhoneDevInspection } from "@/components/portfolio/inspect/PhoneDevInspection";
+import { useSyncMobileWorkDevInspect } from "@/components/portfolio/MobileWorkDevInspect";
 import { CrclePhoneFrame, CrcleThemeToggle } from "@/components/portfolio/CrclePhoneFrame";
+import { useCrcleCaseStudyAppearance } from "@/components/portfolio/useCrcleCaseStudyAppearance";
 import { useCrclePhoneLight } from "@/lib/crcle-phone-theme";
 import { CrclePhoneOverlay, CrclePrimaryDock } from "@/components/portfolio/CrcleChrome";
 import { useCrcleBroadcast } from "@/components/portfolio/crcleBroadcast";
@@ -213,8 +215,9 @@ export function CrcleRadar({
   onGoToSignalHome?: () => void;
   onGoToProfile?: () => void;
 } = {}) {
-  const [broadcastMood] = useCrcleBroadcast();
-  const isNoc = broadcastMood === "night_owl";
+  const [, setBroadcastMood] = useCrcleBroadcast();
+  /* Portfolio Radar always shows standard dark discovery — NOC lives on Profile, not this tab. */
+  const isNoc = false;
   const [isLightMode, toggleLight] = useCrclePhoneLight();
   /* Figma 322:118007 — Radar onboarding over live Radar */
   const [onboardingOpen, setOnboardingOpen] = useState(true);
@@ -223,6 +226,7 @@ export function CrcleRadar({
   const [direction, setDirection] = useState(0);
   const [demoPaused, setDemoPaused] = useState(false);
   const [codeOn, setCodeOn] = useState(false);
+  useSyncMobileWorkDevInspect(codeOn);
   const [demoRun, setDemoRun] = useState(0);
   const [touch, setTouch] = useState<{ x: number; y: number; pressing: boolean } | null>(null);
   const pushTimers = useRef<ReturnType<typeof setTimeout>[]>([]);
@@ -239,8 +243,10 @@ export function CrcleRadar({
   const categoryIndex = CATEGORY_ORDER.indexOf(state.activeCategory);
   const isPushBusy = state.pushPhase !== "idle";
   const showSignalModal = state.pushPhase === "modal";
+  const hideSwipeSheet = caughtUp || showSignalModal || state.isIntentOverlayOpen;
   /* NOC frame is always dark (Figma 957:31045) */
   const light = isLightMode && !isNoc;
+  const caseStudyAppearance = useCrcleCaseStudyAppearance(light);
 
   const clearPushTimers = useCallback(() => {
     pushTimers.current.forEach(clearTimeout);
@@ -248,6 +254,10 @@ export function CrcleRadar({
   }, []);
 
   useEffect(() => () => clearPushTimers(), [clearPushTimers]);
+
+  useLayoutEffect(() => {
+    setBroadcastMood("open_day");
+  }, [setBroadcastMood]);
 
   const pauseDemo = () => {
     demoGen.current += 1;
@@ -263,6 +273,7 @@ export function CrcleRadar({
     setOnboardingOpen(false);
     setState(INITIAL_RADAR);
     setDirection(0);
+    setBroadcastMood("open_day");
     setDemoPaused(false);
     setDemoRun((n) => n + 1);
   };
@@ -350,17 +361,41 @@ export function CrcleRadar({
       }
       await wait(560);
       if (!alive()) return;
-      const romantic = find('[aria-label="romantic"]');
-      if (romantic && (await press(romantic))) {
-        setState((current) => ({ ...current, selectedIntent: "romantic" }));
+      const social = find('[data-demo-target="intent-chip-dock"] [aria-label="social"]');
+      if (social && (await press(social))) {
+        setState((current) => ({ ...current, selectedIntent: "social" }));
       }
-      await wait(720);
+      await wait(520);
       if (!alive()) return;
-      setState((current) => ({
-        ...current,
-        isIntentOverlayOpen: false,
-      }));
-      await wait(420);
+      const pushConfirm = find('[data-demo-target="intent-push-confirm"]');
+      if (pushConfirm && (await press(pushConfirm))) {
+        setState((current) => ({
+          ...current,
+          isIntentOverlayOpen: false,
+          pushPhase: "loading",
+        }));
+        await wait(PUSH_LOAD_MS);
+        if (!alive()) return;
+        setState((current) =>
+          current.pushPhase === "loading" ? { ...current, pushPhase: "success" } : current,
+        );
+        await wait(PUSH_SUCCESS_HOLD_MS);
+        if (!alive()) return;
+        setState((current) =>
+          current.pushPhase === "success" ? { ...current, pushPhase: "modal" } : current,
+        );
+        await wait(1400);
+        if (!alive()) return;
+        const sentClose = find('[data-demo-target="signal-sent-close"]');
+        if (sentClose && (await press(sentClose))) {
+          setState((current) => ({
+            ...current,
+            pushPhase: "idle",
+            selectedIntent: null,
+          }));
+        }
+      }
+      await wait(480);
 
       for (let step = 0; step < 2 && alive(); step += 1) {
         const nextUser = find('[aria-label="Next recommendation"]');
@@ -387,6 +422,7 @@ export function CrcleRadar({
       setCaughtUp(false);
       setDirection(0);
       setState(INITIAL_RADAR);
+      setBroadcastMood("open_day");
       await wait(480);
       if (alive()) void run();
     };
@@ -499,9 +535,27 @@ export function CrcleRadar({
 
   return (
     <div className="relative mx-auto flex w-fit flex-col items-center">
-      <CrcleThemeToggle light={light} onToggle={toggleLight} disabled={isNoc} />
-
-      <CrclePhoneFrame light={light}>
+      <DemoToolbar
+        className="mb-3"
+        compact
+        playing={!demoPaused && !codeOn}
+        codeOn={codeOn}
+        onPlay={replayDemo}
+        onDesign={() => {
+          setCodeOn(false);
+          pauseDemo();
+        }}
+        onCode={() => {
+          setCodeOn(true);
+          pauseDemo();
+        }}
+      />
+      <div className="relative">
+      <CrclePhoneFrame
+        light={light}
+        overlay={caseStudyAppearance.phoneOverlay}
+        caseStudyDemoSurface={caseStudyAppearance.caseStudy}
+      >
         {/* Dark Figma 257:87258 / Light cream — toggled via crcle-phone--light.
             NOC Night Owl: Figma 957:31045 teal gradient + embossed dots. */}
         <div
@@ -747,25 +801,15 @@ export function CrcleRadar({
 
               <div
                 className={`relative flex h-[138px] w-full items-end justify-center overflow-hidden rounded-[36px] p-4 ${
-                  caughtUp ? "pointer-events-none invisible" : ""
-                } ${
-                  isNoc
-                    ? "border border-white/10"
-                    : "border border-[rgba(247,246,242,0.4)]"
-                }`}
+                  hideSwipeSheet ? "pointer-events-none invisible" : ""
+                } border border-[rgba(247,246,242,0.4)]`}
               >
                 <div
                   aria-hidden
-                  className={`pointer-events-none absolute inset-0 rounded-[inherit] ${
-                    isNoc ? "bg-black/40" : "bg-[rgba(2,3,29,0.2)]"
-                  }`}
+                  className="pointer-events-none absolute inset-0 rounded-[inherit] bg-[rgba(2,3,29,0.2)]"
                   style={{
-                    WebkitBackdropFilter: isNoc
-                      ? "blur(24px) saturate(160%)"
-                      : "blur(12px) saturate(160%)",
-                    backdropFilter: isNoc
-                      ? "blur(24px) saturate(160%)"
-                      : "blur(12px) saturate(160%)",
+                    WebkitBackdropFilter: "blur(12px) saturate(160%)",
+                    backdropFilter: "blur(12px) saturate(160%)",
                   }}
                 />
               <div className="absolute left-1/2 top-[7px] z-[1] h-0 w-[58px] -translate-x-1/2">
@@ -795,7 +839,7 @@ export function CrcleRadar({
               </motion.button>
 
               <motion.div
-                className="relative z-[1] mr-[-24px] ml-[-24px] flex h-full min-w-0 flex-1 touch-pan-y flex-col"
+                className="relative z-[1] mr-[-24px] ml-[-24px] flex h-full min-h-0 min-w-0 flex-1 touch-pan-y flex-col"
                 drag="x"
                 dragConstraints={{ left: 0, right: 0 }}
                 dragElastic={0.25}
@@ -923,19 +967,15 @@ export function CrcleRadar({
           <PhoneDevInspection active={codeOn && !onboardingOpen} screenRef={screenRef} />
         </div>
       </CrclePhoneFrame>
-      <DemoToolbar
-        playing={!demoPaused && !codeOn}
-        codeOn={codeOn}
-        onPlay={replayDemo}
-        onDesign={() => {
-          setCodeOn(false);
-          pauseDemo();
-        }}
-        onCode={() => {
-          setCodeOn(true);
-          pauseDemo();
-        }}
-      />
+      {caseStudyAppearance.showThemeToggle ? (
+        <CrcleThemeToggle
+          light={light}
+          onToggle={toggleLight}
+          disabled={isNoc}
+          className={caseStudyAppearance.themeToggleClassName}
+        />
+      ) : null}
+      </div>
     </div>
   );
 }
@@ -1356,6 +1396,7 @@ function IntentPushOverlay({
 
         <button
           type="button"
+          data-demo-target="intent-push-confirm"
           aria-label="Push signal"
           disabled={!selectedIntent}
           onClick={onConfirm}
@@ -1415,6 +1456,7 @@ function IntentChipDock({
 
   return (
     <div
+      data-demo-target="intent-chip-dock"
       onMouseLeave={() => setHovered(null)}
       className="grid grid-cols-2"
       style={{ gap: CHIP_GAP }}
@@ -1711,6 +1753,7 @@ function SignalSentSuccessModal({
       <div className="relative z-[1] flex w-full items-center justify-end">
         <button
           type="button"
+          data-demo-target="signal-sent-close"
           aria-label="Close"
           onClick={onClose}
           className="flex size-6 items-center justify-center rounded-full bg-white/10"

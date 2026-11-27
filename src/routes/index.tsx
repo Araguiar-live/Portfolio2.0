@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { motion, useAnimationControls, useInView, useReducedMotion } from "framer-motion";
 import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react";
 import girlPleaseLogo from "@/assets/girl-please.svg";
@@ -52,9 +52,15 @@ const FoodForThought = lazy(() =>
 import { InteractiveHero } from "@/components/portfolio/InteractiveHero";
 import { SpatialDotBadge } from "@/components/portfolio/SpatialDotBadge";
 import { AiPlaygroundFolder } from "@/components/portfolio/AiPlaygroundFolder";
+import { MiniPlaygroundFolder } from "@/components/portfolio/MiniPlaygroundFolder";
+import {
+  MobileProjectFolderOverlay,
+  type MobileFolderOrigin,
+} from "@/components/portfolio/MobileProjectFolderOverlay";
 import { CalculatorCard, PeekMouse } from "@/components/portfolio/WorkDecorations";
 import { useWorkCommit } from "@/hooks/useWorkCommit";
 import { spatialChromeVisible } from "@/lib/spatialStyles";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { isPhoneViewport } from "@/lib/viewport";
 import crcleHoverStill from "@/assets/portfolio/hover/crcle-in-the-area.jpg";
 import crcleHoverVideo from "@/assets/portfolio/hover/crcle-world-hover.mp4";
@@ -91,7 +97,7 @@ function usePrefetchCaseStudies() {
 }
 
 // Master project registry. Drop real content into `content` per tab later.
-const PROJECTS: Project[] = [
+export const PROJECTS: Project[] = [
   {
     id: "01",
     slug: "crcle",
@@ -293,11 +299,11 @@ const PROJECTS: Project[] = [
   },
 ];
 
-// Dock buttons map 1:1 to projects above.
-const DOCK_ITEMS = [
-  { label: "Cr", slug: "crcle" },
-  { label: "Fd", slug: "first-design" },
-  { label: "Od", slug: "odicci" },
+// Dock buttons map 1:1 to the project rows, numbered in that order.
+export const DOCK_ITEMS = [
+  { label: "01", slug: "crcle" },
+  { label: "02", slug: "first-design" },
+  { label: "03", slug: "odicci" },
 ];
 
 const HEADLINE_LINES = [
@@ -367,82 +373,100 @@ function BouncyHeadline() {
 }
 
 /**
- * Calculator, color badge, and mouse stay in the closed stage frame.
- * Opening a folder grows the sheet below them and does not move these props.
+ * Calculator + SpatialDotBadge — desktop: stage bottom-right; mobile: right edge, vertical center.
  */
 function WorkStageDecorations() {
   return (
-    <div className="@container pointer-events-none absolute left-1/2 top-[calc(50%-76px)] flex h-[min(874px,92%)] w-[min(2400px,calc(100%-32px))] -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-[40px] overflow-visible max-md:relative max-md:left-auto max-md:top-auto max-md:mx-auto max-md:h-auto max-md:min-h-[100dvh] max-md:w-[min(350px,calc(100%-32px))] max-md:translate-x-0 max-md:translate-y-0 max-md:gap-8 max-md:px-1 max-md:pb-28 max-md:pt-14 max-sm:gap-[37px] max-sm:pb-32 max-sm:pt-[68px]">
-      <header
-        aria-hidden
-        className="invisible flex w-full max-w-[720px] shrink-0 flex-col items-center gap-5 text-center max-md:mt-3 max-md:gap-4 max-sm:mt-3 max-sm:gap-4"
-      >
-        <p className="text-[11px] font-bold uppercase tracking-[2px] max-md:text-[9px] max-md:tracking-[1.5px] max-sm:tracking-normal">
-          Selected Work • Portfolio
-        </p>
-        <div className="flex items-end justify-center gap-[15px] max-md:gap-2.5 max-sm:gap-2.5">
-          <div className="hidden w-[87px] shrink-0 pb-2.5 sm:block" />
-          <BouncyHeadline />
-          <div className="w-[87px] shrink-0 pb-2.5 max-md:scale-[0.77] max-sm:pb-[3px]" />
+    <>
+      <div className="portfolio-deco-calculator portfolio-deco-calculator--frame pointer-events-none absolute bottom-6 right-6 z-[5] hidden origin-bottom-right md:block">
+        <div className="portfolio-deco-spin pointer-events-auto absolute right-0 z-0">
+          <SpatialDotBadge />
         </div>
-        <p className="max-w-[580px] text-[14px] leading-[22px] max-md:max-w-[277px] max-md:text-[12px] max-md:leading-[19px] max-sm:max-w-[277px]">
-          <span className="sm:hidden">
-            Small screen? Big FOMO. This portfolio is best on desktop—where the interactive
-            prototypes come out to play.
-          </span>
-          <span className="hidden sm:inline">
-            Multidisciplinary, self-sufficient designer. I build complex B2B platforms, design
-            systems, and code-backed prototypes from zero to one.
-          </span>
-        </p>
-      </header>
-      <div className="relative w-full shrink-0 overflow-visible md:-mt-10 max-md:pt-14 max-md:pb-10">
-        <div className="pointer-events-none absolute inset-0 z-[5] overflow-visible max-md:-top-14 max-md:bottom-0">
-          <div className="portfolio-deco-calculator portfolio-mobile-deco-calculator absolute left-0 top-0 hidden md:block">
-            <div className="portfolio-deco-spin pointer-events-auto absolute right-0 z-0">
-              <SpatialDotBadge />
-            </div>
-            <CalculatorCard />
-          </div>
-          <div className="portfolio-deco-mouse absolute right-4 top-4 hidden md:block">
-            <PeekMouse />
-          </div>
-        </div>
+        <CalculatorCard />
       </div>
+    </>
+  );
+}
+
+/** Mobile: lives in the work column so the calculator stays visible above the grid (folder can stack above it locally). */
+function MobileWorkCalculatorDeco() {
+  return (
+    <div
+      className="portfolio-deco-calculator portfolio-deco-calculator--mobile pointer-events-none absolute inset-y-0 right-0 z-[5] hidden w-[min(48vw,220px)] max-md:block"
+      aria-hidden
+    >
+      <div className="portfolio-deco-spin portfolio-deco-spin--mobile pointer-events-auto absolute z-0">
+        <SpatialDotBadge />
+      </div>
+      <div className="mobile-calculator-frost relative z-[2]">
+        <CalculatorCard />
+      </div>
+    </div>
+  );
+}
+
+/** Mobile closed #work — peek mouse anchored bottom-left (desktop folder has this beside the stack). */
+function MobileWorkMouseDeco() {
+  return (
+    <div
+      className="portfolio-deco-mouse portfolio-deco-mouse--mobile pointer-events-none absolute z-[6] hidden max-md:block"
+      aria-hidden
+    >
+      <PeekMouse />
     </div>
   );
 }
 
 function Index() {
   usePrefetchCaseStudies();
-  const [openSlug, setOpenSlug] = useState<string | null>(null);
+  const isMobile = useIsMobile();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [designOn, setDesignOn] = useState(false);
   const rowRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const [nudgeSignal, setNudgeSignal] = useState(0);
-  const isExpanded = openSlug !== null;
+  const [mobileFolderOpen, setMobileFolderOpen] = useState(false);
+  const [mobileFolderOrigin, setMobileFolderOrigin] = useState<MobileFolderOrigin | null>(null);
+  const navigate = useNavigate();
+  const isExpanded = false;
   const { workCommitted, commitToWork, chromeVisible } = useWorkCommit();
   const showChrome = workCommitted && chromeVisible;
   const chromeClass = spatialChromeVisible(workCommitted, chromeVisible);
 
-  const toggle = useCallback((slug: string) => {
-    setOpenSlug((cur) => (cur === slug ? null : slug));
+  const openProject = useCallback(
+    (slug: string) => {
+      if (isPhoneViewport()) {
+        rowRefs.current[slug]?.scrollIntoView({ behavior: "smooth", block: "center" });
+        window.setTimeout(() => setNudgeSignal((n) => n + 1), 600);
+        return;
+      }
+      void navigate({ to: "/work/$slug", params: { slug } });
+    },
+    [navigate],
+  );
+
+  const openMobileFolderMenu = useCallback(() => {
+    const node = document.querySelector(".mini-playground-folder .project-folder-mini-frame");
+    if (node instanceof HTMLElement) {
+      const rect = node.getBoundingClientRect();
+      setMobileFolderOrigin({
+        top: rect.top,
+        left: rect.left,
+        width: rect.width,
+        height: rect.height,
+      });
+    } else {
+      setMobileFolderOrigin(null);
+    }
+    document.documentElement.classList.add("mobile-folder-sheet-open");
+    setMobileFolderOpen(true);
   }, []);
 
-  // Dock click: open the row (if closed) and smoothly scroll to it.
-  const handleDockSelect = useCallback((slug: string) => {
-    if (isPhoneViewport()) {
-      rowRefs.current[slug]?.scrollIntoView({ behavior: "smooth", block: "center" });
-      window.setTimeout(() => setNudgeSignal((n) => n + 1), 600);
-      return;
-    }
-    setOpenSlug(slug);
-    // Wait a frame so the accordion begins expanding before we measure.
-    requestAnimationFrame(() => {
-      const el = rowRefs.current[slug];
-      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-    });
-  }, []);
+  const openMobileFolderProject = useCallback(
+    (slug: string) => {
+      void navigate({ to: "/work/$slug", params: { slug } });
+    },
+    [navigate],
+  );
 
   return (
     <div className="portfolio-hero-grid relative min-h-[100dvh] w-full text-zinc-900 font-sans antialiased overflow-x-hidden max-md:m-0 max-md:p-0 max-md:isolate max-sm:font-[family-name:system-ui,sans-serif]">
@@ -460,7 +484,7 @@ function Index() {
 
       <div
         aria-hidden
-        className={`portfolio-mobile-tile-row pointer-events-none fixed inset-x-0 top-0 z-[120] hidden max-md:block ${chromeClass}`}
+        className={`portfolio-mobile-tile-row pointer-events-none absolute inset-x-0 top-0 z-0 hidden max-md:block ${chromeClass}`}
       />
 
       {/* Top-right cluster. The note hangs under Contact Me so the two never overlap. */}
@@ -514,10 +538,12 @@ function Index() {
             className={
               isExpanded
                 ? "pointer-events-auto relative mx-auto flex w-[min(2400px,calc(100%-32px))] min-w-0 flex-col items-center gap-[78px] overflow-visible px-0 pb-0 pt-10 max-md:w-full max-md:max-w-[calc(100vw-32px)] max-md:px-0"
-                : "work-closed-column @container pointer-events-auto absolute left-[calc(50%-min(2400px,100%-32px)/2)] top-[calc(50%-76px-min(874px,92%)/2)] flex h-[min(874px,92%)] w-[min(2400px,calc(100%-32px))] flex-col items-center gap-[40px] overflow-visible max-md:relative max-md:left-auto max-md:top-auto max-md:mx-auto max-md:h-auto max-md:min-h-0 max-md:w-full max-md:max-w-[calc(100vw-32px)] max-md:gap-8 max-md:px-0 max-md:pb-16 max-md:pt-24 max-sm:gap-[37px] max-sm:pb-20"
+                : "work-closed-column @container pointer-events-auto absolute flex flex-col items-center overflow-visible max-md:relative max-md:left-auto max-md:top-auto max-md:mx-auto max-md:h-auto max-md:min-h-[calc(100dvh-7.5rem)] max-md:w-full max-md:max-w-[calc(100vw-32px)] max-md:items-stretch max-md:gap-8 max-md:px-0 max-md:pb-6 max-md:pt-24 max-sm:min-h-[calc(100dvh-6.5rem)] max-sm:gap-[37px] max-sm:pb-8"
             }
           >
-            <header className="flex w-full max-w-[720px] shrink-0 flex-col items-center gap-5 text-center max-md:relative max-md:z-10 max-md:mt-3 max-md:gap-4 max-sm:mt-3 max-sm:gap-4">
+            <MobileWorkCalculatorDeco />
+            <MobileWorkMouseDeco />
+            <header className="flex w-full max-w-[720px] shrink-0 flex-col items-center gap-5 text-center max-md:relative max-md:z-[1] max-md:mt-3 max-md:gap-4 max-sm:mt-3 max-sm:gap-4">
               <p className="text-[11px] font-bold uppercase tracking-[2px] text-[#76767a] max-md:text-[9px] max-md:tracking-[1.5px] max-sm:tracking-normal">
                 Selected Work • Portfolio
               </p>
@@ -528,8 +554,8 @@ function Index() {
                 <BouncyHeadline />
 
                 <div
-                  className={`w-[87px] shrink-0 origin-center pb-2.5 max-md:scale-[0.77] max-sm:pb-[3px] ${chromeClass}`}
-                  aria-hidden={!showChrome}
+                  className={`work-headline-toggle w-[87px] shrink-0 origin-center pb-2.5 max-md:scale-[0.77] max-sm:pb-[3px] ${chromeClass}`}
+                  aria-hidden={isMobile ? false : !showChrome}
                 >
                   <DesignToggle on={designOn} onToggle={() => setDesignOn((v) => !v)} />
                 </div>
@@ -537,8 +563,8 @@ function Index() {
 
               <p className="max-w-[580px] text-[14px] leading-[22px] text-[#76767a] max-md:max-w-[277px] max-md:text-[12px] max-md:leading-[19px] max-sm:max-w-[277px]">
                 <span className="sm:hidden">
-                  Small screen? Big FOMO. This portfolio is best on desktop—where the interactive
-                  prototypes come out to play.
+                  A single, fluidly scrolling page. Expand any project to step through the exploration,
+                  the iteration, and a live interactive prototype.
                 </span>
                 <span className="hidden sm:inline">
                   Multidisciplinary, self-sufficient designer. I build complex B2B platforms, design
@@ -548,39 +574,25 @@ function Index() {
             </header>
 
             <div
-              className={`relative mx-auto w-[92%] min-w-0 max-w-[92%] shrink-0 overflow-visible max-md:w-full max-md:max-w-[350px] max-md:pt-2 max-md:pb-16 ${
+              className={`portfolio-mini-folder-slot relative mx-auto w-[92%] min-w-0 max-w-[92%] shrink-0 overflow-visible max-md:absolute max-md:bottom-[max(18px,env(safe-area-inset-bottom))] max-md:left-4 max-md:z-10 max-md:w-auto max-md:max-w-none max-md:pt-0 max-md:pb-0 ${
                 isExpanded ? "" : "md:mt-[2px]"
               }`}
             >
-              <div
-                aria-hidden
-                className="mobile-calculator-frost pointer-events-none absolute -left-10 top-[calc(-0.42*201px*var(--deco-scale,1))] z-0 hidden max-md:block"
-                style={{ ["--deco-scale" as string]: "0.77" }}
-              >
-                <CalculatorCard />
-              </div>
-              <AiPlaygroundFolder>
-                <ProjectBentoStack
-                  projects={PROJECTS}
-                  openSlug={openSlug}
-                  onToggle={toggle}
-                  rowRefs={rowRefs}
-                  nudgeSignal={nudgeSignal}
-                />
-              </AiPlaygroundFolder>
-              <div
-                aria-hidden
-                className="pointer-events-none absolute -right-4 bottom-14 z-0 hidden max-md:block"
-                style={{ ["--deco-scale" as string]: "1" }}
-              >
-                <PeekMouse />
-              </div>
-              <div
-                className={`project-dock-mobile pointer-events-auto absolute -left-2 top-[calc(100%-28px)] z-20 hidden max-md:block ${chromeClass}`}
-                style={{ ["--deco-scale" as string]: "1.25", transform: "translateY(-18%)" }}
-                aria-hidden={!showChrome}
-              >
-                <ProjectDock onPlus={() => setSidebarOpen(true)} />
+              <div className="portfolio-mobile-folder-scale max-md:flex max-md:w-full max-md:justify-start max-md:overflow-visible md:contents">
+                <div className="w-full max-md:pl-4 max-md:pr-0 md:hidden">
+                  <MiniPlaygroundFolder onOpen={openMobileFolderMenu} />
+                </div>
+                <div className="hidden w-full md:contents">
+                  <AiPlaygroundFolder>
+                    <ProjectBentoStack
+                      projects={PROJECTS}
+                      openSlug={null}
+                      onToggle={openProject}
+                      rowRefs={rowRefs}
+                      nudgeSignal={nudgeSignal}
+                    />
+                  </AiPlaygroundFolder>
+                </div>
               </div>
             </div>
           </div>
@@ -589,7 +601,7 @@ function Index() {
         {/* Marquee + footer — continuous black plane under the bento strip */}
         <div className="relative z-20 bg-black [content-visibility:auto] [contain-intrinsic-size:auto_720px] max-sm:bg-[var(--portfolio-bottom-surface,#0a0d11)]">
           <Marquee />
-          <Footer onSelectProject={handleDockSelect} onOpenSidebar={() => setSidebarOpen(true)} />
+          <Footer onSelectProject={openProject} onOpenSidebar={() => setSidebarOpen(true)} />
         </div>
       </section>
 
@@ -598,12 +610,22 @@ function Index() {
           <Dock
             className={chromeClass}
             items={DOCK_ITEMS}
-            onSelect={handleDockSelect}
-            activeSlug={openSlug}
+            onSelect={openProject}
+            activeSlug={null}
           />
         ) : null}
       </div>
       <Sidebar open={sidebarOpen} onOpenChange={setSidebarOpen} />
+      <MobileProjectFolderOverlay
+        open={mobileFolderOpen}
+        origin={mobileFolderOrigin}
+        projects={PROJECTS}
+        onClose={() => {
+          setMobileFolderOpen(false);
+          setMobileFolderOrigin(null);
+        }}
+        onSelectProject={openMobileFolderProject}
+      />
     </div>
   );
 }

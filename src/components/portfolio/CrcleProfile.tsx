@@ -77,7 +77,9 @@ import shareInnerIcon from "@/assets/crcle/share-inner.svg";
 import wifiIcon from "@/assets/crcle/wifi.svg";
 import { DemoToolbar } from "@/components/portfolio/CrcleDemoToolbar";
 import { PhoneDevInspection } from "@/components/portfolio/inspect/PhoneDevInspection";
+import { useSyncMobileWorkDevInspect } from "@/components/portfolio/MobileWorkDevInspect";
 import { CrclePhoneFrame, CrcleThemeToggle } from "@/components/portfolio/CrclePhoneFrame";
+import { useCrcleCaseStudyAppearance } from "@/components/portfolio/useCrcleCaseStudyAppearance";
 import { useCrclePhoneLight } from "@/lib/crcle-phone-theme";
 import { CrcleMoreButton, CrclePhoneOverlay, CrclePrimaryDock } from "@/components/portfolio/CrcleChrome";
 import {
@@ -257,6 +259,7 @@ export function CrcleProfile({
 } = {}) {
   const [broadcastMood, setBroadcastMood] = useCrcleBroadcast();
   const [isLightMode, toggleLight] = useCrclePhoneLight();
+  const caseStudyAppearance = useCrcleCaseStudyAppearance(isLightMode);
   const [profile, setProfile] = useState<ProfileState>(() => ({
     ...INITIAL,
     broadcast: { ...INITIAL.broadcast, activeState: broadcastMood },
@@ -268,6 +271,7 @@ export function CrcleProfile({
   const screenRef = useRef<HTMLDivElement>(null);
   const [demoPaused, setDemoPaused] = useState(false);
   const [devInspection, setDevInspection] = useState(false);
+  useSyncMobileWorkDevInspect(devInspection);
   const [demoRun, setDemoRun] = useState(0);
   const [touch, setTouch] = useState<{ x: number; y: number; pressing: boolean } | null>(null);
   const demoGen = useRef(0);
@@ -459,8 +463,21 @@ export function CrcleProfile({
 
   return (
     <div className="relative mx-auto flex w-fit flex-col items-center">
-      <CrcleThemeToggle light={isLightMode} onToggle={toggleLight} />
-      <CrclePhoneFrame light={isLightMode}>
+      <DemoToolbar
+        className="mb-3"
+        compact
+        playing={!demoPaused}
+        codeOn={devInspection}
+        onPlay={replayDemo}
+        onDesign={selectDesign}
+        onCode={selectCode}
+      />
+      <div className="relative">
+      <CrclePhoneFrame
+        light={isLightMode}
+        overlay={caseStudyAppearance.phoneOverlay}
+        caseStudyDemoSurface={caseStudyAppearance.caseStudy}
+      >
         <div
           ref={screenRef}
           onPointerDownCapture={() => {
@@ -474,7 +491,7 @@ export function CrcleProfile({
             {/* Absolute scroll so the dock can sample this layer for backdrop-filter */}
             <div
               data-demo-scroll
-              className="absolute inset-0 overflow-x-hidden overflow-y-auto px-3 pb-28 pt-[86px]"
+              className="absolute inset-0 overflow-x-hidden overflow-y-auto overscroll-contain px-3 pb-16 pt-[86px]"
             >
               <ProfileMainView
                 profile={profile}
@@ -494,8 +511,8 @@ export function CrcleProfile({
             <div className="pointer-events-none absolute inset-x-0 top-0 z-20">
               <div className="bg-gradient-to-b from-[#010211] from-40% via-[#010211]/85 to-transparent pb-8 transition-colors duration-300 [.crcle-phone--light_&]:from-[#f7f6f2] [.crcle-phone--light_&]:via-[#f7f6f2]/85">
                 <StatusBar />
-                <div className="mt-[5px] flex justify-center pb-[12px]">
-                  <IconImg src={crcleLogo} className="crcle-theme-icon h-[13px] w-[38px]" />
+                <div className="-mt-[3px] flex justify-center pb-[12px]">
+                  <IconImg src={crcleLogo} className="crcle-theme-icon h-[12.61px] w-[36.86px] opacity-65" />
                 </div>
               </div>
             </div>
@@ -648,14 +665,15 @@ export function CrcleProfile({
           ) : null}
         </div>
       </CrclePhoneFrame>
+      {caseStudyAppearance.showThemeToggle ? (
+        <CrcleThemeToggle
+          light={isLightMode}
+          onToggle={toggleLight}
+          className={caseStudyAppearance.themeToggleClassName}
+        />
+      ) : null}
+      </div>
       <PhoneDevInspection active={devInspection} screenRef={screenRef} />
-      <DemoToolbar
-        playing={!demoPaused}
-        codeOn={devInspection}
-        onPlay={replayDemo}
-        onDesign={selectDesign}
-        onCode={selectCode}
-      />
     </div>
   );
 }
@@ -1000,7 +1018,7 @@ function ProfileMainView({
   const isEmptyWidgets = !hasEducation && !hasWork && !hasRelationship && !hasLocation;
 
   return (
-    <div className="flex flex-col gap-4 pb-4">
+    <div className="mt-2 flex flex-col gap-4 pb-4">
       {/* Identity — Figma 851:225654 / Untitled 12:10596 */}
       <div className="flex w-full items-end justify-between gap-2 px-0">
         <div className="flex min-w-0 flex-col items-start justify-center">

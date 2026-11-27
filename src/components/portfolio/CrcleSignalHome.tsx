@@ -33,6 +33,7 @@ import signalRingInner from "@/assets/crcle/signal-home/signal-ring-inner.svg";
 import signalRingOuter from "@/assets/crcle/signal-home/signal-ring-outer.svg";
 import wifiIcon from "@/assets/crcle/wifi.svg";
 import { CrclePhoneFrame, CrcleThemeToggle } from "@/components/portfolio/CrclePhoneFrame";
+import { useCrcleCaseStudyAppearance } from "@/components/portfolio/useCrcleCaseStudyAppearance";
 import { useCrclePhoneLight } from "@/lib/crcle-phone-theme";
 import {
   CrcleBackButton,
@@ -42,6 +43,7 @@ import {
 } from "@/components/portfolio/CrcleChrome";
 import { DemoToolbar } from "@/components/portfolio/CrcleDemoToolbar";
 import { PhoneDevInspection } from "@/components/portfolio/inspect/PhoneDevInspection";
+import { useSyncMobileWorkDevInspect } from "@/components/portfolio/MobileWorkDevInspect";
 import { SignalTuneDrawer } from "@/components/portfolio/SignalTuneDrawer";
 
 /**
@@ -72,6 +74,7 @@ export function CrcleSignalHome({
   /* Figma 322:118233 — Signal Features overlay on light Daily 3 */
   const [onboardingOpen, setOnboardingOpen] = useState(true);
   const [isLightMode, toggleLight] = useCrclePhoneLight();
+  const caseStudyAppearance = useCrcleCaseStudyAppearance(isLightMode);
   /** Untitled 24:10888 — Intent Settings overlay over the Daily 3 photo */
   const [intentOpen, setIntentOpen] = useState(false);
   const [selectedIntent, setSelectedIntent] = useState<RadarIntent | null>(null);
@@ -80,6 +83,7 @@ export function CrcleSignalHome({
   const [pulseLive, setPulseLive] = useState(false);
   const [demoPaused, setDemoPaused] = useState(false);
   const [codeOn, setCodeOn] = useState(false);
+  useSyncMobileWorkDevInspect(codeOn);
   const [demoRun, setDemoRun] = useState(0);
   const [touch, setTouch] = useState<{ x: number; y: number; pressing: boolean } | null>(null);
   const screenRef = useRef<HTMLDivElement>(null);
@@ -284,9 +288,27 @@ export function CrcleSignalHome({
 
   return (
     <div className="relative mx-auto flex w-fit flex-col items-center">
-      <CrcleThemeToggle light={isLightMode} onToggle={toggleLight} />
-
-      <CrclePhoneFrame light={isLightMode}>
+      <DemoToolbar
+        className="mb-3"
+        compact
+        playing={!demoPaused && !codeOn}
+        codeOn={codeOn}
+        onPlay={replayDemo}
+        onDesign={() => {
+          setCodeOn(false);
+          pauseDemo();
+        }}
+        onCode={() => {
+          setCodeOn(true);
+          pauseDemo();
+        }}
+      />
+      <div className="relative">
+      <CrclePhoneFrame
+        light={isLightMode}
+        overlay={caseStudyAppearance.phoneOverlay}
+        caseStudyDemoSurface={caseStudyAppearance.caseStudy}
+      >
         <div
           ref={screenRef}
           onPointerDownCapture={() => {
@@ -698,19 +720,14 @@ export function CrcleSignalHome({
           <PhoneDevInspection active={codeOn && !onboardingOpen} screenRef={screenRef} />
         </div>
       </CrclePhoneFrame>
-      <DemoToolbar
-        playing={!demoPaused && !codeOn}
-        codeOn={codeOn}
-        onPlay={replayDemo}
-        onDesign={() => {
-          setCodeOn(false);
-          pauseDemo();
-        }}
-        onCode={() => {
-          setCodeOn(true);
-          pauseDemo();
-        }}
-      />
+      {caseStudyAppearance.showThemeToggle ? (
+        <CrcleThemeToggle
+          light={isLightMode}
+          onToggle={toggleLight}
+          className={caseStudyAppearance.themeToggleClassName}
+        />
+      ) : null}
+      </div>
     </div>
   );
 }

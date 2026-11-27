@@ -8,29 +8,34 @@ const TOGGLE_EASE = [0.22, 1, 0.36, 1] as const;
 export function CrcleThemeToggle({
   light,
   onToggle,
+  onOpenAppearance,
+  appearanceTrigger = false,
   disabled = false,
   className = "",
 }: {
   light: boolean;
   onToggle: () => void;
+  /** Mobile case study — opens Appearance sheet instead of toggling inline. */
+  onOpenAppearance?: () => void;
+  appearanceTrigger?: boolean;
   disabled?: boolean;
   className?: string;
 }) {
   return (
     <motion.button
       type="button"
-      role="switch"
-      aria-checked={light}
-      aria-label={light ? "Switch to dark mode" : "Switch to light mode"}
+      role={appearanceTrigger ? "button" : "switch"}
+      aria-checked={appearanceTrigger ? undefined : light}
+      aria-label={appearanceTrigger ? "Open appearance settings" : light ? "Switch to dark mode" : "Switch to light mode"}
       disabled={disabled}
-      onClick={onToggle}
-      className={`relative z-30 mb-2 flex h-8 w-[52px] shrink-0 items-center rounded-full border border-zinc-200/80 bg-white/75 p-0.5 shadow-[0_2px_8px_rgba(0,0,0,0.08)] backdrop-blur-sm disabled:pointer-events-none disabled:opacity-40 ${className}`}
+      onClick={appearanceTrigger ? () => onOpenAppearance?.() : onToggle}
+      className={`z-30 flex h-[52px] w-8 shrink-0 flex-col items-center rounded-full border border-zinc-200/80 bg-white/75 p-0.5 shadow-[0_2px_8px_rgba(0,0,0,0.08)] backdrop-blur-sm disabled:pointer-events-none disabled:opacity-40 ${className}`}
     >
       <motion.span
         aria-hidden
-        className="absolute inset-y-0.5 w-[calc(50%-2px)] rounded-full bg-zinc-100 shadow-sm"
+        className="absolute inset-x-0.5 h-[calc(50%-2px)] rounded-full bg-zinc-100 shadow-sm"
         initial={false}
-        animate={{ left: light ? 2 : "calc(50% + 0px)" }}
+        animate={{ top: light ? 2 : "calc(50%)" }}
         transition={{ duration: 0.22, ease: TOGGLE_EASE }}
       />
       <span
@@ -59,18 +64,22 @@ export function CrclePhoneFrame({
   overlay,
   light = false,
   className = "",
+  caseStudyDemoSurface = false,
 }: {
   children: ReactNode;
   /** Full-device overlays (modals/scrims) — sits above the screen, covers the wireframe. */
   overlay?: ReactNode;
   light?: boolean;
   className?: string;
+  /** Marks live demo taps so the case-study frame can open Appearance instead. */
+  caseStudyDemoSurface?: boolean;
 }) {
   return (
     <div
       className={`relative ml-auto h-[874px] w-[402px] shrink-0 overflow-hidden rounded-[58px] ${className}`}
       style={{ clipPath: "inset(0 round 58px)" }}
       data-device="iphone-crcle-402x874"
+      {...(caseStudyDemoSurface ? { "data-crcle-demo-surface": "" } : {})}
     >
       {/* Hardware buttons — flush to rim (clipped by rounded frame) */}
       <span
@@ -133,8 +142,8 @@ export function CrclePhoneFrame({
           {/* Full-wireframe overlays (above screen + bezel); inert until a modal mounts */}
           {overlay ? (
             <div
-              className="pointer-events-none absolute inset-0 z-[60] overflow-hidden rounded-[56px]"
-              style={{ clipPath: "inset(0 round 56px)" }}
+              className="absolute inset-0 z-[60] overflow-hidden rounded-[56px] [&>*]:pointer-events-auto"
+              style={{ clipPath: "inset(0 round 56px)", pointerEvents: "none" }}
             >
               {overlay}
             </div>

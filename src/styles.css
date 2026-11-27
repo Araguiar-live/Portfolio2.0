@@ -31,28 +31,221 @@
   zoom: min(1, calc(100cqw / 402px));
 }
 
+/* Closed work stage: full-bleed tiles; height caps at viewport, width always 100%. */
+@media (min-width: 768px) {
+  #work > .wireframe-stage-closed {
+    width: 100%;
+    max-width: none;
+    margin-inline: 0;
+    aspect-ratio: auto;
+    height: min(100dvh, calc(100vw * 847 / 1262));
+    min-height: min(100dvh, calc(100vw * 847 / 1262));
+  }
+
+  #work > .wireframe-stage-closed .wireframe-stage-deco {
+    inset: 0;
+    height: 100%;
+    aspect-ratio: auto;
+  }
+}
+
+/* Laptop: pull accordion sheets 20px closer (more stack overlap). */
 @media (min-width: 768px) and (max-width: 1536px) {
-  .work-closed-column {
-    top: calc(50% - 20px - min(874px, 92%) / 2);
+  #work {
+    --folder-overlap: clamp(52px, calc(2.5vw + 20px), 68px);
+  }
+
+  /* Frame calculator + SpatialDotBadge: 15% smaller, 24px lower (24px → 0 bottom). */
+  #work .portfolio-deco-calculator.portfolio-deco-calculator--frame {
+    bottom: 0;
+    transform: scale(0.9775);
+    transform-origin: bottom right;
+    translate: -15% 13%;
   }
 }
 
 @media (min-width: 768px) {
+  #work {
+    --folder-row-pad-y: clamp(38px, 3.18vw, 61px);
+    --folder-row-pad-x: clamp(22px, 1.93vw, 37px);
+    --folder-row-gap: clamp(16px, 1.46vw, 28px);
+    --folder-title-size: clamp(22px, 1.93vw, 37px);
+    --folder-meta-size: clamp(12px, 0.83vw, 16px);
+    --folder-overlap: clamp(32px, 2.5vw, 48px);
+    --folder-pocket-h: clamp(168px, 12.63vw, 242.55px);
+    --folder-pocket-rise: clamp(14px, 1.25vw, 24px);
+    --work-column-gap: clamp(24px, 2.08vw, 40px);
+    --work-closed-scale: 0.8;
+  }
+
+  .work-closed-column {
+    left: 50%;
+    top: 50%;
+    width: min(2400px, calc(100% - clamp(16px, 1.67vw, 32px)));
+    height: min(874px, 100%, calc(100% - clamp(8px, 1vw, 16px)));
+    max-height: 100%;
+    transform: translate(-50%, calc(-50% - clamp(16px, 2.2vw, 38px)))
+      scale(var(--work-closed-scale));
+    transform-origin: center center;
+    gap: var(--work-column-gap);
+  }
+
+  @media (max-height: 900px) {
+    #work {
+      --folder-row-pad-y: clamp(30px, 2.2vw, 48px);
+      --folder-row-pad-x: clamp(20px, 1.6vw, 32px);
+      --folder-title-size: clamp(20px, 1.65vw, 32px);
+      --folder-meta-size: clamp(11px, 0.75vw, 14px);
+      --folder-overlap: clamp(48px, calc(2.1vw + 20px), 60px);
+      --folder-pocket-h: clamp(132px, 10.5vw, 190px);
+      --folder-pocket-rise: clamp(12px, 1vw, 20px);
+      --work-column-gap: clamp(16px, 1.6vw, 28px);
+    }
+
+    .work-closed-column {
+      transform: translate(-50%, calc(-50% + clamp(4px, 0.8dvh, 12px)))
+        scale(var(--work-closed-scale));
+    }
+
+    .work-closed-column > header {
+      gap: clamp(12px, 1.2vw, 20px) !important;
+    }
+
+    .work-closed-column > header p:last-of-type {
+      font-size: clamp(11px, 0.73vw, 14px);
+      line-height: 1.45;
+    }
+
+    .folder-shell .folder-row {
+      min-height: clamp(92px, min(7.2vw, 17dvh), 140px);
+    }
+  }
+
+  .ai-playground-folder {
+    --pocket-h: var(--folder-pocket-h);
+    --pocket-overlap: var(--folder-overlap);
+    --pocket-rise: var(--folder-pocket-rise);
+    margin-bottom: clamp(1rem, 1.46vw, 1.75rem);
+  }
+
+  /* Closed stage: stack lifts in the jacket; whole folder sits lower vs hero. */
+  #work .wireframe-stage-closed {
+    --folder-block-drop: 5%;
+    --folder-stack-lift: -10%;
+    --folder-bleed: 3%;
+    --folder-wide: 106%;
+    /* Extra horizontal inset per side (stack ↔ pocket lips); was 30px bleed each way. */
+    --folder-side-inset: 44px;
+    --folder-inner-pad: clamp(1.75rem, 2.25vw, 2.75rem);
+    /* Back + front pocket share one geometry (bleed + pad − side inset). */
+    --folder-pocket-left: calc(-1 * var(--folder-bleed) + var(--folder-inner-pad) - var(--folder-side-inset));
+    --folder-pocket-width: calc(var(--folder-wide) - 2 * var(--folder-inner-pad) + 2 * var(--folder-side-inset));
+  }
+
+  #work .wireframe-stage-closed .ai-playground-folder > .ai-playground-folder-inner {
+    padding-inline: var(--folder-inner-pad);
+    /* Reserve space when the front pocket is absolute. */
+    padding-bottom: calc(var(--folder-pocket-h) + 3rem);
+  }
+
+  #work .wireframe-stage-closed .portfolio-mobile-shake-root {
+    margin-left: calc(-1 * var(--folder-bleed)) !important;
+    width: var(--folder-wide) !important;
+  }
+
+  #work .wireframe-stage-closed .playground-pocket {
+    position: absolute !important;
+    left: var(--folder-pocket-left) !important;
+    right: auto !important;
+    margin-left: 0 !important;
+    width: var(--folder-pocket-width) !important;
+    max-width: none !important;
+    box-sizing: border-box;
+    padding-inline: clamp(2.5rem, 2.8vw, 3.25rem) !important;
+  }
+
+  #work .wireframe-stage-closed .ai-playground-back {
+    left: var(--folder-pocket-left) !important;
+    width: var(--folder-pocket-width) !important;
+    max-width: none !important;
+    box-sizing: border-box;
+  }
+
+  #work .wireframe-stage-closed .ai-playground-folder {
+    translate: 0 var(--folder-block-drop);
+  }
+
+  #work .wireframe-stage-closed .portfolio-mobile-shake-root,
+  #work .wireframe-stage-closed .playground-pocket,
+  #work .wireframe-stage-closed .ai-playground-back,
+  #work .wireframe-stage-closed .ai-playground-peek-mouse {
+    translate: 0 var(--folder-stack-lift);
+  }
+
   /* Authored closed-row size, written as plain lengths so Safari cannot collapse it. */
   .folder-shell .folder-row {
-    min-height: 196px;
-    padding-top: 78.6px;
-    padding-bottom: 78.6px;
+    min-height: clamp(108px, min(9.06vw, 22dvh), 174px);
+    padding-top: var(--folder-row-pad-y);
+    padding-bottom: var(--folder-row-pad-y);
+    padding-left: var(--folder-row-pad-x);
+    padding-right: var(--folder-row-pad-x);
+    gap: var(--folder-row-gap);
+  }
+
+  .folder-shell ~ .folder-shell {
+    margin-top: calc(-1 * var(--folder-overlap)) !important;
   }
 
   .folder-shell .folder-title {
-    font-size: 37px;
+    font-size: var(--folder-title-size);
     line-height: 1.15;
+  }
+
+  .folder-shell .folder-index,
+  .folder-shell .folder-meta .folder-muted {
+    font-size: var(--folder-meta-size);
+  }
+
+  .folder-shell .folder-row > .relative {
+    gap: clamp(16px, 1.93vw, 37px);
   }
 
   /* 15% of each decoration's own height, below the previous anchor. */
   .portfolio-deco-calculator {
     translate: max(-50%, calc(16px - 50vw + 50cqw)) -35%;
+  }
+
+  #work .portfolio-deco-calculator--frame {
+    top: auto;
+    right: 24px;
+    bottom: 24px;
+    left: auto;
+    translate: -15% 13%;
+    transform: scale(1.15);
+    transform-origin: bottom right;
+  }
+
+  #work .portfolio-deco-calculator--frame .portfolio-deco-spin {
+    top: -60px;
+    right: 0;
+    left: auto;
+    translate: 24px 15%;
+  }
+
+  /* ≥1537px desktop — flush to wireframe stage bottom; laptop band (768–1536) unchanged above. */
+  @media (min-width: 1537px) {
+    #work .portfolio-deco-calculator.portfolio-deco-calculator--frame {
+      bottom: 0;
+      right: clamp(16px, 1.25vw, 28px);
+      translate: -15% 0;
+    }
+
+    #work .portfolio-deco-calculator--frame .portfolio-deco-spin {
+      top: auto;
+      bottom: 100%;
+      margin-bottom: 4px;
+      translate: 24px 0;
+    }
   }
 
   .portfolio-deco-spin {
@@ -62,6 +255,14 @@
 
   .portfolio-deco-mouse {
     translate: 0 calc(-70px + 15%);
+  }
+
+  .portfolio-deco-mouse.portfolio-deco-mouse--frame {
+    top: auto;
+    right: auto;
+    bottom: 24px;
+    left: 24px;
+    translate: none;
   }
 }
 
@@ -90,6 +291,352 @@ html[data-work-locked] .portfolio-interactive-hero-shell {
     background-size: 100% auto;
   }
 
+  /* Sticky mobile chrome on project pages — avoid overflow clipping on ancestors. */
+  .work-project-page.portfolio-hero-grid {
+    position: relative;
+    isolation: isolate;
+    overflow: visible;
+    box-sizing: border-box;
+    padding-inline: 2px;
+    background-color: #f3f4f6;
+    background-image: none;
+  }
+
+  .work-project-page.portfolio-hero-grid > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Figma 3149:13185 — sticky Home + Contact rail while case study scrolls. */
+  .work-project-mobile-top.work-project-header-tile {
+    position: sticky;
+    top: 0;
+    z-index: 120;
+    box-sizing: border-box;
+    margin: 2px 2px 0;
+    width: calc(100% - 4px);
+    min-height: calc((100vw - 4px) * 64 / 392);
+    border-radius: calc((100vw - 4px) * 8.757 / 392);
+    background-color: #fff;
+    box-shadow: none;
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+  }
+
+  .work-project-page {
+    --work-project-tabs-sticky-top: calc(
+      max(10px, env(safe-area-inset-top)) + (100vw - 4px) * 64 / 392 + 0.5rem
+    );
+  }
+
+
+  .work-project-page .wireframe-stage {
+    overflow: visible;
+    height: auto;
+  }
+
+  .work-project-page .wireframe-stage-expanded-content {
+    pointer-events: none;
+    min-height: 0;
+  }
+
+  .work-project-page .wireframe-stage-expanded-content > * {
+    pointer-events: auto;
+  }
+
+  .work-project-page .work-project-wireframe {
+    width: 100%;
+    max-width: 100%;
+    min-height: 0;
+    padding-top: 0 !important;
+    background-color: #f3f4f6 !important;
+    background-image: url("/work-grid-tile.svg");
+    background-repeat: repeat-y;
+    background-size: 100% auto;
+    background-position: top center;
+    background-attachment: scroll;
+  }
+
+  /* Page grid tiles are the mobile wireframe; skip the desktop jenga stack here. */
+  .work-project-page .work-project-wireframe > [aria-hidden] {
+    display: none;
+  }
+
+  .work-project-page .work-project-stage-inner {
+    width: 100%;
+    max-width: none;
+    padding-inline: 8px;
+    padding-top: 8px;
+    padding-bottom: 24px;
+  }
+
+  .work-project-page > .relative.z-20.bg-black {
+    margin-top: -8px;
+  }
+
+  .crcle-mobile-tab-pill {
+    width: 100%;
+  }
+
+  .crcle-mobile-prototype-host {
+    box-sizing: border-box;
+    flex: 0 0 60%;
+    width: 60%;
+    max-width: 60%;
+  }
+
+  /* Mobile case study prototype — Figma 3161:13760; fills host (~60% of row). */
+  .crcle-mobile-prototype-preview {
+    container-type: size;
+    box-sizing: border-box;
+    flex: 0 0 auto;
+    width: 100%;
+    max-width: 100%;
+    height: min(454.35px, 72dvh, calc(100cqw * 510.12457 / 224.876));
+    padding: 14px 16px 15px;
+    overflow-x: hidden;
+    overflow-y: hidden;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(11, 14, 20, 0.2) transparent;
+  }
+
+  .crcle-mobile-prototype-preview::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .crcle-mobile-prototype-preview::-webkit-scrollbar-thumb {
+    border-radius: 999px;
+    background: rgba(11, 14, 20, 0.18);
+  }
+
+  .crcle-mobile-prototype-preview .crcle-mobile-prototype-scale {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    width: 100%;
+    min-height: 100%;
+    margin-inline: auto;
+    zoom: 1;
+  }
+
+  /* Phone on top, toolbar pinned to bottom — Figma 3161:13760. */
+  .crcle-mobile-prototype-preview .crcle-mobile-prototype-scale > .relative.mx-auto.flex.w-fit.flex-col {
+    align-items: stretch;
+    align-self: stretch;
+    box-sizing: border-box;
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 100% !important;
+    max-width: 100%;
+    min-height: 100%;
+  }
+
+  .crcle-mobile-prototype-preview .crcle-case-study-toolbar {
+    order: 2;
+    flex: 0 0 auto;
+    margin-top: auto !important;
+    margin-bottom: 0 !important;
+    padding-top: 7px;
+  }
+
+  .crcle-mobile-prototype-preview .crcle-case-study-toolbar__rail button {
+    padding: 4px 8px !important;
+  }
+
+  .crcle-mobile-prototype-preview
+    .crcle-mobile-prototype-scale
+    > .relative.mx-auto.flex.w-fit.flex-col
+    > .relative:has([data-device="iphone-crcle-402x874"]) {
+    order: 1;
+    container-type: size;
+    container-name: crcle-case-study-phone;
+    display: flex;
+    flex: 1 1 0%;
+    align-items: center;
+    justify-content: center;
+    align-self: stretch;
+    width: 100%;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  /* Fit entire demo in the tile (phone + toolbar) — 5% inset so nothing scrolls. */
+  .crcle-mobile-prototype-preview.crcle-phone-stage
+    .relative:has([data-device="iphone-crcle-402x874"])
+    > [data-device="iphone-crcle-402x874"] {
+    flex-shrink: 0;
+    margin-inline: auto !important;
+    zoom: calc(
+      min(calc(100cqw / 402px), calc(100cqh / 874px)) * 0.95
+    );
+  }
+
+  .crcle-mobile-prototype-preview .crcle-primary-dock,
+  .crcle-mobile-prototype-preview .crcle-signal-panel,
+  .crcle-mobile-prototype-preview .crcle-signal-panel button {
+    pointer-events: none !important;
+  }
+
+
+  .work-project-page .portfolio-mobile-shake-root {
+    overflow: visible;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+
+  /* Productive mobile case study — aerial file frame, horizontal browse. */
+  /* ODICCI mobile work page — landscape preview + demo rail (Figma 3149:13181). */
+  .odicci-mobile-case-study {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .odicci-mobile-prototype-host {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  .odicci-mobile-prototype-host .odicci-browser-frame-root {
+    align-items: stretch;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .odicci-mobile-prototype-host .odicci-browser-frame-shell {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .odicci-mobile-prototype-host .odicci-browser-frame-root .crcle-case-study-toolbar {
+    flex-shrink: 0;
+    padding-top: 2px;
+  }
+
+  /* Dev inspect — single backdrop + wireframe lift; prototype + dock stay crisp. */
+  .work-project-page[data-mobile-work-dev-inspect="true"] .wireframe-stage {
+    position: relative;
+    z-index: 100;
+  }
+
+  .work-project-page[data-mobile-work-dev-inspect="true"] .odicci-mobile-prototype-host,
+  .work-project-page[data-mobile-work-dev-inspect="true"] .crcle-mobile-prototype-host {
+    position: relative;
+    z-index: 2;
+  }
+
+  .work-project-page[data-mobile-work-dev-inspect="true"] .odicci-mobile-intro-card,
+  .work-project-page[data-mobile-work-dev-inspect="true"] .odicci-mobile-specs-card,
+  .work-project-page[data-mobile-work-dev-inspect="true"] .odicci-mobile-work-tab-chrome,
+  .work-project-page[data-mobile-work-dev-inspect="true"] .crcle-mobile-intro-card,
+  .work-project-page[data-mobile-work-dev-inspect="true"] .crcle-mobile-narrative-side,
+  .work-project-page[data-mobile-work-dev-inspect="true"] .crcle-mobile-specs-card,
+  .work-project-page[data-mobile-work-dev-inspect="true"] .crcle-mobile-work-tab-chrome {
+    opacity: 0.38;
+    filter: blur(5px);
+    pointer-events: none;
+    transition: opacity 0.2s ease, filter 0.2s ease;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .work-project-page[data-mobile-work-dev-inspect="true"] .odicci-mobile-intro-card,
+    .work-project-page[data-mobile-work-dev-inspect="true"] .odicci-mobile-specs-card,
+    .work-project-page[data-mobile-work-dev-inspect="true"] .odicci-mobile-work-tab-chrome,
+    .work-project-page[data-mobile-work-dev-inspect="true"] .crcle-mobile-intro-card,
+    .work-project-page[data-mobile-work-dev-inspect="true"] .crcle-mobile-narrative-side,
+    .work-project-page[data-mobile-work-dev-inspect="true"] .crcle-mobile-specs-card,
+    .work-project-page[data-mobile-work-dev-inspect="true"] .crcle-mobile-work-tab-chrome {
+      transition: none;
+    }
+
+    .mobile-work-dev-backdrop {
+      backdrop-filter: blur(8px) !important;
+    }
+  }
+
+  .odicci-mobile-prototype-host .odicci-browser-frame-shell .relative.aspect-\[1512\/982\] {
+    max-height: min(220px, 52vw);
+    aspect-ratio: 1512 / 982;
+  }
+
+  .productive-mobile-showcase {
+    container-type: size;
+    container-name: productive-mobile-showcase;
+    height: min(404px, calc(100cqi * 874 / 402 * 0.5));
+    min-height: 300px;
+  }
+
+  .productive-mobile-showcase > div {
+    height: 100%;
+    max-width: none !important;
+    border-radius: 0 !important;
+    border: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .productive-mobile-showcase [data-productive-design-viewport] {
+    height: 100% !important;
+    min-height: 0;
+    padding: 12px 10px !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+    scroll-padding-inline: 10px;
+  }
+
+  .productive-mobile-showcase [data-productive-design-viewport] > .relative.flex {
+    width: max-content;
+    max-width: none;
+    height: 100%;
+    justify-content: flex-start;
+    align-items: center;
+    gap: clamp(10px, 3cqi, 16px);
+    padding-inline: 4px;
+  }
+
+  .productive-mobile-showcase__phone[data-device="iphone-16-pro-402x874"],
+  .productive-mobile-showcase__phone--tap > [data-device="iphone-16-pro-402x874"] {
+    flex-shrink: 0;
+    margin-inline: 0 !important;
+    zoom: min(calc((100cqh - 24px) / 874px), 0.46);
+  }
+
+  .productive-mobile-inspector-overlay__chrome {
+    zoom: 0.92;
+  }
+
+  .productive-mobile-inspector-overlay__body {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .productive-mobile-inspector-overlay__spec-card {
+    width: min(188px, calc(100vw - 72px)) !important;
+    max-width: min(188px, calc(100vw - 72px));
+    scroll-snap-align: center;
+    flex-shrink: 0;
+  }
+
+  .productive-mobile-inspector-overlay__cards {
+    scroll-padding-inline: 12px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .productive-mobile-inspector-overlay__sheet {
+      transition-duration: 0.01ms !important;
+    }
+  }
+
   /* Let the page tile show through the work stage. */
   #work,
   #work > .wireframe-stage {
@@ -102,8 +649,8 @@ html[data-work-locked] .portfolio-interactive-hero-shell {
     width: 100%;
   }
 
-  .ai-playground-back,
-  .ai-playground-folder .playground-pocket {
+  .ai-playground-folder:not(.portfolio-mobile-folder-scaled) .ai-playground-back,
+  .ai-playground-folder:not(.portfolio-mobile-folder-scaled) .playground-pocket {
     display: none !important;
   }
 
@@ -127,7 +674,37 @@ html[data-work-locked] .portfolio-interactive-hero-shell {
     backdrop-filter: blur(18px) saturate(160%);
   }
 
-  /* One tile row is 78px of the 390-wide sheet. Pin that first row only. */
+  /* Design toggle beside headline — not gated on sticky chrome reveal on mobile. */
+  #work .work-headline-toggle.spatial-chrome {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+  #work .work-closed-column .portfolio-deco-calculator--mobile {
+    top: 50%;
+    right: max(-4px, calc(-1 * env(safe-area-inset-right, 0px)));
+    height: auto;
+    translate: 0 -50%;
+    transform: scale(0.86);
+    transform-origin: center right;
+  }
+
+  #work .work-closed-column .portfolio-deco-mouse--mobile {
+    bottom: max(0px, env(safe-area-inset-bottom, 0px));
+    left: 10px;
+    --deco-scale: 0.68;
+    translate: 0 calc(-8% + 56px);
+  }
+
+  #work .portfolio-deco-calculator--mobile .portfolio-deco-spin--mobile {
+    top: -54px;
+    right: -18px;
+    left: auto;
+    translate: none;
+  }
+
+  /* First grid row at page top — scrolls with content (Contact Me stays fixed separately). */
   .portfolio-mobile-tile-row {
     width: 100%;
     pointer-events: none !important;
@@ -139,17 +716,19 @@ html[data-work-locked] .portfolio-interactive-hero-shell {
     background-size: 100% auto;
   }
 
-  .folder-shell {
+  .ai-playground-folder:not(.portfolio-mobile-folder-scaled) .folder-shell {
     margin-top: 0 !important;
     z-index: auto !important;
     border-bottom: 1px solid #ececec;
   }
 
-  .folder-shell + .folder-shell {
+  .ai-playground-folder:not(.portfolio-mobile-folder-scaled) .folder-shell + .folder-shell {
     margin-top: 0 !important;
   }
 
-  .folder-shell:not([data-open="true"]) .folder-face {
+  .ai-playground-folder:not(.portfolio-mobile-folder-scaled)
+    .folder-shell:not([data-open="true"])
+    .folder-face {
     height: auto;
     padding-top: 0 !important;
     clip-path: none !important;
@@ -161,14 +740,14 @@ html[data-work-locked] .portfolio-interactive-hero-shell {
     backdrop-filter: none;
   }
 
-  .folder-stroke,
-  .folder-mark,
-  .folder-paperclip,
-  .pocket-clip {
+  .ai-playground-folder:not(.portfolio-mobile-folder-scaled) .folder-stroke,
+  .ai-playground-folder:not(.portfolio-mobile-folder-scaled) .folder-mark,
+  .ai-playground-folder:not(.portfolio-mobile-folder-scaled) .folder-paperclip,
+  .ai-playground-folder:not(.portfolio-mobile-folder-scaled) .pocket-clip {
     display: none !important;
   }
 
-  .folder-row {
+  .ai-playground-folder:not(.portfolio-mobile-folder-scaled) .folder-row {
     height: auto !important;
     flex-direction: column !important;
     align-items: stretch !important;
@@ -176,12 +755,12 @@ html[data-work-locked] .portfolio-interactive-hero-shell {
     padding: 24px !important;
   }
 
-  .folder-row > .relative {
+  .ai-playground-folder:not(.portfolio-mobile-folder-scaled) .folder-row > .relative {
     gap: 16px !important;
     align-items: center !important;
   }
 
-  .folder-index {
+  .ai-playground-folder:not(.portfolio-mobile-folder-scaled) .folder-index {
     display: inline-flex !important;
     color: #a3a3a6;
     font-size: 12px;
@@ -189,27 +768,27 @@ html[data-work-locked] .portfolio-interactive-hero-shell {
     letter-spacing: 0;
   }
 
-  .folder-title {
+  .ai-playground-folder:not(.portfolio-mobile-folder-scaled) .folder-title {
     font-size: 28px !important;
     line-height: 34px !important;
     letter-spacing: 0 !important;
     color: #111;
   }
 
-  .folder-shell:nth-child(2) .folder-title {
+  .ai-playground-folder:not(.portfolio-mobile-folder-scaled) .folder-shell:nth-child(2) .folder-title {
     font-size: 24px !important;
     line-height: 20px !important;
     color: #000;
   }
 
-  .folder-meta {
+  .ai-playground-folder:not(.portfolio-mobile-folder-scaled) .folder-meta {
     display: flex !important;
     width: 100% !important;
     flex-direction: row !important;
     align-items: center !important;
   }
 
-  .folder-meta > div {
+  .ai-playground-folder:not(.portfolio-mobile-folder-scaled) .folder-meta > div {
     display: flex !important;
     width: 100%;
     align-items: center;
@@ -220,18 +799,238 @@ html[data-work-locked] .portfolio-interactive-hero-shell {
     color: #76767a;
   }
 
-  .folder-meta > div > span:first-child {
+  .ai-playground-folder:not(.portfolio-mobile-folder-scaled) .folder-meta > div > span:first-child {
     flex: 1 1 auto;
     min-width: 0;
     text-align: left !important;
   }
 
-  .folder-meta > div > span:nth-child(2) {
+  .ai-playground-folder:not(.portfolio-mobile-folder-scaled) .folder-meta > div > span:nth-child(2) {
     color: #999;
   }
 
   .mobile-psst {
     top: 88px;
+  }
+
+  .mini-playground-folder,
+  .project-folder-mini {
+    width: min(calc(100vw - 48px), 292px);
+    margin-inline: 0 auto;
+    filter: drop-shadow(0 22px 44px rgba(0, 0, 0, 0.28));
+  }
+
+  .project-folder-mini-jacket {
+    z-index: -1;
+  }
+
+  .project-folder-mini-frame {
+    width: 100%;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .mini-playground-folder[data-folder-active="true"] {
+      cursor: pointer;
+    }
+  }
+
+  .mobile-project-folder-sheet {
+    isolation: isolate;
+    contain: paint;
+    backface-visibility: hidden;
+    translate: 0 0;
+  }
+
+  html.mobile-folder-sheet-open #work .portfolio-mini-folder-slot {
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  .mobile-project-folder-overlay[data-animating="true"] .mobile-project-folder-sheet--docking .relative.z-10 {
+    visibility: hidden;
+  }
+
+  .mobile-project-folder-overlay[data-phase="collapsed"] .mobile-project-folder-sheet--docking {
+    border-color: transparent;
+    background: rgba(12, 12, 15, 0.94);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    box-shadow: 0 18px 44px rgba(0, 0, 0, 0.2);
+  }
+
+  .project-folder-mini-sheet-rear,
+  .project-folder-mini-sheet-back {
+    will-change: transform;
+  }
+
+  .project-folder-mini-frame .project-folder-mini-jacket,
+  .project-folder-mini-frame > .absolute.inset-x-0 {
+    left: 0;
+    right: 0;
+    width: 100%;
+  }
+
+  #work .work-closed-column:has(.portfolio-mini-folder-slot) {
+    position: relative;
+    min-height: calc(100dvh - 6rem);
+    overflow: visible;
+  }
+
+  #work .portfolio-mini-folder-slot {
+    bottom: max(18px, env(safe-area-inset-bottom, 0px));
+  }
+
+  #work > .wireframe-stage-closed,
+  #work > .wireframe-stage-closed > .wireframe-stage-content {
+    overflow-y: visible;
+  }
+
+  .portfolio-mobile-folder-scale:has(.mini-playground-folder) {
+    width: auto;
+    max-width: none;
+    margin-inline: 0;
+    padding-bottom: 0;
+    justify-content: flex-start;
+    align-items: flex-end;
+  }
+
+  /* Figma mobile: desktop folder at 50%, structure only — no visible copy */
+  .portfolio-mobile-folder-scale {
+    width: 100%;
+    max-width: 350px;
+    margin-inline: auto;
+    justify-content: center;
+    padding-bottom: 0.5rem;
+    overflow: visible;
+  }
+
+  .portfolio-mobile-folder-scaled {
+    --folder-mobile-stack-h: calc(3 * 174px - 2 * var(--pocket-overlap, 48px));
+    --folder-mobile-total-h: calc(var(--folder-mobile-stack-h) + var(--pocket-h, 242.55px) + 1rem);
+    --folder-bleed: 3%;
+    --folder-wide: 106%;
+    --folder-side-inset: 44px;
+    --folder-inner-pad: clamp(1.75rem, 2.25vw, 2.75rem);
+    --folder-pocket-left: calc(-1 * var(--folder-bleed) + var(--folder-inner-pad) - var(--folder-side-inset));
+    --folder-pocket-width: calc(var(--folder-wide) - 2 * var(--folder-inner-pad) + 2 * var(--folder-side-inset));
+    position: relative;
+    left: 50%;
+    width: min(680px, calc(200vw - 64px));
+    transform: translateX(-50%) scale(0.5);
+    transform-origin: top center;
+    margin-bottom: calc(var(--folder-mobile-total-h) * -0.5);
+  }
+
+  @supports (zoom: 0.5) {
+    .portfolio-mobile-folder-scaled {
+      zoom: 0.5;
+      left: auto;
+      transform: none;
+      margin-inline: auto;
+      margin-bottom: 0;
+    }
+  }
+
+  .portfolio-mobile-folder-scaled .ai-playground-folder-inner {
+    isolation: isolate;
+  }
+
+  .portfolio-mobile-folder-scaled .portfolio-mobile-shake-root {
+    position: relative;
+    z-index: 1 !important;
+    margin-left: calc(-1 * var(--folder-bleed)) !important;
+    width: var(--folder-wide) !important;
+    border: none !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    overflow: visible !important;
+  }
+
+  .portfolio-mobile-folder-scaled .folder-shell {
+    z-index: auto !important;
+  }
+
+  .portfolio-mobile-folder-scaled .ai-playground-back,
+  .portfolio-mobile-folder-scaled .playground-pocket {
+    display: flex !important;
+  }
+
+  .portfolio-mobile-folder-scaled .playground-pocket {
+    position: absolute !important;
+    bottom: 0 !important;
+    left: var(--folder-pocket-left) !important;
+    width: var(--folder-pocket-width) !important;
+    margin-top: 0 !important;
+    margin-left: 0 !important;
+    z-index: 40 !important;
+  }
+
+  .portfolio-mobile-folder-scaled .ai-playground-back {
+    left: var(--folder-pocket-left) !important;
+    width: var(--folder-pocket-width) !important;
+    z-index: 0 !important;
+  }
+
+  .portfolio-mobile-folder-scaled .ai-playground-folder > .ai-playground-folder-inner {
+    padding-inline: var(--folder-inner-pad);
+    padding-bottom: calc(var(--pocket-h) + 3rem);
+  }
+
+  .portfolio-mobile-folder-scaled .folder-shell ~ .folder-shell {
+    margin-top: calc(-1 * var(--pocket-overlap, 48px)) !important;
+  }
+
+  .portfolio-mobile-folder-scaled .folder-row {
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 28px !important;
+    min-height: 174px;
+    padding: 61px 37px !important;
+  }
+
+  .portfolio-mobile-folder-scaled .folder-shell:not([data-open="true"]) .folder-face {
+    padding-top: 24px !important;
+    background-color: rgba(255, 255, 255, 0.624) !important;
+    -webkit-backdrop-filter: blur(22px) saturate(160%) !important;
+    backdrop-filter: blur(22px) saturate(160%) !important;
+  }
+
+  .portfolio-mobile-folder-scaled .folder-stroke,
+  .portfolio-mobile-folder-scaled .folder-mark,
+  .portfolio-mobile-folder-scaled .folder-paperclip,
+  .portfolio-mobile-folder-scaled .pocket-clip {
+    display: block !important;
+  }
+
+  #work .portfolio-mobile-folder-scaled .folder-title,
+  #work .portfolio-mobile-folder-scaled .folder-index,
+  #work .portfolio-mobile-folder-scaled .folder-meta,
+  #work .portfolio-mobile-folder-scaled .folder-meta *,
+  #work .portfolio-mobile-folder-scaled .folder-muted,
+  #work .portfolio-mobile-folder-scaled .playground-pocket-labels,
+  #work .portfolio-mobile-folder-scaled .mobile-psst,
+  #work .portfolio-mobile-folder-scaled .portfolio-mobile-shake-root > [role="status"] {
+    visibility: hidden !important;
+    display: none !important;
+    font-size: 0 !important;
+    line-height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  #work .portfolio-mobile-folder-scaled .folder-face .folder-title {
+    display: none !important;
+  }
+
+  .portfolio-mobile-folder-scaled .folder-row button {
+    opacity: 0;
+    pointer-events: none !important;
+  }
+
+  .portfolio-mobile-folder-scaled .ai-playground-peek-mouse {
+    display: block !important;
   }
 }
 
@@ -2954,18 +3753,24 @@ html.dark .thought-body-gradient {
 }
 
 .project-dock-app-icon {
-  --project-dock-blur: 33.6px;
-  width: calc(120px * var(--deco-scale, 1));
-  height: calc(120px * var(--deco-scale, 1));
-  padding: calc(15px * var(--deco-scale, 1));
-  border-radius: calc(30px * var(--deco-scale, 1));
-  background-color: rgba(255, 255, 255, 0.504);
-  -webkit-backdrop-filter: blur(var(--project-dock-blur)) saturate(1.6);
-  backdrop-filter: blur(var(--project-dock-blur)) saturate(1.6);
+  --dock-scale: var(--deco-scale, 1);
+  width: calc(120px * var(--dock-scale));
+  height: calc(120px * var(--dock-scale));
+  padding: calc(15px * var(--dock-scale));
+  border-radius: calc(30px * var(--dock-scale));
+  background-color: rgba(255, 255, 255, 0.624);
+  -webkit-backdrop-filter: blur(22px) saturate(160%);
+  backdrop-filter: blur(22px) saturate(160%);
+}
+
+@media (width >= 1024px) {
+  .project-dock-app-icon {
+    --dock-scale: calc(var(--deco-scale, 1) * 0.85);
+  }
 }
 
 .project-dock-app-icon__hit {
-  border-radius: calc(30px * var(--deco-scale, 1));
+  border-radius: calc(30px * var(--dock-scale, 1));
   cursor: pointer;
 }
 
@@ -2979,25 +3784,25 @@ html.dark .thought-body-gradient {
 }
 
 .project-dock-app-icon__grid {
-  column-gap: calc(9px * var(--deco-scale, 1));
-  row-gap: calc(8px * var(--deco-scale, 1));
+  column-gap: calc(9px * var(--dock-scale, 1));
+  row-gap: calc(8px * var(--dock-scale, 1));
 }
 
 .project-dock-icon-cell {
-  width: calc(24px * var(--deco-scale, 1));
-  height: calc(24px * var(--deco-scale, 1));
+  width: calc(24px * var(--dock-scale, 1));
+  height: calc(24px * var(--dock-scale, 1));
 }
 
 .project-dock-sphere {
-  width: calc(24px * var(--deco-scale, 1));
-  height: calc(24px * var(--deco-scale, 1));
+  width: calc(24px * var(--dock-scale, 1));
+  height: calc(24px * var(--dock-scale, 1));
   max-width: none;
   max-height: none;
 }
 
 .project-dock-plus {
-  width: calc(15px * var(--deco-scale, 1));
-  height: calc(15px * var(--deco-scale, 1));
+  width: calc(15px * var(--dock-scale, 1));
+  height: calc(15px * var(--dock-scale, 1));
 }
 
 .project-dock-plus__bar-h {

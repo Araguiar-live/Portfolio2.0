@@ -1,4 +1,5 @@
-import { useRef, useState, type RefObject } from "react";
+import { useEffect, useRef, useState, type RefObject } from "react";
+import { useMobileWorkDevInspect } from "@/components/portfolio/MobileWorkDevInspect";
 
 export type OdicciTouch = { x: number; y: number; pressing: boolean };
 
@@ -65,6 +66,7 @@ function setNativeValue(el: HTMLInputElement, value: string) {
 
 export function useOdicciDemo() {
   const screenRef = useRef<HTMLDivElement>(null);
+  const mobileDevInspect = useMobileWorkDevInspect();
   const [paused, setPaused] = useState(false);
   const [codeOn, setCodeOn] = useState(false);
   const [run, setRun] = useState(0);
@@ -73,6 +75,12 @@ export function useOdicciDemo() {
   const pausedRef = useRef(false);
   pausedRef.current = paused;
   const refs: DemoRefs = { screenRef, gen, pausedRef, setTouch };
+
+  useEffect(() => {
+    if (!mobileDevInspect) return;
+    mobileDevInspect.setCodeOn(codeOn);
+    return () => mobileDevInspect.setCodeOn(false);
+  }, [codeOn, mobileDevInspect]);
 
   const arm = (): OdicciDemoContext => {
     const token = ++gen.current;

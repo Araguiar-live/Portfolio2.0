@@ -34,9 +34,12 @@ import userFilledIcon from "@/assets/crcle/onboarding/user-filled.svg";
 import serenaPortrait from "@/assets/crcle/serena-portrait.png";
 import wifiIcon from "@/assets/crcle/wifi.svg";
 import { ChatListItem, type ChatConversation } from "@/components/portfolio/ChatListItem";
+import { useCrcleCaseStudyChrome } from "@/components/portfolio/CrcleCaseStudyChrome";
 import { DemoToolbar } from "@/components/portfolio/CrcleDemoToolbar";
 import { PhoneDevInspection } from "@/components/portfolio/inspect/PhoneDevInspection";
+import { useSyncMobileWorkDevInspect } from "@/components/portfolio/MobileWorkDevInspect";
 import { CrclePhoneFrame, CrcleThemeToggle } from "@/components/portfolio/CrclePhoneFrame";
+import { useCrcleCaseStudyAppearance } from "@/components/portfolio/useCrcleCaseStudyAppearance";
 import { useCrcleBroadcast } from "@/components/portfolio/crcleBroadcast";
 import {
   AREA_CONNECTED_DELAY_MS,
@@ -255,16 +258,22 @@ export function CrcleMessaging({
   onGoToSignalHome?: () => void;
   onGoToRadar?: () => void;
 } = {}) {
-  const [phase, setPhase] = useState<Phase>("inbox");
+  const caseStudyChrome = useCrcleCaseStudyChrome();
+  const caseStudyOpenChat =
+    MOCK_CONVERSATIONS.find((conversation) => conversation.id === "chat-jordan") ?? null;
+  const [phase, setPhase] = useState<Phase>(caseStudyChrome ? "chat" : "inbox");
   const [menuOpen, setMenuOpen] = useState(false);
   /* Figma 322:118341 — Messaging Hub onboarding over Active Chats */
-  const [onboardingOpen, setOnboardingOpen] = useState(true);
-  const [notificationsOpen, setNotificationsOpen] = useState(true);
+  const [onboardingOpen, setOnboardingOpen] = useState(!caseStudyChrome);
+  const [notificationsOpen, setNotificationsOpen] = useState(!caseStudyChrome);
   const [activeMatch, setActiveMatch] = useState<UserProfile | null>(null);
-  const [activeConversation, setActiveConversation] = useState<ChatConversation | null>(null);
+  const [activeConversation, setActiveConversation] = useState<ChatConversation | null>(() =>
+    caseStudyChrome ? caseStudyOpenChat : null,
+  );
   const [tab, setTab] = useState<"sent" | "received">("received");
   const [draft, setDraft] = useState("");
   const [isLightMode, toggleLight] = useCrclePhoneLight();
+  const caseStudyAppearance = useCrcleCaseStudyAppearance(isLightMode);
   const [broadcastMood] = useCrcleBroadcast();
   const [areaPhase, setAreaPhase] = useState<AreaPanelPhase>("off");
   const [nearbyStep, setNearbyStep] = useState<NearbySheetStep | null>(null);
@@ -277,9 +286,10 @@ export function CrcleMessaging({
   const areaConnectedTimer = useRef<number | null>(null);
   const rootRef = useRef<HTMLDivElement>(null);
   const screenRef = useRef<HTMLDivElement>(null);
-  const [demoPaused, setDemoPaused] = useState(false);
+  const [demoPaused, setDemoPaused] = useState(caseStudyChrome);
   const [demoRun, setDemoRun] = useState(0);
   const [codeOn, setCodeOn] = useState(false);
+  useSyncMobileWorkDevInspect(codeOn);
   const [touch, setTouch] = useState<{ x: number; y: number; pressing: boolean } | null>(null);
   const demoGen = useRef(0);
   const demoPausedRef = useRef(false);
@@ -676,9 +686,29 @@ export function CrcleMessaging({
 
   return (
     <div ref={rootRef} className="relative mx-auto flex w-fit flex-col items-center">
-      <CrcleThemeToggle light={isLightMode} onToggle={toggleLight} />
+      <DemoToolbar
+        className="mb-3"
+        compact
+        playing={!demoPaused && !codeOn}
+        codeOn={codeOn}
+        onPlay={replayDemo}
+        onDesign={() => {
+          setCodeOn(false);
+          pauseDemo();
+        }}
+        onCode={() => {
+          setCodeOn(true);
+          pauseDemo();
+          setOnboardingOpen(false);
+          setPhase("inbox");
+          setActiveMatch(null);
+          setLocusOpen(false);
+          setAttachOpen(false);
+        }}
+      />
 
       <div
+        className="relative"
         onPointerDownCapture={() => {
           if (demoPausedRef.current) return;
           pauseDemo();
@@ -686,8 +716,11 @@ export function CrcleMessaging({
       >
       <CrclePhoneFrame
         light={isLightMode}
+        caseStudyDemoSurface={caseStudyAppearance.caseStudy}
         overlay={
-          <AnimatePresence>
+          <>
+            {caseStudyAppearance.phoneOverlay}
+            <AnimatePresence>
             {activeMatch ? (
               <SignalInterceptModal
                 key={activeMatch.id}
@@ -698,6 +731,7 @@ export function CrcleMessaging({
               />
             ) : null}
           </AnimatePresence>
+          </>
         }
       >
         <div ref={screenRef} className="relative h-full min-h-0 w-full">
@@ -895,26 +929,15 @@ export function CrcleMessaging({
         </AnimatePresence>
         </div>
       </CrclePhoneFrame>
+      {caseStudyAppearance.showThemeToggle ? (
+        <CrcleThemeToggle
+          light={isLightMode}
+          onToggle={toggleLight}
+          className={caseStudyAppearance.themeToggleClassName}
+        />
+      ) : null}
       </div>
       <PhoneDevInspection active={codeOn && !onboardingOpen} screenRef={screenRef} />
-      <DemoToolbar
-        playing={!demoPaused && !codeOn}
-        codeOn={codeOn}
-        onPlay={replayDemo}
-        onDesign={() => {
-          setCodeOn(false);
-          pauseDemo();
-        }}
-        onCode={() => {
-          setCodeOn(true);
-          pauseDemo();
-          setOnboardingOpen(false);
-          setPhase("inbox");
-          setActiveMatch(null);
-          setLocusOpen(false);
-          setAttachOpen(false);
-        }}
-      />
       {touch && !demoPaused ? (
         <>
           <span

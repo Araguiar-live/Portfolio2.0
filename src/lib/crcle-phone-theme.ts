@@ -15,11 +15,19 @@ function getSnapshot() {
   return light;
 }
 
+export function setCrclePhoneLight(next: boolean) {
+  if (light === next) return;
+  light = next;
+  listeners.forEach((notify) => notify());
+}
+
 export function useCrclePhoneLight() {
   const isLight = useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
   const toggleLight = useCallback(() => {
-    light = !light;
-    listeners.forEach((notify) => notify());
+    setCrclePhoneLight(!light);
   }, []);
-  return [isLight, toggleLight] as const;
+  const setLight = useCallback((next: boolean) => {
+    setCrclePhoneLight(next);
+  }, []);
+  return [isLight, toggleLight, setLight] as const;
 }
