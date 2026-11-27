@@ -72,11 +72,8 @@ export function OdicciBrowserFrame({
 
     const update = () => {
       const { width, height } = el.getBoundingClientRect();
-      setScale(
-        embed
-          ? width / ODICCI_FRAME_W
-          : Math.min(width / ODICCI_FRAME_W, height / ODICCI_FRAME_H),
-      );
+      if (width < 2 || height < 2) return;
+      setScale(Math.min(width / ODICCI_FRAME_W, height / ODICCI_FRAME_H));
     };
 
     update();
@@ -202,16 +199,11 @@ export function OdicciBrowserFrame({
         className={`relative aspect-[1512/982] w-full overflow-hidden ${canvasClassName}`}
       >
         <div
-          className={cn(
-            "absolute left-1/2",
-            embed ? "top-0 origin-top" : "top-1/2 origin-center",
-          )}
+          className="absolute left-1/2 top-1/2 origin-center"
           style={{
             width: ODICCI_FRAME_W,
             height: ODICCI_FRAME_H,
-            transform: embed
-              ? `translateX(-50%) scale(${scale})`
-              : `translate(-50%, -50%) scale(${scale})`,
+            transform: `translate(-50%, -50%) scale(${scale})`,
           }}
         >
           {children}

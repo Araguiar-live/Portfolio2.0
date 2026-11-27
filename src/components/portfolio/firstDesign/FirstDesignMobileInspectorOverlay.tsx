@@ -77,7 +77,7 @@ function InspectorSheetBody({
 
   return (
     <div
-      className="productive-mobile-inspector-overlay__panel relative flex h-full min-h-0 w-full flex-col bg-[#1b1b1b]"
+      className="productive-mobile-inspector-overlay__panel relative flex h-full min-h-0 w-full flex-col bg-transparent"
       data-dev-mode={devMode ? "true" : undefined}
     >
       <DesignFileDotGrid className="productive-mobile-inspector-overlay__dots pointer-events-none absolute inset-0 z-0" />
@@ -105,18 +105,13 @@ function InspectorSheetBody({
       </div>
 
       <div
-        className={cn(
-          "productive-mobile-inspector-overlay__body relative z-10 min-h-0 flex-1 px-3 pb-[max(16px,env(safe-area-inset-bottom))]",
-          devMode
-            ? "overflow-y-auto overflow-x-hidden overscroll-contain"
-            : "flex flex-col overflow-hidden",
-        )}
+        className="productive-mobile-inspector-overlay__body relative z-10 min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain px-3 pb-[max(16px,env(safe-area-inset-bottom))]"
         style={{ pointerEvents: interactive ? "auto" : "none" }}
       >
         <div
           className={cn(
-            "flex w-full flex-col items-center",
-            devMode ? "gap-3 pt-1" : "min-h-0 flex-1 justify-center gap-2 py-2",
+            "productive-mobile-inspector-overlay__scroll-column flex w-full min-h-full flex-col items-center py-2",
+            devMode ? "gap-3 justify-start pt-1" : "gap-2 justify-center",
           )}
         >
           <div
@@ -316,7 +311,7 @@ export function FirstDesignMobileInspectorOverlay({
       />
 
       <motion.div
-        className="productive-mobile-inspector-overlay__sheet fixed inset-x-0 bottom-0 z-[1] flex h-[min(96dvh,780px)] max-h-[96dvh] flex-col overflow-hidden border border-white/10 border-b-0 bg-[#1b1b1b] shadow-[0_-20px_60px_rgba(0,0,0,0.45)] will-change-transform [transform-origin:50%_100%]"
+        className="productive-mobile-inspector-overlay__sheet fixed inset-x-0 bottom-0 z-[1] flex h-[min(96dvh,780px)] max-h-[96dvh] flex-col overflow-hidden border border-white/10 border-b-0 bg-[rgba(27,27,27,0.55)] shadow-[0_-20px_60px_rgba(0,0,0,0.45)] backdrop-blur-2xl will-change-transform [transform-origin:50%_100%]"
         initial={false}
         animate={layout}
         transition={transition}
