@@ -302,9 +302,45 @@ html[data-work-locked] .portfolio-interactive-hero-shell {
     background-image: none;
   }
 
-  .work-project-page.portfolio-hero-grid > * {
+  .work-project-page.portfolio-hero-grid > *:not(.work-project-dock-host) {
     position: relative;
     z-index: 1;
+  }
+
+  .work-project-page .work-project-dock-host {
+    position: fixed !important;
+    z-index: 130 !important;
+    transform: none;
+    padding-inline: max(8px, env(safe-area-inset-left), env(safe-area-inset-right));
+  }
+
+  .work-project-page .work-project-dock-glass {
+    box-sizing: border-box;
+    background-color: rgba(255, 255, 255, 0.52);
+    -webkit-backdrop-filter: blur(32px) saturate(200%);
+    backdrop-filter: blur(32px) saturate(200%);
+    border-color: rgba(255, 255, 255, 0.72);
+    box-shadow:
+      0 12px 40px rgba(0, 0, 0, 0.12),
+      0 1px 0 rgba(255, 255, 255, 0.85) inset;
+  }
+
+  .work-project-page .work-project-dock-glass::before {
+    opacity: 0.65;
+  }
+
+  .work-project-page .work-project-dock-glass::after {
+    opacity: 0.7;
+  }
+
+  /* Marquee + footer — edge-to-edge under the 2px page gutter (Figma mobile work page). */
+  .work-project-page > .work-project-bottom-strip {
+    box-sizing: border-box;
+    width: calc(100% + 4px);
+    max-width: 100vw;
+    margin-inline: -2px;
+    margin-top: -8px;
+    padding-bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px));
   }
 
   /* Figma 3149:13185 — sticky Home + Contact rail while case study scrolls. */
@@ -368,10 +404,6 @@ html[data-work-locked] .portfolio-interactive-hero-shell {
     padding-inline: 8px;
     padding-top: 8px;
     padding-bottom: 24px;
-  }
-
-  .work-project-page > .relative.z-20.bg-black {
-    margin-top: -8px;
   }
 
   .crcle-mobile-tab-pill {
@@ -481,6 +513,33 @@ html[data-work-locked] .portfolio-interactive-hero-shell {
     pointer-events: none !important;
   }
 
+  .crcle-mobile-prototype-preview [data-crcle-settings-ui] {
+    pointer-events: auto !important;
+  }
+
+  .crcle-mobile-prototype-preview [data-crcle-case-study-settings-surface] {
+    cursor: pointer;
+  }
+
+  /* Settings overlay — light frost plate (Figma 3169:13772 / 3169:14397, rgba(0,51,98,0.3)). */
+  .crcle-case-study-settings-overlay__frost {
+    translate: 0 0;
+    transform: translateZ(0);
+    background: rgba(0, 51, 98, 0.3);
+    -webkit-backdrop-filter: blur(22px) saturate(1.35);
+    backdrop-filter: blur(22px) saturate(1.35);
+  }
+
+  .crcle-mobile-prototype-preview .crcle-case-study-settings-overlay__frost {
+    -webkit-backdrop-filter: blur(18px) saturate(1.32);
+    backdrop-filter: blur(18px) saturate(1.32);
+  }
+
+  /* Zoomed preview: soften the demo under the sheet when backdrop-filter is weak. */
+  .crcle-mobile-prototype-preview .crcle-phone:has([data-crcle-settings-ui]) [data-crcle-phone-screen] {
+    filter: blur(10px) saturate(0.92);
+  }
+
 
   .work-project-page .portfolio-mobile-shake-root {
     overflow: visible;
@@ -533,6 +592,18 @@ html[data-work-locked] .portfolio-interactive-hero-shell {
   .work-project-page[data-mobile-work-dev-inspect="true"] .crcle-mobile-prototype-host {
     position: relative;
     z-index: 2;
+  }
+
+  /* Sheet scrims + full-bleed dismiss taps must not steal hover hit-testing in code mode. */
+  .work-project-page[data-mobile-work-dev-inspect="true"]
+    .crcle-mobile-prototype-preview
+    [data-crcle-phone-screen]
+    .crcle-phone-scrim,
+  .work-project-page[data-mobile-work-dev-inspect="true"]
+    .crcle-mobile-prototype-preview
+    [data-crcle-phone-screen]
+    button.absolute.inset-0[aria-label="Close"] {
+    pointer-events: none !important;
   }
 
   .work-project-page[data-mobile-work-dev-inspect="true"] .odicci-mobile-intro-card,
@@ -612,6 +683,26 @@ html[data-work-locked] .portfolio-interactive-hero-shell {
     zoom: min(calc((100cqh - 24px) / 874px), 0.46);
   }
 
+  /* Figma 2238:175039 — offset 24px dot field (DesignFileDotGrid); lift on small screens. */
+  .productive-mobile-inspector-overlay__dots > div:first-child {
+    filter: brightness(1.45);
+  }
+
+  /* Dev inspect — keep dots readable (no spatial-glass blur over uniform #1b1b1b). */
+  .productive-mobile-inspector-overlay__dev-wash {
+    background: rgba(9, 9, 11, 0.07);
+  }
+
+  .productive-mobile-inspector-overlay__panel[data-dev-mode="true"]
+    .productive-mobile-inspector-overlay__dots
+    > div:first-child {
+    filter: brightness(1.65);
+  }
+
+  .productive-mobile-inspector-overlay__scrim {
+    background-color: rgba(11, 14, 20, 0.38) !important;
+  }
+
   .productive-mobile-inspector-overlay__chrome {
     zoom: 0.92;
   }
@@ -624,11 +715,22 @@ html[data-work-locked] .portfolio-interactive-hero-shell {
     width: min(188px, calc(100vw - 72px)) !important;
     max-width: min(188px, calc(100vw - 72px));
     scroll-snap-align: center;
+    scroll-snap-stop: always;
     flex-shrink: 0;
+  }
+
+  .productive-mobile-inspector-overlay__specs {
+    overflow: visible;
+  }
+
+  .productive-mobile-inspector-overlay__keys,
+  .productive-mobile-inspector-overlay__cards {
+    overflow-y: visible;
   }
 
   .productive-mobile-inspector-overlay__cards {
     scroll-padding-inline: 12px;
+    scroll-padding-block: 10px;
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -841,21 +943,143 @@ html[data-work-locked] .portfolio-interactive-hero-shell {
     translate: 0 0;
   }
 
+  /* Figma 3137:12511 — header pinned; project list centered in remaining sheet height. */
+  .mobile-project-folder-menu {
+    box-sizing: border-box;
+    min-height: min(639px, calc(100dvh - 11.5rem - env(safe-area-inset-top) - env(safe-area-inset-bottom)));
+  }
+
+  .mobile-project-folder-list-region {
+    flex: 1 1 auto;
+    width: 100%;
+    min-height: 0;
+  }
+
+  /* Swiss-watch row press/hover — mobile folder only (md+ unchanged). */
+  .mobile-folder-project-row {
+    overflow: hidden;
+    border-radius: 30px;
+    transform: translate3d(0, 0, 0) scale(1);
+    transition:
+      transform 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+      background-color 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+      border-color 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: transform;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .mobile-folder-project-row:enabled:hover {
+    transform: translate3d(0, -1px, 0) scale(1.012);
+    border-color: rgba(255, 255, 255, 0.1);
+    background-color: rgba(255, 255, 255, 0.3);
+  }
+
+  .mobile-folder-project-row:enabled:active {
+    transform: translate3d(0, 1px, 0) scale(0.985);
+    border-color: rgba(255, 255, 255, 0.1);
+    background-color: rgba(255, 255, 255, 0.3);
+  }
+
+  .mobile-folder-project-row:enabled:hover .mobile-folder-project-row__title,
+  .mobile-folder-project-row:enabled:active .mobile-folder-project-row__title {
+    color: #000;
+  }
+
+  .mobile-folder-project-row:enabled:hover .mobile-folder-project-row__role,
+  .mobile-folder-project-row:enabled:active .mobile-folder-project-row__role {
+    color: rgba(0, 0, 0, 0.25);
+  }
+
+  .mobile-folder-project-row:enabled:hover > span:first-of-type,
+  .mobile-folder-project-row:enabled:active > span:first-of-type {
+    border-color: #fff;
+  }
+
+  .mobile-project-folder-overlay[data-animating="true"] .mobile-folder-project-row,
+  .mobile-project-folder-overlay:not([data-phase="expanded"]) .mobile-folder-project-row {
+    pointer-events: none;
+  }
+
+  .phone-dev-inspect-card--compact {
+    padding: 0.5rem 0.65rem;
+  }
+
+  .phone-dev-inspect-card--compact p {
+    font-size: 12px;
+  }
+
+  .phone-dev-inspect-card--compact dl {
+    font-size: 9px;
+    line-height: 13px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .mobile-folder-project-row {
+      transition: none;
+      transform: none;
+    }
+
+    .mobile-folder-project-row:enabled:hover,
+    .mobile-folder-project-row:enabled:active {
+      transform: none;
+    }
+  }
+
+  @media (max-height: 700px) {
+    .mobile-project-folder-menu {
+      min-height: min(480px, calc(100dvh - 10rem));
+    }
+
+    .mobile-project-folder-list-region {
+      justify-content: flex-start;
+      padding-top: 2.5rem;
+    }
+  }
+
   html.mobile-folder-sheet-open #work .portfolio-mini-folder-slot {
     visibility: hidden;
     pointer-events: none;
+  }
+
+  html.mobile-folder-sheet-open[data-mobile-folder-docking="true"] #work .portfolio-mini-folder-slot {
+    visibility: visible;
+    pointer-events: none;
+  }
+
+  html.mobile-folder-sheet-open[data-mobile-folder-docking="true"] .mini-playground-folder {
+    filter: drop-shadow(0 22px 44px rgba(0, 0, 0, 0.28));
   }
 
   .mobile-project-folder-overlay[data-animating="true"] .mobile-project-folder-sheet--docking .relative.z-10 {
     visibility: hidden;
   }
 
-  .mobile-project-folder-overlay[data-phase="collapsed"] .mobile-project-folder-sheet--docking {
+  .mobile-project-folder-overlay[data-phase="collapsed"][data-dock-fly="true"] .mobile-project-folder-sheet--docking {
+    border-color: transparent;
+    background: transparent;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    box-shadow: none;
+  }
+
+  .mobile-project-folder-overlay[data-phase="collapsed"]:not([data-dock-fly="true"])
+    .mobile-project-folder-sheet--docking {
     border-color: transparent;
     background: rgba(12, 12, 15, 0.94);
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
     box-shadow: 0 18px 44px rgba(0, 0, 0, 0.2);
+  }
+
+  .mobile-folder-dock-widget {
+    will-change: transform, left, top, width, height;
+    transform: translate3d(0, 0, 0);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .mobile-folder-dock-widget {
+      display: none;
+    }
   }
 
   .project-folder-mini-sheet-rear,
@@ -1307,7 +1531,7 @@ html[data-work-locked] .portfolio-interactive-hero-shell {
   inset: 0;
   z-index: 30;
   border-radius: inherit;
-  padding: 4px;
+  padding: 2px;
   pointer-events: none;
   background: conic-gradient(
     from var(--odicci-welcome-angle),
@@ -1350,7 +1574,7 @@ html[data-work-locked] .portfolio-interactive-hero-shell {
   .odicci-welcome-ring::after {
     animation: none;
     background: #ff9500;
-    padding: 4px;
+    padding: 2px;
   }
 
   .odicci-welcome-atmosphere,

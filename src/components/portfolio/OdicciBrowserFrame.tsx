@@ -1,5 +1,5 @@
 import { ChevronDown, Moon, Sun } from "lucide-react";
-import { useEffect, useRef, useState, type ReactNode, type RefObject } from "react";
+import { useEffect, useRef, useState, type PointerEvent, type ReactNode, type RefObject } from "react";
 import { CrcleScreenToolbar, DemoToolbar } from "@/components/portfolio/CrcleDemoToolbar";
 import { useOdicciMobileLayout } from "@/components/portfolio/OdicciMobileLayout";
 import { cn } from "@/lib/utils";
@@ -31,6 +31,11 @@ interface OdicciBrowserFrameProps {
     onDesign: () => void;
     onCode: () => void;
   };
+  /** Mobile embed — hover the browser shell to arm PhoneDevInspection (same as CRCLE preview card). */
+  prototypeDevHover?: {
+    onPointerEnter: (event: PointerEvent<HTMLElement>) => void;
+    onPointerLeave: (event: PointerEvent<HTMLElement>) => void;
+  };
   children: ReactNode;
 }
 
@@ -50,6 +55,7 @@ export function OdicciBrowserFrame({
   stageRef: stageRefProp,
   onStagePointerDown,
   demo,
+  prototypeDevHover,
   children,
 }: OdicciBrowserFrameProps) {
   const mobileLayout = useOdicciMobileLayout();
@@ -94,6 +100,7 @@ export function OdicciBrowserFrame({
 
   const browserShell = (
     <div
+      {...(embed ? prototypeDevHover : {})}
       className={cn(
         "odicci-browser-frame-shell relative w-full min-w-0 overflow-hidden bg-white",
         embed
@@ -158,7 +165,7 @@ export function OdicciBrowserFrame({
         {toolbarExtra}
         <div
           className={cn(
-            "flex min-w-0 flex-1 items-center rounded-md border border-zinc-200 bg-zinc-100",
+            "flex min-w-0 flex-1 basis-0 items-center rounded-md border border-zinc-200 bg-zinc-100",
             embed ? "h-[18px] px-1.5" : "h-[30px] gap-2 px-3",
           )}
         >
@@ -171,6 +178,8 @@ export function OdicciBrowserFrame({
             {url}
           </span>
         </div>
+        {/* Flex 0.25 : 1 → address bar uses 80% of free toolbar width */}
+        <span aria-hidden className="min-w-0 shrink flex-[0.25] basis-0" />
         <span className={cn("shrink-0 leading-none tracking-widest text-zinc-500", embed ? "text-[10px]" : "text-base")}>
           ···
         </span>

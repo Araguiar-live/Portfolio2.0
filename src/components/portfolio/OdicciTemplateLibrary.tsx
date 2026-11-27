@@ -4,7 +4,6 @@ import { useOdicciDemo } from "@/components/portfolio/useOdicciDemo";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronDown, ChevronLeft, ChevronRight, Search, Share2, SlidersHorizontal } from "lucide-react";
 import { OdicciBrowserFrame } from "@/components/portfolio/OdicciBrowserFrame";
-import { useOdicciMobileLayout } from "@/components/portfolio/OdicciMobileLayout";
 import { cn } from "@/lib/utils";
 import {
   PLAYABLE_THEMES,
@@ -40,6 +39,8 @@ import welcomeMesh from "@/assets/odicci/template-library/welcome-mesh-a.svg";
 
 const ACCENT = "#FF5A2B";
 const FONT = "Poppins, ui-sans-serif, system-ui, sans-serif";
+const TEMPLATE_THUMB_RADIUS_PX = 12;
+const TEMPLATE_CARD_RADIUS_PX = TEMPLATE_THUMB_RADIUS_PX + 4;
 
 const FILTER_DROPDOWNS = [
   "Industries & Niches",
@@ -189,7 +190,6 @@ const RECENT_EXPERIENCES = [
 ] as const;
 
 export function OdicciTemplateLibrary() {
-  const embed = useOdicciMobileLayout()?.embed ?? false;
   const [category, setCategory] = useState<(typeof CATEGORIES)[number]>("For you");
   const [selectedId, setSelectedId] = useState(TEMPLATE_CARDS[0].id);
   const [query, setQuery] = useState("");
@@ -270,36 +270,27 @@ export function OdicciTemplateLibrary() {
         onDesign: demo.design,
         onCode: demo.code,
       }}
+      prototypeDevHover={demo.prototypeDevHover}
     >
       <div
         data-odicci-template-library=""
         className="relative flex size-full flex-col overflow-hidden bg-white text-[#1a1d21]"
         style={{ fontFamily: FONT }}
       >
-        <TemplateNavbar onCreateNew={() => setCreateOpen(true)} edgeToEdge={embed} />
+        <TemplateNavbar onCreateNew={() => setCreateOpen(true)} />
 
         <div className="flex min-h-0 min-w-0 flex-1 overflow-hidden">
           <OdicciAppSidebar activeId="layers" />
 
-          <div
-            className={cn(
-              "flex min-h-0 min-w-0 flex-1 overflow-hidden",
-              embed ? "gap-2 px-0 pb-2 pt-0" : "gap-4 px-4 pb-4 pt-3",
-            )}
-          >
+          <div className="flex min-h-0 min-w-0 flex-1 overflow-hidden gap-4 px-4 pb-4 pt-3">
             {/* Left — scrollable feed; filter sticks while cards scroll */}
             <div
               data-demo-scroll="templates"
               className="relative min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-contain pr-1 [-ms-overflow-style:none] [scrollbar-width:thin]"
             >
-              <WelcomeBanner edgeToEdge={embed} />
+              <WelcomeBanner />
 
-              <div
-                className={cn(
-                  "sticky -top-px z-20 bg-white/95 pb-3 pt-3 backdrop-blur-md",
-                  embed ? "px-0" : "-mx-1 px-1",
-                )}
-              >
+              <div className="sticky -top-px z-20 -mx-1 bg-white/95 px-1 pb-3 pt-3 backdrop-blur-md">
                 <FilterBar query={query} onQueryChange={setQuery} />
                 <CategoryTabs active={category} onChange={setCategory} />
               </div>
@@ -344,20 +335,9 @@ export function OdicciTemplateLibrary() {
   );
 }
 
-function TemplateNavbar({
-  onCreateNew,
-  edgeToEdge = false,
-}: {
-  onCreateNew: () => void;
-  edgeToEdge?: boolean;
-}) {
+function TemplateNavbar({ onCreateNew }: { onCreateNew: () => void }) {
   return (
-    <header
-      className={cn(
-        "flex h-14 w-full shrink-0 items-center justify-between border-b border-[#e8e8e8]/80 bg-white/90 backdrop-blur-md",
-        edgeToEdge ? "gap-2 px-0" : "gap-4 pr-5",
-      )}
-    >
+    <header className="flex h-14 w-full shrink-0 items-center justify-between gap-4 border-b border-[#e8e8e8]/80 bg-white/90 pr-5 backdrop-blur-md">
       {/* Logo sits over the app sidebar; nav aligns with the content column (search bar) */}
       <div className="flex min-w-0 items-center">
         <div className="flex w-[72px] shrink-0 items-center justify-center">
@@ -416,94 +396,89 @@ function TemplateNavbar({
   );
 }
 
-function WelcomeBanner({ edgeToEdge = false }: { edgeToEdge?: boolean }) {
+function WelcomeBanner() {
   return (
     /* Outer radius = inner header radius + 4px */
     <section
-      className={cn(
-        "odicci-welcome-ring relative overflow-hidden bg-white",
-        edgeToEdge ? "p-0" : "p-3",
-      )}
-      style={{
-        borderRadius: edgeToEdge ? 0 : "calc(var(--welcome-inner-r, 16px) + 4px)",
-      }}
+      className="odicci-welcome-ring relative overflow-hidden bg-white p-3"
+      style={{ borderRadius: "calc(var(--welcome-inner-r, 16px) + 4px)" }}
     >
       {/* Header strip only — Sign Uo Flow 393:172696 / patterns 393:172038 */}
       <div
         className="relative h-[105px] overflow-hidden bg-[#004074]"
         style={{ borderRadius: "var(--welcome-inner-r, 16px)" }}
       >
-        <div aria-hidden className="pointer-events-none absolute inset-0">
-          <img
-            alt=""
-            src={welcomeAtmosphere}
-            className="odicci-welcome-atmosphere absolute inset-0 size-full object-cover"
-            draggable={false}
-          />
-          <img
-            alt=""
-            src={welcomeMesh}
-            className="odicci-welcome-mesh absolute -left-[10%] -top-[80%] h-[280%] w-[70%] max-w-none object-cover opacity-40 mix-blend-soft-light"
-            draggable={false}
-          />
-          <img
-            alt=""
-            src={welcomeOrbs}
-            className="odicci-welcome-orbs absolute -right-[5%] -top-[120%] h-[320%] w-[55%] max-w-none object-cover opacity-70 mix-blend-screen"
-            draggable={false}
-          />
+          <div aria-hidden className="pointer-events-none absolute inset-0">
+            <img
+              alt=""
+              src={welcomeAtmosphere}
+              className="odicci-welcome-atmosphere absolute inset-0 size-full object-cover"
+              draggable={false}
+            />
+            <img
+              alt=""
+              src={welcomeMesh}
+              className="odicci-welcome-mesh absolute -left-[10%] -top-[80%] h-[280%] w-[70%] max-w-none object-cover opacity-40 mix-blend-soft-light"
+              draggable={false}
+            />
+            <img
+              alt=""
+              src={welcomeOrbs}
+              className="odicci-welcome-orbs absolute -right-[5%] -top-[120%] h-[320%] w-[55%] max-w-none object-cover opacity-70 mix-blend-screen"
+              draggable={false}
+            />
+          </div>
+          <div className="relative z-10 flex h-full flex-col justify-center gap-0.5 px-5">
+            <p className="text-[28px] font-medium leading-none tracking-tight text-white">Welcome User!</p>
+            <p className="text-[15px] font-normal leading-snug tracking-tight text-white/90">
+              There&apos;s nothing here yet...
+            </p>
+          </div>
         </div>
-        <div className="relative z-10 flex h-full flex-col justify-center gap-0.5 px-5">
-          <p className="text-[28px] font-medium leading-none tracking-tight text-white">Welcome User!</p>
-          <p className="text-[15px] font-normal leading-snug tracking-tight text-white/90">
-            There&apos;s nothing here yet...
-          </p>
-        </div>
-      </div>
 
       {/* Recent games sit below the header inside the outlined frame */}
       <div className="mt-3 flex w-full gap-3 overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        {RECENT_EXPERIENCES.map((exp) => (
-          <div
-            key={exp.id}
-            className="flex w-[min(353px,78%)] shrink-0 flex-col gap-2 rounded-[20px] border border-[#e8e8e8] bg-white p-2 sm:w-[calc((100%-1.5rem)/3)] sm:min-w-0"
-          >
-            <div className="flex items-center justify-between gap-2 px-0.5">
-              <span className="inline-flex h-6 max-w-[70%] items-center gap-1.5 truncate rounded-full bg-[#004074] px-2.5 text-[11px] font-medium text-white">
-                <img src={iconGameboyLight} alt="" className="size-3.5 shrink-0" />
-                <span className="truncate">{exp.label}</span>
-              </span>
-              <span className="shrink-0 text-[11px] text-[#838383]">{exp.when}</span>
+          {RECENT_EXPERIENCES.map((exp) => (
+            <div
+              key={exp.id}
+              className="flex w-[min(353px,78%)] shrink-0 flex-col gap-2 rounded-[20px] border border-[#e8e8e8] bg-white p-2 sm:w-[calc((100%-1.5rem)/3)] sm:min-w-0"
+            >
+              <div className="flex items-center justify-between gap-2 px-0.5">
+                <span className="inline-flex h-6 max-w-[70%] items-center gap-1.5 truncate rounded-full bg-[#004074] px-2.5 text-[11px] font-medium text-white">
+                  <img src={iconGameboyLight} alt="" className="size-3.5 shrink-0" />
+                  <span className="truncate">{exp.label}</span>
+                </span>
+                <span className="shrink-0 text-[11px] text-[#838383]">{exp.when}</span>
+              </div>
+              <div className="relative h-[120px] overflow-hidden rounded-[12px] sm:h-[148px]">
+                <img
+                  alt=""
+                  src={exp.image}
+                  className="absolute inset-0 size-full object-cover"
+                  draggable={false}
+                />
+              </div>
+              <div className="flex items-center justify-between gap-2 px-1 pb-0.5">
+                <p className="min-w-0 truncate text-[13px] font-medium text-[#1a1d21] sm:text-[14px]">
+                  {exp.title}
+                </p>
+                <span
+                  className={`inline-flex shrink-0 items-center gap-1.5 rounded-md border px-2 py-0.5 text-[11px] font-medium ${
+                    exp.status === "Draft"
+                      ? "border-[#e5e7eb] bg-[#f3f4f6] text-[#6b7280]"
+                      : "border-[#86efac] bg-[#dcfce7] text-[#15803d]"
+                  }`}
+                >
+                  {exp.status === "Live" ? (
+                    <span className="relative flex size-1.5 shrink-0" aria-hidden>
+                      <span className="absolute inset-0 animate-ping rounded-full bg-[#22c55e] opacity-75" />
+                      <span className="relative size-1.5 rounded-full bg-[#16a34a]" />
+                    </span>
+                  ) : null}
+                  {exp.status}
+                </span>
+              </div>
             </div>
-            <div className="relative h-[120px] overflow-hidden rounded-[12px] sm:h-[148px]">
-              <img
-                alt=""
-                src={exp.image}
-                className="absolute inset-0 size-full object-cover"
-                draggable={false}
-              />
-            </div>
-            <div className="flex items-center justify-between gap-2 px-1 pb-0.5">
-              <p className="min-w-0 truncate text-[13px] font-medium text-[#1a1d21] sm:text-[14px]">
-                {exp.title}
-              </p>
-              <span
-                className={`inline-flex shrink-0 items-center gap-1.5 rounded-md border px-2 py-0.5 text-[11px] font-medium ${
-                  exp.status === "Draft"
-                    ? "border-[#e5e7eb] bg-[#f3f4f6] text-[#6b7280]"
-                    : "border-[#86efac] bg-[#dcfce7] text-[#15803d]"
-                }`}
-              >
-                {exp.status === "Live" ? (
-                  <span className="relative flex size-1.5 shrink-0" aria-hidden>
-                    <span className="absolute inset-0 animate-ping rounded-full bg-[#22c55e] opacity-75" />
-                    <span className="relative size-1.5 rounded-full bg-[#16a34a]" />
-                  </span>
-                ) : null}
-                {exp.status}
-              </span>
-            </div>
-          </div>
         ))}
       </div>
     </section>
@@ -615,13 +590,18 @@ function TemplateSection({
             type="button"
             data-demo-target={`template-${card.id}`}
             onClick={() => onSelect(card.id)}
-            className={`flex flex-col gap-2 rounded-2xl border bg-white p-2 text-left transition ${
+            className={cn(
+              "box-border flex flex-col gap-2 border bg-white p-2 text-left transition",
               selectedId === card.id
-                ? "border-[#ff5a2b] shadow-[0_0_0_1px_#ff5a2b]"
-                : "border-[#e0e0e0] hover:border-[#c5cad1]"
-            }`}
+                ? "border-2 border-[#ff5a2b]"
+                : "border border-[#e0e0e0] hover:border-[#c5cad1]",
+            )}
+            style={{ borderRadius: TEMPLATE_CARD_RADIUS_PX }}
           >
-            <div className="relative aspect-[342/236] w-full overflow-hidden rounded-[14px]">
+            <div
+              className="relative aspect-[342/236] w-full overflow-hidden"
+              style={{ borderRadius: TEMPLATE_THUMB_RADIUS_PX }}
+            >
               <img
                 alt=""
                 src={card.image}

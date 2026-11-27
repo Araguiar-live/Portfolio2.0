@@ -1,5 +1,8 @@
 import { useState, type ReactNode } from "react";
-import { useCrcleCaseStudyChrome } from "@/components/portfolio/CrcleCaseStudyChrome";
+import { useCrcleCaseStudyAppearanceContext, useCrcleCaseStudyChrome } from "@/components/portfolio/CrcleCaseStudyChrome";
+import { useMobileWorkDevInspect } from "@/components/portfolio/MobileWorkDevInspect";
+import { openCaseStudyAppearance } from "@/components/portfolio/openCaseStudyAppearance";
+import settingsGear from "@/assets/crcle/case-study/settings-gear.svg";
 import codeActiveIcon from "@/assets/crcle/demo-toolbar/code-active.svg";
 import codeIdleIcon from "@/assets/crcle/demo-toolbar/code-idle.svg";
 import penActiveIcon from "@/assets/crcle/demo-toolbar/pen-active.svg";
@@ -57,6 +60,8 @@ export function DemoToolbar({
 }) {
   const designOn = !playing && !codeOn;
   const caseStudyChrome = useCrcleCaseStudyChrome();
+  const caseStudyAppearance = useCrcleCaseStudyAppearanceContext();
+  const mobileDev = useMobileWorkDevInspect();
 
   const playButton = (
     <DemoToolbarButton
@@ -81,11 +86,21 @@ export function DemoToolbar({
   );
 
   if (caseStudyChrome) {
+    const openAppearance = () => openCaseStudyAppearance(caseStudyAppearance, mobileDev);
+
     return (
       <div className="crcle-case-study-toolbar flex w-full shrink-0 items-center justify-center">
-        {/* Figma 3161:13763 — Play + Dev only (135×44). */}
-        <div className="crcle-case-study-toolbar__rail flex w-[135px] items-center gap-0.5 rounded-[64px] bg-white p-0.5">
+        {/* Figma 3161:13763 — Play + Dev; appearance opens in-phone settings (not default frame tap). */}
+        <div className="crcle-case-study-toolbar__rail flex w-[min(100%,202px)] items-center gap-0.5 rounded-[64px] bg-white p-0.5">
           {playButton}
+          <DemoToolbarButton
+            active={Boolean(caseStudyAppearance?.appearanceOpen)}
+            label="Appearance settings"
+            onClick={openAppearance}
+            activeClassName="border border-zinc-800/60 bg-black [&_img]:brightness-0 [&_img]:invert"
+          >
+            <img src={settingsGear} alt="" className="size-6 object-contain opacity-90" />
+          </DemoToolbarButton>
           {codeButton}
         </div>
       </div>

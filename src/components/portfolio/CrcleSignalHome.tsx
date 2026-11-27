@@ -43,7 +43,9 @@ import {
 } from "@/components/portfolio/CrcleChrome";
 import { DemoToolbar } from "@/components/portfolio/CrcleDemoToolbar";
 import { PhoneDevInspection } from "@/components/portfolio/inspect/PhoneDevInspection";
-import { useSyncMobileWorkDevInspect } from "@/components/portfolio/MobileWorkDevInspect";
+import { useCaseStudyDevInspect } from "@/components/portfolio/useCaseStudyDevInspect";
+import { useCrcleCaseStudyChrome } from "@/components/portfolio/CrcleCaseStudyChrome";
+import { useCrcleDevInspectLayer } from "@/components/portfolio/useCrcleDevInspectLayer";
 import { SignalTuneDrawer } from "@/components/portfolio/SignalTuneDrawer";
 
 /**
@@ -71,8 +73,9 @@ export function CrcleSignalHome({
   const [homeDone, setHomeDone] = useState(false);
   const [locationOpen, setLocationOpen] = useState(false);
   const [locationDone, setLocationDone] = useState(false);
-  /* Figma 322:118233 — Signal Features overlay on light Daily 3 */
-  const [onboardingOpen, setOnboardingOpen] = useState(true);
+  const caseStudyChrome = useCrcleCaseStudyChrome();
+  /* Figma 322:118233 — Signal Features overlay on light Daily 3 (full work page only). */
+  const [onboardingOpen, setOnboardingOpen] = useState(!caseStudyChrome);
   const [isLightMode, toggleLight] = useCrclePhoneLight();
   const caseStudyAppearance = useCrcleCaseStudyAppearance(isLightMode);
   /** Untitled 24:10888 — Intent Settings overlay over the Daily 3 photo */
@@ -82,8 +85,7 @@ export function CrcleSignalHome({
   const [pulseOpen, setPulseOpen] = useState(false);
   const [pulseLive, setPulseLive] = useState(false);
   const [demoPaused, setDemoPaused] = useState(false);
-  const [codeOn, setCodeOn] = useState(false);
-  useSyncMobileWorkDevInspect(codeOn);
+  const { codeOn, setCodeOn, armDevInspect } = useCaseStudyDevInspect();
   const [demoRun, setDemoRun] = useState(0);
   const [touch, setTouch] = useState<{ x: number; y: number; pressing: boolean } | null>(null);
   const screenRef = useRef<HTMLDivElement>(null);
@@ -125,6 +127,19 @@ export function CrcleSignalHome({
     setDemoPaused(true);
     setTouch(null);
   };
+
+  const enterDevInspect = useCallback(() => {
+    demoGen.current += 1;
+    setDemoPaused(true);
+    setTouch(null);
+    setOnboardingOpen(false);
+    setIntentOpen(false);
+    setPulseOpen(false);
+    setTuneOpen(false);
+    setLocationOpen(false);
+  }, []);
+
+  useCrcleDevInspectLayer(enterDevInspect);
 
   const replayDemo = () => {
     demoGen.current += 1;
@@ -299,7 +314,7 @@ export function CrcleSignalHome({
           pauseDemo();
         }}
         onCode={() => {
-          setCodeOn(true);
+          armDevInspect();
           pauseDemo();
         }}
       />
@@ -350,9 +365,15 @@ export function CrcleSignalHome({
               />
             ) : null}
           </AnimatePresence>
-          <StatusBar />
-          <div className="mt-[5px] flex shrink-0 justify-center pb-1">
-            <IconImg src={crcleLogo} className="crcle-theme-icon h-[13px] w-[38px]" />
+          <div
+            data-crcle-case-study-settings-surface
+            data-crcle-case-study-settings-trigger
+            className="relative z-[2] shrink-0"
+          >
+            <StatusBar />
+            <div className="mt-[5px] flex shrink-0 justify-center pb-1">
+              <IconImg src={crcleLogo} className="crcle-theme-icon h-[13px] w-[38px]" />
+            </div>
           </div>
 
           <div className="flex w-full shrink-0 flex-col items-center gap-px px-3">
@@ -717,13 +738,15 @@ export function CrcleSignalHome({
               />
             </>
           ) : null}
-          <PhoneDevInspection active={codeOn && !onboardingOpen} screenRef={screenRef} />
+          <PhoneDevInspection active={codeOn} screenRef={screenRef} />
         </div>
       </CrclePhoneFrame>
       {caseStudyAppearance.showThemeToggle ? (
         <CrcleThemeToggle
           light={isLightMode}
           onToggle={toggleLight}
+          onOpenAppearance={caseStudyAppearance.openAppearance}
+          appearanceTrigger={caseStudyAppearance.appearanceTrigger}
           className={caseStudyAppearance.themeToggleClassName}
         />
       ) : null}

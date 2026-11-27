@@ -175,6 +175,7 @@ export function OdicciWorkspacePicker({ onNext }: { onNext?: () => void }) {
         onDesign: demo.design,
         onCode: demo.code,
       }}
+      prototypeDevHover={demo.prototypeDevHover}
     >
       {/* Artboard — Figma 65:94009 */}
       <div className="relative size-full overflow-hidden">

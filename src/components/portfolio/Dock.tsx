@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
+import { cn } from "@/lib/utils";
 
 interface DockItem {
   label: string;
@@ -12,11 +13,15 @@ interface Props {
   activeSlug?: string | null;
   /** Visibility classes must live on this fixed node. A transformed parent would pin the dock to the page instead of the viewport. */
   className?: string;
+  /** Mobile work project — fixed bottom, hugged glass capsule (6px between items). */
+  stickyBar?: boolean;
 }
 
 const BASE = 44;
 const GAP = 8 * 1.15;
 const HOVER_GAP = 6 * 1.15;
+/** Mobile work project dock — Figma hugged capsule, 6px between circles. */
+const STICKY_GAP = 6;
 /** Jelly spring — fast, underdamped, so width/height overshoot inside the pill. */
 const SQUISH = { type: "spring" as const, stiffness: 520, damping: 11, mass: 0.38 };
 const ENTER = { type: "spring" as const, stiffness: 280, damping: 16, mass: 0.7 };
@@ -25,39 +30,57 @@ const ENTER = { type: "spring" as const, stiffness: 280, damping: 16, mass: 0.7 
  * Floating macOS-style dock — clear glass capsule with symmetrical padding.
  * Layout slots grow with hover so icons stay inside the pill edge.
  */
-export function Dock({ items, onSelect, activeSlug, className }: Props) {
+export function Dock({ items, onSelect, activeSlug, className, stickyBar = false }: Props) {
   const [hovered, setHovered] = useState<number | null>(null);
   const reduce = useReducedMotion();
   const spring = reduce ? { duration: 0.15 } : SQUISH;
+
+  const hostClass = stickyBar
+    ? "work-project-dock-host pointer-events-none fixed inset-x-0 bottom-1 z-[130] flex justify-center px-2 pb-[max(10px,env(safe-area-inset-bottom))] pt-2 md:inset-x-auto md:bottom-8 md:left-1/2 md:z-[60] md:-translate-x-1/2 md:px-0 md:pb-0 md:pt-0"
+    : "pointer-events-none fixed bottom-8 left-1/2 z-[60] -translate-x-1/2";
+
+  const itemGap = stickyBar ? STICKY_GAP : GAP;
+  const hoverItemGap = stickyBar ? STICKY_GAP : HOVER_GAP;
+
+  const glassClass = stickyBar
+    ? "dock-glass work-project-dock-glass pointer-events-auto relative flex w-auto max-w-none shrink-0 origin-bottom scale-[0.95] items-center justify-center overflow-hidden rounded-full p-3"
+    : "dock-glass pointer-events-auto relative flex items-center justify-center overflow-hidden rounded-full p-3";
+
+  const trackClass = stickyBar
+    ? "relative z-[1] flex w-auto shrink-0 items-center justify-center"
+    : "relative z-[1] flex items-center justify-center";
 
   return (
     <motion.div
       initial={{ y: 56, opacity: 0, scale: 0.92 }}
       animate={{ y: 0, opacity: 1, scale: 1 }}
       transition={{ ...ENTER, delay: 0.15 }}
-      className={`spatial-layer pointer-events-none fixed bottom-8 left-1/2 z-[60] -translate-x-1/2 ${className ?? ""}`}
+      className={`spatial-layer ${hostClass} ${className ?? ""}`}
     >
       <motion.div
         layout
         transition={spring}
         onMouseLeave={() => setHovered(null)}
-        className="dock-glass pointer-events-auto relative flex items-center justify-center overflow-hidden rounded-full p-3"
-        style={{ gap: GAP }}
+        className={glassClass}
+        style={{ gap: itemGap }}
       >
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0 z-0 rounded-full bg-gradient-to-b from-white/12 via-transparent to-transparent"
         />
-        <div className="dock-glass-lens z-0 opacity-25" aria-hidden />
+        <div
+          className={cn("dock-glass-lens z-0", stickyBar ? "opacity-45" : "opacity-25")}
+          aria-hidden
+        />
 
         {/* Layout track — width/height spring with slots; icons never leave the glass */}
         <motion.div
           layout
           transition={spring}
           initial={false}
-          animate={{ gap: hovered === null ? GAP : HOVER_GAP }}
-          className="relative z-[1] flex items-center justify-center"
-          style={{ gap: GAP }}
+          animate={{ gap: hovered === null ? itemGap : hoverItemGap }}
+          className={trackClass}
+          style={{ gap: itemGap }}
         >
           {items.map((item, index) => (
             <DockButton

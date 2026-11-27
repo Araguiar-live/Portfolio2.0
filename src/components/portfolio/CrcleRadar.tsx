@@ -49,7 +49,9 @@ import unlockIcon from "@/assets/crcle/unlock.svg";
 import wifiIcon from "@/assets/crcle/wifi.svg";
 import { DemoToolbar } from "@/components/portfolio/CrcleDemoToolbar";
 import { PhoneDevInspection } from "@/components/portfolio/inspect/PhoneDevInspection";
-import { useSyncMobileWorkDevInspect } from "@/components/portfolio/MobileWorkDevInspect";
+import { useCaseStudyDevInspect } from "@/components/portfolio/useCaseStudyDevInspect";
+import { useCrcleCaseStudyChrome } from "@/components/portfolio/CrcleCaseStudyChrome";
+import { useCrcleDevInspectLayer } from "@/components/portfolio/useCrcleDevInspectLayer";
 import { CrclePhoneFrame, CrcleThemeToggle } from "@/components/portfolio/CrclePhoneFrame";
 import { useCrcleCaseStudyAppearance } from "@/components/portfolio/useCrcleCaseStudyAppearance";
 import { useCrclePhoneLight } from "@/lib/crcle-phone-theme";
@@ -216,17 +218,17 @@ export function CrcleRadar({
   onGoToProfile?: () => void;
 } = {}) {
   const [, setBroadcastMood] = useCrcleBroadcast();
+  const caseStudyChrome = useCrcleCaseStudyChrome();
   /* Portfolio Radar always shows standard dark discovery — NOC lives on Profile, not this tab. */
   const isNoc = false;
   const [isLightMode, toggleLight] = useCrclePhoneLight();
-  /* Figma 322:118007 — Radar onboarding over live Radar */
-  const [onboardingOpen, setOnboardingOpen] = useState(true);
+  /* Figma 322:118007 — Radar onboarding over live Radar (full work page only). */
+  const [onboardingOpen, setOnboardingOpen] = useState(!caseStudyChrome);
   const [caughtUp, setCaughtUp] = useState(false);
   const [state, setState] = useState<RadarState>(INITIAL_RADAR);
   const [direction, setDirection] = useState(0);
   const [demoPaused, setDemoPaused] = useState(false);
-  const [codeOn, setCodeOn] = useState(false);
-  useSyncMobileWorkDevInspect(codeOn);
+  const { codeOn, setCodeOn, armDevInspect } = useCaseStudyDevInspect();
   const [demoRun, setDemoRun] = useState(0);
   const [touch, setTouch] = useState<{ x: number; y: number; pressing: boolean } | null>(null);
   const pushTimers = useRef<ReturnType<typeof setTimeout>[]>([]);
@@ -264,6 +266,21 @@ export function CrcleRadar({
     setDemoPaused(true);
     setTouch(null);
   };
+
+  const enterDevInspect = useCallback(() => {
+    demoGen.current += 1;
+    setDemoPaused(true);
+    setTouch(null);
+    setOnboardingOpen(false);
+    clearPushTimers();
+    setState((s) => ({
+      ...s,
+      isIntentOverlayOpen: false,
+      pushPhase: "idle",
+    }));
+  }, [clearPushTimers]);
+
+  useCrcleDevInspectLayer(enterDevInspect);
 
   const replayDemo = () => {
     clearPushTimers();
@@ -546,7 +563,7 @@ export function CrcleRadar({
           pauseDemo();
         }}
         onCode={() => {
-          setCodeOn(true);
+          armDevInspect();
           pauseDemo();
         }}
       />
@@ -569,9 +586,15 @@ export function CrcleRadar({
           }`}
         >
           {isNoc ? <NocDotField /> : null}
-          <StatusBar />
-          <div className="relative z-[1] mt-[5px] flex shrink-0 justify-center pb-1">
-            <IconImg src={crcleLogo} className="crcle-theme-icon h-[13px] w-[38px]" />
+          <div
+            data-crcle-case-study-settings-surface
+            data-crcle-case-study-settings-trigger
+            className="relative z-[2] shrink-0"
+          >
+            <StatusBar />
+            <div className="relative mt-[5px] flex shrink-0 justify-center pb-1">
+              <IconImg src={crcleLogo} className="crcle-theme-icon h-[13px] w-[38px]" />
+            </div>
           </div>
 
           <div className="relative z-[1] flex h-10 shrink-0 items-center px-3">
@@ -637,6 +660,7 @@ export function CrcleRadar({
                 Clip + card must share the same height/radius or bottom corners look cropped wrong.
                 24px under the header arrow; bottom edge (and sheet overlap) stays fixed. */}
             <div
+              data-crcle-demo-interactive
               className={`relative mt-6 mb-[-138px] h-[558px] w-full overflow-hidden rounded-[36px] ${
                 state.isIntentOverlayOpen || showSignalModal ? "z-30" : "z-0"
               }`}
@@ -964,13 +988,15 @@ export function CrcleRadar({
               />
             </>
           ) : null}
-          <PhoneDevInspection active={codeOn && !onboardingOpen} screenRef={screenRef} />
+          <PhoneDevInspection active={codeOn} screenRef={screenRef} />
         </div>
       </CrclePhoneFrame>
       {caseStudyAppearance.showThemeToggle ? (
         <CrcleThemeToggle
           light={light}
           onToggle={toggleLight}
+          onOpenAppearance={caseStudyAppearance.openAppearance}
+          appearanceTrigger={caseStudyAppearance.appearanceTrigger}
           disabled={isNoc}
           className={caseStudyAppearance.themeToggleClassName}
         />

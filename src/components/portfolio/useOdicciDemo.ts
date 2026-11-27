@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type RefObject } from "react";
 import { useMobileWorkDevInspect } from "@/components/portfolio/MobileWorkDevInspect";
+import { useCaseStudyPrototypeDevHover } from "@/components/portfolio/useCaseStudyPrototypeDevHover";
 
 export type OdicciTouch = { x: number; y: number; pressing: boolean };
 
@@ -69,6 +70,7 @@ export function useOdicciDemo() {
   const mobileDevInspect = useMobileWorkDevInspect();
   const [paused, setPaused] = useState(false);
   const [codeOn, setCodeOn] = useState(false);
+  const prototypeDevHover = useCaseStudyPrototypeDevHover(setCodeOn);
   const [run, setRun] = useState(0);
   const [touch, setTouch] = useState<OdicciTouch | null>(null);
   const gen = useRef(0);
@@ -76,11 +78,17 @@ export function useOdicciDemo() {
   pausedRef.current = paused;
   const refs: DemoRefs = { screenRef, gen, pausedRef, setTouch };
 
+  const syncCodeOn = mobileDevInspect?.setCodeOn;
+
   useEffect(() => {
-    if (!mobileDevInspect) return;
-    mobileDevInspect.setCodeOn(codeOn);
-    return () => mobileDevInspect.setCodeOn(false);
-  }, [codeOn, mobileDevInspect]);
+    if (!syncCodeOn) return;
+    syncCodeOn(codeOn);
+  }, [codeOn, syncCodeOn]);
+
+  useEffect(() => {
+    if (!syncCodeOn) return;
+    return () => syncCodeOn(false);
+  }, [syncCodeOn]);
 
   const arm = (): OdicciDemoContext => {
     const token = ++gen.current;
@@ -164,9 +172,11 @@ export function useOdicciDemo() {
     codeOn,
     run,
     touch,
+    prototypeDevHover,
     playing: !paused && !codeOn,
     replay() {
       gen.current += 1;
+      mobileDevInspect?.setDevPinned(false);
       setCodeOn(false);
       setTouch(null);
       setPaused(false);
@@ -174,12 +184,14 @@ export function useOdicciDemo() {
     },
     design() {
       gen.current += 1;
+      mobileDevInspect?.setDevPinned(false);
       setCodeOn(false);
       setPaused(true);
       setTouch(null);
     },
     code() {
       gen.current += 1;
+      mobileDevInspect?.setDevPinned(true);
       setCodeOn(true);
       setPaused(true);
       setTouch(null);
@@ -189,6 +201,7 @@ export function useOdicciDemo() {
       if (target instanceof Element && target.closest("[data-demo-target]")) return;
       if (pausedRef.current) return;
       gen.current += 1;
+      mobileDevInspect?.setDevPinned(false);
       setCodeOn(false);
       setPaused(true);
       setTouch(null);

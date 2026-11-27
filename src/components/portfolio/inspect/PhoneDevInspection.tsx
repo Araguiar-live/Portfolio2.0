@@ -23,6 +23,8 @@ type Reading = {
 
 const CARD_W = 196;
 const CARD_H = 156;
+const CARD_W_COMPACT = 168;
+const CARD_H_COMPACT = 132;
 
 function roundedPx(value: string) {
   const n = Number.parseFloat(value);
@@ -187,13 +189,13 @@ function readFrame(el: HTMLElement): Omit<Reading, "card"> {
   };
 }
 
-function placeCard(el: HTMLElement, root: HTMLElement) {
+function placeCard(el: HTMLElement, root: HTMLElement, cardW: number, cardH: number) {
   const rect = el.getBoundingClientRect();
   const phone = root.getBoundingClientRect();
-  let left = rect.left - CARD_W + 20;
+  let left = rect.left - cardW + 20;
   let top = rect.bottom + 6;
-  left = Math.min(Math.max(left, phone.left + 8), phone.right - CARD_W - 8);
-  top = Math.min(Math.max(top, phone.top + 8), phone.bottom - CARD_H - 8);
+  left = Math.min(Math.max(left, phone.left + 8), phone.right - cardW - 8);
+  top = Math.min(Math.max(top, phone.top + 8), phone.bottom - cardH - 8);
   return { left, top };
 }
 
@@ -210,16 +212,25 @@ export function PhoneDevInspection({
   const [boxes, setBoxes] = useState<Box[]>([]);
   const [hover, setHover] = useState<number | null>(null);
   const [reading, setReading] = useState<Reading | null>(null);
+  const [compact, setCompact] = useState(false);
 
   useEffect(() => {
     const root = screenRef.current;
     if (!active || !root) {
+      setCompact(false);
       framesRef.current = [];
       setBoxes([]);
       setHover(null);
       setReading(null);
       return;
     }
+
+    const isCompact =
+      Boolean(root.closest(".crcle-mobile-prototype-preview, .odicci-mobile-prototype-host")) &&
+      window.matchMedia("(max-width: 767px)").matches;
+    setCompact(isCompact);
+    const cardW = isCompact ? CARD_W_COMPACT : CARD_W;
+    const cardH = isCompact ? CARD_H_COMPACT : CARD_H;
 
     let frame = 0;
     const measure = () => {
@@ -247,7 +258,7 @@ export function PhoneDevInspection({
       setBoxes(keptBoxes);
       const hovered = hoverRef.current;
       const el = hovered == null ? null : next[hovered];
-      if (el) setReading({ ...readFrame(el), card: placeCard(el, root) });
+      if (el) setReading({ ...readFrame(el), card: placeCard(el, root, cardW, cardH) });
     };
 
     const show = (index: number | null) => {
@@ -258,7 +269,7 @@ export function PhoneDevInspection({
         setReading(null);
         return;
       }
-      setReading({ ...readFrame(el), card: placeCard(el, root) });
+      setReading({ ...readFrame(el), card: placeCard(el, root, cardW, cardH) });
     };
 
     const schedule = () => {
@@ -343,8 +354,13 @@ export function PhoneDevInspection({
         ? createPortal(
             <div
               data-inspect-ui
-              className="pointer-events-none fixed z-[80] rounded-[16px] border border-white/80 bg-white/65 px-3 py-2.5 text-left shadow-[0_16px_40px_rgba(15,23,42,0.16)] backdrop-blur-[18px]"
-              style={{ left: reading.card.left, top: reading.card.top, width: CARD_W, transform: "none" }}
+              className={`phone-dev-inspect-card pointer-events-none fixed z-[80] rounded-[16px] border border-white/80 bg-white/65 px-3 py-2.5 text-left shadow-[0_16px_40px_rgba(15,23,42,0.16)] backdrop-blur-[18px] ${compact ? "phone-dev-inspect-card--compact" : ""}`}
+              style={{
+                left: reading.card.left,
+                top: reading.card.top,
+                width: compact ? CARD_W_COMPACT : CARD_W,
+                transform: "none",
+              }}
             >
               <span className="inline-flex size-[18px] items-center justify-center rounded-[5px] border border-[#7eb6e8] bg-white/50 text-[10px] font-semibold leading-none text-[#2f7eb8]">
                 {reading.mark}

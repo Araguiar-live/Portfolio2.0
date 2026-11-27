@@ -77,7 +77,8 @@ import shareInnerIcon from "@/assets/crcle/share-inner.svg";
 import wifiIcon from "@/assets/crcle/wifi.svg";
 import { DemoToolbar } from "@/components/portfolio/CrcleDemoToolbar";
 import { PhoneDevInspection } from "@/components/portfolio/inspect/PhoneDevInspection";
-import { useSyncMobileWorkDevInspect } from "@/components/portfolio/MobileWorkDevInspect";
+import { useCaseStudyDevInspect } from "@/components/portfolio/useCaseStudyDevInspect";
+import { useCrcleCaseStudyChrome } from "@/components/portfolio/CrcleCaseStudyChrome";
 import { CrclePhoneFrame, CrcleThemeToggle } from "@/components/portfolio/CrclePhoneFrame";
 import { useCrcleCaseStudyAppearance } from "@/components/portfolio/useCrcleCaseStudyAppearance";
 import { useCrclePhoneLight } from "@/lib/crcle-phone-theme";
@@ -259,19 +260,23 @@ export function CrcleProfile({
 } = {}) {
   const [broadcastMood, setBroadcastMood] = useCrcleBroadcast();
   const [isLightMode, toggleLight] = useCrclePhoneLight();
+  const caseStudyChrome = useCrcleCaseStudyChrome();
   const caseStudyAppearance = useCrcleCaseStudyAppearance(isLightMode);
   const [profile, setProfile] = useState<ProfileState>(() => ({
     ...INITIAL,
     broadcast: { ...INITIAL.broadcast, activeState: broadcastMood },
   }));
   const [overlay, setOverlay] = useState<Overlay>(null);
-  const [onboardingOpen, setOnboardingOpen] = useState(true);
+  const [onboardingOpen, setOnboardingOpen] = useState(!caseStudyChrome);
   const [identityVerified, setIdentityVerified] = useState(false);
   const dismissOnboarding = () => setOnboardingOpen(false);
   const screenRef = useRef<HTMLDivElement>(null);
   const [demoPaused, setDemoPaused] = useState(false);
-  const [devInspection, setDevInspection] = useState(false);
-  useSyncMobileWorkDevInspect(devInspection);
+  const {
+    codeOn: devInspection,
+    setCodeOn: setDevInspection,
+    armDevInspect,
+  } = useCaseStudyDevInspect();
   const [demoRun, setDemoRun] = useState(0);
   const [touch, setTouch] = useState<{ x: number; y: number; pressing: boolean } | null>(null);
   const demoGen = useRef(0);
@@ -292,13 +297,13 @@ export function CrcleProfile({
   };
 
   const selectCode = () => {
-    setDevInspection(true);
+    armDevInspect();
     pauseDemo();
   };
 
   const replayDemo = () => {
     setDevInspection(false);
-    setOnboardingOpen(true);
+    setOnboardingOpen(!caseStudyChrome);
     setOverlay(null);
     setDemoPaused(false);
     setDemoRun((n) => n + 1);
@@ -482,7 +487,7 @@ export function CrcleProfile({
           ref={screenRef}
           onPointerDownCapture={() => {
             if (demoPausedRef.current) return;
-            setDevInspection(false);
+            if (!caseStudyChrome) setDevInspection(false);
             pauseDemo();
           }}
           className="relative flex h-full min-h-0 w-full flex-col overflow-hidden bg-[#010211] transition-colors duration-300 [.crcle-phone--light_&]:bg-[var(--crcle-bg)]"
@@ -509,7 +514,11 @@ export function CrcleProfile({
 
             {/* Status + wordmark float over content with a soft fade — no hard cutoff */}
             <div className="pointer-events-none absolute inset-x-0 top-0 z-20">
-              <div className="bg-gradient-to-b from-[#010211] from-40% via-[#010211]/85 to-transparent pb-8 transition-colors duration-300 [.crcle-phone--light_&]:from-[#f7f6f2] [.crcle-phone--light_&]:via-[#f7f6f2]/85">
+              <div
+                data-crcle-case-study-settings-surface
+                data-crcle-case-study-settings-trigger
+                className="pointer-events-auto bg-gradient-to-b from-[#010211] from-40% via-[#010211]/85 to-transparent pb-8 transition-colors duration-300 [.crcle-phone--light_&]:from-[#f7f6f2] [.crcle-phone--light_&]:via-[#f7f6f2]/85"
+              >
                 <StatusBar />
                 <div className="-mt-[3px] flex justify-center pb-[12px]">
                   <IconImg src={crcleLogo} className="crcle-theme-icon h-[12.61px] w-[36.86px] opacity-65" />
@@ -669,6 +678,8 @@ export function CrcleProfile({
         <CrcleThemeToggle
           light={isLightMode}
           onToggle={toggleLight}
+          onOpenAppearance={caseStudyAppearance.openAppearance}
+          appearanceTrigger={caseStudyAppearance.appearanceTrigger}
           className={caseStudyAppearance.themeToggleClassName}
         />
       ) : null}

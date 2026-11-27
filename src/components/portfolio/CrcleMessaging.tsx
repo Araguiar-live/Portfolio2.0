@@ -37,7 +37,8 @@ import { ChatListItem, type ChatConversation } from "@/components/portfolio/Chat
 import { useCrcleCaseStudyChrome } from "@/components/portfolio/CrcleCaseStudyChrome";
 import { DemoToolbar } from "@/components/portfolio/CrcleDemoToolbar";
 import { PhoneDevInspection } from "@/components/portfolio/inspect/PhoneDevInspection";
-import { useSyncMobileWorkDevInspect } from "@/components/portfolio/MobileWorkDevInspect";
+import { useCaseStudyDevInspect } from "@/components/portfolio/useCaseStudyDevInspect";
+import { useCrcleDevInspectLayer } from "@/components/portfolio/useCrcleDevInspectLayer";
 import { CrclePhoneFrame, CrcleThemeToggle } from "@/components/portfolio/CrclePhoneFrame";
 import { useCrcleCaseStudyAppearance } from "@/components/portfolio/useCrcleCaseStudyAppearance";
 import { useCrcleBroadcast } from "@/components/portfolio/crcleBroadcast";
@@ -286,10 +287,9 @@ export function CrcleMessaging({
   const areaConnectedTimer = useRef<number | null>(null);
   const rootRef = useRef<HTMLDivElement>(null);
   const screenRef = useRef<HTMLDivElement>(null);
-  const [demoPaused, setDemoPaused] = useState(caseStudyChrome);
+  const [demoPaused, setDemoPaused] = useState(false);
   const [demoRun, setDemoRun] = useState(0);
-  const [codeOn, setCodeOn] = useState(false);
-  useSyncMobileWorkDevInspect(codeOn);
+  const { codeOn, setCodeOn, armDevInspect } = useCaseStudyDevInspect();
   const [touch, setTouch] = useState<{ x: number; y: number; pressing: boolean } | null>(null);
   const demoGen = useRef(0);
   const demoPausedRef = useRef(false);
@@ -300,6 +300,21 @@ export function CrcleMessaging({
     setDemoPaused(true);
     setTouch(null);
   };
+
+  const enterDevInspect = useCallback(() => {
+    demoGen.current += 1;
+    setDemoPaused(true);
+    setTouch(null);
+    setOnboardingOpen(false);
+    setNotificationsOpen(false);
+    setMenuOpen(false);
+    setNotifyOverlayOpen(false);
+    setLocusOpen(false);
+    setAttachOpen(false);
+    setNearbyStep(null);
+  }, []);
+
+  useCrcleDevInspectLayer(enterDevInspect);
 
   const replayDemo = () => {
     setCodeOn(false);
@@ -697,7 +712,7 @@ export function CrcleMessaging({
           pauseDemo();
         }}
         onCode={() => {
-          setCodeOn(true);
+          armDevInspect();
           pauseDemo();
           setOnboardingOpen(false);
           setPhase("inbox");
@@ -933,11 +948,13 @@ export function CrcleMessaging({
         <CrcleThemeToggle
           light={isLightMode}
           onToggle={toggleLight}
+          onOpenAppearance={caseStudyAppearance.openAppearance}
+          appearanceTrigger={caseStudyAppearance.appearanceTrigger}
           className={caseStudyAppearance.themeToggleClassName}
         />
       ) : null}
       </div>
-      <PhoneDevInspection active={codeOn && !onboardingOpen} screenRef={screenRef} />
+      <PhoneDevInspection active={codeOn} screenRef={screenRef} />
       {touch && !demoPaused ? (
         <>
           <span
@@ -1099,8 +1116,14 @@ function ChatHeader({
       </div>
 
       <div className="relative z-[1] flex flex-col gap-1">
-        <StatusBar />
-        <div className="relative flex flex-col items-center px-3 pb-3 pt-0">
+        <div
+          data-crcle-case-study-settings-surface
+          data-crcle-case-study-settings-trigger
+          className="relative z-[2] shrink-0"
+        >
+          <StatusBar />
+        </div>
+        <div className="relative flex flex-col items-center px-3 pb-3 pt-0" data-crcle-demo-interactive>
           {/* Centered avatar + name (overlaps action row) — Figma 769:205669 */}
           <div className="pointer-events-none relative z-[1] mb-[-40px] flex h-[42px] w-[141px] items-center gap-3">
             <div className="relative size-[42px] shrink-0 overflow-hidden rounded-full border border-[rgba(2,3,29,0.2)] [.crcle-phone:not(.crcle-phone--light)_&]:border-[#f7f6f2]">

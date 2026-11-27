@@ -76,10 +76,16 @@ function InspectorSheetBody({
   const previewH = PHONE_H * previewScale;
 
   return (
-    <div className="productive-mobile-inspector-overlay__panel relative flex h-full min-h-0 w-full flex-col bg-[#1b1b1b]">
-      <DesignFileDotGrid className="pointer-events-none absolute inset-0" />
+    <div
+      className="productive-mobile-inspector-overlay__panel relative flex h-full min-h-0 w-full flex-col bg-[#1b1b1b]"
+      data-dev-mode={devMode ? "true" : undefined}
+    >
+      <DesignFileDotGrid className="productive-mobile-inspector-overlay__dots pointer-events-none absolute inset-0 z-0" />
       {devMode ? (
-        <div aria-hidden className="spatial-glass pointer-events-none absolute inset-0 z-[1] bg-zinc-900/20" />
+        <div
+          aria-hidden
+          className="productive-mobile-inspector-overlay__dev-wash pointer-events-none absolute inset-0 z-[1]"
+        />
       ) : null}
 
       <div
@@ -139,9 +145,9 @@ function InspectorSheetBody({
           </div>
 
           {devMode && annotations.length > 0 ? (
-            <>
+            <div className="productive-mobile-inspector-overlay__specs flex w-full flex-col gap-4">
               <div
-                className="productive-mobile-inspector-overlay__keys flex w-full max-w-full gap-1.5 overflow-x-auto px-0.5 pb-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                className="productive-mobile-inspector-overlay__keys flex w-full max-w-full gap-1.5 overflow-x-auto overflow-y-visible px-0.5 pb-2 pt-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
                 role="tablist"
                 aria-label="Annotation types"
               >
@@ -149,7 +155,7 @@ function InspectorSheetBody({
                   const match = annotations.find((a) => a.kind === entry.kind);
                   const active = activeKind === entry.kind;
                   return (
-                    <div key={entry.kind} className="shrink-0">
+                    <div key={entry.kind} className="shrink-0 py-1">
                       <button
                         type="button"
                         onClick={() => match && onActiveChange(match.id)}
@@ -166,7 +172,7 @@ function InspectorSheetBody({
               </div>
 
               <div
-                className="productive-mobile-inspector-overlay__cards flex w-full snap-x snap-mandatory gap-2 overflow-x-auto overscroll-x-contain px-1 pb-2 [scrollbar-width:thin]"
+                className="productive-mobile-inspector-overlay__cards flex w-full snap-x snap-mandatory gap-2 overflow-x-auto overflow-y-visible overscroll-x-contain px-1 pb-2 pt-2 [scrollbar-width:thin]"
                 role="list"
                 aria-label="Specification cards"
               >
@@ -179,11 +185,11 @@ function InspectorSheetBody({
                     onHover={onActiveChange}
                     onSelect={onActiveChange}
                     condensed
-                    className="productive-mobile-inspector-overlay__spec-card"
+                    className="productive-mobile-inspector-overlay__spec-card my-0.5"
                   />
                 ))}
               </div>
-            </>
+            </div>
           ) : null}
         </div>
       </div>
@@ -300,12 +306,13 @@ export function FirstDesignMobileInspectorOverlay({
       data-phase={phase}
       data-productive-mobile-inspector
     >
+      <DesignFileDotGrid className="productive-mobile-inspector-overlay__dots pointer-events-none absolute inset-0 z-0" />
       <button
         type="button"
         aria-label="Close inspector"
         tabIndex={-1}
         onClick={requestClose}
-        className="absolute inset-0 z-0 border-0 bg-[rgba(11,14,20,0.45)] p-0 backdrop-blur-[6px]"
+        className="productive-mobile-inspector-overlay__scrim absolute inset-0 z-[1] border-0 bg-[rgba(11,14,20,0.42)] p-0 backdrop-blur-[6px]"
       />
 
       <motion.div

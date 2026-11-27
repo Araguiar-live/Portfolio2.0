@@ -142,6 +142,7 @@ export function OdicciColourPalette({ onBackToWorkspace }: { onBackToWorkspace?:
         onDesign: demo.design,
         onCode: demo.code,
       }}
+      prototypeDevHover={demo.prototypeDevHover}
     >
       {stage === "business" ? (
         <OdicciBusinessProfile

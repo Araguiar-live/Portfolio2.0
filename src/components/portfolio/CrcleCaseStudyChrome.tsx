@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { setCrclePhoneLight } from "@/lib/crcle-phone-theme";
 
-type CrcleCaseStudyAppearanceContextValue = {
+export type CrcleCaseStudyAppearanceContextValue = {
   caseStudy: boolean;
   appearanceOpen: boolean;
   openAppearance: () => void;

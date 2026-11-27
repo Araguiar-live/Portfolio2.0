@@ -1,10 +1,13 @@
 import {
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type Dispatch,
+  type MutableRefObject,
   type ReactNode,
   type SetStateAction,
 } from "react";
@@ -13,6 +16,9 @@ import { useCrcleCaseStudyChrome } from "@/components/portfolio/CrcleCaseStudyCh
 type MobileWorkDevInspectContextValue = {
   codeOn: boolean;
   setCodeOn: Dispatch<SetStateAction<boolean>>;
+  /** Dev toggled via toolbar — hover leave must not dismiss inspect. */
+  devPinnedRef: MutableRefObject<boolean>;
+  setDevPinned: (pinned: boolean) => void;
 };
 
 const MobileWorkDevInspectContext = createContext<MobileWorkDevInspectContextValue | null>(null);
@@ -22,7 +28,14 @@ const BACKDROP_CLASS =
 
 export function MobileWorkDevInspectProvider({ children }: { children: ReactNode }) {
   const [codeOn, setCodeOn] = useState(false);
-  const value = useMemo(() => ({ codeOn, setCodeOn }), [codeOn]);
+  const devPinnedRef = useRef(false);
+  const setDevPinned = useCallback((pinned: boolean) => {
+    devPinnedRef.current = pinned;
+  }, []);
+  const value = useMemo(
+    () => ({ codeOn, setCodeOn, devPinnedRef, setDevPinned }),
+    [codeOn, setDevPinned],
+  );
 
   return (
     <MobileWorkDevInspectContext.Provider value={value}>
@@ -37,15 +50,21 @@ export function useMobileWorkDevInspect() {
 }
 
 /** Sync CRCLE screen dev toggles to the mobile work-page frost (case study provider only). */
+/** @deprecated Prefer `useCaseStudyDevInspect` (provider is the source of truth on case study). */
 export function useSyncMobileWorkDevInspect(codeOn: boolean) {
   const caseStudy = useCrcleCaseStudyChrome();
   const dev = useMobileWorkDevInspect();
+  const setCodeOn = dev?.setCodeOn;
 
   useEffect(() => {
-    if (!caseStudy || !dev) return;
-    dev.setCodeOn(codeOn);
-    return () => dev.setCodeOn(false);
-  }, [caseStudy, codeOn, dev]);
+    if (!caseStudy || !setCodeOn) return;
+    setCodeOn(codeOn);
+  }, [caseStudy, codeOn, setCodeOn]);
+
+  useEffect(() => {
+    if (!caseStudy || !setCodeOn) return;
+    return () => setCodeOn(false);
+  }, [caseStudy, setCodeOn]);
 }
 
 function MobileWorkDevBackdrop({ active }: { active: boolean }) {

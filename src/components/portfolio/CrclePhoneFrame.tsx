@@ -1,6 +1,12 @@
 import { motion } from "framer-motion";
-import type { ReactNode } from "react";
+import { useCallback, type PointerEvent, type ReactNode } from "react";
 import { Moon, Sun } from "lucide-react";
+import { useCrcleCaseStudyAppearanceContext } from "@/components/portfolio/CrcleCaseStudyChrome";
+import { useMobileWorkDevInspect } from "@/components/portfolio/MobileWorkDevInspect";
+import {
+  openCaseStudyAppearance,
+  shouldOpenCaseStudyAppearanceFromTarget,
+} from "@/components/portfolio/openCaseStudyAppearance";
 
 const TOGGLE_EASE = [0.22, 1, 0.36, 1] as const;
 
@@ -74,6 +80,20 @@ export function CrclePhoneFrame({
   /** Marks live demo taps so the case-study frame can open Appearance instead. */
   caseStudyDemoSurface?: boolean;
 }) {
+  const chrome = useCrcleCaseStudyAppearanceContext();
+  const mobileDev = useMobileWorkDevInspect();
+
+  const onCaseStudyPrototypePointerUp = useCallback(
+    (event: PointerEvent<HTMLElement>) => {
+      if (!caseStudyDemoSurface) return;
+      const target = event.target;
+      if (!(target instanceof HTMLElement)) return;
+      if (!shouldOpenCaseStudyAppearanceFromTarget(target)) return;
+      openCaseStudyAppearance(chrome, mobileDev);
+    },
+    [caseStudyDemoSurface, chrome, mobileDev],
+  );
+
   return (
     <div
       className={`relative ml-auto h-[874px] w-[402px] shrink-0 overflow-hidden rounded-[58px] ${className}`}
@@ -125,6 +145,8 @@ export function CrclePhoneFrame({
 
           {/* Screen — clips all overlays (modals, blur) to the device curve */}
           <div
+            data-crcle-phone-screen
+            onPointerUpCapture={onCaseStudyPrototypePointerUp}
             className="relative flex h-full w-full flex-col overflow-hidden rounded-[53px] bg-[#020617] transition-colors duration-300 [.crcle-phone--light_&]:bg-[var(--crcle-bg)]"
             style={{ clipPath: "inset(0 round 53px)" }}
           >

@@ -1,5 +1,5 @@
 import { useMemo, type ReactNode } from "react";
-import { CrcleAppearanceSheet } from "@/components/portfolio/CrcleAppearanceSheet";
+import { CrcleCaseStudySettingsOverlay } from "@/components/portfolio/CrcleCaseStudySettingsOverlay";
 import { useCrcleCaseStudyAppearanceContext } from "@/components/portfolio/CrcleCaseStudyChrome";
 
 /** Wire theme toggle + phone overlay for mobile case study only. */
@@ -23,9 +23,9 @@ export function useCrcleCaseStudyAppearance(isLight: boolean) {
       showThemeToggle: false,
       themeToggleClassName: "crcle-case-study-theme-trigger",
       openAppearance: chrome.openAppearance,
-      appearanceTrigger: true,
+      appearanceTrigger: false,
       phoneOverlay: chrome.appearanceOpen ? (
-        <CrcleAppearanceSheet
+        <CrcleCaseStudySettingsOverlay
           open={chrome.appearanceOpen}
           light={isLight}
           onClosed={chrome.closeAppearance}

@@ -11,6 +11,7 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { syncSafeViewportCssVar } from "../lib/clamp-viewport-height";
 
 function NotFoundComponent() {
   return (
@@ -124,7 +125,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       {
         // Sizes the interactive hero's fallback grid before hydration so it doesn't flash 12 rows.
         children:
-          '(function(){var pad=2,gap=2,w=document.documentElement.clientWidth,h=window.innerHeight,innerW=Math.max(0,w-pad*2),innerH=Math.max(0,h-pad*2),cols=w<640?Math.max(4,Math.round((innerW+gap)/66)):14,cellW=(innerW-gap*(cols-1))/cols,rows=Math.max(1,Math.round((innerH+gap)/(cellW+gap))),cellH=(innerH-gap*(rows-1))/rows,root=document.documentElement;root.style.setProperty("--hero-cols",String(cols));root.style.setProperty("--hero-rows",String(rows));root.style.setProperty("--hero-cell-w",cellW+"px");root.style.setProperty("--hero-cell-h",cellH+"px");})();',
+          '(function(){var pad=2,gap=2,w=document.documentElement.clientWidth,rawH=window.visualViewport&&window.visualViewport.height||window.innerHeight,cap=Math.max(480,Math.min(4096,Math.round(((window.screen&&window.screen.height)||900)*1.5))),h=Math.min(Math.max(0,Math.round(rawH||0)),cap)||Math.min(cap,Math.round(window.innerHeight)||844),innerW=Math.max(0,w-pad*2),innerH=Math.max(0,h-pad*2),cols=w<640?Math.max(4,Math.round((innerW+gap)/66)):14,cellW=(innerW-gap*(cols-1))/cols,rows=Math.min(48,Math.max(1,Math.round((innerH+gap)/(cellW+gap)))),cellH=(innerH-gap*(rows-1))/rows,root=document.documentElement;root.style.setProperty("--hero-cols",String(cols));root.style.setProperty("--hero-rows",String(rows));root.style.setProperty("--hero-cell-w",cellW+"px");root.style.setProperty("--hero-cell-h",cellH+"px");root.style.setProperty("--safe-viewport-h",h+"px");})();',
       },
     ],
   }),
@@ -150,6 +151,17 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+
+  useEffect(() => {
+    const sync = () => syncSafeViewportCssVar();
+    sync();
+    window.visualViewport?.addEventListener("resize", sync);
+    window.addEventListener("resize", sync);
+    return () => {
+      window.visualViewport?.removeEventListener("resize", sync);
+      window.removeEventListener("resize", sync);
+    };
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>

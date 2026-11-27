@@ -96,6 +96,7 @@ export function OdicciSignUp({
         onDesign: demo.design,
         onCode: demo.code,
       }}
+      prototypeDevHover={demo.prototypeDevHover}
     >
       <AuthArtboard
         variant={variant}

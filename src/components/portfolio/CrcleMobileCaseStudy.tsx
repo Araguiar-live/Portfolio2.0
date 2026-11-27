@@ -1,9 +1,6 @@
-import type { PointerEvent } from "react";
-import {
-  CrcleCaseStudyChromeProvider,
-  useCrcleCaseStudyAppearanceContext,
-} from "@/components/portfolio/CrcleCaseStudyChrome";
+import { CrcleCaseStudyChromeProvider } from "@/components/portfolio/CrcleCaseStudyChrome";
 import { MobileWorkDevInspectProvider } from "@/components/portfolio/MobileWorkDevInspect";
+import { useCaseStudyDevInspect } from "@/components/portfolio/useCaseStudyDevInspect";
 import { CrcleMobilePrototype } from "@/components/portfolio/CrcleMobilePrototype";
 import specPen from "@/assets/crcle/spec/pen.svg";
 import specPuzzle from "@/assets/crcle/spec/puzzle.svg";
@@ -71,20 +68,11 @@ function MobileEditorialSpecs({ copy, dark = false }: { copy: CrcleMobileCopy; d
 }
 
 function MobilePrototypeFrame({ activeTab }: { activeTab: string }) {
-  const chrome = useCrcleCaseStudyAppearanceContext();
-
-  const openAppearanceFromFrame = (event: PointerEvent<HTMLElement>) => {
-    if (!chrome || chrome.appearanceOpen) return;
-    const target = event.target as HTMLElement;
-    if (target.closest(".crcle-case-study-toolbar")) return;
-    if (target.closest("[data-appearance-ui]")) return;
-    if (target.closest("button, a, input, textarea, [role='button']")) return;
-    chrome.openAppearance();
-  };
+  const { prototypeDevHover } = useCaseStudyDevInspect();
 
   return (
     <section
-      onPointerUp={openAppearanceFromFrame}
+      {...prototypeDevHover}
       className={`${mobileBlock} crcle-mobile-prototype-preview crcle-phone-stage flex w-full max-w-full shrink-0 cursor-default flex-col items-stretch justify-start overflow-x-hidden overflow-y-hidden`}
     >
       <CrcleMobilePrototype activeTab={activeTab} />
