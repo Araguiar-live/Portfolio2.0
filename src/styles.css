@@ -57,7 +57,7 @@
 
   /* Frame calculator + SpatialDotBadge: 15% smaller, 24px lower (24px → 0 bottom). */
   #work .portfolio-deco-calculator.portfolio-deco-calculator--frame {
-    bottom: 56px;
+    bottom: 80px;
     transform: scale(0.9775);
     transform-origin: bottom right;
     translate: -15% 13%;
@@ -218,33 +218,43 @@
   #work .portfolio-deco-calculator--frame {
     top: auto;
     right: 24px;
-    bottom: 80px;
+    bottom: 104px;
     left: auto;
     translate: -15% 13%;
     transform: scale(1.15);
     transform-origin: bottom right;
   }
 
-  #work .portfolio-deco-calculator--frame .portfolio-deco-spin {
-    top: -60px;
-    right: 0;
-    left: auto;
-    translate: 24px 15%;
+  #work .portfolio-deco-calculator--frame {
+    isolation: isolate;
   }
 
-  /* ≥1537px desktop — flush to wireframe stage bottom; laptop band (768–1536) unchanged above. */
+  #work .portfolio-deco-calculator--frame .portfolio-deco-spin {
+    top: -68px;
+    right: 0;
+    left: auto;
+    z-index: 0;
+    translate: 24px 18%;
+  }
+
+  #work .portfolio-deco-calculator--frame > [data-name="calculator-card"] {
+    position: relative;
+    z-index: 2;
+  }
+
+  /* ≥1537px desktop — same badge/calc overlap as laptop (not fully detached above). */
   @media (min-width: 1537px) {
     #work .portfolio-deco-calculator.portfolio-deco-calculator--frame {
-      bottom: 56px;
+      bottom: 80px;
       right: clamp(16px, 1.25vw, 28px);
       translate: -15% 0;
     }
 
     #work .portfolio-deco-calculator--frame .portfolio-deco-spin {
-      top: auto;
-      bottom: 100%;
-      margin-bottom: 4px;
-      translate: 24px 0;
+      top: -72px;
+      bottom: auto;
+      margin-bottom: 0;
+      translate: 24px 16%;
     }
   }
 
@@ -783,16 +793,17 @@ html[data-work-locked] .portfolio-interactive-hero-shell {
     pointer-events: auto;
   }
 
-  /* Mobile — calc stack at stage bottom; desktop uses --frame rules. */
+  /* Mobile — pin to stage bottom; ~50% of calc bleeds into marquee (marquee z-20 clips/covers). */
   #work .wireframe-stage-closed .portfolio-deco-calculator--mobile {
     top: auto;
     right: max(-4px, calc(-1 * env(safe-area-inset-right, 0px)));
-    bottom: 20px;
+    bottom: 0;
     height: auto;
     overflow: visible;
-    translate: none;
+    translate: 0 calc(50% + 36px);
     transform: scale(0.86);
     transform-origin: bottom right;
+    isolation: isolate;
   }
 
   #work .work-closed-column .portfolio-deco-mouse--mobile {
@@ -803,12 +814,12 @@ html[data-work-locked] .portfolio-interactive-hero-shell {
   }
 
   #work .portfolio-deco-calculator--mobile .portfolio-deco-spin--mobile {
-    top: -48px;
+    top: -52px;
     bottom: auto;
     right: -8px;
     left: auto;
     z-index: 0;
-    translate: 14px 12%;
+    translate: 14px 16%;
   }
 
   #work .portfolio-deco-calculator--mobile .mobile-calculator-frost {
