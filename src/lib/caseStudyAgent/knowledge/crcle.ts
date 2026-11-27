@@ -13,11 +13,13 @@ export const crcleCaseStudyKnowledge: CaseStudyKnowledgeBase = {
       chipLabel: "What changed first?",
       question: "What was Crcle at the start, and what did you change first?",
       answer:
-        "When I joined, Crcle was basically a generic LinkedIn-style profile and an open search bar for connections. I started by filtering search around what people actually wanted — friendship, work, and love — giving each result its own card. That became the core daily recommendation experience, capped at three a day to avoid doomscrolling.",
+        "When I joined Crcle as their first and only designer, it was basically a generic LinkedIn-style profile and an open search bar for connections.\n\nI started by filtering search around what people actually wanted — friendship, work, and love — giving each result its own card. That became the core daily recommendation experience, capped at three a day to avoid doomscrolling.",
       keywords: [
         "start",
         "joined",
         "first",
+        "only designer",
+        "designer",
         "linkedin",
         "search",
         "friendship",
@@ -35,7 +37,7 @@ export const crcleCaseStudyKnowledge: CaseStudyKnowledgeBase = {
       chipLabel: "The recommendation card",
       question: "Why did the recommendation card take so long—and how did you finally crack it?",
       answer:
-        "The founder wanted something graphic and customizable — almost like a Yu-Gi-Oh! card — and pushed back when it felt like a Post-it. We tried guitar-string signals and pink/blue bars for love, social, and work, which hurt usability and was awkward to build. I stripped it back to a simple scrollable format, and that's the one the founder loved. From there we shaped the daily profile so people choose interests and visuals to control how they're perceived.",
+        "The founder wanted something graphic and customisable — almost Yu-Gi-Oh! card energy — and pushed back whenever it felt like a Post-it.\n\nWe tried guitar-string signals and pink/blue bars for love, social, and work; usability suffered and it was awkward to build reliably.\n\nStripping it back to a simple swipeable card was what landed. From there we shaped the daily profile around interests and visuals so people control how they're perceived.",
       keywords: [
         "recommendation",
         "card",
@@ -47,9 +49,11 @@ export const crcleCaseStudyKnowledge: CaseStudyKnowledgeBase = {
         "signal",
         "pink",
         "blue",
+        "swipeable",
         "scrollable",
         "founder",
         "graphic",
+        "customisable",
         "customizable",
         "daily profile",
       ],
@@ -59,7 +63,7 @@ export const crcleCaseStudyKnowledge: CaseStudyKnowledgeBase = {
       chipLabel: "Beyond the card",
       question: "What else did you design beyond the recommendation card?",
       answer:
-        "While the card ate a lot of iteration, I kept moving across Crcle — profiles, settings, messaging, and core flows. I also explored a customizable iOS-inspired widget profile for V1, with room to grow later.",
+        "While the card ate a lot of iteration, I kept moving across Crcle — profiles, settings, messaging, and core flows. I also explored a customisable iOS-inspired widget profile for V1, with room to grow later.",
       keywords: [
         "else",
         "beyond",

@@ -8,6 +8,7 @@ import {
   type RefObject,
 } from "react";
 import { createPortal } from "react-dom";
+import { formatCaseStudyReplyForDisplay } from "@/lib/caseStudyAgent/formatReplyDisplay";
 import {
   shouldShowCaseStudyFollowUpPrompts,
   visibleCaseStudyPrompts,
@@ -67,6 +68,24 @@ function useStickyPanelPosition(rootRef: RefObject<HTMLDivElement | null>, open:
   }, [open, update]);
 
   return style;
+}
+
+/** Chat-formatted agent copy — short paragraphs from `\\n\\n` in grounded answers. */
+function CaseStudyAgentReplyText({ text }: { text: string }) {
+  const display = formatCaseStudyReplyForDisplay(text);
+  const blocks = display.split(/\n\n+/).filter(Boolean);
+  if (blocks.length <= 1) {
+    return <span className="case-study-agent__reply-text">{display}</span>;
+  }
+  return (
+    <span className="case-study-agent__reply-text">
+      {blocks.map((block, i) => (
+        <span key={i} className="case-study-agent__reply-para">
+          {block}
+        </span>
+      ))}
+    </span>
+  );
 }
 
 function useAnchoredPanelPosition(tileRef: RefObject<HTMLDivElement | null>, open: boolean) {
@@ -217,7 +236,11 @@ function CaseStudyAgentPanel({
                 : "case-study-agent__bubble case-study-agent__bubble--agent"
             }
           >
-            {m.content}
+            {m.role === "assistant" ? (
+              <CaseStudyAgentReplyText text={m.content} />
+            ) : (
+              m.content
+            )}
           </div>
         ))}
         {typing && (
