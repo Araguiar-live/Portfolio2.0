@@ -9,6 +9,8 @@ import { Marquee } from "@/components/portfolio/Marquee";
 import { Sidebar } from "@/components/portfolio/Sidebar";
 import { ProjectBentoStack } from "@/components/portfolio/ProjectAccordion";
 import { WireframeStage } from "@/components/portfolio/SiteWireframe";
+import { CaseStudyAgentSticky } from "@/components/portfolio/caseStudyAgent/CaseStudyAgentSticky";
+import { getWorkCaseStudyAgentKnowledge } from "@/lib/caseStudyAgent";
 import { DOCK_ITEMS, PROJECTS } from "@/routes/index";
 
 export const Route = createFileRoute("/work/$slug")({
@@ -33,6 +35,8 @@ function ProjectPage() {
   }, [slug]);
 
   if (!project) return <Navigate to="/" />;
+
+  const caseStudyAgent = getWorkCaseStudyAgentKnowledge(slug);
 
   const openProject = (next: string) => {
     if (next === slug) {
@@ -76,7 +80,14 @@ function ProjectPage() {
           <Home className="size-11" fill="currentColor" strokeWidth={2} aria-hidden />
         </button>
       </div>
-      <div className="fixed top-6 right-8 z-[80] hidden md:block">{contactCluster}</div>
+      {caseStudyAgent ? (
+        <div className="fixed top-6 right-8 z-[200] hidden max-md:!hidden md:flex md:flex-col md:items-end md:gap-3">
+          <div className="pointer-events-auto">{contactCluster}</div>
+          <CaseStudyAgentSticky knowledge={caseStudyAgent} stacked />
+        </div>
+      ) : (
+        <div className="fixed top-6 right-8 z-[80] hidden md:block">{contactCluster}</div>
+      )}
 
       <header className="work-project-mobile-top work-project-header-tile work-mobile-chrome sticky top-0 z-[120] flex w-[calc(100%-4px)] items-center justify-between gap-3 px-4 pb-3 pt-[max(10px,env(safe-area-inset-top))] md:hidden">
         <button
@@ -104,7 +115,7 @@ function ProjectPage() {
         </div>
       </WireframeStage>
 
-      <div className="work-project-bottom-strip relative z-20 bg-black [content-visibility:auto] [contain-intrinsic-size:auto_720px] max-sm:bg-[var(--portfolio-bottom-surface,#0a0d11)]">
+      <div className="work-project-bottom-strip relative z-20 bg-black max-sm:bg-[var(--portfolio-bottom-surface,#0a0d11)]">
         <Marquee />
         <Footer onSelectProject={openProject} onOpenSidebar={() => setSidebarOpen(true)} />
       </div>

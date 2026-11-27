@@ -561,17 +561,17 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
             initial={floating ? false : { height: 0 }}
             animate={
               floating
-                ? { height: "auto" }
+                ? false
                 : { height: project.slug === "odicci" ? "auto" : EXPANDED_BODY_H }
             }
             exit={floating ? undefined : { height: 0 }}
             transition={floating ? { duration: 0 } : { duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-            className={floating ? "overflow-visible" : "overflow-hidden"}
+            className={floating ? "overflow-visible h-auto" : "overflow-hidden"}
           >
             <div
               className={
                 floating
-                  ? "relative flex w-full flex-col"
+                  ? "relative flex w-full flex-col md:pt-14"
                   : `relative flex flex-col px-6 pt-6 ${project.slug === "odicci" ? "h-auto pb-32" : "h-full pb-6"}`
               }
               style={
