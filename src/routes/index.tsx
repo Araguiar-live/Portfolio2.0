@@ -59,6 +59,7 @@ import {
 } from "@/components/portfolio/MobileProjectFolderOverlay";
 import { CalculatorCard, PeekMouse } from "@/components/portfolio/WorkDecorations";
 import { useWorkCommit } from "@/hooks/useWorkCommit";
+import { resetCrclePhoneDarkForWorkEntry } from "@/lib/crcle-phone-theme";
 import { spatialChromeVisible } from "@/lib/spatialStyles";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { isPhoneViewport } from "@/lib/viewport";
@@ -329,7 +330,7 @@ function BouncyHeadline() {
     <h1
       ref={ref}
       aria-label="Hi.. I do Design."
-      className="text-center text-[40px] font-medium leading-[48px] tracking-[-1.5px] text-[#111] max-md:text-[34px] max-md:leading-[41px] max-sm:font-normal max-sm:tracking-normal sm:text-[48px] sm:leading-[56px]"
+      className="text-center text-[40px] font-medium leading-[48px] tracking-[-1.5px] text-[#111] max-md:text-[34px] max-md:leading-[41px] sm:text-[48px] sm:leading-[56px]"
     >
       {HEADLINE_LINES.map((line) => (
         <span key={line.words[0]} className={line.className}>
@@ -442,6 +443,7 @@ function Index() {
         window.setTimeout(() => setNudgeSignal((n) => n + 1), 600);
         return;
       }
+      if (slug === "crcle") resetCrclePhoneDarkForWorkEntry();
       void navigate({ to: "/work/$slug", params: { slug } });
     },
     [navigate],
@@ -472,8 +474,8 @@ function Index() {
   );
 
   return (
-    <div className="portfolio-hero-grid relative min-h-[100dvh] w-full text-zinc-900 font-sans antialiased overflow-x-hidden max-md:m-0 max-md:min-h-[var(--hero-mobile-vh,var(--safe-viewport-h,100svh))] max-md:p-0 max-md:isolate max-sm:font-[family-name:system-ui,sans-serif]">
-      <div className="portfolio-interactive-hero-shell max-md:relative max-md:z-10 max-md:min-h-[var(--hero-mobile-vh,var(--safe-viewport-h,100svh))] max-md:shrink-0 max-md:overflow-hidden">
+    <div className="portfolio-hero-grid relative min-h-[100dvh] w-full text-zinc-900 font-sans antialiased overflow-x-hidden max-md:m-0 max-md:p-0 max-md:isolate">
+      <div className="portfolio-interactive-hero-shell max-md:relative max-md:z-10 max-md:shrink-0 max-md:overflow-hidden">
         <InteractiveHero onEnterWork={() => commitToWork()} />
       </div>
 

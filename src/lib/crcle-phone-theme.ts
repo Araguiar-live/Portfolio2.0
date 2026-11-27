@@ -21,8 +21,13 @@ export function setCrclePhoneLight(next: boolean) {
   listeners.forEach((notify) => notify());
 }
 
+/** Entering the desktop /work CRCLE stage — dark Radar by default (toggle still works in-session). */
+export function resetCrclePhoneDarkForWorkEntry() {
+  setCrclePhoneLight(false);
+}
+
 export function useCrclePhoneLight() {
-  const isLight = useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
+  const isLight = useSyncExternalStore(subscribe, getSnapshot, () => false);
   const toggleLight = useCallback(() => {
     setCrclePhoneLight(!light);
   }, []);

@@ -54,7 +54,7 @@ import { useCrcleCaseStudyChrome } from "@/components/portfolio/CrcleCaseStudyCh
 import { useCrcleDevInspectLayer } from "@/components/portfolio/useCrcleDevInspectLayer";
 import { CrclePhoneFrame, CrcleThemeToggle } from "@/components/portfolio/CrclePhoneFrame";
 import { useCrcleCaseStudyAppearance } from "@/components/portfolio/useCrcleCaseStudyAppearance";
-import { setCrclePhoneLight, useCrclePhoneLight } from "@/lib/crcle-phone-theme";
+import { resetCrclePhoneDarkForWorkEntry, useCrclePhoneLight } from "@/lib/crcle-phone-theme";
 import { CrclePhoneOverlay, CrclePrimaryDock } from "@/components/portfolio/CrcleChrome";
 import { useCrcleBroadcast } from "@/components/portfolio/crcleBroadcast";
 
@@ -241,11 +241,6 @@ export function CrcleRadar({
     setOnboardingOpen(false);
   }, []);
 
-  useLayoutEffect(() => {
-    if (caseStudyChrome) return;
-    setCrclePhoneLight(false);
-  }, [caseStudyChrome]);
-
   const user = state.recommendedUsers[state.activeCardIndex] ?? state.recommendedUsers[0];
   const categoryIndex = CATEGORY_ORDER.indexOf(state.activeCategory);
   const isPushBusy = state.pushPhase !== "idle";
@@ -261,6 +256,11 @@ export function CrcleRadar({
   }, []);
 
   useEffect(() => () => clearPushTimers(), [clearPushTimers]);
+
+  /* Desktop /work default tab — dark Radar before the phone frame paints. */
+  useLayoutEffect(() => {
+    if (!caseStudyChrome) resetCrclePhoneDarkForWorkEntry();
+  }, [caseStudyChrome]);
 
   useLayoutEffect(() => {
     setBroadcastMood("open_day");

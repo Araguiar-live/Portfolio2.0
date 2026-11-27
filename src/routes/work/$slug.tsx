@@ -1,7 +1,7 @@
 import { createFileRoute, Link, Navigate, useNavigate } from "@tanstack/react-router";
 import { Home } from "lucide-react";
 import { useLayoutEffect, useRef, useState } from "react";
-import { setCrclePhoneLight } from "@/lib/crcle-phone-theme";
+import { resetCrclePhoneDarkForWorkEntry } from "@/lib/crcle-phone-theme";
 import girlPleaseLogo from "@/assets/girl-please.svg";
 import { Dock } from "@/components/portfolio/Dock";
 import { Footer } from "@/components/portfolio/Footer";
@@ -12,6 +12,12 @@ import { WireframeStage } from "@/components/portfolio/SiteWireframe";
 import { DOCK_ITEMS, PROJECTS } from "@/routes/index";
 
 export const Route = createFileRoute("/work/$slug")({
+  loader: ({ params }) => {
+    if (params.slug === "crcle") {
+      resetCrclePhoneDarkForWorkEntry();
+    }
+    return null;
+  },
   component: ProjectPage,
 });
 
@@ -23,11 +29,7 @@ function ProjectPage() {
   const project = PROJECTS.find((item) => item.slug === slug);
 
   useLayoutEffect(() => {
-    if (slug !== "crcle") return;
-    if (typeof window === "undefined") return;
-    if (window.matchMedia("(min-width: 768px)").matches) {
-      setCrclePhoneLight(false);
-    }
+    if (slug === "crcle") resetCrclePhoneDarkForWorkEntry();
   }, [slug]);
 
   if (!project) return <Navigate to="/" />;
@@ -37,6 +39,7 @@ function ProjectPage() {
       void navigate({ to: "/", hash: "work" });
       return;
     }
+    if (next === "crcle") resetCrclePhoneDarkForWorkEntry();
     void navigate({ to: "/work/$slug", params: { slug: next } });
   };
 
@@ -59,7 +62,10 @@ function ProjectPage() {
   );
 
   return (
-    <div className="work-project-page portfolio-hero-grid relative min-h-[100dvh] w-full max-w-[100vw] bg-[#f3f4f6] font-sans text-zinc-900 antialiased md:overflow-x-hidden">
+    <div
+      className="work-project-page portfolio-hero-grid relative min-h-[100dvh] w-full max-w-[100vw] bg-[#f3f4f6] font-sans text-zinc-900 antialiased md:overflow-x-hidden"
+      data-crcle-work-default={slug === "crcle" ? "dark" : undefined}
+    >
       <div className="fixed top-6 left-6 z-[80] hidden md:block">
         <button
           type="button"

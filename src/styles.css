@@ -291,7 +291,7 @@ html[data-work-locked] .portfolio-interactive-hero-shell {
   .portfolio-hero-grid {
     width: 100%;
     max-width: 100%;
-    min-height: var(--hero-mobile-vh, var(--safe-viewport-h, 100svh));
+    min-height: 100vh;
     margin: 0;
     padding: 0;
     overflow-x: hidden;
@@ -299,12 +299,6 @@ html[data-work-locked] .portfolio-interactive-hero-shell {
     background-image: url("/work-grid-tile.svg");
     background-repeat: repeat;
     background-size: 100% auto;
-  }
-
-  /* Tiled hero owns the first screen — no light work grid peeking under Safari chrome. */
-  html:not([data-work-locked]) .portfolio-hero-grid {
-    background-color: #090e15;
-    background-image: none;
   }
 
   /* Sticky mobile chrome on project pages — avoid overflow clipping on ancestors. */
@@ -412,6 +406,20 @@ html[data-work-locked] .portfolio-interactive-hero-shell {
   /* Page grid tiles are the mobile wireframe; skip the desktop jenga stack here. */
   .work-project-page .work-project-wireframe > [aria-hidden] {
     display: none;
+  }
+
+  /* CRCLE on /work — default dark chrome (theme class still toggles in-session). */
+  .work-project-page[data-crcle-work-default="dark"] .crcle-phone:not(.crcle-phone--light) {
+    --crcle-bg: #020217;
+    --crcle-bg-deep: #010211;
+    --crcle-fg: #f7f6f2;
+    --crcle-icon-filter: none;
+    background-color: var(--crcle-bg);
+    color: var(--crcle-fg);
+  }
+
+  .work-project-page[data-crcle-work-default="dark"] .crcle-phone:not(.crcle-phone--light) [data-crcle-phone-screen] {
+    background-color: #020617;
   }
 
   .work-project-page .work-project-stage-inner {
@@ -3520,7 +3528,7 @@ html.dark .thought-body-gradient {
     padding: 0;
     width: 100%;
     overflow-x: hidden;
-    background-color: #090e15;
+    background-color: #f3f4f6;
   }
 
   body {
@@ -3536,7 +3544,6 @@ html.dark .thought-body-gradient {
     html,
     body {
       min-height: 100dvh;
-      background-color: #090e15;
     }
   }
 }
@@ -3566,12 +3573,9 @@ html.dark .thought-body-gradient {
     max-width: 100vw;
     margin-left: -50vw;
     margin-right: -50vw;
-    height: var(--hero-mobile-vh, var(--safe-viewport-h, 100svh));
-    min-height: var(--hero-mobile-vh, var(--safe-viewport-h, 100svh));
-    max-height: var(--hero-mobile-vh, var(--safe-viewport-h, 100svh));
+    min-height: var(--hero-mobile-vh, 100dvh);
     overflow: hidden;
     z-index: 10;
-    flex-shrink: 0;
     background-color: #090e15;
   }
 
@@ -3580,16 +3584,14 @@ html.dark .thought-body-gradient {
     isolation: isolate;
     width: 100%;
     max-width: 100vw;
-    height: var(--hero-mobile-vh, var(--safe-viewport-h, 100svh));
-    min-height: var(--hero-mobile-vh, var(--safe-viewport-h, 100svh));
-    max-height: var(--hero-mobile-vh, var(--safe-viewport-h, 100svh));
+    height: var(--hero-mobile-vh, 100dvh);
+    min-height: var(--hero-mobile-vh, 100dvh);
+    max-height: var(--hero-mobile-vh, 100dvh);
     overflow: hidden;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: stretch;
-    padding-bottom: env(safe-area-inset-bottom, 0px);
-    box-sizing: border-box;
     background-color: #090e15;
   }
 
@@ -3600,7 +3602,7 @@ html.dark .thought-body-gradient {
     right: 0;
     bottom: -1px;
     z-index: 40;
-    height: max(4px, env(safe-area-inset-bottom, 0px));
+    height: 3px;
     background: #090e15;
     pointer-events: none;
   }

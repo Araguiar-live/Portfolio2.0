@@ -1,5 +1,5 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
-import { setCrclePhoneLight } from "@/lib/crcle-phone-theme";
+import { createContext, useCallback, useContext, useLayoutEffect, useMemo, useState, type ReactNode } from "react";
+import { resetCrclePhoneDarkForWorkEntry } from "@/lib/crcle-phone-theme";
 
 export type CrcleCaseStudyAppearanceContextValue = {
   caseStudy: boolean;
@@ -16,8 +16,8 @@ const CrcleCaseStudyAppearanceContext = createContext<CrcleCaseStudyAppearanceCo
 export function CrcleCaseStudyChromeProvider({ children }: { children: ReactNode }) {
   const [appearanceOpen, setAppearanceOpen] = useState(false);
 
-  useEffect(() => {
-    setCrclePhoneLight(false);
+  useLayoutEffect(() => {
+    resetCrclePhoneDarkForWorkEntry();
   }, []);
 
   const openAppearance = useCallback(() => setAppearanceOpen(true), []);

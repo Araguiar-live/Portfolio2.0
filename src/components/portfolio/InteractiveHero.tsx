@@ -4,8 +4,6 @@ import { ScannerPillLoop } from "@/components/craft/ScannerPillLoop";
 import heroMark from "@/assets/hero/hero-mark.svg";
 import toggleKnobHover from "@/assets/hero/hero-toggle-knob-hover.svg";
 import toggleRest from "@/assets/hero/hero-toggle-rest.svg";
-import { syncMobileHeroViewportCssVars } from "@/lib/clamp-viewport-height";
-
 const HEADLINE = "Looking for a designer?";
 const LEDE =
   "Product Designer specialising in complex B2B platforms, design systems, and interactive prototypes.";
@@ -68,15 +66,16 @@ function lockMobileHeroViewport(host: HTMLElement | null) {
     }
     return;
   }
-  const blockH = syncMobileHeroViewportCssVars();
-  host.style.setProperty("height", `${blockH}px`, "important");
-  host.style.setProperty("min-height", `${blockH}px`, "important");
-  host.style.setProperty("max-height", `${blockH}px`, "important");
+  const vvh = Math.round(window.visualViewport?.height ?? window.innerHeight);
+  document.documentElement.style.setProperty("--hero-mobile-vh", `${vvh}px`);
+  host.style.setProperty("height", `${vvh}px`, "important");
+  host.style.setProperty("min-height", `${vvh}px`, "important");
+  host.style.setProperty("max-height", `${vvh}px`, "important");
   const shell = host.closest(".portfolio-interactive-hero-shell");
   if (shell instanceof HTMLElement) {
-    shell.style.setProperty("min-height", `${blockH}px`, "important");
-    shell.style.setProperty("height", `${blockH}px`, "important");
-    shell.style.setProperty("max-height", `${blockH}px`, "important");
+    shell.style.setProperty("min-height", `${vvh}px`, "important");
+    shell.style.setProperty("height", `${vvh}px`, "important");
+    shell.style.setProperty("max-height", `${vvh}px`, "important");
   }
 }
 
@@ -795,7 +794,7 @@ export function InteractiveHero({ onEnterWork }: { onEnterWork?: () => void }) {
           className="interactive-hero__mark absolute bottom-[max(31px,env(safe-area-inset-bottom))] left-[max(2rem,env(safe-area-inset-left))] shrink-0 sm:hidden"
           style={{ maskImage: `url("${heroMark}")`, WebkitMaskImage: `url("${heroMark}")` }}
         />
-        <div className="absolute right-[max(18px,env(safe-area-inset-right))] top-[max(3.5rem,env(safe-area-inset-top))] flex flex-col gap-0.5 text-center font-[family-name:system-ui,sans-serif] leading-normal text-[rgba(255,255,255,0.6)] sm:static sm:ml-auto sm:gap-0 sm:text-right sm:font-sans">
+        <div className="absolute right-[max(18px,env(safe-area-inset-right))] top-[max(3.5rem,env(safe-area-inset-top))] flex flex-col gap-0.5 text-center font-sans leading-normal text-[rgba(255,255,255,0.6)] sm:static sm:ml-auto sm:gap-0 sm:text-right">
           <p className="text-[20px]">Ana.R Design</p>
           <p className="text-[12px]">Product Designer</p>
         </div>
@@ -803,7 +802,7 @@ export function InteractiveHero({ onEnterWork }: { onEnterWork?: () => void }) {
 
       <div className="interactive-hero__content relative z-10 mx-auto flex min-h-0 w-full max-w-[593px] flex-1 flex-col items-center justify-center gap-[42px] px-[max(18px,env(safe-area-inset-left))] pb-[max(18px,env(safe-area-inset-bottom))] pt-[max(12px,env(safe-area-inset-top))] text-center max-md:flex-none max-md:justify-center sm:px-6 sm:pb-12 sm:pt-6">
         <div className="flex w-full flex-col items-center gap-5">
-          <h1 className="w-full whitespace-nowrap font-[family-name:system-ui,sans-serif] text-[min(36px,calc((100vw-36px)/10))] font-normal leading-normal text-[rgba(255,255,255,0.6)] sm:whitespace-normal sm:font-sans sm:text-[clamp(36px,6vw,56px)]">
+          <h1 className="w-full text-balance text-[clamp(32px,9.5vw,40px)] font-normal leading-normal text-[rgba(255,255,255,0.6)] sm:text-[clamp(36px,6vw,56px)]">
             {HEADLINE}
           </h1>
           <p className="max-w-[min(34rem,calc(100vw-36px))] text-balance px-1 text-sm font-normal leading-6 text-[rgba(255,255,255,0.4)] sm:px-0 sm:text-base sm:leading-7">

@@ -30,7 +30,7 @@ import { CrcleMobileCaseStudy } from "@/components/portfolio/CrcleMobileCaseStud
 import { FirstDesignMobileCaseStudy } from "@/components/portfolio/firstDesign/FirstDesignMobileCaseStudy";
 import { OdicciMobileCaseStudy } from "@/components/portfolio/OdicciMobileCaseStudy";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { setCrclePhoneLight } from "@/lib/crcle-phone-theme";
+import { resetCrclePhoneDarkForWorkEntry } from "@/lib/crcle-phone-theme";
 import { isPhoneViewport } from "@/lib/viewport";
 
 // Tabs shown inside every expanded project row.
@@ -350,11 +350,11 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
   const tabContent = project.content?.[activeTab] ?? {};
   const showTabChrome = tabs.length > 1;
 
-  /* Desktop project stage — CRCLE opens on Radar; reset phone theme before the prototype paints. */
+  /* Work project stage — CRCLE opens on Radar; dark phone before the prototype paints. */
   useLayoutEffect(() => {
-    if (!floating || !isOpen || isMobile || project.slug !== "crcle") return;
-    setCrclePhoneLight(false);
-  }, [floating, isOpen, isMobile, project.slug]);
+    if (!floating || !isOpen || project.slug !== "crcle") return;
+    resetCrclePhoneDarkForWorkEntry();
+  }, [floating, isOpen, project.slug]);
 
   const rowHover = useRowHoverPreview(project.hoverPreview, !isOpen);
   const linkHover = useRowHoverPreview(project.linkHoverPreview, Boolean(project.url) && isOpen);
