@@ -54,7 +54,7 @@ import { useCrcleCaseStudyChrome } from "@/components/portfolio/CrcleCaseStudyCh
 import { useCrcleDevInspectLayer } from "@/components/portfolio/useCrcleDevInspectLayer";
 import { CrclePhoneFrame, CrcleThemeToggle } from "@/components/portfolio/CrclePhoneFrame";
 import { useCrcleCaseStudyAppearance } from "@/components/portfolio/useCrcleCaseStudyAppearance";
-import { useCrclePhoneLight } from "@/lib/crcle-phone-theme";
+import { setCrclePhoneLight, useCrclePhoneLight } from "@/lib/crcle-phone-theme";
 import { CrclePhoneOverlay, CrclePrimaryDock } from "@/components/portfolio/CrcleChrome";
 import { useCrcleBroadcast } from "@/components/portfolio/crcleBroadcast";
 
@@ -240,6 +240,11 @@ export function CrcleRadar({
   const dismissOnboarding = useCallback(() => {
     setOnboardingOpen(false);
   }, []);
+
+  useLayoutEffect(() => {
+    if (caseStudyChrome) return;
+    setCrclePhoneLight(false);
+  }, [caseStudyChrome]);
 
   const user = state.recommendedUsers[state.activeCardIndex] ?? state.recommendedUsers[0];
   const categoryIndex = CATEGORY_ORDER.indexOf(state.activeCategory);

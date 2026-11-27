@@ -15,9 +15,24 @@ export function readVisualViewportHeight(): number {
   return clampViewportHeight(window.visualViewport?.height ?? window.innerHeight);
 }
 
+/** One full mobile screen for the tiled hero (VV + layout height — iOS can under-report VV at load). */
+export function readMobileHeroBlockHeight(): number {
+  const visual = clampViewportHeight(window.visualViewport?.height ?? 0);
+  const inner = clampViewportHeight(window.innerHeight);
+  return Math.max(visual, inner);
+}
+
 /** Pins a clamped px height on `<html>` so mobile layouts never trust a broken `dvh`. */
 export function syncSafeViewportCssVar(): number {
   const h = readVisualViewportHeight();
   document.documentElement.style.setProperty("--safe-viewport-h", `${h}px`);
+  return h;
+}
+
+export function syncMobileHeroViewportCssVars(): number {
+  const h = readMobileHeroBlockHeight();
+  const root = document.documentElement;
+  root.style.setProperty("--safe-viewport-h", `${h}px`);
+  root.style.setProperty("--hero-mobile-vh", `${h}px`);
   return h;
 }

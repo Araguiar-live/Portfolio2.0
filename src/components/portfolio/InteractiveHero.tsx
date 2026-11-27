@@ -4,6 +4,7 @@ import { ScannerPillLoop } from "@/components/craft/ScannerPillLoop";
 import heroMark from "@/assets/hero/hero-mark.svg";
 import toggleKnobHover from "@/assets/hero/hero-toggle-knob-hover.svg";
 import toggleRest from "@/assets/hero/hero-toggle-rest.svg";
+import { syncMobileHeroViewportCssVars } from "@/lib/clamp-viewport-height";
 
 const HEADLINE = "Looking for a designer?";
 const LEDE =
@@ -67,16 +68,15 @@ function lockMobileHeroViewport(host: HTMLElement | null) {
     }
     return;
   }
-  const vvh = Math.round(window.visualViewport?.height ?? window.innerHeight);
-  document.documentElement.style.setProperty("--hero-mobile-vh", `${vvh}px`);
-  host.style.setProperty("height", `${vvh}px`, "important");
-  host.style.setProperty("min-height", `${vvh}px`, "important");
-  host.style.setProperty("max-height", `${vvh}px`, "important");
+  const blockH = syncMobileHeroViewportCssVars();
+  host.style.setProperty("height", `${blockH}px`, "important");
+  host.style.setProperty("min-height", `${blockH}px`, "important");
+  host.style.setProperty("max-height", `${blockH}px`, "important");
   const shell = host.closest(".portfolio-interactive-hero-shell");
   if (shell instanceof HTMLElement) {
-    shell.style.setProperty("min-height", `${vvh}px`, "important");
-    shell.style.setProperty("height", `${vvh}px`, "important");
-    shell.style.setProperty("max-height", `${vvh}px`, "important");
+    shell.style.setProperty("min-height", `${blockH}px`, "important");
+    shell.style.setProperty("height", `${blockH}px`, "important");
+    shell.style.setProperty("max-height", `${blockH}px`, "important");
   }
 }
 

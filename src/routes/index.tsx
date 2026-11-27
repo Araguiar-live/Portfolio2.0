@@ -382,7 +382,9 @@ function WorkStageDecorations() {
         <div className="portfolio-deco-spin pointer-events-auto absolute right-0 z-0">
           <SpatialDotBadge />
         </div>
-        <CalculatorCard />
+        <div className="portfolio-deco-calculator-surface relative z-[2]">
+          <CalculatorCard />
+        </div>
       </div>
       <MobileWorkCalculatorDeco />
     </>
@@ -470,8 +472,8 @@ function Index() {
   );
 
   return (
-    <div className="portfolio-hero-grid relative min-h-[100dvh] w-full text-zinc-900 font-sans antialiased overflow-x-hidden max-md:m-0 max-md:p-0 max-md:isolate max-sm:font-[family-name:system-ui,sans-serif]">
-      <div className="portfolio-interactive-hero-shell max-md:relative max-md:z-10 max-md:shrink-0 max-md:overflow-hidden">
+    <div className="portfolio-hero-grid relative min-h-[100dvh] w-full text-zinc-900 font-sans antialiased overflow-x-hidden max-md:m-0 max-md:min-h-[var(--hero-mobile-vh,var(--safe-viewport-h,100svh))] max-md:p-0 max-md:isolate max-sm:font-[family-name:system-ui,sans-serif]">
+      <div className="portfolio-interactive-hero-shell max-md:relative max-md:z-10 max-md:min-h-[var(--hero-mobile-vh,var(--safe-viewport-h,100svh))] max-md:shrink-0 max-md:overflow-hidden">
         <InteractiveHero onEnterWork={() => commitToWork()} />
       </div>
 

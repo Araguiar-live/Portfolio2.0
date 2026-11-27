@@ -1,7 +1,7 @@
 import { useCallback, useSyncExternalStore } from "react";
 
 /** Shared across CRCLE tabs so the sun toggle survives Signal Home → Messaging Hub. */
-let light = true;
+let light = false;
 const listeners = new Set<() => void>();
 
 function subscribe(onStoreChange: () => void) {

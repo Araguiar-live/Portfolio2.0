@@ -1,6 +1,7 @@
 import { createFileRoute, Link, Navigate, useNavigate } from "@tanstack/react-router";
 import { Home } from "lucide-react";
-import { useRef, useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
+import { setCrclePhoneLight } from "@/lib/crcle-phone-theme";
 import girlPleaseLogo from "@/assets/girl-please.svg";
 import { Dock } from "@/components/portfolio/Dock";
 import { Footer } from "@/components/portfolio/Footer";
@@ -20,6 +21,14 @@ function ProjectPage() {
   const rowRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const project = PROJECTS.find((item) => item.slug === slug);
+
+  useLayoutEffect(() => {
+    if (slug !== "crcle") return;
+    if (typeof window === "undefined") return;
+    if (window.matchMedia("(min-width: 768px)").matches) {
+      setCrclePhoneLight(false);
+    }
+  }, [slug]);
 
   if (!project) return <Navigate to="/" />;
 
