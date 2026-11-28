@@ -697,7 +697,11 @@ export const ProjectAccordion = forwardRef<HTMLDivElement, Props>(function Proje
                       ) : (
                         <div className="flex h-full min-h-0 min-w-0 flex-col gap-8">
                           <div className={`${crcleGlassCard} min-h-0 flex-1`}>
-                            <EditorialNarrative copy={editorialCopy(project, activeTab, tabContent)} />
+                            <EditorialNarrative
+                              copy={editorialCopy(project, activeTab, tabContent)}
+                              liveUrl={project.url}
+                              liveLinkHover={project.linkHoverPreview ? linkHover : undefined}
+                            />
                           </div>
                           <div className={crcleSpecsCard}>
                             <EditorialSpecs copy={editorialCopy(project, activeTab, tabContent)} />
@@ -910,11 +914,44 @@ function editorialCopy(project: Project, tab: Tab, content: ProjectTabContent): 
   };
 }
 
-function EditorialNarrative({ copy, dense = false }: { copy: CrcleBentoCopy; dense?: boolean }) {
+type EditorialLiveLinkHover = Pick<
+  ReturnType<typeof useRowHoverPreview>,
+  "onMouseEnter" | "onMouseMove" | "onMouseLeave"
+>;
+
+function EditorialNarrative({
+  copy,
+  dense = false,
+  liveUrl,
+  liveLinkHover,
+}: {
+  copy: CrcleBentoCopy;
+  dense?: boolean;
+  liveUrl?: string;
+  liveLinkHover?: EditorialLiveLinkHover;
+}) {
   return (
     <article className="flex min-h-0 flex-col gap-4">
       <span className={`${dense ? "text-[11px]" : "text-[12.65px]"} font-medium uppercase tracking-[0.18em] text-zinc-400`}>{copy.eyebrow}</span>
-      <h3 className={`${dense ? "text-[32px]" : "text-[39.1px]"} font-medium leading-[1.15] tracking-[-0.03em] text-[#111111]`}>{copy.headline}</h3>
+      <div className="flex min-w-0 items-start gap-3">
+        <h3 className={`min-w-0 flex-1 ${dense ? "text-[32px]" : "text-[39.1px]"} font-medium leading-[1.15] tracking-[-0.03em] text-[#111111]`}>
+          {copy.headline}
+        </h3>
+        {liveUrl ? (
+          <a
+            href={liveUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Open live site"
+            className="pointer-events-auto mt-1 flex size-9 shrink-0 items-center justify-center rounded-full text-[#111]/50 transition-colors hover:bg-black/[0.06] hover:text-[#111] sm:mt-1.5 sm:size-10"
+            onMouseEnter={liveLinkHover?.onMouseEnter}
+            onMouseMove={liveLinkHover?.onMouseMove}
+            onMouseLeave={liveLinkHover?.onMouseLeave}
+          >
+            <ArrowUpRight className="size-5 sm:size-[22px]" strokeWidth={2.2} />
+          </a>
+        ) : null}
+      </div>
       <p className={`max-w-[34ch] text-zinc-600 ${dense ? "text-[15px] leading-7" : "text-[17.25px] leading-[32.2px]"}`}>{copy.narrative}</p>
     </article>
   );
