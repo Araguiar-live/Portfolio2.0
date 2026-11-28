@@ -7,6 +7,13 @@ const US_TO_UK: ReadonlyArray<readonly [RegExp, string]> = [
   [/\borganizing\b/gi, "organising"],
   [/\blabeled\b/gi, "labelled"],
   [/\blabeling\b/gi, "labelling"],
+  [/\btokenized\b/gi, "tokenised"],
+  [/\btokenize\b/gi, "tokenise"],
+  [/\boptimize\b/gi, "optimise"],
+  [/\boptimized\b/gi, "optimised"],
+  [/\bbehavior\b/gi, "behaviour"],
+  [/\bcolors\b/gi, "colours"],
+  [/\bcolor\b/gi, "colour"],
 ];
 
 export function formatCaseStudyReplyForDisplay(text: string): string {
